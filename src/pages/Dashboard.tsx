@@ -79,8 +79,6 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-
-        <ProjectTimeline />
       </div>
     </Layout>
   );

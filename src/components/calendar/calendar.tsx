@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import DailySchedule from '../daily-schedule/daily-schedule';
 import MonthYearNav from '../month-year-nav/month-year-nav';
+import MaterialIcon from '../ui/material-icon';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent, EventType } from '../schedule/event-types';
 import { useCalendarStore } from '../../store/calendar';
@@ -17,10 +18,6 @@ const getDayLabel = (date: Date): string => {
 
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   return days[date.getDay()];
-};
-
-const formatTime = (date: Date): string => {
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 };
 
 const getMockEventsForDate = (year: number, month: number, day: number): ScheduleEvent[] => {
@@ -54,16 +51,10 @@ const getMockEventsForDate = (year: number, month: number, day: number): Schedul
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [currentTime, setCurrentTime] = useState(new Date());
   const customEvents = useCalendarStore((state) => state.customEvents);
   const handleAddEvent = useCalendarStore((state) => state.addEvent);
   const handleEditEvent = useCalendarStore((state) => state.editEvent);
   const handleRemoveEvent = useCalendarStore((state) => state.removeEvent);
-
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -102,9 +93,9 @@ export default function Calendar() {
 
         {/* Day label + Time + Month/Year nav */}
         <div className="flex items-center justify-between">
-          <div className="flex flex-col">
-            <span className="text-xl font-semibold text-gray-900">{getDayLabel(selectedDate)}</span>
-            <span className="text-sm text-gray-500">{formatTime(currentTime)}</span>
+          <div className="flex items-center gap-2 text-gray-900">
+            <MaterialIcon name="calendar_today" size={20} />
+            <span className="text-xl font-semibold ">{getDayLabel(selectedDate)}</span>
           </div>
           <MonthYearNav value={currentDate} onChange={setCurrentDate} />
         </div>

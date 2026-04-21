@@ -72,10 +72,13 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
   };
 
   return (
-    <div className="bg-white rounded-[24px] p-6 flex flex-col border border-gray-100">
+    <div className="daily-schedulebg-white rounded-[24px] p-6 flex flex-col border border-gray-100">
       {/* Header */}
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="text-lg font-bold text-gray-900">{label}</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2 text-gray-600">
+          <MaterialIcon name="schedule" size={20} />
+          <p className="text-sm font-medium ">Daily Schedule</p>
+        </div>
         {onAddEvent && (
           <Tooltip content="Add event" side="left">
             <button
@@ -88,7 +91,6 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
           </Tooltip>
         )}
       </div>
-      <p className="text-sm font-medium text-gray-400 mb-6">Daily Schedule</p>
 
       {/* Event list */}
       <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar flex-1">
