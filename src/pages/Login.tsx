@@ -5,7 +5,7 @@ export default function Login() {
   const { login } = useAuth();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F7F7F9] px-4 font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-(--color-surface-subtle) px-4 font-sans">
       <div className="max-w-md w-full space-y-8 bg-white p-12 rounded-[32px] border border-gray-200 shadow-sm">
         <div className="text-center">
           <h2 className="mt-2 text-4xl font-extrabold text-gray-900 tracking-tight">VISH <span className="font-medium text-gray-500 text-3xl">STUDIO</span></h2>

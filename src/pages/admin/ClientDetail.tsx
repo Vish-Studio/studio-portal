@@ -230,7 +230,7 @@ export default function ClientDetail() {
     <div className="space-y-8 max-w-7xl mx-auto pb-20">
       <header className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-4">
-          <Link to="/clients" className="w-[42px] h-[42px] bg-white rounded-full flex items-center justify-center text-gray-500 shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:text-gray-900 hover:scale-105 transition-all">
+          <Link to="/clients" className="w-[42px] h-[42px] bg-white rounded-full flex items-center justify-center text-gray-500 shadow-[0_2px_10px_var(--color-shadow-subtle)] hover:text-gray-900 hover:scale-105 transition-all">
             <ArrowLeft size={20} />
           </Link>
           <div>
@@ -238,7 +238,7 @@ export default function ClientDetail() {
             <p className="text-[13px] font-semibold text-gray-500 mt-1">{client.email}</p>
           </div>
         </div>
-        <div className="hidden sm:flex bg-white rounded-full p-1 shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+        <div className="hidden sm:flex bg-white rounded-full p-1 shadow-[0_2px_10px_var(--color-shadow-subtle)]">
            {['prospect', 'agreed', 'active', 'lost'].map(s => (
               <button key={s} onClick={() => updateStatus(s)} className={`px-5 py-2.5 rounded-full text-[11px] font-extrabold uppercase tracking-widest transition-all ${status === s ? 'bg-black text-white shadow-sm' : 'text-gray-400 hover:text-gray-900'}`}>
                 {s}
@@ -260,7 +260,7 @@ export default function ClientDetail() {
         
         {/* Left Col: Setup */}
         <div className="space-y-8">
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_var(--color-shadow-subtle)]">
             <h3 className="text-[16px] font-extrabold text-gray-900 mb-6">Company Profile</h3>
             <div className="space-y-4 mb-4">
               <div>
@@ -278,10 +278,10 @@ export default function ClientDetail() {
                 </div>
               )}
             </div>
-            <button onClick={saveProfile} className="text-[13px] font-bold mt-2 flex items-center justify-center px-6 py-3 bg-[#1C1C1E] text-white rounded-full hover:bg-black transition-colors w-full shadow-sm">Save Profile</button>
+            <button onClick={saveProfile} className="text-[13px] font-bold mt-2 flex items-center justify-center px-6 py-3 bg-(--color-btn-dark) text-white rounded-full hover:bg-black transition-colors w-full shadow-sm">Save Profile</button>
           </section>
 
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_var(--color-shadow-subtle)]">
             <h3 className="text-[16px] font-extrabold text-gray-900 mb-6">Financials & Timeline</h3>
             <div className="space-y-4 mb-4">
               <div>
@@ -303,14 +303,14 @@ export default function ClientDetail() {
                 </div>
               </div>
             </div>
-            <button onClick={saveProject} className="text-[13px] font-bold mt-2 flex items-center justify-center px-6 py-3 bg-[#1C1C1E] text-white rounded-full hover:bg-black transition-colors w-full shadow-sm">Save Tracking</button>
+            <button onClick={saveProject} className="text-[13px] font-bold mt-2 flex items-center justify-center px-6 py-3 bg-(--color-btn-dark) text-white rounded-full hover:bg-black transition-colors w-full shadow-sm">Save Tracking</button>
           </section>
         </div>
 
         {/* Middle Col: Tasks and Docs */}
         <div className="space-y-8">
           {/* Tasks */}
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_var(--color-shadow-subtle)]">
              <div className="flex justify-between items-center mb-6">
                 <h3 className="text-[16px] font-extrabold text-gray-900">Project Tasks</h3>
              </div>
@@ -335,7 +335,7 @@ export default function ClientDetail() {
                ) : tasks.map(t => (
                  <div key={t.id} className="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-[20px] transition-all hover:shadow-sm hover:border-gray-200 group">
                    <div className="flex items-center cursor-pointer flex-1 gap-4" onClick={() => toggleTask(t)}>
-                     <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${t.completed ? 'bg-[#A1FABA] border-[#A1FABA] text-green-700' : 'bg-white border-gray-200 text-transparent'}`}>
+                     <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${t.completed ? 'bg-(--color-accent-mint) border-(--color-accent-mint) text-green-700' : 'bg-white border-gray-200 text-transparent'}`}>
                         <CheckCircle size={14} className={t.completed ? 'opacity-100' : 'opacity-0'} />
                      </div>
                      <span className={`text-[13px] font-extrabold truncate max-w-[200px] leading-tight ${t.completed ? 'text-gray-400 line-through decoration-gray-300 decoration-2' : 'text-gray-900'}`}>{t.title}</span>
@@ -349,7 +349,7 @@ export default function ClientDetail() {
           </section>
 
           {/* Docs */}
-          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+          <section className="bg-white p-6 sm:p-8 rounded-[32px] shadow-[0_2px_20px_var(--color-shadow-subtle)]">
              <h3 className="text-[16px] font-extrabold text-gray-900 mb-6">Manage Documents</h3>
              <form onSubmit={saveDocument} className="space-y-4 mb-8">
                 <select value={docType} onChange={e=>setDocType(e.target.value)} className="w-full bg-gray-50 border border-gray-100 text-gray-900 font-bold text-[13px] px-4 py-3.5 rounded-[16px] focus:outline-none focus:bg-white shadow-sm transition-colors">
@@ -364,7 +364,7 @@ export default function ClientDetail() {
                 </select>
                 <input placeholder="Doc Title" value={docTitle} onChange={e=>setDocTitle(e.target.value)} required className="w-full bg-gray-50 border border-gray-100 text-gray-900 font-bold text-[13px] px-4 py-3.5 rounded-[16px] focus:outline-none focus:bg-white shadow-sm transition-colors" />
                 <input placeholder="Document URL (https://...)" value={docUrl} onChange={e=>setDocUrl(e.target.value)} required type="url" className="w-full bg-gray-50 border border-gray-100 text-gray-900 font-bold text-[13px] px-4 py-3.5 rounded-[16px] focus:outline-none focus:bg-white shadow-sm transition-colors" />
-                <button type="submit" disabled={savingDoc} className="text-[13px] font-bold mt-2 flex items-center justify-center px-6 py-3 bg-[#1C1C1E] text-white rounded-full hover:bg-black transition-colors w-full shadow-sm disabled:opacity-50">
+                <button type="submit" disabled={savingDoc} className="text-[13px] font-bold mt-2 flex items-center justify-center px-6 py-3 bg-(--color-btn-dark) text-white rounded-full hover:bg-black transition-colors w-full shadow-sm disabled:opacity-50">
                   Share Document
                 </button>
              </form>
@@ -387,7 +387,7 @@ export default function ClientDetail() {
         </div>
 
         {/* Right Col: Chat Logs */}
-        <section className="bg-white rounded-[32px] shadow-[0_2px_20px_rgba(0,0,0,0.02)] flex flex-col h-[800px] overflow-hidden">
+        <section className="bg-white rounded-[32px] shadow-[0_2px_20px_var(--color-shadow-subtle)] flex flex-col h-[800px] overflow-hidden">
           <div className="p-6 sm:p-8 border-b border-gray-100 flex items-center justify-between bg-white z-10">
             <h3 className="text-[16px] font-extrabold text-gray-900">Communication</h3>
             <button 

@@ -80,10 +80,10 @@ export default function ProjectTimeline() {
                     setIsDropdownOpen(false);
                   }}
                   className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors hover:bg-gray-50 flex items-center justify-between
-                    ${project.id === selectedProjectId ? 'text-[#121316] bg-gray-50/50' : 'text-gray-600'}`}
+                    ${project.id === selectedProjectId ? 'text-(--color-ink) bg-gray-50/50' : 'text-gray-600'}`}
                 >
                   <span className="truncate">{project.name}</span>
-                  {project.id === selectedProjectId && <div className="w-2 h-2 rounded-full bg-[#E0FA72]"></div>}
+                  {project.id === selectedProjectId && <div className="w-2 h-2 rounded-full bg-(--color-timeline-accent)"></div>}
                 </button>
               ))}
             </div>
@@ -104,7 +104,7 @@ export default function ProjectTimeline() {
               let lineClass = "bg-gray-100";
               if (nextPhase) {
                   if (phase.status === 'completed' && (nextPhase.status === 'completed' || nextPhase.status === 'in-progress')) {
-                      lineClass = "bg-[#E0FA72]";
+                      lineClass = "bg-(--color-timeline-accent)";
                   }
               }
 
@@ -115,8 +115,8 @@ export default function ProjectTimeline() {
                   <div className="flex flex-col items-center w-28 group relative z-10">
                     {/* Status Icon/Node */}
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-transform duration-300 group-hover:scale-110 flex-shrink-0
-                      ${isCompleted ? 'bg-[#121316] text-white' : 
-                        isInProgress ? 'bg-[#E0FE8A] text-gray-900 border-[3px] border-white shadow-[0_0_0_2px_#E0FE8A]' : 
+                      ${isCompleted ? 'bg-(--color-ink) text-white' : 
+                        isInProgress ? 'bg-(--color-accent-lime) text-gray-900 border-[3px] border-white shadow-[0_0_0_2px_var(--color-accent-lime)]' : 
                         'bg-white text-gray-300 border-2 border-dashed border-gray-200'}`}
                     >
                       {isCompleted && <CheckCircle2 size={18} strokeWidth={2.5} />}
@@ -128,7 +128,7 @@ export default function ProjectTimeline() {
                     <div className="text-center w-full">
                       <h4 className={`text-[13px] font-semibold mb-1 leading-tight break-words px-1
                         ${isCompleted ? 'text-gray-900' : 
-                          isInProgress ? 'text-[#121316]' : 'text-gray-400'}`}>
+                          isInProgress ? 'text-(--color-ink)' : 'text-gray-400'}`}>
                         {phase.title}
                       </h4>
                       <p className="text-[11px] font-medium text-gray-400">{phase.date}</p>

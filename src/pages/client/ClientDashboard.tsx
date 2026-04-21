@@ -92,7 +92,7 @@ export default function ClientDashboard() {
           <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight mb-1">Project: {project?.name || 'Getting Started'}</h2>
           <div className="flex gap-4 items-center mt-2">
              {project && (
-                <span className="px-3 py-1 bg-[#A1FABA]/30 text-green-700 text-[10px] font-bold uppercase tracking-widest rounded-full border border-green-100">Status: {appUser?.status || 'Active'}</span>
+                <span className="px-3 py-1 bg-(--color-accent-mint)/30 text-green-700 text-[10px] font-bold uppercase tracking-widest rounded-full border border-green-100">Status: {appUser?.status || 'Active'}</span>
              )}
              <span className="text-[13px] font-bold text-gray-500">Current Phase: {project?.phase || 'Kickoff'}</span>
           </div>

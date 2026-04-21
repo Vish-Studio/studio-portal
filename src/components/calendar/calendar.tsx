@@ -68,7 +68,7 @@ export default function Calendar() {
   }, [selectedDate]);
 
   return (
-    <div className="flex-1 bg-[#F5F6F8] rounded-[32px] p-8 flex flex-col min-h-[350px]">
+    <div className="flex-1 bg-(--color-surface) rounded-[32px] p-8 flex flex-col min-h-[350px]">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-8">
           <div className="flex items-center gap-3 text-xl font-medium text-gray-900">
@@ -96,7 +96,7 @@ export default function Calendar() {
 
       <div className="flex flex-col lg:flex-row gap-6 flex-1">
         {/* Calendar Grid Layout */}
-        <div className="flex flex-col flex-[2] bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-col flex-[2] bg-white rounded-[24px] p-6 shadow-[0_2px_12px_var(--color-shadow-subtle)]">
           {/* Days Header */}
           <div className="grid grid-cols-7 mb-4">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -131,7 +131,7 @@ export default function Calendar() {
                   onClick={() => handleSelectDate(day)}
                   className={`min-h-[60px] p-2 rounded-[16px] border transition-all flex flex-col relative group cursor-pointer
                     ${isSelected 
-                      ? 'border-[#121316] bg-[#121316] text-white shadow-md transform scale-[1.02]' 
+                      ? 'border-(--color-ink) bg-(--color-ink) text-white shadow-md transform scale-[1.02]' 
                       : 'border-gray-50 bg-gray-50/50 hover:bg-gray-100'}`}
                 >
                   <span className={`text-sm pl-1 ${isSelected ? 'text-white font-bold' : 'text-gray-700 font-semibold group-hover:text-black'}`}>
@@ -139,7 +139,7 @@ export default function Calendar() {
                   </span>
                   
                   <div className="flex gap-1 mt-auto pb-1 pl-1 flex-wrap">
-                    {hasCall && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-[#E0FE8A]' : 'bg-blue-500'}`}></div>}
+                    {hasCall && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-(--color-accent-lime)' : 'bg-blue-500'}`}></div>}
                     {hasProject && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-pink-400' : 'bg-pink-500'}`}></div>}
                   </div>
                 </div>
@@ -154,7 +154,7 @@ export default function Calendar() {
         </div>
 
         {/* Selected Day Agenda */}
-        <div className="flex flex-col flex-[1] bg-white rounded-[24px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.02)]">
+        <div className="flex flex-col flex-[1] bg-white rounded-[24px] p-6 shadow-[0_2px_12px_var(--color-shadow-subtle)]">
           <h3 className="text-lg font-bold text-gray-900 mb-1">
             {selectedDayLabel}
           </h3>

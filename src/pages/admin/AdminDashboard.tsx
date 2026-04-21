@@ -142,14 +142,14 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-extrabold text-gray-900">Overview</h3>
           <button onClick={toggleWorkingStatus} className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-extrabold uppercase tracking-widest transition-all ${isWorking ? 'bg-white text-gray-900 shadow-sm border border-gray-100 hover:bg-gray-50' : 'bg-red-50 text-red-700 border border-red-100 hover:bg-red-100'}`}>
-             {isWorking ? <ToggleRight size={16} className="text-[#3ED973]" /> : <ToggleLeft size={16} />}
+             {isWorking ? <ToggleRight size={16} className="text-(--color-accent-green)" /> : <ToggleLeft size={16} />}
              {isWorking ? "Agency Active" : "Out of Office"}
           </button>
         </div>
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+          <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)]">
             <div className="flex items-center gap-3 mb-6">
               <Users className="text-gray-900" size={20} />
               <h4 className="text-[15px] font-bold text-gray-900">Customers</h4>
@@ -162,7 +162,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+          <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)]">
             <div className="flex items-center gap-3 mb-6">
               <CreditCard className="text-gray-900" size={20} />
               <h4 className="text-[15px] font-bold text-gray-900">Balance</h4>
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Avatars Row */}
-        <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] mt-2">
+        <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)] mt-2">
            <h4 className="text-[15px] font-extrabold text-gray-900 mb-1">{stats.activeProjects} active projects running</h4>
            <p className="text-[13px] font-semibold text-gray-400 mb-8">Send a welcome message to all new customers.</p>
            
@@ -200,7 +200,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Product View Chart Mockup */}
-        <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] mt-2 flex flex-col relative h-[360px]">
+        <div className="bg-white rounded-[32px] p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)] mt-2 flex flex-col relative h-[360px]">
            <div className="flex justify-between items-center z-10 relative">
               <h4 className="text-[15px] font-extrabold text-gray-900">Product view</h4>
               <button className="bg-white border border-gray-200 text-gray-500 text-[12px] font-bold px-4 py-2 rounded-full flex items-center gap-2 hover:text-gray-900 transition-colors shadow-sm shrink-0">
@@ -209,7 +209,7 @@ export default function AdminDashboard() {
            </div>
 
            <div className="absolute left-8 bottom-10 z-10 space-y-1">
-              <h2 className="text-[40px] sm:text-5xl font-extrabold text-[#E5E5E5] tracking-tighter opacity-80">${(stats.totalRevenue > 0 ? stats.totalRevenue / 1000000 : 0).toFixed(1)}m</h2>
+              <h2 className="text-[40px] sm:text-5xl font-extrabold text-(--color-text-ghost) tracking-tighter opacity-80">${(stats.totalRevenue > 0 ? stats.totalRevenue / 1000000 : 0).toFixed(1)}m</h2>
            </div>
 
            {/* Fake Bar Chart */}
@@ -218,9 +218,9 @@ export default function AdminDashboard() {
               <div className="w-10 sm:w-14 bg-gray-100 rounded-t-[12px] h-[45%]"></div>
               <div className="w-10 sm:w-14 bg-gray-100 rounded-t-[12px] h-[60%]"></div>
               
-              <div className="w-12 sm:w-16 bg-[#A1FABA] rounded-t-[12px] h-[85%] relative flex flex-col items-center shadow-[0_0_20px_rgba(161,250,186,0.4)]">
-                 <div className="w-3 h-3 bg-white rounded-full border-[3px] border-[#3ED973] absolute -top-8"></div>
-                 <div className="absolute -top-16 bg-[#1A1D20] text-white text-[11px] font-bold px-2 py-1 rounded-[8px]">
+              <div className="w-12 sm:w-16 bg-(--color-accent-mint) rounded-t-[12px] h-[85%] relative flex flex-col items-center shadow-[0_0_20px_var(--color-accent-mint-glow)]">
+                 <div className="w-3 h-3 bg-white rounded-full border-[3px] border-(--color-accent-green) absolute -top-8"></div>
+                 <div className="absolute -top-16 bg-(--color-tooltip-bg) text-white text-[11px] font-bold px-2 py-1 rounded-[8px]">
                     2.2m
                  </div>
               </div>
@@ -239,13 +239,13 @@ export default function AdminDashboard() {
       <div className="md:col-span-4 flex flex-col gap-6 w-full max-w-[400px] mx-auto md:max-w-none">
         
         {/* Recent Expenses (Popular products equivalent) */}
-        <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)] md:mt-[45px]">
+        <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)] md:mt-[45px]">
           <h4 className="text-[16px] font-extrabold text-gray-900 mb-6">Recent Expenses</h4>
           <div className="space-y-6">
              {expenses.length === 0 ? (
                 <p className="text-sm font-semibold text-gray-400">No expenses recorded.</p>
              ) : expenses.map((ex, i) => {
-                const colors = ['bg-[#A0D911]', 'bg-[#F2555A]', 'bg-[#FA8C16]', 'bg-[#1890FF]'];
+                const colors = ['bg-(--color-expense-1)', 'bg-(--color-expense-2)', 'bg-(--color-expense-3)', 'bg-(--color-expense-4)'];
                 const cardColor = colors[i % colors.length];
                 return (
                   <div key={ex.id} className="flex justify-between items-center group">
@@ -260,7 +260,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="text-right flex-shrink-0 ml-2">
                        <p className="text-[13px] font-extrabold text-gray-900 mb-1">${ex.amount.toLocaleString()}</p>
-                       <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-[6px] ${i%3 === 2 ? 'text-red-500 bg-red-50' : 'text-green-500 bg-[#A1FABA]/30'}`}>
+                       <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-[6px] ${i%3 === 2 ? 'text-red-500 bg-red-50' : 'text-green-500 bg-(--color-accent-mint)/30'}`}>
                          {i%3 === 2 ? 'Offline' : 'Active'}
                        </span>
                     </div>
@@ -274,7 +274,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Log Expense Form (Comments equivalent) */}
-        <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-[0_2px_20px_rgba(0,0,0,0.02)]">
+        <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)]">
           <h4 className="text-[16px] font-extrabold text-gray-900 mb-6">Log Expense</h4>
           <form onSubmit={addExpense} className="flex flex-col gap-3">
              <input required type="number" placeholder="$ Amount" value={expAmount} onChange={e=>setExpAmount(e.target.value)} className="w-full bg-gray-50 border border-gray-100 text-gray-900 text-[13px] font-bold py-3 px-4 rounded-[16px] focus:outline-none focus:bg-white focus:border-gray-200 transition-colors shadow-sm" />
