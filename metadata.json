@@ -1,0 +1,6 @@
+{
+  "name": "VISH Studio Client Portal",
+  "description": "A sleek, dark-themed client portal for VISH Studio. Features secure document access, project timeline tracking, real-time chat, and payment overviews for clients and admins.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A platform user, either staff (admin) or client.",
+      "type": "object",
+      "properties": {
+        "role": { "enum": ["admin", "client"] },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "status": { "enum": ["prospect", "agreed", "lost", "active"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["role", "email", "createdAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A client project trackable via timeline and phases.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string" },
+        "name": { "type": "string" },
+        "phase": { "type": "string" },
+        "timeline": { "type": "string" },
+        "agreedPayment": { "type": "number" },
+        "remainingPayment": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId", "name", "phase", "createdAt", "updatedAt"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "A document associated with a project or globally available to client.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "type": { "enum": ["quotation", "proposal", "invoice", "onboarding", "other"] },
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId", "type", "title", "url", "createdAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Real-time chat messages between admin and client.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "text": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId", "senderId", "text", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Stores projects for clients."
+    },
+    "/documents/{documentId}": {
+      "schema": { "$ref": "#/entities/Document" },
+      "description": "Stores document records."
+    },
+    "/messages/{messageId}": {
+      "schema": { "$ref": "#/entities/Message" },
+      "description": "Stores chat messages."
+    }
+  }
+}
