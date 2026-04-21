@@ -72,7 +72,7 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
   };
 
   return (
-    <div className="daily-schedulebg-white rounded-[24px] p-6 flex flex-col border border-gray-100">
+    <div className="daily-schedule bg-(--color-surface) rounded-[24px] p-6 flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2 text-gray-600">
@@ -83,7 +83,7 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
           <Tooltip content="Add event" side="left">
             <button
               onClick={() => setShowModal(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-(--color-surface) text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
               aria-label="Add event"
             >
               <MaterialIcon name="add" size={18} />

@@ -86,7 +86,7 @@ export default function Calendar() {
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="calendar grid grid-cols-1 lg:grid-cols-3 gap-6">
 
       {/* Calendar grid — spans 2 of 3 columns */}
       <div className="lg:col-span-2 bg-(--color-surface) rounded-[32px] p-6 sm:p-8 flex flex-col gap-6">
