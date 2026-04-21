@@ -60,8 +60,11 @@ export default function Calendar() {
 
         {/* Title + Month/Year nav on same row */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xl font-semibold text-gray-900">
-            <CalendarIcon size={24} /> Calendar
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-100 shadow-sm shrink-0">
+              <CalendarIcon size={18} className="text-gray-700" />
+            </div>
+            <span className="text-xl font-semibold text-gray-900">Calendar</span>
           </div>
           <MonthYearNav value={currentDate} onChange={setCurrentDate} />
         </div>

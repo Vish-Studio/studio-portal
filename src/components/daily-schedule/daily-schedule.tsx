@@ -17,11 +17,13 @@ interface DailyScheduleProps {
   events: ScheduleEvent[];
 }
 
+// bg - (--color - ink)
+
 export default function DailySchedule({ date, events }: DailyScheduleProps) {
   const label = `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
 
   return (
-    <div className="daily-schedule bg-color-ink rounded-[24px] p-6 shadow-[0_2px_12px_var(--color-shadow-subtle)] flex flex-col">
+    <div className="daily-schedule rounded-[24px] p-6 shadow-[0_2px_12px_var(--color-shadow-subtle)] flex flex-col">
       <h3 className="text-lg font-bold text-gray-900 mb-1">{label}</h3>
       <p className="text-sm font-medium text-gray-500 mb-6">Daily Schedule</p>
 
