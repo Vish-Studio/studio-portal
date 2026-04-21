@@ -59,7 +59,7 @@ export default function Sidebar({
         className={`sidebar bg-(--color-sidebar-bg) flex flex-col py-6 lg:py-8 lg:pb-4 justify-between shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[100] md:z-50
           ${isMobile
             ? `fixed inset-y-0 left-0 w-[260px] px-4 m-0 rounded-none transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
-            : `relative md:flex md:my-4 md:lg:my-6 md:ml-4 md:lg:ml-6 md:rounded-[32px] ${isSidebarOpen ? 'md:w-[260px] md:px-4 md:items-stretch' : 'md:w-[84px] md:items-center md:px-4 pb-1'}`
+            : `relative md:flex md:my-4 md:lg:my-2 md:ml-4 md:lg:ml-2 md:rounded-[32px] ${isSidebarOpen ? 'md:w-[260px] md:px-4 md:items-stretch' : 'md:w-[84px] md:items-center md:px-4 pb-1'}`
           }
         `}
       >
@@ -79,7 +79,7 @@ export default function Sidebar({
               ) : (
                 <img src="/assets/logo-white-trans.png" alt="Logo" width={32} height={32} />
               )}
-              {isExpanded && <span className="font-bold text-lg whitespace-nowrap text-white">vish <span className="font-normal">studio.</span></span>}
+              {isExpanded && <span className="font-bold text-lg whitespace-nowrap text-white">studio <span className="font-normal">portal</span></span>}
             </div>
 
             {/* Collapse / Close Toggle */}
