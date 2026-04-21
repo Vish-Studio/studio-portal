@@ -13,7 +13,7 @@ interface MonthYearNavProps {
 
 export default function MonthYearNav({ value, onChange }: MonthYearNavProps) {
   const month = value.getMonth();
-  const year  = value.getFullYear();
+  const year = value.getFullYear();
 
   const prevMonth = () => onChange(new Date(year, month - 1, 1));
   const nextMonth = () => onChange(new Date(year, month + 1, 1));
@@ -23,13 +23,6 @@ export default function MonthYearNav({ value, onChange }: MonthYearNavProps) {
 
   return (
     <div className="flex items-center gap-2">
-      <button
-        onClick={goToToday}
-        className="hidden sm:flex px-4 py-2.5 bg-white border border-gray-100 rounded-xl font-medium text-sm text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition-colors"
-      >
-        Today
-      </button>
-
       <button onClick={prevMonth} className={btnClass} aria-label="Previous month">
         <ChevronLeft size={15} strokeWidth={2.5} />
       </button>

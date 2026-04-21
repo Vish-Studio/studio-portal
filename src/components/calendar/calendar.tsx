@@ -1,31 +1,50 @@
-import React, { useState, useMemo } from 'react';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
 import DailySchedule from '../daily-schedule/daily-schedule';
-import type { ScheduleEvent } from '../daily-schedule/daily-schedule';
 import MonthYearNav from '../month-year-nav/month-year-nav';
+import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
+import type { ScheduleEvent, EventType } from '../schedule/event-types';
+import { useCalendarStore } from '../../store/calendar';
+
+const dateKey = (year: number, month: number, day: number) => `${year}-${month}-${day}`;
+
+const getDayLabel = (date: Date): string => {
+  const today = new Date();
+  const isToday = date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
+
+  if (isToday) return 'Today';
+
+  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  return days[date.getDay()];
+};
+
+const formatTime = (date: Date): string => {
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+};
 
 const getMockEventsForDate = (year: number, month: number, day: number): ScheduleEvent[] => {
   const events: ScheduleEvent[] = [];
   const seed = year * 10000 + month * 100 + day;
 
   if (seed % 7 === 0 || seed % 13 === 0) {
-    events.push({ type: 'call', title: 'Strategy Sync', time: '10:00 AM' });
+    events.push({ id: `mock-${seed}-0`, type: 'brief', title: 'Strategy Sync', time: '10:00 AM' });
   }
   if (seed % 5 === 0) {
-    events.push({ type: 'video', title: 'Product Review', time: '1:00 PM' });
+    events.push({ id: `mock-${seed}-1`, type: 'design-review', title: 'Product Review', time: '1:00 PM' });
   }
   if (seed % 8 === 0) {
-    events.push({ type: 'project', title: 'Web App Launch', time: 'All Day' });
+    events.push({ id: `mock-${seed}-2`, type: 'launch', title: 'Web App Launch', time: 'All Day' });
   }
   if (seed % 19 === 0) {
-    events.push({ type: 'call', title: 'Client Feedback', time: '3:00 PM' });
+    events.push({ id: `mock-${seed}-3`, type: 'client-feedback', title: 'Client Feedback', time: '3:00 PM' });
   }
 
   const today = new Date();
   if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
     if (events.length === 0) {
-      events.push({ type: 'video', title: 'Acme Corp Kickoff', time: '10:00 AM - 11:00 AM' });
-      events.push({ type: 'call', title: 'Design Review', time: '01:30 PM - 02:00 PM' });
+      events.push({ id: 'today-0', type: 'onboarding', title: 'Acme Corp Kickoff', time: '10:00 AM - 11:00 AM' });
+      events.push({ id: 'today-1', type: 'design-review', title: 'Design Review', time: '01:30 PM - 02:00 PM' });
     }
   }
 
@@ -35,6 +54,16 @@ const getMockEventsForDate = (year: number, month: number, day: number): Schedul
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const customEvents = useCalendarStore((state) => state.customEvents);
+  const handleAddEvent = useCalendarStore((state) => state.addEvent);
+  const handleEditEvent = useCalendarStore((state) => state.editEvent);
+  const handleRemoveEvent = useCalendarStore((state) => state.removeEvent);
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -44,13 +73,26 @@ export default function Calendar() {
 
   const handleSelectDate = (day: number) => setSelectedDate(new Date(year, month, day));
 
-  const selectedEvents = useMemo(() => {
-    return getMockEventsForDate(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      selectedDate.getDate()
-    );
-  }, [selectedDate]);
+  const getEventsForDate = (y: number, m: number, d: number): ScheduleEvent[] => {
+    const mock = getMockEventsForDate(y, m, d);
+    const custom = customEvents[dateKey(y, m, d)] ?? [];
+
+    // Collect all custom event ids that came from mock events (to filter out edited mock events)
+    const editedMockIds = new Set<string>();
+    Object.values(customEvents).flat().forEach(e => {
+      if (e.id.startsWith('mock-')) {
+        editedMockIds.add(e.id);
+      }
+    });
+
+    // Filter out mock events that have been edited (exist in custom)
+    return [...mock.filter(e => !editedMockIds.has(e.id)), ...custom];
+  };
+
+  const selectedEvents = useMemo(
+    () => getEventsForDate(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()),
+    [selectedDate, customEvents]
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -58,13 +100,11 @@ export default function Calendar() {
       {/* Calendar grid — spans 2 of 3 columns */}
       <div className="lg:col-span-2 bg-(--color-surface) rounded-[32px] p-6 sm:p-8 flex flex-col gap-6">
 
-        {/* Title + Month/Year nav on same row */}
+        {/* Day label + Time + Month/Year nav */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-100 shadow-sm shrink-0">
-              <CalendarIcon size={18} className="text-gray-700" />
-            </div>
-            <span className="text-xl font-semibold text-gray-900">Calendar</span>
+          <div className="flex flex-col">
+            <span className="text-xl font-semibold text-gray-900">{getDayLabel(selectedDate)}</span>
+            <span className="text-sm text-gray-500">{formatTime(currentTime)}</span>
           </div>
           <MonthYearNav value={currentDate} onChange={setCurrentDate} />
         </div>
@@ -91,9 +131,8 @@ export default function Calendar() {
               selectedDate.getMonth() === month &&
               selectedDate.getFullYear() === year;
 
-            const events = getMockEventsForDate(year, month, day);
-            const hasCall = events.some(e => e.type === 'call' || e.type === 'video');
-            const hasProject = events.some(e => e.type === 'project');
+            const events = getEventsForDate(year, month, day);
+            const dotTypes = [...new Set(events.map(e => e.type))].slice(0, 3) as EventType[];
 
             return (
               <div
@@ -108,8 +147,12 @@ export default function Calendar() {
                   {day}
                 </span>
                 <div className="flex gap-1 mt-auto pb-1 pl-1 flex-wrap">
-                  {hasCall && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-(--color-accent-lime)' : 'bg-blue-500'}`} />}
-                  {hasProject && <div className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-pink-400' : 'bg-pink-500'}`} />}
+                  {dotTypes.map(type => (
+                    <div
+                      key={type}
+                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? 'bg-white/60' : EVENT_TYPE_CONFIG[type].dotClass}`}
+                    />
+                  ))}
                 </div>
               </div>
             );
@@ -122,7 +165,7 @@ export default function Calendar() {
       </div>
 
       {/* Daily schedule — spans 1 of 3 columns */}
-      <DailySchedule date={selectedDate} events={selectedEvents} />
+      <DailySchedule date={selectedDate} events={selectedEvents} onAddEvent={handleAddEvent} onEditEvent={handleEditEvent} onRemoveEvent={handleRemoveEvent} />
     </div>
   );
 }
