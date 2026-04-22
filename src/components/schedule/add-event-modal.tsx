@@ -39,6 +39,7 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   const [selectedDate, setSelectedDate] = useState(startOfDay(date));
   const [selectedType, setSelectedType] = useState<EventType>(initialEvent?.type || 'brief');
   const [title, setTitle] = useState(initialEvent?.title || '');
+  const [callLink, setCallLink] = useState(initialEvent?.callLink || '');
 
   const isAllDay = !initialEvent || initialEvent.time === 'All Day';
   const [allDay, setAllDay] = useState(isAllDay);
@@ -75,7 +76,7 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
         ? `${toDisplayTime(startTime)} – ${toDisplayTime(endTime)}`
         : toDisplayTime(startTime);
     }
-    onAdd({ id: initialEvent?.id || uuidv4(), type: selectedType, title: title.trim(), time }, selectedDate);
+    onAdd({ id: initialEvent?.id || uuidv4(), type: selectedType, title: title.trim(), time, callLink: callLink.trim() || undefined }, selectedDate);
     onClose();
   };
 
@@ -193,6 +194,19 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
             </div>
           </div>
 
+
+          {/* Call Link */}
+          <div>
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Call Link (Optional)</p>
+            <input
+              type="url"
+              value={callLink}
+              onChange={e => setCallLink(e.target.value)}
+              placeholder="e.g. https://meet.google.com/abc-defg-hij"
+              className="w-full px-4 py-3 bg-(--color-surface) border border-transparent rounded-2xl text-sm font-medium text-gray-900 placeholder-gray-300 outline-none focus:border-gray-200 focus:ring-2 focus:ring-gray-100 transition-all"
+            />
+            <p className="text-xs text-gray-400 mt-2">Add Google Meet, Microsoft Teams, or other video call links</p>
+          </div>
 
           {/* Type grid */}
           <div>

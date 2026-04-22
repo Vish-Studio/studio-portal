@@ -4,6 +4,7 @@ import MaterialIcon from '../ui/material-icon';
 import Tooltip from '../ui/tooltip';
 import EventBadge from '../schedule/event-badge';
 import AddEventModal from '../schedule/add-event-modal';
+import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
 
@@ -45,6 +46,7 @@ interface DailyScheduleProps {
 
 export default function DailySchedule({ date, events, onAddEvent, onEditEvent, onRemoveEvent }: DailyScheduleProps) {
   const [showModal, setShowModal] = useState(false);
+  const [viewingEvent, setViewingEvent] = useState<ScheduleEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const label = `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
@@ -54,6 +56,21 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
     setEditingEvent(event);
     setShowModal(true);
     setOpenMenuId(null);
+  };
+
+  const handleViewEvent = (event: ScheduleEvent) => {
+    setViewingEvent(event);
+  };
+
+  const handleEditFromView = () => {
+    if (viewingEvent) {
+      handleEditEvent(viewingEvent);
+      setViewingEvent(null);
+    }
+  };
+
+  const handleCloseViewModal = () => {
+    setViewingEvent(null);
   };
 
   const handleSaveEvent = (event: ScheduleEvent, eventDate: Date) => {
@@ -72,9 +89,9 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
   };
 
   return (
-    <div className="daily-schedule bg-(--color-surface) rounded-[24px] p-6 flex flex-col">
+    <div className="daily-schedule bg-(--color-surface) rounded-[24px] p-6 flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 shrink-0">
         <div className="flex items-center gap-2 text-gray-600">
           <MaterialIcon name="schedule" size={20} />
           <p className="text-sm font-medium ">Daily Schedule</p>
@@ -93,19 +110,22 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
       </div>
 
       {/* Event list */}
-      <div className="flex flex-col gap-4 overflow-y-auto no-scrollbar flex-1">
+      <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0">
         {sortedEvents.length > 0 ? (
           sortedEvents.map(event => (
             <div key={event.id} className="flex gap-3 items-start group relative">
               <Tooltip content={EVENT_TYPE_CONFIG[event.type].label} side="right">
                 <EventBadge type={event.type} variant="icon" />
               </Tooltip>
-              <div className="flex flex-col gap-0.5 min-w-0 flex-1 pt-0.5">
+              <button
+                onClick={() => handleViewEvent(event)}
+                className="flex flex-col gap-0.5 min-w-0 flex-1 pt-0.5 text-left hover:opacity-80 transition-opacity"
+              >
                 <h4 className="text-gray-900 font-bold text-sm tracking-tight truncate leading-tight">
                   {event.title}
                 </h4>
                 <span className="text-gray-400 text-xs font-semibold">{event.time}</span>
-              </div>
+              </button>
               {(onEditEvent || onRemoveEvent) && (
                 <div className="relative shrink-0">
                   <button
@@ -160,6 +180,14 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
           onAdd={handleSaveEvent}
           onClose={handleCloseModal}
           initialEvent={editingEvent || undefined}
+        />
+      )}
+
+      {viewingEvent && (
+        <EventDetailsModal
+          event={viewingEvent}
+          onClose={handleCloseViewModal}
+          onEdit={handleEditFromView}
         />
       )}
     </div>
