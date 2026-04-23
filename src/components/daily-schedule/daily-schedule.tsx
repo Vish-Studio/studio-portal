@@ -7,7 +7,7 @@ import AddEventModal from '../schedule/add-event-modal';
 import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
-import CardHeader from '../card/card-header/card-header';
+import ContentCard from '../content-card/content-card';
 
 export type { ScheduleEvent };
 
@@ -84,23 +84,24 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
   };
 
   return (
-    <div className="daily-schedule bg-white border border-gray-200 rounded-[24px] flex flex-col h-full overflow-hidden">
-      <CardHeader title="Daily Schedule" iconName="schedule" >
-        {onAddEvent && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="w-9 h-9 flex items-center justify-center rounded-full bg-(--color-ink) text-white hover:bg-gray-200 hover:text-(--color-ink) transition-all ease-in-out"
-            aria-label="Add event"
-          >
-            <MaterialIcon name="add" size={18} />
-          </button>
-        )}
-      </CardHeader>
-
-      <div className="border-b border-gray-100 mx-4 md:mx-6 shrink-0" />
-
-      {/* Event list */}
-      <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 px-4 md:px-6 py-4">
+    <>
+      <ContentCard
+        title="Daily Schedule"
+        iconName="schedule"
+        className="h-full"
+        bodyClassName="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 px-4 md:px-6 py-4"
+        action={
+          onAddEvent ? (
+            <button
+              onClick={() => setShowModal(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-(--color-ink) text-white hover:bg-gray-700 transition-colors"
+              aria-label="Add event"
+            >
+              <MaterialIcon name="add" size={18} />
+            </button>
+          ) : undefined
+        }
+      >
         {sortedEvents.length > 0 ? (
           sortedEvents.map(event => (
             <div key={event.id} className="flex gap-3 items-start group relative">
@@ -125,13 +126,12 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
                   >
                     <MaterialIcon name="more_vert" size={16} />
                   </button>
-
                   {openMenuId === event.id && (
                     <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 z-50 min-w-[140px]">
                       {onEditEvent && (
                         <button
                           onClick={() => handleEditEvent(event)}
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-t-lg first:rounded-t-lg transition-colors"
+                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 rounded-t-lg transition-colors"
                         >
                           <MaterialIcon name="edit" size={14} />
                           Edit
@@ -139,11 +139,8 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
                       )}
                       {onRemoveEvent && (
                         <button
-                          onClick={() => {
-                            onRemoveEvent(event.id);
-                            setOpenMenuId(null);
-                          }}
-                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-b-lg last:rounded-b-lg transition-colors"
+                          onClick={() => { onRemoveEvent(event.id); setOpenMenuId(null); }}
+                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 rounded-b-lg transition-colors"
                         >
                           <MaterialIcon name="delete" size={14} />
                           Delete
@@ -162,8 +159,9 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
             <p className="text-xs text-gray-400 mt-1">Enjoy your free day!</p>
           </div>
         )}
-      </div>
+      </ContentCard>
 
+      {/* Modals — fixed-position, unaffected by parent overflow */}
       {showModal && (onAddEvent || onEditEvent) && (
         <AddEventModal
           date={date}
@@ -172,7 +170,6 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
           initialEvent={editingEvent || undefined}
         />
       )}
-
       {viewingEvent && (
         <EventDetailsModal
           event={viewingEvent}
@@ -180,6 +177,6 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
           onEdit={handleEditFromView}
         />
       )}
-    </div>
+    </>
   );
 }

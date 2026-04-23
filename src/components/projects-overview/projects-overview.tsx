@@ -1,12 +1,9 @@
-import React from 'react';
-import { Briefcase } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import MaterialIcon from '../ui/material-icon';
+import ContentCard from '../content-card/content-card';
+import ButtonIcon from '../button-icon/button-icon';
 import { getMemberColors } from '../../data/team';
 import type { TeamProject, TeamMember } from '../../data/team';
-import CardHeader from '../card/card-header/card-header';
-import ButtonIcon from '../button-icon/button-icon';
-import { useLocation, useNavigation } from 'react-router-dom';
 
 interface ProjectsOverviewProps {
   projects: TeamProject[];
@@ -16,13 +13,13 @@ interface ProjectsOverviewProps {
 
 function StatusDot({ status }: { status: string }) {
   const dot: Record<string, string> = {
-    active: 'bg-green-400',
-    paused: 'bg-amber-400',
+    active:    'bg-green-400',
+    paused:    'bg-amber-400',
     completed: 'bg-gray-300',
   };
   const label: Record<string, string> = {
-    active: 'text-green-700',
-    paused: 'text-amber-700',
+    active:    'text-green-700',
+    paused:    'text-amber-700',
     completed: 'text-gray-500',
   };
   return (
@@ -34,19 +31,24 @@ function StatusDot({ status }: { status: string }) {
 }
 
 export default function ProjectsOverview({ projects, members, limit = 5 }: ProjectsOverviewProps) {
+  const navigate = useNavigate();
   const sorted = [...projects]
     .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
     .slice(0, limit);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-[24px] overflow-hidden flex flex-col h-full">
-      {/* Header */}
-      <CardHeader title="Recent Projects" iconName="work" >
-        <ButtonIcon iconName="arrow_outward" clickHandler={() => { }} aria-label="Go to project page" />
-      </CardHeader>
-
-      <div className="border-b border-gray-100 mx-4 md:mx-6" />
-
+    <ContentCard
+      iconName="work"
+      title="Recent Projects"
+      className="h-full"
+      action={
+        <ButtonIcon
+          iconName="arrow_outward"
+          clickHandler={() => navigate('/admin/projects')}
+          aria-label="Go to projects page"
+        />
+      }
+    >
       {sorted.length === 0 ? (
         <div className="flex-1 flex items-center justify-center py-10">
           <p className="text-sm text-gray-400 font-medium">No projects yet</p>
@@ -62,7 +64,7 @@ export default function ProjectsOverview({ projects, members, limit = 5 }: Proje
                 key={project.id}
                 className="px-4 md:px-6 py-3 hover:bg-(--color-surface) transition-colors group flex items-center gap-4"
               >
-                {/* Date/time column */}
+                {/* Date / time */}
                 <div className="w-14 shrink-0 text-right">
                   <p className="text-xs font-semibold text-gray-500 tabular-nums">
                     {ts ? format(ts, 'MMM d') : '—'}
@@ -72,7 +74,7 @@ export default function ProjectsOverview({ projects, members, limit = 5 }: Proje
                   </p>
                 </div>
 
-                {/* Divider pip */}
+                {/* Pip divider */}
                 <div className="w-px h-8 bg-gray-100 shrink-0" />
 
                 {/* Name + client */}
@@ -115,6 +117,6 @@ export default function ProjectsOverview({ projects, members, limit = 5 }: Proje
           })}
         </div>
       )}
-    </div>
+    </ContentCard>
   );
 }

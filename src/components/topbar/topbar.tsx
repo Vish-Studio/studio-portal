@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Search, Bell } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import SearchBar from '../search-bar/search-bar';
 import MaterialIcon from '../ui/material-icon';
+import { useUIStore } from '../../store/ui';
 
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -10,28 +12,31 @@ interface TopbarProps {
 
 export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: TopbarProps) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isUserOpen, setIsUserOpen] = useState(false);
-
+  const [isUserOpen,  setIsUserOpen]  = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const userRef = useRef<HTMLDivElement>(null);
+  const userRef  = useRef<HTMLDivElement>(null);
+
+  const location = useLocation();
+  const { searchQuery, setSearchQuery, clearSearch } = useUIStore();
+
+  // Clear search whenever the page changes
+  useEffect(() => {
+    clearSearch();
+  }, [location.pathname]);
 
   // Close dropdowns on outside click
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-        setIsNotifOpen(false);
-      }
-      if (userRef.current && !userRef.current.contains(event.target as Node)) {
-        setIsUserOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    const handle = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) setIsNotifOpen(false);
+      if (userRef.current  && !userRef.current.contains(e.target as Node))  setIsUserOpen(false);
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
   }, []);
 
   return (
     <div className="topbar flex items-center justify-between gap-4 border-none">
-      {/* Left: Page Title & Mobile Menu */}
+      {/* Left: mobile menu + page title */}
       <div className="flex items-center gap-4">
         <button
           className="md:hidden text-gray-700 hover:text-black shrink-0 flex items-center justify-center rounded-md transition-colors"
@@ -42,28 +47,29 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
         <h2 className="text-xl sm:text-2xl font-bold text-(--color-ink)">{title}</h2>
       </div>
 
-      {/* Search Bar - hide on very small screens, expand on larger */}
+      {/* Global search — wired to ui store */}
       <SearchBar
         className="hidden sm:block"
         placeholder="Search here..."
-        value=""
-        onChange={() => { }} />
+        value={searchQuery}
+        onChange={setSearchQuery}
+      />
 
-      {/* Middle & Right Components */}
+      {/* Right icons */}
       <div className="flex items-center gap-2 sm:gap-4 justify-end">
-        {/* Mobile Search Button */}
+        {/* Mobile search toggle */}
         <button className="sm:hidden w-10 h-10 rounded-full bg-(--color-surface) flex items-center justify-center shrink-0">
           <Search size={18} className="text-gray-600" />
         </button>
 
-        {/* Notification Dropdown Custom */}
+        {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button
-            onClick={() => { setIsNotifOpen(!isNotifOpen); setIsUserOpen(false); }}
+            onClick={() => { setIsNotifOpen(v => !v); setIsUserOpen(false); }}
             className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white flex items-center justify-center relative transition-colors"
           >
             <MaterialIcon name="notifications" size={18} />
-            <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-(--color-surface)"></div>
+            <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-(--color-surface)" />
           </button>
 
           {isNotifOpen && (
@@ -82,11 +88,11 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
           )}
         </div>
 
-        {/* User Dropdown Custom */}
+        {/* User */}
         <div className="relative" ref={userRef}>
           <button
-            onClick={() => { setIsUserOpen(!isUserOpen); setIsNotifOpen(false); }}
-            className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white  overflow-hidden flex flex-col justify-center items-center border border-gray-100 ring-2 ring-transparent focus:ring-gray-300 outline-none transition-all"
+            onClick={() => { setIsUserOpen(v => !v); setIsNotifOpen(false); }}
+            className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white overflow-hidden flex flex-col justify-center items-center border border-gray-100 ring-2 ring-transparent focus:ring-gray-300 outline-none transition-all"
           >
             <MaterialIcon name="person" size={18} />
           </button>
@@ -104,7 +110,6 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
             </div>
           )}
         </div>
-
       </div>
     </div>
   );

@@ -1,108 +1,27 @@
-import React, { useState, useMemo } from 'react';
-import { Plus, Search, Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
 import Layout from '../components/layout/layout';
 import Modal from '../components/modal/modal';
 import DataTable, { RowActionsMenu, type Column } from '../components/table/table';
+import TableToolbar, { type TabItem } from '../components/table-toolbar/table-toolbar';
+import FormSidebar, { FormSidebarFooter } from '../components/form-sidebar/form-sidebar';
+import FormField, { inputCls } from '../components/form-field/form-field';
+import Fab from '../components/fab/fab';
 import { useTeamStore } from '../store/team';
+import { useUIStore } from '../store/ui';
 import { getMemberColors } from '../data/team';
 import type { TeamMember, TeamProject } from '../data/team';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type MemberRow = TeamMember & { project?: TeamProject };
+type FilterKey = 'all' | 'assigned' | 'unassigned';
 
-type FilterTab = 'All' | 'Assigned' | 'Unassigned';
-
-// ─── Member Form Modal (Add + Edit) ───────────────────────────────────────────
-
-interface MemberFormModalProps {
-  initial?: TeamMember;
-  onClose: () => void;
-  onSave: (data: Pick<TeamMember, 'name' | 'role' | 'email'>) => void;
-}
-
-function MemberFormModal({ initial, onClose, onSave }: MemberFormModalProps) {
-  const [name, setName] = useState(initial?.name ?? '');
-  const [role, setRole] = useState(initial?.role ?? '');
-  const [email, setEmail] = useState(initial?.email ?? '');
-  const isEdit = !!initial;
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim() || !role.trim()) return;
-    onSave({ name: name.trim(), role: role.trim(), email: email.trim() });
-  };
-
-  return (
-    <Modal
-      variant="dialog"
-      size="md"
-      onClose={onClose}
-      title={isEdit ? 'Edit Member' : 'Add Team Member'}
-      description={isEdit ? `Editing ${initial!.name}` : 'New members start unassigned.'}
-    >
-      <form onSubmit={handleSubmit} className="px-6 py-6 flex flex-col gap-5">
-        <div>
-          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
-            Full Name *
-          </label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-            autoFocus
-            placeholder="e.g. Jordan Clarke"
-            className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium py-3 px-4 rounded-xl focus:outline-none focus:border-gray-400 focus:ring-4 focus:ring-gray-100 transition-all"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
-            Role *
-          </label>
-          <input
-            type="text"
-            value={role}
-            onChange={e => setRole(e.target.value)}
-            required
-            placeholder="e.g. Frontend Developer"
-            className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium py-3 px-4 rounded-xl focus:outline-none focus:border-gray-400 focus:ring-4 focus:ring-gray-100 transition-all"
-          />
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="team@studio.com"
-            className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium py-3 px-4 rounded-xl focus:outline-none focus:border-gray-400 focus:ring-4 focus:ring-gray-100 transition-all"
-          />
-        </div>
-
-        <div className="flex gap-3 pt-1">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-3 bg-gray-100 text-gray-700 font-semibold text-sm rounded-xl hover:bg-gray-200 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={!name.trim() || !role.trim()}
-            className="flex-1 py-3 bg-black text-white font-semibold text-sm rounded-xl hover:bg-gray-800 transition-colors disabled:opacity-40"
-          >
-            {isEdit ? 'Save Changes' : 'Add Member'}
-          </button>
-        </div>
-      </form>
-    </Modal>
-  );
+interface MemberFormValues {
+  name: string;
+  role: string;
+  email: string;
 }
 
 // ─── Assign Project Modal ──────────────────────────────────────────────────────
@@ -116,7 +35,6 @@ interface AssignModalProps {
 
 function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) {
   const colors = getMemberColors(member.id);
-
   return (
     <Modal
       variant="dialog"
@@ -138,26 +56,19 @@ function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) 
               key={project.id}
               onClick={() => { onAssign(member.id, project.id); onClose(); }}
               className={`w-full text-left px-3.5 py-3 rounded-xl border transition-all flex items-center gap-3
-                ${isSelected
-                  ? 'bg-black border-black'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                }`}
+                ${isSelected ? 'bg-black border-black' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
             >
               <Briefcase size={14} className={isSelected ? 'text-white/50 shrink-0' : 'text-gray-400 shrink-0'} />
               <div className="min-w-0 flex-1">
-                <p className={`font-semibold text-sm truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                  {project.name}
-                </p>
+                <p className={`font-semibold text-sm truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>{project.name}</p>
                 <p className={`text-xs truncate mt-0.5 ${isSelected ? 'text-white/50' : 'text-gray-400'}`}>
-                  {project.client}
-                  {project.status === 'paused' && <span className="ml-1.5">· Paused</span>}
+                  {project.client}{project.status === 'paused' && <span className="ml-1.5">· Paused</span>}
                 </p>
               </div>
               {isSelected && <UserCheck size={14} className="text-white/70 shrink-0" />}
             </button>
           );
         })}
-
         <button
           onClick={() => { onAssign(member.id, null); onClose(); }}
           disabled={member.assignedProjectId === null}
@@ -170,13 +81,13 @@ function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) 
   );
 }
 
-// ─── Avatar cell ──────────────────────────────────────────────────────────────
+// ─── Member avatar cell ───────────────────────────────────────────────────────
 
 function MemberAvatar({ member }: { member: TeamMember }) {
   const colors = getMemberColors(member.id);
   return (
     <div className="flex items-center gap-3 min-w-0">
-      <div className={`w-8 h-8 rounded-lg ${colors.bg} flex items-center justify-center text-white font-semibold text-sm shrink-0`}>
+      <div className={`w-8 h-8 rounded-full ${colors.bg} flex items-center justify-center text-white font-semibold text-sm shrink-0`}>
         {member.name.charAt(0)}
       </div>
       <span className="font-medium text-gray-900 truncate">{member.name}</span>
@@ -184,90 +95,76 @@ function MemberAvatar({ member }: { member: TeamMember }) {
   );
 }
 
-// ─── Filter tab ───────────────────────────────────────────────────────────────
-
-function FilterTab({
-  label,
-  count,
-  active,
-  onClick,
-}: {
-  label: FilterTab;
-  count: number;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors
-        ${active
-          ? 'bg-black text-white'
-          : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'
-        }`}
-    >
-      {label}
-      <span
-        className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md ${active ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
-          }`}
-      >
-        {count}
-      </span>
-    </button>
-  );
-}
-
-// ─── Team Page ─────────────────────────────────────────────────────────────────
+// ─── Team Page ────────────────────────────────────────────────────────────────
 
 export default function Team() {
   const { members, projects, addMember, updateMember, removeMember, assignMember } = useTeamStore();
+  const { searchQuery } = useUIStore();
 
-  const [search, setSearch] = useState('');
-  const [activeTab, setActiveTab] = useState<FilterTab>('All');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [activeTab, setActiveTab]             = useState<FilterKey>('all');
+  const [sidebarOpen, setSidebarOpen]         = useState(false);
+  const [editingMember, setEditingMember]     = useState<TeamMember | null>(null);
   const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<MemberFormValues>({
+    defaultValues: { name: '', role: '', email: '' },
+  });
+
   const tabCounts = useMemo(() => ({
-    All: members.length,
-    Assigned: members.filter(m => m.assignedProjectId !== null).length,
-    Unassigned: members.filter(m => m.assignedProjectId === null).length,
+    all:        members.length,
+    assigned:   members.filter(m => m.assignedProjectId !== null).length,
+    unassigned: members.filter(m => m.assignedProjectId === null).length,
   }), [members]);
+
+  const tabs: TabItem[] = [
+    { key: 'all',        label: 'All',        count: tabCounts.all        },
+    { key: 'assigned',   label: 'Assigned',   count: tabCounts.assigned   },
+    { key: 'unassigned', label: 'Unassigned', count: tabCounts.unassigned },
+  ];
 
   const tableData: MemberRow[] = useMemo(() => {
     let list = members;
-
-    if (activeTab === 'Assigned') list = list.filter(m => m.assignedProjectId !== null);
-    if (activeTab === 'Unassigned') list = list.filter(m => m.assignedProjectId === null);
-
-    if (search.trim()) {
-      const q = search.toLowerCase();
+    if (activeTab === 'assigned')   list = list.filter(m => m.assignedProjectId !== null);
+    if (activeTab === 'unassigned') list = list.filter(m => m.assignedProjectId === null);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
       list = list.filter(m =>
         m.name.toLowerCase().includes(q) ||
         m.email.toLowerCase().includes(q) ||
         m.role.toLowerCase().includes(q),
       );
     }
+    return list.map(m => ({ ...m, project: projects.find(p => p.id === m.assignedProjectId) }));
+  }, [members, projects, activeTab, searchQuery]);
 
-    return list.map(m => ({
-      ...m,
-      project: projects.find(p => p.id === m.assignedProjectId),
-    }));
-  }, [members, projects, activeTab, search]);
-
-  const handleAdd = ({ name, role, email }: Pick<TeamMember, 'name' | 'role' | 'email'>) => {
-    addMember({ id: 'm_' + Date.now(), name, role, email, assignedProjectId: null });
-    setShowAddModal(false);
-  };
-
-  const handleEdit = ({ name, role, email }: Pick<TeamMember, 'name' | 'role' | 'email'>) => {
-    if (!editingMember) return;
-    updateMember(editingMember.id, { name, role, email });
+  const openAdd = () => {
     setEditingMember(null);
+    reset({ name: '', role: '', email: '' });
+    setSidebarOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Remove this team member?')) removeMember(id);
+  const openEdit = (member: TeamMember) => {
+    setEditingMember(member);
+    reset({ name: member.name, role: member.role, email: member.email });
+    setSidebarOpen(true);
+  };
+
+  const onSubmit = (data: MemberFormValues) => {
+    if (editingMember) {
+      updateMember(editingMember.id, data);
+    } else {
+      addMember({ id: 'm_' + Date.now(), assignedProjectId: null, ...data });
+    }
+    setSidebarOpen(false);
+  };
+
+  const handleDelete = (member: TeamMember) => {
+    if (confirm(`Remove ${member.name} from the team?`)) removeMember(member.id);
   };
 
   const columns: Column<MemberRow>[] = [
@@ -280,17 +177,13 @@ export default function Team() {
       key: 'email',
       label: 'Email',
       hideBelow: 'md',
-      render: row => (
-        <span className="text-gray-500 text-sm">{row.email || '—'}</span>
-      ),
+      render: row => <span className="text-sm text-gray-500">{row.email || '—'}</span>,
     },
     {
       key: 'role',
       label: 'Role',
       hideBelow: 'sm',
-      render: row => (
-        <span className="text-gray-700 text-sm font-medium">{row.role}</span>
-      ),
+      render: row => <span className="text-sm font-medium text-gray-700">{row.role}</span>,
     },
     {
       key: 'project',
@@ -299,7 +192,7 @@ export default function Team() {
         row.project ? (
           <button
             onClick={e => { e.stopPropagation(); setAssigningMember(row); }}
-            className="flex items-center gap-1.5 text-sm text-gray-700 font-medium hover:text-black transition-colors group"
+            className="flex items-center gap-1.5 text-sm text-gray-700 font-medium hover:text-black transition-colors"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
             {row.project.name}
@@ -322,22 +215,9 @@ export default function Team() {
       render: row => (
         <RowActionsMenu
           actions={[
-            {
-              label: 'Edit member',
-              icon: <Pencil size={14} />,
-              onClick: () => setEditingMember(row),
-            },
-            {
-              label: 'Assign project',
-              icon: <Briefcase size={14} />,
-              onClick: () => setAssigningMember(row),
-            },
-            {
-              label: 'Delete',
-              icon: <Trash2 size={14} />,
-              onClick: () => handleDelete(row.id),
-              variant: 'danger',
-            },
+            { label: 'Edit member',    icon: <Pencil size={14} />,   onClick: () => openEdit(row)              },
+            { label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(row)  },
+            { label: 'Delete',         icon: <Trash2 size={14} />,    onClick: () => handleDelete(row), variant: 'danger' },
           ]}
         />
       ),
@@ -345,59 +225,81 @@ export default function Team() {
   ];
 
   return (
-    <Layout title="Team">
-      <div className="flex flex-col h-full gap-5">
-        {/* ── Toolbar: tabs + search ── */}
-        <div className="flex items-center justify-between gap-3 flex-wrap shrink-0">
-          {/* Filter tabs */}
-          <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl">
-            {(['All', 'Assigned', 'Unassigned'] as FilterTab[]).map(tab => (
-              <FilterTab
-                key={tab}
-                label={tab}
-                count={tabCounts[tab]}
-                active={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
-              />
-            ))}
-          </div>
+    <Layout title="Team" fullHeight>
+      <div className="flex-1 min-h-0 flex flex-col gap-5 max-w-[1200px] w-full mx-auto pb-6">
 
-          {/* Add new member */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-800 transition-colors shrink-0"
-          >
-            <Plus size={16} />
-            Add Member
-          </button>
-        </div>
+        <TableToolbar
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={key => setActiveTab(key as FilterKey)}
+          actionLabel="Add Member"
+          onAction={openAdd}
+        />
 
-        {/* ── Table ── */}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0">
           <DataTable<MemberRow>
             columns={columns}
             data={tableData}
-            emptyMessage={
-              search ? `No members match "${search}".` : 'No team members yet.'
-            }
+            className="h-full"
+            emptyMessage={searchQuery ? `No members match "${searchQuery}".` : 'No team members yet.'}
+            onRowClick={openEdit}
           />
         </div>
 
       </div>
 
-      {/* ── Modals ── */}
-      {showAddModal && (
-        <MemberFormModal onClose={() => setShowAddModal(false)} onSave={handleAdd} />
-      )}
+      {/* Mobile FAB */}
+      <Fab onClick={openAdd} ariaLabel="Add team member" />
 
-      {editingMember && (
-        <MemberFormModal
-          initial={editingMember}
-          onClose={() => setEditingMember(null)}
-          onSave={handleEdit}
-        />
-      )}
+      {/* Member Form Sidebar */}
+      <FormSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        title={editingMember ? 'Edit Member' : 'Add Team Member'}
+        description={editingMember ? `Editing ${editingMember.name}` : 'New members start unassigned.'}
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            <FormField label="Full Name" required error={errors.name?.message}>
+              <input
+                {...register('name', { required: 'Name is required' })}
+                autoFocus
+                placeholder="e.g. Jordan Clarke"
+                className={inputCls(!!errors.name)}
+              />
+            </FormField>
+            <FormField label="Role" required error={errors.role?.message}>
+              <input
+                {...register('role', { required: 'Role is required' })}
+                placeholder="e.g. Frontend Developer"
+                className={inputCls(!!errors.role)}
+              />
+            </FormField>
+            <FormField label="Email" error={errors.email?.message}>
+              <input
+                {...register('email', {
+                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
+                })}
+                type="email"
+                placeholder="team@studio.com"
+                className={inputCls(!!errors.email)}
+              />
+            </FormField>
+          </div>
+          <FormSidebarFooter>
+            <button type="button" onClick={() => setSidebarOpen(false)}
+              className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting}
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-black hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50">
+              {editingMember ? 'Save Changes' : 'Add Member'}
+            </button>
+          </FormSidebarFooter>
+        </form>
+      </FormSidebar>
 
+      {/* Assign Project Modal */}
       {assigningMember && (
         <AssignModal
           member={assigningMember}

@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react';
 import DailySchedule from '../daily-schedule/daily-schedule';
 import MonthYearNav from '../month-year-nav/month-year-nav';
-import MaterialIcon from '../ui/material-icon';
+import ContentCard from '../content-card/content-card';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent, EventType } from '../schedule/event-types';
 import { useCalendarStore } from '../../store/calendar';
 import { DAY_NAMES_SHORT, DAY_NAMES_LONG, MOCK_EVENT_SEEDS, TODAY_DEFAULT_EVENTS } from '../../data/calendar';
-import CardHeader from '../card/card-header/card-header';
 
 const dateKey = (year: number, month: number, day: number) => `${year}-${month}-${day}`;
 
@@ -80,15 +79,13 @@ export default function Calendar() {
     <div className="calendar grid grid-cols-1 lg:grid-cols-3 gap-6 h-fit md:h-[585px]">
 
       {/* Calendar grid — spans 2 of 3 columns */}
-      <div className="lg:col-span-2 bg-white border border-gray-200 rounded-[24px] flex flex-col overflow-hidden">
-
-        <CardHeader title={getDayLabel(selectedDate)} iconName="calendar_today" >
-          <MonthYearNav value={currentDate} onChange={setCurrentDate} />
-        </CardHeader>
-        <div className="border-b border-gray-100 mx-4 md:mx-6" />
-
-        {/* Content */}
-        <div className="px-4 md:px-6 pb-4 md:pb-6 pt-4 flex flex-col gap-4 flex-1 overflow-y-auto">
+      <ContentCard
+        className="lg:col-span-2"
+        iconName="calendar_today"
+        title={getDayLabel(selectedDate)}
+        action={<MonthYearNav value={currentDate} onChange={setCurrentDate} />}
+        bodyClassName="px-4 md:px-6 pb-4 md:pb-6 pt-4 flex flex-col gap-4 overflow-y-auto"
+      >
 
           {/* Days-of-week header */}
           <div className="grid grid-cols-7">
@@ -143,8 +140,7 @@ export default function Calendar() {
               <div key={`empty-end-${i}`} className="p-2" />
             ))}
           </div>
-        </div>
-      </div>
+      </ContentCard>
 
       {/* Daily schedule — spans 1 of 3 columns */}
       <DailySchedule date={selectedDate} events={selectedEvents} onAddEvent={handleAddEvent} onEditEvent={handleEditEvent} onRemoveEvent={handleRemoveEvent} />

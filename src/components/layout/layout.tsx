@@ -5,9 +5,16 @@ import Topbar from '../topbar/topbar';
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
+  /**
+   * When true the content area becomes a flex column with overflow-hidden
+   * instead of a scrollable block. Use this for pages where the content
+   * should fill the viewport and manage its own internal scroll (e.g. table
+   * pages where the table body scrolls but the header stays fixed).
+   */
+  fullHeight?: boolean;
 }
 
-export default function Layout({ children, title }: LayoutProps) {
+export default function Layout({ children, title, fullHeight }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -33,9 +40,15 @@ export default function Layout({ children, title }: LayoutProps) {
           <Topbar setIsMobileMenuOpen={setIsMobileMenuOpen} title={title} />
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-10">
-          {children}
-        </div>
+        {fullHeight ? (
+          <div className="flex-1 overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+            {children}
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-10">
+            {children}
+          </div>
+        )}
       </div>
     </div>
   );

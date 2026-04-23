@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Command, Users, BarChart2, TrendingUp, TrendingDown } from 'lucide-react';
 import Layout from '../components/layout/layout';
 import Calendar from '../components/calendar/calendar';
@@ -9,6 +10,7 @@ import { useDocumentsStore } from '../store/documents';
 import { useTeamStore } from '../store/team';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const { documents } = useDocumentsStore();
   const { projects, members } = useTeamStore();
 
@@ -25,9 +27,8 @@ export default function Dashboard() {
             value="12"
             badge="68% capacity"
             badgeLabel="Projects in progress"
-            onAction={() => { }}
+            onAction={() => navigate('/admin/projects')}
           />
-
           <StatCard
             variant="surface"
             icon={<Users size={16} />}
@@ -35,9 +36,8 @@ export default function Dashboard() {
             value="24"
             badge={<><TrendingUp size={14} className="text-green-600" /> +12%</>}
             badgeLabel="Active this month"
-            onAction={() => { }}
+            onAction={() => navigate('/admin/clients')}
           />
-
           <StatCard
             variant="dark"
             icon={<BarChart2 size={16} />}
@@ -46,26 +46,22 @@ export default function Dashboard() {
             valueSubLabel="/ $5,000"
             badge={<><TrendingDown size={14} className="text-red-400" /> -5%</>}
             badgeLabel="Versus budget"
-            onAction={() => { }}
+            onAction={() => navigate('/admin/expenses')}
           />
-
         </div>
 
-        {/* Calendar + Daily Schedule row */}
+        {/* Calendar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Calendar - 2 cols */}
           <div className="lg:col-span-3">
             <Calendar />
           </div>
         </div>
 
-        {/* Projects Overview + Documents Overview row */}
+        {/* Projects + Documents overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          {/* Projects Overview - 2 cols (same width as Calendar) */}
           <div className="lg:col-span-2">
             <ProjectsOverview projects={projects} members={members} limit={5} />
           </div>
-          {/* Documents Overview - 1 col (same width as Daily Schedule) */}
           <div className="lg:col-span-1">
             <DocumentOverview documents={documents} limit={5} />
           </div>
@@ -78,24 +74,15 @@ export default function Dashboard() {
 
 export function MauritiusTimeDisplay() {
   const [time, setTime] = useState('');
-
   useEffect(() => {
-    const formatter = new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-      timeZone: 'Indian/Mauritius',
+    const fmt = new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false, timeZone: 'Indian/Mauritius',
     });
-    const update = () => setTime(formatter.format(new Date()));
-    update();
-    const id = setInterval(update, 1000);
+    const tick = () => setTime(fmt.format(new Date()));
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-
-  return (
-    <div className="mt-2">
-      <span className="text-[42px] font-bold tracking-tight text-(--color-ink) leading-none">{time}</span>
-    </div>
-  );
+  return <span className="text-[42px] font-bold tracking-tight text-(--color-ink) leading-none">{time}</span>;
 }
