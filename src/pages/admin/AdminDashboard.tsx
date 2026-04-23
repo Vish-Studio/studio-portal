@@ -1,116 +1,39 @@
-import React, { useEffect, useState } from 'react';
-import { collection, query, getDocs, addDoc, serverTimestamp, doc, setDoc, getDoc } from 'firebase/firestore';
-import { db } from '../../lib/firebase';
-import { Users, CreditCard, DollarSign, ToggleLeft, ToggleRight, Loader2, ArrowRight } from 'lucide-react';
-import { useAuth } from '../../components/authprovider/authprovider';
+import React, { useState } from 'react';
+import { Users, CreditCard, DollarSign, ToggleLeft, ToggleRight, ArrowRight } from 'lucide-react';
 import { useAdminStore } from '../../store/admin';
 import type { Expense } from '../../store/admin';
 
 export default function AdminDashboard() {
-  const { isDemo } = useAuth();
-  const { stats, recentClients, expenses, isWorking, setStats, setRecentClients, setExpenses, addExpense, toggleWorking, incrementExpenseTotal } = useAdminStore();
-  const [loading, setLoading] = useState(true);
+  const {
+    stats, recentClients, expenses, isWorking,
+    addExpense, toggleWorking, incrementExpenseTotal,
+  } = useAdminStore();
+
   const [expAmount, setExpAmount] = useState('');
   const [expDesc, setExpDesc] = useState('');
 
-  useEffect(() => {
-    if (isDemo) {
-      setLoading(false);
-      return;
-    }
-    const fetchStats = async () => {
-      try {
-        const usersSnap = await getDocs(query(collection(db, 'users')));
-        const projectsSnap = await getDocs(query(collection(db, 'projects')));
-        const expSnap = await getDocs(query(collection(db, 'expenses')));
-
-        const settingsSnap = await getDoc(doc(db, 'settings', 'global'));
-        if (settingsSnap.exists()) {
-          if (settingsSnap.data().isWorking === false) toggleWorking();
-        }
-
-        let clientsCount = 0;
-        const clients: any[] = [];
-        usersSnap.forEach(d => {
-          const data = d.data();
-          if (data.role === 'client') {
-            clientsCount++;
-            clients.push({ id: d.id, ...data });
-          }
-        });
-
-        let revenue = 0;
-        let active = 0;
-        projectsSnap.forEach(d => {
-          const data = d.data();
-          revenue += data.agreedPayment || 0;
-          if (data.phase !== 'Completed') active++;
-        });
-
-        let expTotal = 0;
-        const expList: Expense[] = [];
-        expSnap.forEach(d => {
-          expTotal += d.data().amount || 0;
-          expList.push({ id: d.id, ...(d.data() as any) });
-        });
-
-        setStats({ totalClients: clientsCount, activeProjects: active, totalRevenue: revenue, totalExpenses: expTotal });
-        setExpenses(expList.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis()).slice(0, 5));
-        clients.sort((a, b) => b.createdAt?.toMillis() - a.createdAt?.toMillis());
-        setRecentClients(clients.slice(0, 5));
-      } catch (error) {
-        console.error('Failed to load dashboard stats', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, [isDemo]);
-
-  const handleToggleWorking = async () => {
-    toggleWorking();
-    if (!isDemo) {
-      try {
-        await setDoc(doc(db, 'settings', 'global'), { isWorking: !isWorking }, { merge: true });
-      } catch (e) { console.error(e); }
-    }
-  };
-
-  const handleAddExpense = async (e: React.FormEvent) => {
+  const handleAddExpense = (e: React.FormEvent) => {
     e.preventDefault();
     if (!expAmount || !expDesc) return;
     const amount = Number(expAmount);
     const newExpense: Expense = {
-      id: 'demo_' + Date.now(),
+      id: 'local_' + Date.now(),
       amount,
       description: expDesc,
       createdAt: { toMillis: () => Date.now() },
     };
-    try {
-      if (!isDemo) {
-        const res = await addDoc(collection(db, 'expenses'), {
-          amount,
-          description: expDesc,
-          createdAt: serverTimestamp(),
-        });
-        newExpense.id = res.id;
-      }
-      addExpense(newExpense);
-      incrementExpenseTotal(amount);
-      setExpAmount('');
-      setExpDesc('');
-    } catch (e) { console.error(e); }
+    addExpense(newExpense);
+    incrementExpenseTotal(amount);
+    setExpAmount('');
+    setExpDesc('');
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-[400px] items-center justify-center text-gray-500 font-medium">
-        <Loader2 className="animate-spin" size={32} />
-      </div>
-    );
-  }
-
-  const EXPENSE_COLORS = ['bg-(--color-expense-1)', 'bg-(--color-expense-2)', 'bg-(--color-expense-3)', 'bg-(--color-expense-4)'];
+  const EXPENSE_COLORS = [
+    'bg-(--color-expense-1)',
+    'bg-(--color-expense-2)',
+    'bg-(--color-expense-3)',
+    'bg-(--color-expense-4)',
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pb-20 overflow-x-hidden md:overflow-visible">
@@ -119,7 +42,7 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-xl font-extrabold text-gray-900">Overview</h3>
           <button
-            onClick={handleToggleWorking}
+            onClick={toggleWorking}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-[11px] font-extrabold uppercase tracking-widest transition-all ${isWorking ? 'bg-white text-gray-900 shadow-sm border border-gray-100 hover:bg-gray-50' : 'bg-red-50 text-red-700 border border-red-100 hover:bg-red-100'}`}
           >
             {isWorking ? <ToggleRight size={16} className="text-(--color-accent-green)" /> : <ToggleLeft size={16} />}
@@ -200,14 +123,14 @@ export default function AdminDashboard() {
             <div className="w-10 sm:w-14 bg-gray-100 rounded-t-[12px] h-[40%]"></div>
             <div className="w-10 sm:w-14 bg-gray-100 rounded-t-[12px] h-[65%]"></div>
           </div>
-          <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white to-transparent z-0 pointer-events-none rounded-b-[32px]"></div>
+          <div className="absolute bottom-0 left-0 w-full h-24 bg-linear-to-t from-white to-transparent z-0 pointer-events-none rounded-b-[32px]"></div>
         </div>
       </div>
 
       {/* Right Column */}
-      <div className="md:col-span-4 flex flex-col gap-6 w-full max-w-[400px] mx-auto md:max-w-none">
+      <div className="md:col-span-4 flex flex-col gap-6 w-full max-w-100 mx-auto md:max-w-none">
         {/* Recent Expenses */}
-        <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)] md:mt-[45px]">
+        <div className="bg-white rounded-[32px] p-6 sm:p-8 shadow-[0_2px_20px_var(--color-shadow-subtle)] md:mt-11.25">
           <h4 className="text-[16px] font-extrabold text-gray-900 mb-6">Recent Expenses</h4>
           <div className="space-y-6">
             {expenses.length === 0 ? (
@@ -217,8 +140,8 @@ export default function AdminDashboard() {
               return (
                 <div key={ex.id} className="flex justify-between items-center group">
                   <div className="flex items-center gap-4 min-w-0">
-                    <div className={`w-[48px] h-[48px] sm:w-[52px] sm:h-[52px] rounded-[16px] ${cardColor} bg-opacity-20 flex items-center justify-center border border-white shadow-sm shrink-0 relative overflow-hidden`}>
-                      <div className={`absolute bottom-0 right-0 w-full h-1/2 ${cardColor} opacity-40 blur-[8px]`}></div>
+                    <div className={`w-12 h-12 sm:w-13 sm:h-13 rounded-[16px] ${cardColor} bg-opacity-20 flex items-center justify-center border border-white shadow-sm shrink-0 relative overflow-hidden`}>
+                      <div className={`absolute bottom-0 right-0 w-full h-1/2 ${cardColor} opacity-40 blur-sm`}></div>
                       <DollarSign size={20} className={`${cardColor.replace('bg-', 'text-')}`} />
                     </div>
                     <div className="min-w-0">
@@ -245,25 +168,16 @@ export default function AdminDashboard() {
           <h4 className="text-[16px] font-extrabold text-gray-900 mb-6">Log Expense</h4>
           <form onSubmit={handleAddExpense} className="flex flex-col gap-3">
             <input
-              required
-              type="number"
-              placeholder="$ Amount"
-              value={expAmount}
-              onChange={e => setExpAmount(e.target.value)}
+              required type="number" placeholder="$ Amount"
+              value={expAmount} onChange={e => setExpAmount(e.target.value)}
               className="w-full bg-gray-50 border border-gray-100 text-gray-900 text-[13px] font-bold py-3 px-4 rounded-[16px] focus:outline-none focus:bg-white focus:border-gray-200 transition-colors shadow-sm"
             />
             <input
-              required
-              type="text"
-              placeholder="Description..."
-              value={expDesc}
-              onChange={e => setExpDesc(e.target.value)}
+              required type="text" placeholder="Description..."
+              value={expDesc} onChange={e => setExpDesc(e.target.value)}
               className="w-full bg-gray-50 border border-gray-100 text-gray-900 text-[13px] font-bold py-3 px-4 rounded-[16px] focus:outline-none focus:bg-white focus:border-gray-200 transition-colors shadow-sm"
             />
-            <button
-              type="submit"
-              className="w-full bg-black text-white text-[13px] font-bold px-6 py-3 rounded-full hover:bg-gray-800 transition-colors shadow-sm mt-2"
-            >
+            <button type="submit" className="w-full bg-black text-white text-[13px] font-bold px-6 py-3 rounded-full hover:bg-gray-800 transition-colors shadow-sm mt-2">
               Submit Log
             </button>
           </form>

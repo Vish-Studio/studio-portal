@@ -11,6 +11,7 @@ export interface TeamProject {
   name: string;
   client: string;
   status: "active" | "completed" | "paused";
+  createdAt?: number;
 }
 
 export const AVATAR_COLORS: Record<string, { bg: string; text: string; header: string }> = {
@@ -31,12 +32,15 @@ export function getMemberColors(id: string) {
   return AVATAR_COLORS[key];
 }
 
+const daysAgo = (n: number, h = 0, m = 0) =>
+  Date.now() - n * 86400000 - h * 3600000 - m * 60000;
+
 export const DEMO_PROJECTS: TeamProject[] = [
-  { id: "p1", name: "Brand Refresh", client: "Acme Corp", status: "active" },
-  { id: "p2", name: "E-Commerce Redesign", client: "Globex", status: "active" },
-  { id: "p3", name: "Mobile App MVP", client: "Initech", status: "active" },
-  { id: "p4", name: "Marketing Site", client: "Stark Industries", status: "paused" },
-  { id: "p5", name: "Dashboard Analytics", client: "Umbrella Ltd", status: "active" },
+  { id: "p1", name: "Brand Refresh", client: "Acme Corp", status: "active", createdAt: daysAgo(1, 9, 30) },
+  { id: "p2", name: "E-Commerce Redesign", client: "Globex", status: "active", createdAt: daysAgo(3, 14, 15) },
+  { id: "p3", name: "Mobile App MVP", client: "Initech", status: "active", createdAt: daysAgo(5, 11, 0) },
+  { id: "p4", name: "Marketing Site", client: "Stark Industries", status: "paused", createdAt: daysAgo(8, 16, 45) },
+  { id: "p5", name: "Dashboard Analytics", client: "Umbrella Ltd", status: "active", createdAt: daysAgo(12, 10, 20) },
 ];
 
 export const DEMO_MEMBERS: TeamMember[] = [

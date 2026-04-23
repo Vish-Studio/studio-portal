@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Home,
@@ -9,7 +8,6 @@ import {
   Calendar,
   FileText,
   LayoutTemplate,
-  Command,
   PanelLeftClose,
   X,
   Settings,
@@ -35,15 +33,15 @@ export default function Sidebar({
   const location = useLocation();
 
   const navItems = [
-    { icon: <Home size={18} />, label: "Home", path: "/" },
-    { icon: <UserCircle2 size={18} />, label: "Team", path: "/team" },
-    { icon: <Users size={18} />, label: "Clients", path: "/clients" },
-    { icon: <Receipt size={18} />, label: "Expenses", path: "/expenses" },
-    { icon: <Briefcase size={18} />, label: "Projects", path: "/projects" },
-    { icon: <CheckSquare size={18} />, label: "Tasks", path: "/tasks" },
-    { icon: <Calendar size={18} />, label: "Calendar", path: "/calendar" },
-    { icon: <FileText size={18} />, label: "Documents", path: "/documents" },
-    { icon: <LayoutTemplate size={18} />, label: "Templates", path: "/templates" },
+    { icon: <Home size={18} />, label: "Home", path: "/admin" },
+    { icon: <UserCircle2 size={18} />, label: "Team", path: "/admin/team" },
+    { icon: <Users size={18} />, label: "Clients", path: "/admin/clients" },
+    { icon: <Receipt size={18} />, label: "Expenses", path: "/admin/expenses" },
+    { icon: <Briefcase size={18} />, label: "Projects", path: "/admin/projects" },
+    { icon: <CheckSquare size={18} />, label: "Tasks", path: "/admin/tasks" },
+    { icon: <Calendar size={18} />, label: "Calendar", path: "/admin/calendar" },
+    { icon: <FileText size={18} />, label: "Documents", path: "/admin/documents" },
+    { icon: <LayoutTemplate size={18} />, label: "Templates", path: "/admin/templates" },
   ];
 
   return (
@@ -134,7 +132,7 @@ export default function Sidebar({
         {/* Bottom Settings */}
         <div className={`flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-4'}`}>
           {(() => {
-            const isActive = location.pathname === '/settings';
+            const isActive = location.pathname === '/admin/settings';
             const btnClass = isActive
               ? `bg-(--color-sidebar-active) text-white shadow-md transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
               : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;

@@ -7,6 +7,7 @@ import AddEventModal from '../schedule/add-event-modal';
 import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
+import CardHeader from '../card/card-header/card-header';
 
 export type { ScheduleEvent };
 
@@ -83,28 +84,23 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
   };
 
   return (
-    <div className="daily-schedule bg-(--color-surface) rounded-[24px] p-6 flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 shrink-0">
-        <div className="flex items-center gap-2 text-gray-600">
-          <MaterialIcon name="schedule" size={20} />
-          <p className="text-sm font-medium ">Daily Schedule</p>
-        </div>
+    <div className="daily-schedule bg-white border border-gray-200 rounded-[24px] flex flex-col h-full overflow-hidden">
+      <CardHeader title="Daily Schedule" iconName="schedule" >
         {onAddEvent && (
-          <Tooltip content="Add event" side="left">
-            <button
-              onClick={() => setShowModal(true)}
-              className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors"
-              aria-label="Add event"
-            >
-              <MaterialIcon name="add" size={18} />
-            </button>
-          </Tooltip>
+          <button
+            onClick={() => setShowModal(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-full bg-(--color-ink) text-white hover:bg-gray-200 hover:text-(--color-ink) transition-all ease-in-out"
+            aria-label="Add event"
+          >
+            <MaterialIcon name="add" size={18} />
+          </button>
         )}
-      </div>
+      </CardHeader>
+
+      <div className="border-b border-gray-100 mx-4 md:mx-6 shrink-0" />
 
       {/* Event list */}
-      <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0">
+      <div className="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 px-4 md:px-6 py-4">
         {sortedEvents.length > 0 ? (
           sortedEvents.map(event => (
             <div key={event.id} className="flex gap-3 items-start group relative">
