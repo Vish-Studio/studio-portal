@@ -1,47 +1,37 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import DailySchedule from '../daily-schedule/daily-schedule';
 import MonthYearNav from '../month-year-nav/month-year-nav';
 import MaterialIcon from '../ui/material-icon';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent, EventType } from '../schedule/event-types';
 import { useCalendarStore } from '../../store/calendar';
+import { DAY_NAMES_SHORT, DAY_NAMES_LONG, MOCK_EVENT_SEEDS, TODAY_DEFAULT_EVENTS } from '../../data/calendar';
 
 const dateKey = (year: number, month: number, day: number) => `${year}-${month}-${day}`;
 
 const getDayLabel = (date: Date): string => {
   const today = new Date();
-  const isToday = date.getDate() === today.getDate() &&
+  const isToday =
+    date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&
     date.getFullYear() === today.getFullYear();
-
-  if (isToday) return 'Today';
-
-  const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  return days[date.getDay()];
+  return isToday ? 'Today' : DAY_NAMES_LONG[date.getDay()];
 };
 
 const getMockEventsForDate = (year: number, month: number, day: number): ScheduleEvent[] => {
   const events: ScheduleEvent[] = [];
   const seed = year * 10000 + month * 100 + day;
 
-  if (seed % 7 === 0 || seed % 13 === 0) {
-    events.push({ id: `mock-${seed}-0`, type: 'brief', title: 'Strategy Sync', time: '10:00 AM' });
-  }
-  if (seed % 5 === 0) {
-    events.push({ id: `mock-${seed}-1`, type: 'design-review', title: 'Product Review', time: '1:00 PM' });
-  }
-  if (seed % 8 === 0) {
-    events.push({ id: `mock-${seed}-2`, type: 'launch', title: 'Web App Launch', time: 'All Day' });
-  }
-  if (seed % 19 === 0) {
-    events.push({ id: `mock-${seed}-3`, type: 'client-feedback', title: 'Client Feedback', time: '3:00 PM' });
+  for (const s of MOCK_EVENT_SEEDS) {
+    if (seed % s.modulo === 0) {
+      events.push({ id: `mock-${seed}-${s.index}`, type: s.type as EventType, title: s.title, time: s.time });
+    }
   }
 
   const today = new Date();
-  if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
-    if (events.length === 0) {
-      events.push({ id: 'today-0', type: 'onboarding', title: 'Acme Corp Kickoff', time: '10:00 AM - 11:00 AM' });
-      events.push({ id: 'today-1', type: 'design-review', title: 'Design Review', time: '01:30 PM - 02:00 PM' });
+  if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate() && events.length === 0) {
+    for (const e of TODAY_DEFAULT_EVENTS) {
+      events.push({ id: e.idSuffix, type: e.type as EventType, title: e.title, time: e.time });
     }
   }
 
@@ -86,10 +76,10 @@ export default function Calendar() {
   );
 
   return (
-    <div className="calendar grid grid-cols-1 lg:grid-cols-3 gap-6 h-[585px]">
+    <div className="calendar grid grid-cols-1 lg:grid-cols-3 gap-6 h-fit md:h-[585px]">
 
       {/* Calendar grid — spans 2 of 3 columns */}
-      <div className="lg:col-span-2 bg-(--color-surface) rounded-[32px] p-6 sm:p-8 flex flex-col gap-6 overflow-y-auto">
+      <div className="lg:col-span-2 bg-(--color-surface) rounded-[24px] p-6 sm:p-8 flex flex-col gap-6 overflow-y-auto">
 
         {/* Day label + Time + Month/Year nav */}
         <div className="flex items-center justify-between">
@@ -102,7 +92,7 @@ export default function Calendar() {
 
         {/* Days-of-week header */}
         <div className="grid grid-cols-7">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+          {DAY_NAMES_SHORT.map(day => (
             <div key={day} className="text-center text-xs font-bold text-gray-400 uppercase tracking-wider">
               {day}
             </div>

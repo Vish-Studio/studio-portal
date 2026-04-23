@@ -1,97 +1,47 @@
 import React, { useEffect, useState } from 'react';
-import {
-  MoreVertical,
-  BarChart2,
-  Command,
-  Clock,
-  Users,
-  TrendingUp,
-  TrendingDown,
-} from 'lucide-react';
+import { Command, Users, BarChart2, TrendingUp, TrendingDown } from 'lucide-react';
 import Layout from '../components/layout/layout';
 import Calendar from '../components/calendar/calendar';
-import MaterialIcon from '../components/ui/material-icon';
+import StatCard from '../components/stat-card/stat-card';
 
 export default function Dashboard() {
   return (
     <Layout>
-      {/* Dashboard Grid Content */}
       <div className="flex-1 flex flex-col gap-8">
-        {/* Top 4 Cards Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* Mauritius Local Time Card */}
-          {/* <div className="bg-(--color-surface-alt) shadow-sm rounded-[32px] p-6 flex flex-col items-start gap-4">
-            <div className="flex w-full justify-between items-center">
-              <div className="flex items-center gap-2 text-gray-600 font-medium text-sm">
-                <Clock size={16} /> Mauritius Time
-              </div>
-              <MoreVertical size={16} className="text-gray-400" />
-            </div>
-            <MauritiusTimeDisplay />
-            <div className="flex items-center gap-2 mt-auto">
-              <span className="text-sm font-medium text-gray-500">Local time (GMT+4)</span>
-            </div>
-          </div> */}
+        {/* Stats row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <StatCard
+            variant="lime"
+            icon={<Command size={16} />}
+            label="Ongoing Projects"
+            value="12"
+            badge="68% capacity"
+            badgeLabel="Projects in progress"
+            onAction={() => { }}
+          />
 
-          {/* Ongoing Project Overview Card */}
-          <div className="bg-(--color-accent-lime) rounded-[32px] p-6 flex flex-col items-start gap-4">
-            <div className="flex w-full justify-between items-center">
-              <div className="flex items-center gap-2 text-gray-800 font-medium text-sm">
-                <Command size={16} /> Ongoing Projects
-              </div>
+          <StatCard
+            variant="surface"
+            icon={<Users size={16} />}
+            label="Client Overview"
+            value="24"
+            badge={<><TrendingUp size={14} className="text-green-600" /> +12%</>}
+            badgeLabel="Active this month"
+            onAction={() => { }}
+          />
 
-              <MaterialIcon name="arrow_outward" size={16} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" />
-            </div>
-            <div className="mt-2">
-              <span className="text-[42px] font-bold tracking-tight text-(--color-ink) leading-none">12</span>
-            </div>
-            <div className="flex items-center gap-2 mt-auto">
-              <div className="flex items-center gap-1 text-[12px] font-bold text-gray-900 bg-white/60 px-2 py-1 rounded-[6px]">
-                68% capacity
-              </div>
-              <span className="text-sm font-medium text-gray-700">Projects in progress</span>
-            </div>
-          </div>
+          <StatCard
+            variant="dark"
+            icon={<BarChart2 size={16} />}
+            label="Expense Overview"
+            value="$4,250"
+            valueSubLabel="/ $5,000"
+            badge={<><TrendingDown size={14} className="text-red-400" /> -5%</>}
+            badgeLabel="Versus budget"
+            onAction={() => { }}
+          />
 
-          {/* Client Overview Card */}
-          <div className="bg-(--color-surface-alt)  rounded-[32px] p-6 flex flex-col items-start gap-4">
-            <div className="flex w-full justify-between items-center">
-              <div className="flex items-center gap-2 text-gray-600 font-medium text-sm">
-                <Users size={16} /> Client Overview
-              </div>
-              <MaterialIcon name="arrow_outward" size={16} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" />
-            </div>
-            <div className="mt-2">
-              <span className="text-[42px] font-bold tracking-tight text-(--color-ink) leading-none">24</span>
-            </div>
-            <div className="flex items-center gap-2 mt-auto">
-              <div className="flex items-center gap-1 text-[12px] font-bold text-gray-900 bg-white px-2 py-1 rounded-[6px]">
-                <TrendingUp size={14} className="text-green-600" /> +12%
-              </div>
-              <span className="text-sm font-medium text-gray-500">Active this month</span>
-            </div>
-          </div>
-
-          {/* Expense Overview Card */}
-          <div className="bg-(--color-ink) rounded-[32px] p-6 flex flex-col items-start gap-4">
-            <div className="flex w-full justify-between items-center">
-              <div className="flex items-center gap-2 text-gray-400 font-medium text-sm">
-                <BarChart2 size={16} /> Expense Overview
-              </div>
-              <MaterialIcon name="arrow_outward" size={16} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer" />
-            </div>
-            <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-[42px] font-bold tracking-tight text-white leading-none">$4,250</span>
-              <span className="text-sm font-medium text-gray-400">/ $5,000</span>
-            </div>
-            <div className="flex items-center gap-2 mt-auto">
-              <div className="flex items-center gap-1 text-[12px] font-bold text-white bg-white/10 px-2 py-1 rounded-[6px]">
-                <TrendingDown size={14} className="text-red-400" /> -5%
-              </div>
-              <span className="text-sm font-medium text-gray-400">Versus budget</span>
-            </div>
-          </div>
         </div>
 
         <Calendar />
@@ -101,7 +51,7 @@ export default function Dashboard() {
   );
 }
 
-function MauritiusTimeDisplay() {
+export function MauritiusTimeDisplay() {
   const [time, setTime] = useState('');
 
   useEffect(() => {
@@ -112,7 +62,6 @@ function MauritiusTimeDisplay() {
       hour12: false,
       timeZone: 'Indian/Mauritius',
     });
-
     const update = () => setTime(formatter.format(new Date()));
     update();
     const id = setInterval(update, 1000);

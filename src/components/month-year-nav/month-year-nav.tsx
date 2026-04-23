@@ -1,10 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
+import { MONTH_NAMES } from '../../data/calendar';
 
 interface MonthYearNavProps {
   value: Date;

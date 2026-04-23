@@ -9,6 +9,7 @@ import Calendar from './pages/Calendar';
 import Documents from './pages/Documents';
 import Templates from './pages/Templates';
 import Settings from './pages/Settings';
+import Team from './pages/Team';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/clients" element={<Clients />} />
+        <Route path="/team" element={<Team />} />
         <Route path="/expenses" element={<Expenses />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/tasks" element={<Tasks />} />

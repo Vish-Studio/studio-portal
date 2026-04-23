@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Menu, Search, Bell } from 'lucide-react';
+import SearchBar from '../search-bar/search-bar';
+import MaterialIcon from '../ui/material-icon';
 
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -28,30 +30,27 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
   }, []);
 
   return (
-    <div className="topbar flex items-center justify-between gap-4">
+    <div className="topbar flex items-center justify-between gap-4 border-none">
       {/* Left: Page Title & Mobile Menu */}
       <div className="flex items-center gap-4">
         <button
-          className="md:hidden text-gray-700 hover:text-black shrink-0"
+          className="md:hidden text-gray-700 hover:text-black shrink-0 flex items-center justify-center rounded-md transition-colors"
           onClick={() => setIsMobileMenuOpen(true)}
         >
-          <Menu size={28} />
+          <MaterialIcon name="menu" size={24} />
         </button>
         <h2 className="text-xl sm:text-2xl font-bold text-(--color-ink)">{title}</h2>
       </div>
 
       {/* Search Bar - hide on very small screens, expand on larger */}
-      <div className="hidden sm:flex relative items-center max-w-sm w-full">
-        <Search size={18} className="absolute left-3 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search anything..."
-          className="w-full bg-(--color-surface) rounded-full py-2.5 pl-10 pr-4 text-sm outline-none border border-transparent focus:border-gray-200 focus:bg-white transition-all shadow-sm"
-        />
-      </div>
+      <SearchBar
+        className="hidden sm:block"
+        placeholder="Search here..."
+        value=""
+        onChange={() => { }} />
 
       {/* Middle & Right Components */}
-      <div className="flex items-center gap-4 sm:gap-6 justify-end">
+      <div className="flex items-center gap-2 sm:gap-4 justify-end">
         {/* Mobile Search Button */}
         <button className="sm:hidden w-10 h-10 rounded-full bg-(--color-surface) flex items-center justify-center shrink-0">
           <Search size={18} className="text-gray-600" />
@@ -61,9 +60,9 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => { setIsNotifOpen(!isNotifOpen); setIsUserOpen(false); }}
-            className="w-10 h-10 rounded-full bg-(--color-surface) hover:bg-gray-100 flex items-center justify-center relative transition-colors shadow-sm border border-gray-100"
+            className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white flex items-center justify-center relative transition-colors"
           >
-            <Bell size={18} className="text-gray-600" />
+            <MaterialIcon name="notifications" size={18} />
             <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-(--color-surface)"></div>
           </button>
 
@@ -87,9 +86,9 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
         <div className="relative" ref={userRef}>
           <button
             onClick={() => { setIsUserOpen(!isUserOpen); setIsNotifOpen(false); }}
-            className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex flex-col justify-center items-center shadow-sm border border-gray-100 ring-2 ring-transparent focus:ring-gray-300 outline-none transition-all"
+            className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white  overflow-hidden flex flex-col justify-center items-center border border-gray-100 ring-2 ring-transparent focus:ring-gray-300 outline-none transition-all"
           >
-            <div className="w-full h-full bg-gradient-to-tr from-purple-500 to-orange-400"></div>
+            <MaterialIcon name="person" size={18} />
           </button>
 
           {isUserOpen && (

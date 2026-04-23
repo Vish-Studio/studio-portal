@@ -10,11 +10,6 @@ import type { ScheduleEvent } from '../schedule/event-types';
 
 export type { ScheduleEvent };
 
-const MONTH_NAMES = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
-];
-
 const parseTimeToMinutes = (timeStr: string): number => {
   if (timeStr === 'All Day') return -1; // All day events come first
 
@@ -49,7 +44,6 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
   const [viewingEvent, setViewingEvent] = useState<ScheduleEvent | null>(null);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const label = `${MONTH_NAMES[date.getMonth()]} ${date.getDate()}`;
   const sortedEvents = sortEventsByTime(events);
 
   const handleEditEvent = (event: ScheduleEvent) => {

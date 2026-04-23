@@ -12,7 +12,8 @@ import {
   Command,
   PanelLeftClose,
   X,
-  Settings
+  Settings,
+  UserCircle2
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -35,6 +36,7 @@ export default function Sidebar({
 
   const navItems = [
     { icon: <Home size={18} />, label: "Home", path: "/" },
+    { icon: <UserCircle2 size={18} />, label: "Team", path: "/team" },
     { icon: <Users size={18} />, label: "Clients", path: "/clients" },
     { icon: <Receipt size={18} />, label: "Expenses", path: "/expenses" },
     { icon: <Briefcase size={18} />, label: "Projects", path: "/projects" },
