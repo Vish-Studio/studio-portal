@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
 import Layout from '../../components/layout/layout';
-import DataTable, { RowActionsMenu, type Column } from '../../components/table/table';
-import TableToolbar, { type TabItem } from '../../components/table-toolbar/table-toolbar';
+import TableData, { RowActionsMenu, type Column } from '../../components/table/table';
+import TableTab, { type TabItem } from '../../components/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../../components/form-sidebar/form-sidebar';
 import FormField, { inputCls, selectCls } from '../../components/form-field/form-field';
 import Fab from '../../components/fab/fab';
@@ -33,8 +33,8 @@ export default function Clients() {
   const { clients, addClient, updateClient, removeClient } = useClientsStore();
   const { searchQuery } = useUIStore();
 
-  const [activeTab, setActiveTab]         = useState<FilterKey>('all');
-  const [sidebarOpen, setSidebarOpen]     = useState(false);
+  const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
   const {
@@ -48,17 +48,17 @@ export default function Clients() {
 
   // ── Tab counts ──
   const tabCounts = useMemo(() => ({
-    all:      clients.length,
-    active:   clients.filter(c => c.status === 'active').length,
+    all: clients.length,
+    active: clients.filter(c => c.status === 'active').length,
     inactive: clients.filter(c => c.status === 'inactive').length,
-    lost:     clients.filter(c => c.status === 'lost').length,
+    lost: clients.filter(c => c.status === 'lost').length,
   }), [clients]);
 
   const tabs: TabItem[] = [
-    { key: 'all',      label: 'All',      count: tabCounts.all      },
-    { key: 'active',   label: 'Active',   count: tabCounts.active   },
+    { key: 'all', label: 'All', count: tabCounts.all },
+    { key: 'active', label: 'Active', count: tabCounts.active },
     { key: 'inactive', label: 'Inactive', count: tabCounts.inactive },
-    { key: 'lost',     label: 'Lost',     count: tabCounts.lost     },
+    { key: 'lost', label: 'Lost', count: tabCounts.lost },
   ];
 
   // ── Filtered rows — tab first, then global search ──
@@ -89,9 +89,9 @@ export default function Clients() {
     reset({
       displayName: client.displayName,
       companyName: client.companyName ?? '',
-      email:       client.email,
-      phone:       client.phone ?? '',
-      status:      client.status,
+      email: client.email,
+      phone: client.phone ?? '',
+      status: client.status,
     });
     setSidebarOpen(true);
   };
@@ -172,8 +172,8 @@ export default function Clients() {
         <RowActionsMenu
           actions={[
             { label: 'View client', icon: <ExternalLink size={14} />, onClick: () => navigate(`/admin/clients/${row.id}`) },
-            { label: 'Edit client', icon: <Pencil size={14} />,     onClick: () => openEdit(row)                        },
-            { label: 'Delete',      icon: <Trash2 size={14} />,     onClick: () => handleDelete(row), variant: 'danger' },
+            { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => openEdit(row) },
+            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(row), variant: 'danger' },
           ]}
         />
       ),
@@ -182,9 +182,8 @@ export default function Clients() {
 
   return (
     <Layout title="Clients" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-5 max-w-[1200px] w-full mx-auto pb-6">
-
-        <TableToolbar
+      <div className="flex-1 min-h-0 flex flex-col gap-3 w-full mx-auto pb-6">
+        <TableTab
           tabs={tabs}
           activeTab={activeTab}
           onTabChange={key => setActiveTab(key as FilterKey)}
@@ -193,7 +192,7 @@ export default function Clients() {
         />
 
         <div className="flex-1 min-h-0">
-          <DataTable<Client>
+          <TableData<Client>
             columns={columns}
             data={filtered}
             className="h-full"
@@ -201,7 +200,6 @@ export default function Clients() {
             onRowClick={row => navigate(`/admin/clients/${row.id}`)}
           />
         </div>
-
       </div>
 
       {/* Mobile FAB */}

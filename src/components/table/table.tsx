@@ -19,7 +19,7 @@ export interface Column<T = any> {
   width?: string;
 }
 
-export interface DataTableProps<T extends { id: string }> {
+export interface TableDataProps<T extends { id: string }> {
   columns: Column<T>[];
   data: T[];
   loading?: boolean;
@@ -93,19 +93,19 @@ const HIDE_CLASS: Record<HideBelow, string> = {
 };
 
 const ALIGN_CLASS: Record<ColumnAlign, string> = {
-  left:   'text-left',
+  left: 'text-left',
   center: 'text-center',
-  right:  'text-right',
+  right: 'text-right',
 };
 
-// ─── DataTable ────────────────────────────────────────────────────────────────
+// ─── TableData ────────────────────────────────────────────────────────────────
 
 /**
  * Single-table design: thead + tbody share the same <table> element so column
  * widths are always computed together — no header/cell misalignment.
  * The thead is position:sticky so it stays visible while the body scrolls.
  */
-export default function DataTable<T extends { id: string }>({
+export default function TableData<T extends { id: string }>({
   columns,
   data,
   loading = false,
@@ -113,9 +113,9 @@ export default function DataTable<T extends { id: string }>({
   emptyMessage = 'No records found.',
   onRowClick,
   className = '',
-}: DataTableProps<T>) {
+}: TableDataProps<T>) {
   return (
-    <div className={`w-full bg-white border border-gray-200 rounded-[24px] overflow-hidden flex flex-col h-full ${className}`}>
+    <div className={`table-data w-full bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col h-full ${className}`}>
 
       {/* Single scroll container — thead and tbody share the same table */}
       <div className="overflow-auto flex-1 min-h-0">
@@ -129,7 +129,7 @@ export default function DataTable<T extends { id: string }>({
                   key={col.key}
                   scope="col"
                   className={[
-                    'px-4 py-3 text-[11px] font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap select-none border-b border-gray-100',
+                    'px-4 py-3 text-[12px] font-semibold text-gray-500 tracking-wider whitespace-nowrap select-none border-b border-gray-100',
                     ALIGN_CLASS[col.align ?? 'left'],
                     col.hideBelow ? HIDE_CLASS[col.hideBelow] : '',
                     col.width ?? '',
@@ -168,7 +168,7 @@ export default function DataTable<T extends { id: string }>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-4 py-12 text-center text-sm text-gray-400 font-medium"
+                  className="px-4 py-12 text-center text-sm text-gray-400 font-normal"
                 >
                   {emptyMessage}
                 </td>
@@ -188,7 +188,7 @@ export default function DataTable<T extends { id: string }>({
                     <td
                       key={col.key}
                       className={[
-                        'px-4 py-3 text-sm text-gray-900 align-middle',
+                        'px-4 py-3 text-sm font-normal text-gray-900 align-middle',
                         ALIGN_CLASS[col.align ?? 'left'],
                         col.hideBelow ? HIDE_CLASS[col.hideBelow] : '',
                         col.width ?? '',

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Presentation, FileCheck2, FileHeart, PenTool, User, Users } from 'lucide-react';
 import { format } from 'date-fns';
-import ContentCard from '../content-card/content-card';
+import ContentCard from '../card-content/card-content';
 import ButtonIcon from '../button-icon/button-icon';
 import type { StudioDocument } from '../../data/documents';
 
@@ -13,12 +13,12 @@ interface DocumentOverviewProps {
 function DocIcon({ type }: { type: string }) {
   const cls = 'w-4 h-4 text-gray-500';
   switch (type) {
-    case 'quotation':  return <span className="text-sm font-extrabold text-gray-500">Q</span>;
-    case 'proposal':   return <Presentation className={cls} />;
-    case 'invoice':    return <FileCheck2 className={cls} />;
+    case 'quotation': return <span className="text-sm font-extrabold text-gray-500">Q</span>;
+    case 'proposal': return <Presentation className={cls} />;
+    case 'invoice': return <FileCheck2 className={cls} />;
     case 'onboarding': return <FileHeart className={cls} />;
-    case 'contract':   return <PenTool className={cls} />;
-    default:           return <FileText className={cls} />;
+    case 'contract': return <PenTool className={cls} />;
+    default: return <FileText className={cls} />;
   }
 }
 

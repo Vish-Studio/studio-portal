@@ -35,7 +35,7 @@ export default function Layout({ children, title, fullHeight }: LayoutProps) {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         isMobile={isMobile}
       />
-      <div className="flex-1 flex flex-col w-full max-w-400 mx-auto overflow-hidden relative">
+      <div className="flex-1 flex flex-col w-full overflow-hidden relative">
         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8">
           <Topbar setIsMobileMenuOpen={setIsMobileMenuOpen} title={title} />
         </div>

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import { Plus } from 'lucide-react';
+import MaterialIcon from '../ui/material-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -9,7 +10,7 @@ export interface TabItem {
   count?: number;
 }
 
-export interface TableToolbarProps {
+export interface TableTabProps {
   /** Tab items rendered in the left pill container. Omit to hide tabs. */
   tabs?: TabItem[];
   activeTab?: string;
@@ -24,22 +25,22 @@ export interface TableToolbarProps {
   className?: string;
 }
 
-// ─── TableToolbar ─────────────────────────────────────────────────────────────
+// ─── TableTab ─────────────────────────────────────────────────────────────
 
-export default function TableToolbar({
+const TableTab: FunctionComponent<TableTabProps> = ({
+  className = '',
   tabs,
   activeTab,
   onTabChange,
   actionLabel,
   onAction,
-  className = '',
-}: TableToolbarProps) {
+}) => {
   return (
     <div className={`flex items-center justify-between gap-3 flex-wrap shrink-0 ${className}`}>
 
       {/* Left — filter tabs */}
       {tabs && tabs.length > 0 && (
-        <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-2xl">
+        <div className="flex items-center gap-1 p-1.5 bg-gray-100 rounded-xl w-full md:w-auto">
           {tabs.map(tab => {
             const isActive = tab.key === activeTab;
             return (
@@ -47,7 +48,7 @@ export default function TableToolbar({
                 key={tab.key}
                 type="button"
                 onClick={() => onTabChange?.(tab.key)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-sm font-medium transition-colors
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-[12px] font-medium transition-colors
                   ${isActive
                     ? 'bg-black text-white shadow-sm'
                     : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200'
@@ -56,7 +57,7 @@ export default function TableToolbar({
                 {tab.label}
                 {tab.count !== undefined && (
                   <span
-                    className={`text-[11px] font-bold px-1.5 py-0.5 rounded-md leading-none
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none
                       ${isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-500'}`}
                   >
                     {tab.count}
@@ -73,12 +74,14 @@ export default function TableToolbar({
         <button
           type="button"
           onClick={onAction}
-          className="hidden sm:flex items-center gap-2 bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-800 transition-colors shrink-0 ml-auto"
+          className="hidden sm:flex items-center gap-2 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors shrink-0 ml-auto"
         >
-          <Plus size={16} />
+          <MaterialIcon name='add' size={20} />
           {actionLabel}
         </button>
       )}
     </div>
   );
 }
+
+export default TableTab;

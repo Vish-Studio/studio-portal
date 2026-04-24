@@ -7,7 +7,7 @@ import AddEventModal from '../schedule/add-event-modal';
 import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
-import ContentCard from '../content-card/content-card';
+import ContentCard from '../card-content/card-content';
 
 export type { ScheduleEvent };
 

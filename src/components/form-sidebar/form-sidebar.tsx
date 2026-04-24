@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { FunctionComponent, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 export type SidebarWidth = 'sm' | 'md' | 'lg';
@@ -38,14 +38,14 @@ const WIDTH: Record<SidebarWidth, string> = {
  * </FormSidebar>
  * ```
  */
-export default function FormSidebar({
+const FormSidebar: FunctionComponent<FormSidebarProps> = ({
   isOpen,
   onClose,
   title,
   description,
   width = 'md',
   children,
-}: FormSidebarProps) {
+}) => {
   // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
@@ -81,13 +81,9 @@ export default function FormSidebar({
         aria-label={title}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
-          <div className="min-w-0">
-            <h2 className="text-base font-bold text-gray-900 leading-tight">{title}</h2>
-            {description && (
-              <p className="text-sm text-gray-400 font-medium mt-0.5">{description}</p>
-            )}
-          </div>
+        <div className="flex items-center justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
+          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+
           <button
             type="button"
             onClick={onClose}
@@ -107,9 +103,10 @@ export default function FormSidebar({
   );
 }
 
+
 /**
  * Sticky footer helper — place inside your form, after the scrollable fields div.
- */
+*/
 export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
   return (
     <div className="shrink-0 border-t border-gray-100 px-6 py-4 bg-white flex gap-3">
@@ -117,3 +114,5 @@ export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+
+export default FormSidebar;

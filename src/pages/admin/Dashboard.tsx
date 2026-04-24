@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { Command, Users, BarChart2, TrendingUp, TrendingDown } from 'lucide-react';
-import Layout from '../components/layout/layout';
-import Calendar from '../components/calendar/calendar';
-import StatCard from '../components/stat-card/stat-card';
-import DocumentOverview from '../components/document-overview/document-overview';
-import ProjectsOverview from '../components/projects-overview/projects-overview';
-import { useDocumentsStore } from '../store/documents';
-import { useTeamStore } from '../store/team';
+import { useDocumentsStore } from '@/src/store/documents';
+import { useTeamStore } from '@/src/store/team';
+import StatCard from '@/src/components/stat-card/stat-card';
+import ProjectsOverview from '@/src/components/projects-overview/projects-overview';
+import DocumentOverview from '@/src/components/document-overview/document-overview';
+import Layout from '@/src/components/layout/layout';
+import Calendar from '@/src/components/calendar/calendar';
+
+
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -19,7 +21,7 @@ export default function Dashboard() {
       <div className="flex-1 flex flex-col gap-4 md:gap-6">
 
         {/* Stats row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard
             variant="lime"
             icon={<Command size={16} />}
@@ -70,19 +72,4 @@ export default function Dashboard() {
       </div>
     </Layout>
   );
-}
-
-export function MauritiusTimeDisplay() {
-  const [time, setTime] = useState('');
-  useEffect(() => {
-    const fmt = new Intl.DateTimeFormat('en-GB', {
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      hour12: false, timeZone: 'Indian/Mauritius',
-    });
-    const tick = () => setTime(fmt.format(new Date()));
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, []);
-  return <span className="text-[42px] font-bold tracking-tight text-(--color-ink) leading-none">{time}</span>;
 }

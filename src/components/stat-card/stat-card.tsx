@@ -86,7 +86,7 @@ export default function StatCard({
 
   return (
     <div
-      className={`stat-card ${s.container} rounded-[24px] p-4 md:p-6 flex flex-col items-start gap-4 ${className}`}
+      className={`stat-card ${s.container} rounded-[18px] p-4 md:p-6 flex flex-col items-start gap-4 ${className}`}
     >
       {/* Top row: icon + label | action */}
       <div className="flex w-full justify-between items-center">

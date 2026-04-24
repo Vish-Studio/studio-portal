@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import MaterialIcon from '../ui/material-icon';
 
 // ─── Variant system (mirrors stat-card palette) ───────────────────────────────
 
-export type ContentCardVariant = 'white' | 'lime' | 'surface' | 'dark';
+export type CardContentVariant = 'white' | 'lime' | 'surface' | 'dark';
 
 interface VariantTokens {
   container: string;
@@ -11,7 +11,7 @@ interface VariantTokens {
   divider: string;
 }
 
-const VARIANTS: Record<ContentCardVariant, VariantTokens> = {
+const VARIANTS: Record<CardContentVariant, VariantTokens> = {
   white: {
     container: 'bg-white border border-gray-200',
     headerText: 'text-(--color-ink)',
@@ -36,9 +36,9 @@ const VARIANTS: Record<ContentCardVariant, VariantTokens> = {
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 
-export interface ContentCardProps {
+export interface CardContentProps {
   /** Color palette variant — matches the stat-card system. Defaults to "white". */
-  variant?: ContentCardVariant;
+  variant?: CardContentVariant;
   /** Material Symbol icon name shown beside the title. */
   iconName: string;
   /** Card title displayed in the header. */
@@ -62,8 +62,6 @@ export interface ContentCardProps {
   bodyClassName?: string;
 }
 
-// ─── ContentCard ──────────────────────────────────────────────────────────────
-
 /**
  * Reusable panel card used by Calendar, DailySchedule, ProjectsOverview,
  * DocumentOverview, and any future dashboard-style content panel.
@@ -76,7 +74,7 @@ export interface ContentCardProps {
  *
  * Callers control body scroll and padding via `bodyClassName`.
  */
-export default function ContentCard({
+const CardContent: FunctionComponent<CardContentProps> = ({
   variant = 'white',
   iconName,
   title,
@@ -84,16 +82,16 @@ export default function ContentCard({
   children,
   className = '',
   bodyClassName = '',
-}: ContentCardProps) {
-  const s = VARIANTS[variant];
+}) => {
+  const variantStyles = VARIANTS[variant];
 
   return (
     <div
-      className={`${s.container} rounded-[24px] overflow-hidden flex flex-col ${className}`}
+      className={`card-content ${variantStyles.container} rounded-[18px] overflow-hidden flex flex-col ${className}`}
     >
       {/* ── Header ── */}
       <div className="px-4 md:px-6 py-4 md:py-5 flex items-center justify-between gap-4 shrink-0">
-        <div className={`flex items-center gap-2 text-sm font-semibold ${s.headerText}`}>
+        <div className={`flex items-center gap-2 text-sm font-semibold ${variantStyles.headerText}`}>
           <MaterialIcon name={iconName} size={16} />
           <span>{title}</span>
         </div>
@@ -101,7 +99,7 @@ export default function ContentCard({
       </div>
 
       {/* ── Divider ── */}
-      <div className={`border-b ${s.divider} mx-4 md:mx-6 shrink-0`} />
+      <div className={`border-b ${variantStyles.divider} mx-4 md:mx-6 shrink-0`} />
 
       {/* ── Body ── */}
       <div className={`flex-1 min-h-0 ${bodyClassName}`}>
@@ -110,3 +108,5 @@ export default function ContentCard({
     </div>
   );
 }
+
+export default CardContent;

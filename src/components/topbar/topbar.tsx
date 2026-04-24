@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Search } from 'lucide-react';
 import SearchBar from '../search-bar/search-bar';
 import MaterialIcon from '../ui/material-icon';
 import { useUIStore } from '../../store/ui';
+import ButtonIcon from '../button-icon/button-icon';
 
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -12,9 +12,9 @@ interface TopbarProps {
 
 export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: TopbarProps) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isUserOpen,  setIsUserOpen]  = useState(false);
+  const [isUserOpen, setIsUserOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const userRef  = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
 
   const location = useLocation();
   const { searchQuery, setSearchQuery, clearSearch } = useUIStore();
@@ -28,7 +28,7 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
   useEffect(() => {
     const handle = (e: MouseEvent) => {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) setIsNotifOpen(false);
-      if (userRef.current  && !userRef.current.contains(e.target as Node))  setIsUserOpen(false);
+      if (userRef.current && !userRef.current.contains(e.target as Node)) setIsUserOpen(false);
     };
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
@@ -58,22 +58,18 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
       {/* Right icons */}
       <div className="flex items-center gap-2 sm:gap-4 justify-end">
         {/* Mobile search toggle */}
-        <button className="sm:hidden w-10 h-10 rounded-full bg-(--color-surface) flex items-center justify-center shrink-0">
-          <Search size={18} className="text-gray-600" />
-        </button>
+        <ButtonIcon
+          className="sm:hidden"
+          iconName="search" aria-label="Search" clickHandler={() => alert('Search clicked!')} />
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
-          <button
-            onClick={() => { setIsNotifOpen(v => !v); setIsUserOpen(false); }}
-            className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white flex items-center justify-center relative transition-colors"
-          >
-            <MaterialIcon name="notifications" size={18} />
+          <ButtonIcon iconName="notifications" aria-label="Notifications" clickHandler={() => { setIsNotifOpen(v => !v); setIsUserOpen(false); }} >
             <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-(--color-surface)" />
-          </button>
+          </ButtonIcon>
 
           {isNotifOpen && (
-            <div className="absolute right-0 top-full mt-2 w-[280px] bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-0 top-full mt-2 w-70 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="px-4 py-2 font-semibold text-sm text-gray-800">Notifications</div>
               <div className="h-px bg-gray-100 my-1 w-full" />
               <button className="w-full text-left px-4 py-2 hover:bg-gray-50 flex flex-col gap-1 transition-colors">
@@ -90,12 +86,7 @@ export default function Topbar({ setIsMobileMenuOpen, title = "Dashboard" }: Top
 
         {/* User */}
         <div className="relative" ref={userRef}>
-          <button
-            onClick={() => { setIsUserOpen(v => !v); setIsNotifOpen(false); }}
-            className="w-10 h-10 rounded-full bg-(--color-surface) text-gray-600 hover:bg-(--color-ink) hover:text-white overflow-hidden flex flex-col justify-center items-center border border-gray-100 ring-2 ring-transparent focus:ring-gray-300 outline-none transition-all"
-          >
-            <MaterialIcon name="person" size={18} />
-          </button>
+          <ButtonIcon iconName="person" aria-label="User menu" clickHandler={() => { setIsUserOpen(v => !v); setIsNotifOpen(false); }} />
 
           {isUserOpen && (
             <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">

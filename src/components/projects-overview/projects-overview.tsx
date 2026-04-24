@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import ContentCard from '../content-card/content-card';
+import ContentCard from '../card-content/card-content';
 import ButtonIcon from '../button-icon/button-icon';
 import { getMemberColors } from '../../data/team';
 import type { TeamProject, TeamMember } from '../../data/team';
@@ -13,13 +13,13 @@ interface ProjectsOverviewProps {
 
 function StatusDot({ status }: { status: string }) {
   const dot: Record<string, string> = {
-    active:    'bg-green-400',
-    paused:    'bg-amber-400',
+    active: 'bg-green-400',
+    paused: 'bg-amber-400',
     completed: 'bg-gray-300',
   };
   const label: Record<string, string> = {
-    active:    'text-green-700',
-    paused:    'text-amber-700',
+    active: 'text-green-700',
+    paused: 'text-amber-700',
     completed: 'text-gray-500',
   };
   return (
