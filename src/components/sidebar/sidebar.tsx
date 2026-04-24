@@ -13,6 +13,7 @@ import {
   Settings,
   UserCircle2
 } from 'lucide-react';
+import { FunctionComponent } from 'react';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -22,13 +23,13 @@ interface SidebarProps {
   isMobile: boolean;
 }
 
-export default function Sidebar({
+const Sidebar: FunctionComponent<SidebarProps> = ({
   isSidebarOpen,
   setIsSidebarOpen,
   isMobileMenuOpen,
   setIsMobileMenuOpen,
   isMobile
-}: SidebarProps) {
+}) => {
   const isExpanded = isMobile ? true : isSidebarOpen;
   const location = useLocation();
 
@@ -49,17 +50,17 @@ export default function Sidebar({
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="sidebar-mobile fixed inset-0 bg-black/40 z-[90] md:hidden"
+          className="sidebar-mobile fixed inset-0 bg-black/40 z-90 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Expandable Dark Sidebar */}
       <header
-        className={`sidebar bg-(--color-sidebar-bg) flex flex-col py-6 lg:py-8 lg:pb-4 justify-between shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[100] md:z-50
+        className={`sidebar bg-(--color-sidebar-bg) flex flex-col py-6 lg:py-8 lg:pb-4 justify-between shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-100 md:z-50
           ${isMobile
-            ? `fixed inset-y-0 left-0 w-[260px] px-4 m-0 rounded-none transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
-            : `relative md:flex md:my-4 md:lg:my-2 md:ml-4 md:lg:ml-2 md:rounded-[32px] ${isSidebarOpen ? 'md:w-[260px] md:px-4 md:items-stretch' : 'md:w-[84px] md:items-center md:px-4 pb-1'}`
+            ? `fixed inset-y-0 left-0 w-65 px-4 m-0 rounded-none transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
+            : `relative md:flex md:my-4 md:lg:my-2 md:ml-4 md:lg:ml-2 md:rounded-[32px] ${isSidebarOpen ? 'md:w-65 md:px-4 md:items-stretch' : 'md:w-21 md:items-center md:px-4 pb-1'}`
           }
         `}
       >
@@ -67,7 +68,7 @@ export default function Sidebar({
           {/* Logo & Toggle */}
           <div className={`flex items-center mb-6 transition-all ${isExpanded ? 'justify-between px-2' : 'justify-center w-full'}`}>
             <div
-              className={`flex items-center text-white transition-all ${isExpanded ? 'gap-3' : 'justify-center border border-(--color-sidebar-border-dark) rounded-[18px] w-[52px] h-[52px] cursor-pointer hover:bg-white/5'}`}
+              className={`flex items-center text-white transition-all ${isExpanded ? 'gap-3' : 'justify-center border border-(--color-sidebar-border-dark) rounded-[18px] w-13 h-13 cursor-pointer hover:bg-white/5'}`}
               onClick={() => {
                 if (!isExpanded) setIsSidebarOpen(true);
               }}
@@ -120,7 +121,7 @@ export default function Sidebar({
                     <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
                   </Link>
                   {/* Custom Tailwind Tooltip */}
-                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-[100] shadow-md border border-gray-700/50">
+                  <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-100 shadow-md border border-gray-700/50">
                     {item.label}
                   </div>
                 </div>
@@ -138,16 +139,16 @@ export default function Sidebar({
               : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;
 
             return isExpanded ? (
-              <Link to="/settings" className={btnClass}>
+              <Link to="/admin/settings" className={btnClass}>
                 <div className="shrink-0 flex items-center justify-center"><Settings size={18} /></div>
                 <span className="ml-4 font-medium text-[15px] whitespace-nowrap">Settings</span>
               </Link>
             ) : (
               <div className="group relative flex justify-center">
-                <Link to="/settings" className={btnClass}>
+                <Link to="/admin/settings" className={btnClass}>
                   <div className="shrink-0 flex items-center justify-center"><Settings size={18} /></div>
                 </Link>
-                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-[100] shadow-md border border-gray-700/50">
+                <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-100 shadow-md border border-gray-700/50">
                   Settings
                 </div>
               </div>
@@ -158,3 +159,5 @@ export default function Sidebar({
     </>
   );
 }
+
+export default Sidebar;
