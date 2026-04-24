@@ -11,7 +11,8 @@ import ProjectCard from '../../components/project-card/project-card';
 import ClientDetailCard from '../../components/admin/client-detail-card/client-detail-card';
 import { useClientsStore } from '../../store/clients';
 import type { ClientStatus } from '../../store/clients';
-import { DEMO_PROJECTS } from '../../data/projects';
+import { useTeamStore } from '../../store/team';
+import { useProjectsStore } from '../../store/projects';
 import Breadcrumb from '@/src/components/breadcrumb/breadcrumb';
 import ButtonIcon from '@/src/components/button-icon/button-icon';
 
@@ -40,6 +41,8 @@ const fieldSelectCls = (hasError: boolean) =>
 const ClientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { clients, updateClient } = useClientsStore();
+  const { projects: allProjects } = useProjectsStore();
+  const { members } = useTeamStore();
   const client = clients.find(c => c.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -90,10 +93,10 @@ const ClientDetail = () => {
     );
   }
 
-  const projects = DEMO_PROJECTS.filter(p => p.clientId === id);
-  const activeCount = projects.filter(p => p.status === 'active').length;
-  const totalAgreed = projects.reduce((s, p) => s + p.agreedPayment, 0);
-  const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
+  const projects      = allProjects.filter(p => p.clientId === id);
+  const activeCount   = projects.filter(p => p.status === 'active').length;
+  const totalAgreed   = projects.reduce((s, p) => s + p.agreedPayment, 0);
+  const totalPaid     = projects.reduce((s, p) => s + p.paidPayment, 0);
   const totalRemaining = totalAgreed - totalPaid;
 
   return (
@@ -246,7 +249,7 @@ const ClientDetail = () => {
             ) : (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 {projects.map(project => (
-                  <ProjectCard key={project.id} project={project} />
+                  <ProjectCard key={project.id} project={project} allMembers={members} />
                 ))}
               </div>
             )}
