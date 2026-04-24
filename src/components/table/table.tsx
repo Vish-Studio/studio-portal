@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { MoreHorizontal } from 'lucide-react';
+import MaterialIcon from '../ui/material-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -17,6 +18,8 @@ export interface Column<T = any> {
   hideBelow?: HideBelow;
   /** Fixed or max column width, e.g. "w-10" or "w-40 max-w-40" */
   width?: string;
+  /** Set to false to disable sorting for this column. All labelled columns are sortable by default. */
+  sortable?: boolean;
 }
 
 export interface TableDataProps<T extends { id: string }> {
@@ -27,6 +30,8 @@ export interface TableDataProps<T extends { id: string }> {
   emptyMessage?: string;
   onRowClick?: (row: T) => void;
   className?: string;
+  /** Default sort key and direction on first render. */
+  defaultSort?: { key: string; dir: 'asc' | 'desc' };
 }
 
 // ─── Row Actions Menu ─────────────────────────────────────────────────────────
@@ -38,7 +43,7 @@ export interface RowAction {
   variant?: 'default' | 'danger';
 }
 
-export function RowActionsMenu({ actions }: { actions: RowAction[] }) {
+export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -82,7 +87,7 @@ export function RowActionsMenu({ actions }: { actions: RowAction[] }) {
       )}
     </div>
   );
-}
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -100,12 +105,7 @@ const ALIGN_CLASS: Record<ColumnAlign, string> = {
 
 // ─── TableData ────────────────────────────────────────────────────────────────
 
-/**
- * Single-table design: thead + tbody share the same <table> element so column
- * widths are always computed together — no header/cell misalignment.
- * The thead is position:sticky so it stays visible while the body scrolls.
- */
-export default function TableData<T extends { id: string }>({
+const TableData = <T extends { id: string }>({
   columns,
   data,
   loading = false,
@@ -113,36 +113,88 @@ export default function TableData<T extends { id: string }>({
   emptyMessage = 'No records found.',
   onRowClick,
   className = '',
-}: TableDataProps<T>) {
-  return (
-    <div className={`table-data w-full bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col h-full ${className}`}>
+  defaultSort,
+}: TableDataProps<T>) => {
+  const [sortKey, setSortKey] = useState<string | null>(defaultSort?.key ?? null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>(defaultSort?.dir ?? 'asc');
 
-      {/* Single scroll container — thead and tbody share the same table */}
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir(d => (d === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  };
+
+  const sortedData = useMemo(() => {
+    if (!sortKey) return data;
+    return [...data].sort((a, b) => {
+      const aVal = (a as any)[sortKey];
+      const bVal = (b as any)[sortKey];
+      if (aVal == null && bVal == null) return 0;
+      if (aVal == null) return 1;
+      if (bVal == null) return -1;
+      let cmp = 0;
+      if (typeof aVal === 'number' && typeof bVal === 'number') {
+        cmp = aVal - bVal;
+      } else if (typeof aVal === 'object' && 'toMillis' in aVal) {
+        cmp = aVal.toMillis() - bVal.toMillis();
+      } else {
+        cmp = String(aVal).localeCompare(String(bVal), undefined, { sensitivity: 'base' });
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [data, sortKey, sortDir]);
+
+  const isSortable = (col: Column<T>) => col.label !== '' && col.sortable !== false;
+
+  return (
+    <div className={`table-data w-full max-h-200 bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col h-full ${className}`}>
+
       <div className="overflow-auto flex-1 min-h-0">
         <table className="min-w-full border-separate border-spacing-0">
 
-          {/* Sticky header — solid bg so rows don't bleed through */}
           <thead className="sticky top-0 z-10">
             <tr className="bg-gray-50">
-              {columns.map(col => (
-                <th
-                  key={col.key}
-                  scope="col"
-                  className={[
-                    'px-4 py-3 text-[12px] font-semibold text-gray-500 tracking-wider whitespace-nowrap select-none border-b border-gray-100',
-                    ALIGN_CLASS[col.align ?? 'left'],
-                    col.hideBelow ? HIDE_CLASS[col.hideBelow] : '',
-                    col.width ?? '',
-                    col.thClassName ?? '',
-                  ].filter(Boolean).join(' ')}
-                >
-                  {col.label}
-                </th>
-              ))}
+              {columns.map(col => {
+                const sortable = isSortable(col);
+                const isActive = sortKey === col.key;
+
+                return (
+                  <th
+                    key={col.key}
+                    scope="col"
+                    onClick={sortable ? () => handleSort(col.key) : undefined}
+                    className={[
+                      'px-4 py-3 text-[12px] font-semibold text-gray-500 tracking-wider whitespace-nowrap select-none border-b border-gray-100',
+                      ALIGN_CLASS[col.align ?? 'left'],
+                      col.hideBelow ? HIDE_CLASS[col.hideBelow] : '',
+                      col.width ?? '',
+                      col.thClassName ?? '',
+                      sortable ? 'cursor-pointer group hover:text-gray-800 hover:bg-gray-100/80 transition-colors' : '',
+                    ].filter(Boolean).join(' ')}
+                  >
+                    <span className="inline-flex items-center gap-1">
+                      {col.label}
+                      {sortable && col.label && (
+                        <span className={`transition-opacity ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'}`}>
+                          {isActive ? (
+                            sortDir === 'asc'
+                              ? <MaterialIcon name="arrow_upward" size={12} />
+                              : <MaterialIcon name="arrow_downward" size={12} />
+                          ) : (
+                            <MaterialIcon name="unfold_more" size={12} />
+                          )}
+                        </span>
+                      )}
+                    </span>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
 
-          {/* Body */}
           <tbody>
             {loading ? (
               Array.from({ length: loadingRows }).map((_, i) => (
@@ -164,7 +216,7 @@ export default function TableData<T extends { id: string }>({
                   ))}
                 </tr>
               ))
-            ) : data.length === 0 ? (
+            ) : sortedData.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
@@ -174,7 +226,7 @@ export default function TableData<T extends { id: string }>({
                 </td>
               </tr>
             ) : (
-              data.map(row => (
+              sortedData.map(row => (
                 <tr
                   key={row.id}
                   onClick={() => onRowClick?.(row)}
@@ -205,14 +257,20 @@ export default function TableData<T extends { id: string }>({
         </table>
       </div>
 
-      {/* Footer count */}
-      {!loading && data.length > 0 && (
+      {!loading && sortedData.length > 0 && (
         <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/40 shrink-0">
           <span className="text-xs text-gray-400 font-medium">
-            {data.length} record{data.length !== 1 ? 's' : ''}
+            {sortedData.length} record{sortedData.length !== 1 ? 's' : ''}
+            {sortKey && (
+              <span className="ml-2 text-gray-300">
+                · sorted by <span className="text-gray-400">{columns.find(c => c.key === sortKey)?.label}</span> {sortDir === 'asc' ? '↑' : '↓'}
+              </span>
+            )}
           </span>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default TableData;

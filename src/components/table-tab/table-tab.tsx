@@ -36,7 +36,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
   onAction,
 }) => {
   return (
-    <div className={`flex items-center justify-between gap-3 flex-wrap shrink-0 ${className}`}>
+    <div className={`table-tab flex items-center justify-between gap-3 flex-wrap w-full md:w-auto ${className}`}>
 
       {/* Left — filter tabs */}
       {tabs && tabs.length > 0 && (
@@ -57,7 +57,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
                 {tab.label}
                 {tab.count !== undefined && (
                   <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none
+                    className={`hidden md:block text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none
                       ${isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-500'}`}
                   >
                     {tab.count}

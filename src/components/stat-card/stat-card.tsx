@@ -42,7 +42,7 @@ const VARIANT_STYLES: Record<CardVariant, VariantStyle> = {
     actionText: 'text-gray-400 hover:text-gray-300',
   },
   white: {
-    container: 'bg-white border border-gray-100 shadow-sm',
+    container: 'bg-white border border-gray-200',
     labelText: 'text-gray-500',
     valueText: 'text-(--color-ink)',
     badgeBg: 'bg-gray-100',

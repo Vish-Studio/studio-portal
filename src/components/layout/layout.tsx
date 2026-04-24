@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../sidebar/sidebar';
 import Topbar from '../topbar/topbar';
+import { useUIStore } from '../../store/ui';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,8 +15,8 @@ interface LayoutProps {
   fullHeight?: boolean;
 }
 
-export default function Layout({ children, title, fullHeight }: LayoutProps) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+const Layout = ({ children, title, fullHeight }: LayoutProps) => {
+  const { isSidebarOpen, setIsSidebarOpen } = useUIStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -52,4 +53,6 @@ export default function Layout({ children, title, fullHeight }: LayoutProps) {
       </div>
     </div>
   );
-}
+};
+
+export default Layout;
