@@ -11,7 +11,8 @@ import {
   PanelLeftClose,
   X,
   Settings,
-  UserCircle2
+  UserCircle2,
+  CreditCard
 } from 'lucide-react';
 import { FunctionComponent } from 'react';
 
@@ -38,6 +39,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
     { icon: <UserCircle2 size={18} />, label: "Team", path: "/admin/team" },
     { icon: <Users size={18} />, label: "Clients", path: "/admin/clients" },
     { icon: <Receipt size={18} />, label: "Expenses", path: "/admin/expenses" },
+    { icon: <CreditCard size={18} />, label: "Payments", path: "/admin/payments" },
     { icon: <Briefcase size={18} />, label: "Projects", path: "/admin/projects" },
     { icon: <CheckSquare size={18} />, label: "Tasks", path: "/admin/tasks" },
     { icon: <Calendar size={18} />, label: "Calendar", path: "/admin/calendar" },

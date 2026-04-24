@@ -11,6 +11,8 @@ import Templates from './pages/Templates';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Dashboard from './pages/admin/Dashboard';
+import Payments from './pages/admin/Payments';
+import SignIn from './pages/SignIn';
 
 export default function App() {
   return (
@@ -25,12 +27,16 @@ export default function App() {
         <Route path="/admin/clients/:id" element={<ClientDetail />} />
         <Route path="/admin/team" element={<Team />} />
         <Route path="/admin/expenses" element={<Expenses />} />
+        <Route path="/admin/payments" element={<Payments />} />
         <Route path="/admin/projects" element={<Projects />} />
         <Route path="/admin/tasks" element={<Tasks />} />
         <Route path="/admin/calendar" element={<Calendar />} />
         <Route path="/admin/documents" element={<Documents />} />
         <Route path="/admin/templates" element={<Templates />} />
         <Route path="/admin/settings" element={<Settings />} />
+
+        {/* Auth */}
+        <Route path="/sign-in" element={<SignIn />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/admin" replace />} />

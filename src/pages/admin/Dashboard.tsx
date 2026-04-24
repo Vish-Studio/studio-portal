@@ -1,6 +1,6 @@
 
 import { useNavigate } from 'react-router-dom';
-import { Command, Users, BarChart2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
 import { useDocumentsStore } from '@/src/store/documents';
 import { useTeamStore } from '@/src/store/team';
 import StatCard from '@/src/components/stat-card/stat-card';
@@ -42,13 +42,13 @@ export default function Dashboard() {
           />
           <StatCard
             variant="dark"
-            icon={<BarChart2 size={16} />}
-            label="Expense Overview"
-            value="$4,250"
-            valueSubLabel="/ $5,000"
+            icon={<CreditCard size={16} />}
+            label="Payment Overview"
+            value="$18,240"
+            valueSubLabel="collected"
             badge={<><TrendingDown size={14} className="text-red-400" /> -5%</>}
-            badgeLabel="Versus budget"
-            onAction={() => navigate('/admin/expenses')}
+            badgeLabel="Versus last month"
+            onAction={() => navigate('/admin/payments')}
           />
         </div>
 
