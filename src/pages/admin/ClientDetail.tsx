@@ -249,7 +249,7 @@ const ClientDetail = () => {
             ) : (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                 {projects.map(project => (
-                  <ProjectCard key={project.id} project={project} allMembers={members} />
+                  <ProjectCard key={project.id} project={project} allMembers={members} variant="surface" />
                 ))}
               </div>
             )}

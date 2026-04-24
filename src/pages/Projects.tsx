@@ -1,20 +1,20 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckCircle, TrendingUp, Layers, Search, X, Pencil, Trash2 } from 'lucide-react';
+import { Briefcase, CheckCircle, TrendingUp, Layers, Pencil, Trash2 } from 'lucide-react';
 import Layout from '../components/layout/layout';
 import StatCard from '../components/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/table-tab/table-tab';
 import MaterialIcon from '../components/ui/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../components/form-sidebar/form-sidebar';
 import FormField, { inputCls, selectCls } from '../components/form-field/form-field';
-import Avatar from '../components/avatar/avatar';
 import ProjectCard, { ProjectCardMini } from '../components/project-card/project-card';
-import { useProjectsStore, makeNewProject } from '../store/projects';
+import { PhaseSelector } from '../components/project-progress/project-progress';
+import ClientPicker from '../components/pickers/client-picker';
+import MemberPicker from '../components/pickers/member-picker';
+import { useProjectsStore, makeNewProject, getPhaseIndex } from '../store/projects';
 import { useTeamStore } from '../store/team';
 import { DEMO_CLIENTS } from '../data/clients';
-import type { Client } from '../data/clients';
-import type { TeamMember } from '../data/team';
-import { SERVICE_META, ALL_STAGES } from '../data/projects';
+import { SERVICE_META, ALL_STAGES, buildStages } from '../data/projects';
 import type { ClientProject, ServiceType, PackageType } from '../data/projects';
 import { useUIStore } from '../store/ui';
 
@@ -28,198 +28,6 @@ interface ProjectFormValues {
   timeline: string;
 }
 
-// ─── Searchable Client Picker ─────────────────────────────────────────────────
-
-const ClientPicker = ({
-  clients,
-  selectedId,
-  onSelect,
-}: {
-  clients: Client[];
-  selectedId: string;
-  onSelect: (id: string) => void;
-}) => {
-  const [query, setQuery] = useState('');
-  const ref = useRef<HTMLDivElement>(null);
-  const selected = clients.find(c => c.id === selectedId);
-
-  const filtered = useMemo(
-    () =>
-      clients.filter(
-        c =>
-          c.displayName.toLowerCase().includes(query.toLowerCase()) ||
-          (c.companyName ?? '').toLowerCase().includes(query.toLowerCase()),
-      ),
-    [clients, query],
-  );
-
-  // Close on outside click
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setQuery('');
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, []);
-
-  return (
-    <div ref={ref} className="flex flex-col gap-1.5">
-      {selected ? (
-        <div className="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
-          <Avatar name={selected.displayName} id={selected.id} size="sm" />
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{selected.displayName}</p>
-            {selected.companyName && (
-              <p className="text-xs text-gray-400 truncate">{selected.companyName}</p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => onSelect('')}
-            className="text-gray-400 hover:text-gray-700 transition-colors p-0.5"
-            aria-label="Clear selection"
-          >
-            <X size={14} />
-          </button>
-        </div>
-      ) : (
-        <div className="relative">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search clients…"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            className={`${inputCls(false)} pl-8`}
-          />
-          {query && filtered.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-44 overflow-y-auto">
-              {filtered.map(c => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => { onSelect(c.id); setQuery(''); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
-                >
-                  <Avatar name={c.displayName} id={c.id} size="sm" />
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{c.displayName}</p>
-                    {c.companyName && <p className="text-xs text-gray-400">{c.companyName}</p>}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-          {query && filtered.length === 0 && (
-            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
-              <p className="text-sm text-gray-400">No clients match &ldquo;{query}&rdquo;</p>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// ─── Searchable Member Multi-Picker ──────────────────────────────────────────
-
-const MemberPicker = ({
-  members,
-  selectedIds,
-  onToggle,
-}: {
-  members: TeamMember[];
-  selectedIds: string[];
-  onToggle: (id: string) => void;
-}) => {
-  const [query, setQuery] = useState('');
-  const ref = useRef<HTMLDivElement>(null);
-
-  const selected = members.filter(m => selectedIds.includes(m.id));
-  const filtered = useMemo(
-    () =>
-      members.filter(
-        m =>
-          !selectedIds.includes(m.id) &&
-          (m.name.toLowerCase().includes(query.toLowerCase()) ||
-            m.role.toLowerCase().includes(query.toLowerCase())),
-      ),
-    [members, selectedIds, query],
-  );
-
-  useEffect(() => {
-    const handle = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setQuery('');
-    };
-    document.addEventListener('mousedown', handle);
-    return () => document.removeEventListener('mousedown', handle);
-  }, []);
-
-  return (
-    <div ref={ref} className="flex flex-col gap-2">
-      {/* Selected chips */}
-      {selected.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {selected.map(m => (
-            <div
-              key={m.id}
-              className="flex items-center gap-1.5 bg-gray-100 rounded-full pl-1 pr-2 py-1"
-            >
-              <Avatar name={m.name} id={m.id} size="xs" />
-              <span className="text-xs font-medium text-gray-700 leading-none">
-                {m.name.split(' ')[0]}
-              </span>
-              <button
-                type="button"
-                onClick={() => onToggle(m.id)}
-                className="text-gray-400 hover:text-gray-700 transition-colors ml-0.5"
-                aria-label={`Remove ${m.name}`}
-              >
-                <X size={11} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Search input */}
-      <div className="relative">
-        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-        <input
-          type="text"
-          placeholder="Search team members…"
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          className={`${inputCls(false)} pl-8`}
-        />
-        {query && filtered.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-48 overflow-y-auto">
-            {filtered.map(m => (
-              <button
-                key={m.id}
-                type="button"
-                onClick={() => { onToggle(m.id); setQuery(''); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
-              >
-                <Avatar name={m.name} id={m.id} size="sm" />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">{m.name}</p>
-                  <p className="text-xs text-gray-400">{m.role}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-        {query && filtered.length === 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
-            <p className="text-sm text-gray-400">No members match &ldquo;{query}&rdquo;</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 // ─── Projects Page ────────────────────────────────────────────────────────────
 
 const Projects = () => {
@@ -232,9 +40,10 @@ const Projects = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
 
-  // Picker state lives outside react-hook-form (complex nested values)
+  // Picker / phase state — lives outside react-hook-form
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
 
   const {
     register,
@@ -296,6 +105,7 @@ const Projects = () => {
     reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' });
     setSelectedClientId('');
     setSelectedMemberIds([]);
+    setCurrentPhaseIndex(0);
     setSidebarOpen(true);
   };
 
@@ -310,24 +120,25 @@ const Projects = () => {
     });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
+    setCurrentPhaseIndex(getPhaseIndex(project));
     setSidebarOpen(true);
   };
 
   const onSubmit = (data: ProjectFormValues) => {
     const payload = {
-      name:               data.name,
-      service:            data.service,
-      package:            hasPackages && data.package ? (data.package as PackageType) : undefined,
-      status:             data.status,
-      timeline:           data.timeline,
-      clientId:           selectedClientId,
-      assignedMemberIds:  selectedMemberIds,
+      name:              data.name,
+      service:           data.service,
+      package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
+      status:            data.status,
+      timeline:          data.timeline,
+      clientId:          selectedClientId,
+      assignedMemberIds: selectedMemberIds,
     };
 
     if (editingProject) {
-      updateProject(editingProject.id, payload);
+      updateProject(editingProject.id, { ...payload, stages: buildStages(currentPhaseIndex) });
     } else {
-      addProject(makeNewProject(payload));
+      addProject(makeNewProject({ ...payload, currentPhaseIndex }));
     }
     setSidebarOpen(false);
   };
@@ -430,6 +241,7 @@ const Projects = () => {
                 key={p.id}
                 project={p}
                 allMembers={members}
+                variant="surface"
                 actions={[
                   { label: 'Edit project',   icon: <Pencil size={14} />, onClick: () => openEdit(p)    },
                   { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => handleDelete(p), variant: 'danger' },
@@ -513,6 +325,16 @@ const Projects = () => {
                 <option value="paused">Paused</option>
                 <option value="completed">Completed</option>
               </select>
+            </FormField>
+
+            {/* Current phase — interactive pill selector */}
+            <FormField label="Current Phase">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-x-auto">
+                <PhaseSelector
+                  selectedIndex={currentPhaseIndex}
+                  onChange={setCurrentPhaseIndex}
+                />
+              </div>
             </FormField>
 
             {/* Timeline */}
