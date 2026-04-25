@@ -1,12 +1,14 @@
-import React from 'react';
 import Layout from '../components/common/layout/layout';
+import CalendarWidget from '../components/admin/calendar/calendar';
 
-export default function Calendar() {
-  return (
-    <Layout title="Calendar">
-      <div className="flex-1 rounded-[32px] bg-[#F5F6F8] p-8 min-h-[500px] flex items-center justify-center border border-gray-100">
-        <h2 className="text-xl text-gray-500 font-medium">Calendar Page Content</h2>
-      </div>
-    </Layout>
-  );
-}
+// The Calendar component embeds a full month grid, a day-level schedule panel,
+// and add / edit / delete modals — all wired to useCalendarStore.
+// Events created here automatically appear on the Dashboard widget (shared store).
+
+const CalendarPage = () => (
+  <Layout title="Calendar">
+    <CalendarWidget />
+  </Layout>
+);
+
+export default CalendarPage;

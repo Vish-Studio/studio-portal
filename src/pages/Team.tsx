@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
 import Layout from '../components/common/layout/layout';
 import Modal from '../components/common/modal/modal';
-import TableData, { RowActionsMenu, type Column } from '../components/common/table/table';
+import TableData, { RowActions, type Column } from '../components/common/table/table';
 import TableToolbar, { type TabItem } from '../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
@@ -204,9 +204,9 @@ export default function Team() {
       key: 'actions',
       label: 'Actions',
       align: 'right',
-      width: 'w-10',
+      width: 'w-10 md:w-auto',
       render: row => (
-        <RowActionsMenu
+        <RowActions
           actions={[
             { label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(row) },
             { label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(row) },

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Pencil, Trash2, Eye } from 'lucide-react';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import Layout from '@/src/components/common/layout/layout';
-import TableData, { RowActionsMenu, type Column } from '@/src/components/common/table/table';
+import TableData, { RowActions, type Column } from '@/src/components/common/table/table';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
 import { useUIStore } from '@/src/store/ui';
@@ -185,9 +185,9 @@ const Payments = () => {
       key: 'actions',
       label: '',
       align: 'right',
-      width: 'w-10',
+      width: 'w-10 md:w-auto',
       render: _row => (
-        <RowActionsMenu
+        <RowActions
           actions={[
             { label: 'View invoice', icon: <Eye size={14} />, onClick: () => { } },
             { label: 'Edit payment', icon: <Pencil size={14} />, onClick: () => { } },

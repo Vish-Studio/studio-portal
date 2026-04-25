@@ -34,7 +34,7 @@ export interface TableDataProps<T extends { id: string }> {
   defaultSort?: { key: string; dir: 'asc' | 'desc' };
 }
 
-// ─── Row Actions Menu ─────────────────────────────────────────────────────────
+// ─── Row Action types ─────────────────────────────────────────────────────────
 
 export interface RowAction {
   label: string;
@@ -42,6 +42,8 @@ export interface RowAction {
   onClick: () => void;
   variant?: 'default' | 'danger';
 }
+
+// ─── RowActionsMenu — 3-dot dropdown (kept for backward compat) ───────────────
 
 export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
   const [open, setOpen] = useState(false);
@@ -88,6 +90,43 @@ export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
     </div>
   );
 };
+
+// ─── RowActions — responsive: inline on desktop, 3-dot menu on mobile ─────────
+//
+// Use this in table action columns. On md+ each action renders as a labelled
+// icon button; below md the compact dropdown is used instead.
+
+export const RowActions = ({ actions }: { actions: RowAction[] }) => (
+  <div
+    className="flex items-center justify-end"
+    onClick={e => e.stopPropagation()}
+  >
+    {/* Mobile / tablet — compact dropdown */}
+    <div className="md:hidden">
+      <RowActionsMenu actions={actions} />
+    </div>
+
+    {/* Desktop — inline icon buttons shown in a row */}
+    <div className="hidden md:flex items-center gap-0.5">
+      {actions.map((action, i) => (
+        <button
+          key={i}
+          type="button"
+          onClick={action.onClick}
+          title={action.label}
+          aria-label={action.label}
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors shrink-0 ${
+            action.variant === 'danger'
+              ? 'text-gray-300 hover:text-red-600 hover:bg-red-50'
+              : 'text-gray-300 hover:text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          {action.icon}
+        </button>
+      ))}
+    </div>
+  </div>
+);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

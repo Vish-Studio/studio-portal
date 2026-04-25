@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Pencil, Trash2, ExternalLink } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
-import TableData, { RowActionsMenu, type Column } from '../../components/common/table/table';
+import TableData, { RowActions, type Column } from '../../components/common/table/table';
 import TableTab, { type TabItem } from '../../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls, selectCls } from '../../components/common/form-field/form-field';
@@ -167,9 +167,9 @@ export default function Clients() {
       key: 'actions',
       label: '',
       align: 'right',
-      width: 'w-10',
+      width: 'w-10 md:w-auto',
       render: row => (
-        <RowActionsMenu
+        <RowActions
           actions={[
             { label: 'View client', icon: <ExternalLink size={14} />, onClick: () => navigate(`/admin/clients/${row.id}`) },
             { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => openEdit(row) },
