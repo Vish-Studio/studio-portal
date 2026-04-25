@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { ScheduleEvent } from "../components/schedule/event-types";
+import type { ScheduleEvent } from "../components/admin/schedule/event-types";
 
 const dateKey = (year: number, month: number, day: number) =>
   `${year}-${month}-${day}`;

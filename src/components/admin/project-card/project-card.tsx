@@ -43,7 +43,7 @@ export interface ProjectCardProps {
 const StageDots = ({ project, barClassName }: { project: ClientProject; barClassName: string }) => (
   <div className="flex items-center gap-1">
     {project.stages.map(stage => {
-      const isDone    = stage.status === 'completed';
+      const isDone = stage.status === 'completed';
       const isCurrent = stage.status === 'current';
       return (
         <div
@@ -61,7 +61,7 @@ const DefaultCard = ({
   project, projectMembers, accent, actions, navigate, progress, completedCount, remaining,
 }: any) => {
   const currentStage = project.stages.find((s: any) => s.status === 'current');
-  const currentMeta  = currentStage ? STAGE_META[currentStage.key as import('@/src/data/projects').StageKey] : null;
+  const currentMeta = currentStage ? STAGE_META[currentStage.key as import('@/src/data/projects').StageKey] : null;
 
   return (
     <div
@@ -113,8 +113,8 @@ const DefaultCard = ({
       {/* Stats row */}
       <div className="grid grid-cols-3 divide-x divide-gray-100 border-b border-gray-100">
         {[
-          { label: 'Stages',   value: `${completedCount}/${ALL_STAGES.length}` },
-          { label: 'Budget',   value: `$${(project.agreedPayment / 1000).toFixed(0)}k` },
+          { label: 'Stages', value: `${completedCount}/${ALL_STAGES.length}` },
+          { label: 'Budget', value: `$${(project.agreedPayment / 1000).toFixed(0)}k` },
           { label: 'Timeline', value: project.timeline },
         ].map(({ label, value }) => (
           <div key={label} className="px-4 py-3">
@@ -170,11 +170,8 @@ const SurfaceCard = ({
 }: any) => (
   <div
     onClick={() => navigate(`/admin/projects/${project.id}`)}
-    className="project-card-surface relative bg-white border border-gray-100 rounded-[20px] overflow-hidden hover:shadow-md hover:border-gray-200 hover:cursor-pointer transition-all duration-200 flex flex-col"
+    className="project-card-surface relative bg-white border border-gray-200 rounded-[20px] overflow-hidden hover:bg-gray-100 hover:border-gray-200 hover:cursor-pointer transition-all duration-200 flex flex-col"
   >
-    {/* Left accent strip */}
-    <div className={`absolute left-0 top-0 bottom-0 w-0.75 ${accent.bar}`} />
-
     {/* Header */}
     <div className="pl-5 pr-4 pt-5 pb-4">
       <div className="flex items-start justify-between gap-2">
@@ -243,9 +240,9 @@ const ProjectCard = ({
   className = '',
 }: ProjectCardProps) => {
   const navigate = useNavigate();
-  const accent   = getProjectAccent(project.service, project.package);
+  const accent = getProjectAccent(project.service, project.package);
   const { completedCount, progress } = calcProgress(project);
-  const remaining      = project.agreedPayment - project.paidPayment;
+  const remaining = project.agreedPayment - project.paidPayment;
   const projectMembers = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
 
   const sharedProps = { project, projectMembers, accent, actions, navigate, progress, completedCount, remaining };
@@ -270,9 +267,9 @@ export interface ProjectCardMiniProps {
 
 export const ProjectCardMini = ({ project, allMembers = [], actions }: ProjectCardMiniProps) => {
   const navigate = useNavigate();
-  const accent   = getProjectAccent(project.service, project.package);
+  const accent = getProjectAccent(project.service, project.package);
   const { progress } = calcProgress(project);
-  const remaining     = project.agreedPayment - project.paidPayment;
+  const remaining = project.agreedPayment - project.paidPayment;
   const projectMembers = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
 
   return (
