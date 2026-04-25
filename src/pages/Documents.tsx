@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ExternalLink, FileText, Loader2, Presentation, FileCheck2, FileHeart, FolderOpen, PenTool } from 'lucide-react';
 import { format } from 'date-fns';
-import Layout from '../components/layout/layout';
+import Layout from '../components/common/layout/layout';
 import { useDocumentsStore } from '../store/documents';
 import type { StudioDocument } from '../store/documents';
 

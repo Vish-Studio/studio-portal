@@ -1,18 +1,18 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
-import Layout from '../components/layout/layout';
-import Modal from '../components/modal/modal';
-import TableData, { RowActionsMenu, type Column } from '../components/table/table';
-import TableToolbar, { type TabItem } from '../components/table-tab/table-tab';
-import FormSidebar, { FormSidebarFooter } from '../components/form-sidebar/form-sidebar';
-import FormField, { inputCls } from '../components/form-field/form-field';
-import Fab from '../components/fab/fab';
+import Layout from '../components/common/layout/layout';
+import Modal from '../components/common/modal/modal';
+import TableData, { RowActionsMenu, type Column } from '../components/common/table/table';
+import TableToolbar, { type TabItem } from '../components/common/table-tab/table-tab';
+import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
+import FormField, { inputCls } from '../components/common/form-field/form-field';
+import Fab from '../components/common/fab/fab';
 import { useTeamStore } from '../store/team';
 import { useUIStore } from '../store/ui';
 import { getMemberColors } from '../data/team';
 import type { TeamMember, TeamProject } from '../data/team';
-import StatusIcon from '../components/status-icon/status-icon';
+import StatusIcon from '../components/common/status-icon/status-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

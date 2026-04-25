@@ -1,9 +1,9 @@
 import { FunctionComponent } from 'react';
 import { format } from 'date-fns';
-import DetailHeroCard from '../../detail-hero-card/detail-hero-card';
-import { ProjectStatusBadge } from '../../status-badge/status-badge';
-import MaterialIcon from '../../ui/material-icon';
-import Avatar from '../../avatar/avatar';
+import DetailHeroCard from '../detail-hero-card/detail-hero-card';
+import { ProjectStatusBadge } from '../../common/status-badge/status-badge';
+import MaterialIcon from '../../common/material-icon/material-icon';
+import Avatar from '../../common/avatar/avatar';
 import { getProjectAccent, ALL_STAGES } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
 import { DEMO_CLIENTS } from '@/src/data/clients';

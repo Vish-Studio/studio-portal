@@ -1,9 +1,9 @@
 import { FunctionComponent } from 'react';
 import { Briefcase, Building2, Mail, Phone, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
-import DetailHeroCard from '../../detail-hero-card/detail-hero-card';
-import { ClientStatusBadge } from '../../status-badge/status-badge';
-import { avatarColor } from '../../avatar/avatar';
+import DetailHeroCard from '../detail-hero-card/detail-hero-card';
+import { ClientStatusBadge } from '../../../components/common/status-badge/status-badge';
+import { avatarColor } from '../../common/avatar/avatar';
 import { DEMO_PROJECTS } from '@/src/data/projects';
 import type { Client } from '@/src/store/clients';
 

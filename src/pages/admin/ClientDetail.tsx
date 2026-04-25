@@ -3,18 +3,18 @@ import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { ArrowLeft, Briefcase } from 'lucide-react';
-import Layout from '../../components/layout/layout';
-import CardContent from '../../components/card-content/card-content';
-import FormField, { inputCls, selectCls } from '../../components/form-field/form-field';
-import MaterialIcon from '../../components/ui/material-icon';
-import ProjectCard from '../../components/project-card/project-card';
+import Layout from '../../components/common/layout/layout';
+import CardContent from '../../components/common/card-content/card-content';
+import FormField, { inputCls, selectCls } from '../../components/common/form-field/form-field';
+import MaterialIcon from '../../components/common/material-icon/material-icon';
+import ProjectCard from '../../components/admin/project-card/project-card';
 import ClientDetailCard from '../../components/admin/client-detail-card/client-detail-card';
 import { useClientsStore } from '../../store/clients';
 import type { ClientStatus } from '../../store/clients';
 import { useTeamStore } from '../../store/team';
 import { useProjectsStore } from '../../store/projects';
-import Breadcrumb from '@/src/components/breadcrumb/breadcrumb';
-import ButtonIcon from '@/src/components/button-icon/button-icon';
+import Breadcrumb from '@/src/components/common/breadcrumb/breadcrumb';
+import ButtonIcon from '@/src/components/common/button-icon/button-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

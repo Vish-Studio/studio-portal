@@ -3,11 +3,11 @@ import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-rea
 import { useDocumentsStore } from '@/src/store/documents';
 import { useTeamStore } from '@/src/store/team';
 import { useProjectsStore } from '@/src/store/projects';
-import StatCard from '@/src/components/stat-card/stat-card';
-import ProjectsOverview from '@/src/components/projects-overview/projects-overview';
-import DocumentOverview from '@/src/components/document-overview/document-overview';
-import Layout from '@/src/components/layout/layout';
-import Calendar from '@/src/components/calendar/calendar';
+import StatCard from '@/src/components/common/stat-card/stat-card';
+import ProjectsOverview from '@/src/components/admin/projects-overview/projects-overview';
+import DocumentOverview from '@/src/components/admin/document-overview/document-overview';
+import Layout from '@/src/components/common/layout/layout';
+import Calendar from '@/src/components/admin/calendar/calendar';
 
 const Dashboard = () => {
   const navigate = useNavigate();

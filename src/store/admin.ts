@@ -1,5 +1,6 @@
 import { create } from "zustand";
-import { DEMO_STATS, DEMO_EXPENSES, DEMO_RECENT_CLIENTS } from "../data/admin";
+import { DEMO_STATS, DEMO_EXPENSES } from "../data/admin";
+import { DEMO_RECENT_CLIENTS } from "../data/clients";
 export type { AdminStats, Expense } from "../data/admin";
 
 import type { AdminStats, Expense } from "../data/admin";
