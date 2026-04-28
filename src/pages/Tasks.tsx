@@ -6,7 +6,7 @@ import FormSidebar, { FormSidebarFooter } from '../components/common/form-sideba
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Select from '../components/common/select/select';
 import ConfirmDialog from '../components/common/confirm-dialog/confirm-dialog';
-import Fab from '../components/common/fab/fab';
+import Fab from '../components/common/button-fab/button-fab';
 import TaskCard from '../components/admin/task-card/task-card';
 import TaskRow from '../components/admin/task-card/task-row';
 import TaskDetailModal from '../components/admin/task-detail-modal/task-detail-modal';
@@ -22,53 +22,53 @@ import type { Task, TaskStatus, TaskPriority } from '../data/tasks';
 type FilterKey = 'all' | TaskStatus;
 
 interface TabDef {
-  key:       FilterKey;
-  label:     string;
+  key: FilterKey;
+  label: string;
   activeCls: string;
 }
 
 const TABS: TabDef[] = [
-  { key: 'all',         label: 'All',         activeCls: 'bg-gray-900 text-white'  },
-  { key: 'todo',        label: 'Todo',         activeCls: 'bg-gray-600 text-white'  },
-  { key: 'in-progress', label: 'In Progress',  activeCls: 'bg-blue-600 text-white'  },
-  { key: 'to-test',     label: 'To Test',      activeCls: 'bg-amber-500 text-white' },
-  { key: 'completed',   label: 'Completed',    activeCls: 'bg-green-600 text-white' },
+  { key: 'all', label: 'All', activeCls: 'bg-gray-900 text-white' },
+  { key: 'todo', label: 'Todo', activeCls: 'bg-gray-600 text-white' },
+  { key: 'in-progress', label: 'In Progress', activeCls: 'bg-blue-600 text-white' },
+  { key: 'to-test', label: 'To Test', activeCls: 'bg-amber-500 text-white' },
+  { key: 'completed', label: 'Completed', activeCls: 'bg-green-600 text-white' },
 ];
 
 const EMPTY_MSG: Record<FilterKey, string> = {
-  all:           'No tasks yet. Add your first one.',
-  todo:          'Nothing in the backlog.',
+  all: 'No tasks yet. Add your first one.',
+  todo: 'Nothing in the backlog.',
   'in-progress': 'Nothing in progress.',
-  'to-test':     'Nothing to test.',
-  completed:     'No completed tasks yet.',
+  'to-test': 'Nothing to test.',
+  completed: 'No completed tasks yet.',
 };
 
 // ─── Form values ──────────────────────────────────────────────────────────────
 
 interface TaskFormValues {
-  title:       string;
+  title: string;
   description: string;
-  projectId:   string;
-  status:      TaskStatus;
-  priority:    TaskPriority;
-  dueDate:     string;
+  projectId: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate: string;
 }
 
 // ─── Tasks Page ───────────────────────────────────────────────────────────────
 
 const Tasks = () => {
-  const { searchQuery }                            = useUIStore();
+  const { searchQuery } = useUIStore();
   const { tasks, addTask, updateTask, removeTask } = useTasksStore();
-  const { projects }                               = useProjectsStore();
-  const { members }                                = useTeamStore();
+  const { projects } = useProjectsStore();
+  const { members } = useTeamStore();
 
-  const [activeTab,         setActiveTab]         = useState<FilterKey>('all');
-  const [viewMode,          setViewMode]          = useState<'grid' | 'list'>('grid');
-  const [sidebarOpen,       setSidebarOpen]       = useState(false);
-  const [editingTask,       setEditingTask]       = useState<Task | null>(null);
+  const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
-  const [confirmTask,       setConfirmTask]       = useState<Task | null>(null);
-  const [detailTask,        setDetailTask]        = useState<Task | null>(null);
+  const [confirmTask, setConfirmTask] = useState<Task | null>(null);
+  const [detailTask, setDetailTask] = useState<Task | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
     useForm<TaskFormValues>({
@@ -77,11 +77,11 @@ const Tasks = () => {
 
   // ── Counts per status ──
   const counts = useMemo(() => ({
-    all:           tasks.length,
-    todo:          tasks.filter(t => t.status === 'todo').length,
+    all: tasks.length,
+    todo: tasks.filter(t => t.status === 'todo').length,
     'in-progress': tasks.filter(t => t.status === 'in-progress').length,
-    'to-test':     tasks.filter(t => t.status === 'to-test').length,
-    completed:     tasks.filter(t => t.status === 'completed').length,
+    'to-test': tasks.filter(t => t.status === 'to-test').length,
+    completed: tasks.filter(t => t.status === 'completed').length,
   }), [tasks]);
 
   // ── Filtered list ──
@@ -102,7 +102,7 @@ const Tasks = () => {
     setEditingTask(null);
     reset({
       title: '', description: '', projectId: '',
-      status:   activeTab === 'all' ? 'todo' : activeTab as TaskStatus,
+      status: activeTab === 'all' ? 'todo' : activeTab as TaskStatus,
       priority: 'medium', dueDate: '',
     });
     setSelectedMemberIds([]);
@@ -112,12 +112,12 @@ const Tasks = () => {
   const openEdit = (task: Task) => {
     setEditingTask(task);
     reset({
-      title:       task.title,
+      title: task.title,
       description: task.description ?? '',
-      projectId:   task.projectId,
-      status:      task.status,
-      priority:    task.priority,
-      dueDate:     task.dueDate ?? '',
+      projectId: task.projectId,
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate ?? '',
     });
     setSelectedMemberIds(task.assigneeIds ?? []);
     setSidebarOpen(true);
@@ -125,14 +125,14 @@ const Tasks = () => {
 
   const onSubmit = (data: TaskFormValues) => {
     const payload: Partial<Omit<Task, 'id' | 'createdAt'>> = {
-      title:       data.title,
+      title: data.title,
       description: data.description || undefined,
-      projectId:   data.projectId,
-      status:      data.status,
-      priority:    data.priority,
-      dueDate:     data.dueDate || undefined,
+      projectId: data.projectId,
+      status: data.status,
+      priority: data.priority,
+      dueDate: data.dueDate || undefined,
       assigneeIds: selectedMemberIds.length ? selectedMemberIds : undefined,
-      updatedAt:   Date.now(),
+      updatedAt: Date.now(),
     };
 
     if (editingTask) {
@@ -163,16 +163,14 @@ const Tasks = () => {
                   key={tab.key}
                   type="button"
                   onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap ${
-                    isActive
-                      ? tab.activeCls + ' shadow-sm'
-                      : 'text-gray-500 hover:text-gray-800 hover:bg-white/70'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap ${isActive
+                    ? tab.activeCls + ' shadow-sm'
+                    : 'text-gray-500 hover:text-gray-800 hover:bg-white/70'
+                    }`}
                 >
                   {tab.label}
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none ${
-                    isActive ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-500'
-                  }`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none ${isActive ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-500'
+                    }`}>
                     {counts[tab.key]}
                   </span>
                 </button>
@@ -188,9 +186,8 @@ const Tasks = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                  viewMode === 'grid' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'
-                }`}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'
+                  }`}
                 aria-label="Grid view"
               >
                 <LayoutGrid size={14} />
@@ -198,9 +195,8 @@ const Tasks = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                  viewMode === 'list' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'
-                }`}
+                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'
+                  }`}
                 aria-label="List view"
               >
                 <List size={14} />

@@ -6,16 +6,14 @@ import { useUIStore } from '@/src/store/ui';
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
-  /**
-   * When true the content area becomes a flex column with overflow-hidden
-   * instead of a scrollable block. Use this for pages where the content
-   * should fill the viewport and manage its own internal scroll (e.g. table
-   * pages where the table body scrolls but the header stays fixed).
-   */
   fullHeight?: boolean;
+  /** Hide the search bar in the topbar (e.g. document editor pages) */
+  hideSearch?: boolean;
+  /** Replace the search bar with custom content (e.g. breadcrumb trail) */
+  topbarActions?: React.ReactNode;
 }
 
-const Layout = ({ children, title, fullHeight }: LayoutProps) => {
+const Layout = ({ children, title, fullHeight, hideSearch, topbarActions }: LayoutProps) => {
   const { isSidebarOpen, setIsSidebarOpen } = useUIStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -38,7 +36,12 @@ const Layout = ({ children, title, fullHeight }: LayoutProps) => {
       />
       <div className="flex-1 flex flex-col w-full overflow-hidden relative">
         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8">
-          <Topbar setIsMobileMenuOpen={setIsMobileMenuOpen} title={title} />
+          <Topbar
+          setIsMobileMenuOpen={setIsMobileMenuOpen}
+          title={title}
+          hideSearch={hideSearch}
+          actions={topbarActions}
+        />
         </div>
 
         {fullHeight ? (

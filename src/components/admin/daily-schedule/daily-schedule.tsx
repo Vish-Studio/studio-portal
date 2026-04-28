@@ -127,7 +127,7 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
                     <MaterialIcon name="more_vert" size={16} />
                   </button>
                   {openMenuId === event.id && (
-                    <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-gray-100 z-50 min-w-[140px]">
+                    <div className="absolute right-0 mt-1 bg-white rounded-lg shadow-lg border border-red z-50 min-w-[140px]">
                       {onEditEvent && (
                         <button
                           onClick={() => handleEditEvent(event)}

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Briefcase, Check } from 'lucide-react';
+import { ArrowLeft, Briefcase, Check, Pencil, Trash2 } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
@@ -16,14 +16,17 @@ import MemberPicker from '../../components/admin/pickers/member-picker/member-pi
 import TaskRow from '../../components/admin/task-card/task-row';
 import TaskDetailModal from '../../components/admin/task-detail-modal/task-detail-modal';
 import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
+import AssignTemplateModal from '../../components/admin/template-editor/assign-template-modal';
 import { useProjectsStore, getPhaseIndex } from '../../store/projects';
 import { useTeamStore } from '../../store/team';
 import { useTasksStore } from '../../store/tasks';
+import { useTemplateAssignmentsStore } from '../../store/template-assignments';
 import { DEMO_CLIENTS } from '../../data/clients';
 import {
   getProjectAccent, buildStages, SERVICE_META, ALL_STAGES, STAGE_META,
 } from '../../data/projects';
-import type { ServiceType, PackageType } from '../../data/projects';
+import { TEMPLATES } from '../../data/templates';
+import type { ServiceType, PackageType, StageKey } from '../../data/projects';
 import type { Task, TaskStatus } from '../../data/tasks';
 
 // ─── Form values ──────────────────────────────────────────────────────────────
@@ -63,9 +66,11 @@ const TASK_FILTER_LABELS: Record<TaskFilter, string> = {
 
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { projects, updateProject } = useProjectsStore();
   const { members } = useTeamStore();
-  const { tasks, updateTask, removeTask } = useTasksStore();
+  const { tasks, removeTask } = useTasksStore();
+  const { getPhaseAssignment, addAssignment, removeAssignment } = useTemplateAssignmentsStore();
   const project = projects.find(p => p.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -74,9 +79,13 @@ const ProjectDetail = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
 
   // ── Task panel state ──
-  const [taskFilter,  setTaskFilter]  = useState<TaskFilter>('all');
-  const [detailTask,  setDetailTask]  = useState<Task | null>(null);
-  const [confirmTask, setConfirmTask] = useState<Task | null>(null);
+  const [taskFilter,   setTaskFilter]   = useState<TaskFilter>('all');
+  const [detailTask,   setDetailTask]   = useState<Task | null>(null);
+  const [confirmTask,  setConfirmTask]  = useState<Task | null>(null);
+
+  // ── Phase Documents state ──
+  const [assignPhase,  setAssignPhase]  = useState<StageKey | null>(null);
+  const [removeDocId,  setRemoveDocId]  = useState<string | null>(null);
 
   const {
     register,
@@ -498,6 +507,68 @@ const ProjectDetail = () => {
               )}
             </CardContent>
 
+            {/* ── Phase Documents ── */}
+            <CardContent iconName="folder_open" title="Phase Documents" variant="white">
+              <div className="px-4 md:px-6 py-4 flex flex-col gap-2">
+                {ALL_STAGES.map(phaseKey => {
+                  const meta       = STAGE_META[phaseKey];
+                  const assignment = getPhaseAssignment(id!, phaseKey);
+                  const tplMeta    = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
+
+                  return (
+                    <div
+                      key={phaseKey}
+                      className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0"
+                    >
+                      {/* Phase icon + label */}
+                      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                        <MaterialIcon name={meta.icon} size={14} className="text-gray-500" />
+                      </div>
+                      <span className="text-xs font-semibold text-gray-700 w-28 shrink-0">{meta.label}</span>
+
+                      {/* Assignment or assign button */}
+                      {assignment && tplMeta ? (
+                        <>
+                          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                            <MaterialIcon name={tplMeta.icon} size={13} className="text-gray-400 shrink-0" />
+                            <span className="text-xs text-gray-500 truncate">{assignment.documentTitle}</span>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/admin/projects/${id}/templates/${assignment.id}`)}
+                              className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                            >
+                              <Pencil size={11} />
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setRemoveDocId(assignment.id)}
+                              className="w-6 h-6 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <span className="flex-1 text-xs text-gray-300 italic">No document assigned</span>
+                          <button
+                            type="button"
+                            onClick={() => setAssignPhase(phaseKey)}
+                            className="text-[11px] font-semibold text-gray-500 hover:text-gray-900 px-2.5 py-1 rounded-lg border border-gray-200 hover:border-gray-400 transition-colors shrink-0"
+                          >
+                            + Assign
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+
           </div>
         </div>
       </div>
@@ -511,7 +582,43 @@ const ProjectDetail = () => {
         />
       )}
 
-      {/* ── Delete confirmation ── */}
+      {/* ── Assign template modal ── */}
+      {assignPhase && (
+        <AssignTemplateModal
+          phaseKey={assignPhase}
+          onCancel={() => setAssignPhase(null)}
+          onConfirm={slug => {
+            const tplMeta = TEMPLATES.find(t => t.slug === slug)!;
+            const now = Date.now();
+            const newId = `ta_${now}`;
+            addAssignment({
+              id:            newId,
+              projectId:     id!,
+              phaseKey:      assignPhase,
+              templateSlug:  slug,
+              documentTitle: tplMeta.title,
+              blocks:        [],
+              createdAt:     now,
+              updatedAt:     now,
+            });
+            setAssignPhase(null);
+            navigate(`/admin/projects/${id}/templates/${newId}?phase=${assignPhase}&template=${slug}`);
+          }}
+        />
+      )}
+
+      {/* ── Remove document confirmation ── */}
+      <ConfirmDialog
+        isOpen={!!removeDocId}
+        title="Remove document"
+        message="This document assignment will be removed from the project phase."
+        confirmLabel="Remove"
+        variant="danger"
+        onConfirm={() => { if (removeDocId) removeAssignment(removeDocId); setRemoveDocId(null); }}
+        onCancel={() => setRemoveDocId(null)}
+      />
+
+      {/* ── Delete task confirmation ── */}
       <ConfirmDialog
         isOpen={!!confirmTask}
         title="Delete task"

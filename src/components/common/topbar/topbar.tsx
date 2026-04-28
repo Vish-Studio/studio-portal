@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import SearchBar from '../search-bar/search-bar';
 import MaterialIcon from '../material-icon/material-icon';
 import { useUIStore } from '@/src/store/ui';
@@ -10,6 +10,8 @@ import type { DropdownMenuSectionType } from '../dropdown-menu/dropdown-menu';
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   title?: string;
+  hideSearch?: boolean;
+  actions?: React.ReactNode;
 }
 
 const notifSections: DropdownMenuSectionType[] = [
@@ -35,7 +37,7 @@ const userMenuSections: DropdownMenuSectionType[] = [
   },
 ];
 
-const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard' }: TopbarProps) => {
+const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, actions }: TopbarProps) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -90,26 +92,32 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard' }: TopbarProps) => {
           <h2 className="text-xl sm:text-2xl font-bold text-(--color-ink)">{title}</h2>
         </div>
 
-        {/* Desktop search */}
-        <SearchBar
-          className="hidden sm:block"
-          placeholder="Search here..."
-          value={searchQuery}
-          onChange={setSearchQuery}
-        />
+        {/* Desktop search or custom actions */}
+        {actions ? (
+          <div className="flex-1 flex justify-center">{actions}</div>
+        ) : !hideSearch ? (
+          <SearchBar
+            className="hidden sm:block"
+            placeholder="Search here..."
+            value={searchQuery}
+            onChange={setSearchQuery}
+          />
+        ) : <div className="flex-1" />}
 
         {/* Right icons */}
         <div className="flex items-center gap-2 sm:gap-4 justify-end">
           {/* Mobile search toggle */}
-          <ButtonIcon
-            className="sm:hidden"
-            iconName={isMobileSearchOpen ? 'close' : 'search'}
-            aria-label={isMobileSearchOpen ? 'Close search' : 'Open search'}
-            clickHandler={() => {
-              if (isMobileSearchOpen) clearSearch();
-              setIsMobileSearchOpen(v => !v);
-            }}
-          />
+          {!hideSearch && !actions && (
+            <ButtonIcon
+              className="sm:hidden"
+              iconName={isMobileSearchOpen ? 'close' : 'search'}
+              aria-label={isMobileSearchOpen ? 'Close search' : 'Open search'}
+              clickHandler={() => {
+                if (isMobileSearchOpen) clearSearch();
+                setIsMobileSearchOpen(v => !v);
+              }}
+            />
+          )}
 
           {/* Notifications */}
           <div className="relative" ref={notifRef}>
@@ -142,7 +150,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard' }: TopbarProps) => {
       </div>
 
       {/* Mobile search bar — slides in below the main row */}
-      {isMobileSearchOpen && (
+      {isMobileSearchOpen && !hideSearch && !actions && (
         <div className="sm:hidden mt-3 animate-in slide-in-from-top-1 fade-in duration-150">
           <SearchBar
             className="w-full!"

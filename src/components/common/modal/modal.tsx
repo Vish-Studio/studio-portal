@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import ButtonIcon from '../button-icon/button-icon';
 
 export type ModalVariant = 'dialog' | 'sheet';
 export type ModalSize = 'sm' | 'md' | 'lg';
@@ -57,8 +58,8 @@ export default function Modal({
     : 'items-center';
 
   const containerShape = isSheet
-    ? 'rounded-t-[32px] sm:rounded-[32px]'
-    : 'rounded-[32px]';
+    ? 'rounded-t-lg sm:rounded-lg'
+    : 'rounded-lg';
 
   const closeBtnClass = isSheet
     ? 'w-8 h-8 flex items-center justify-center rounded-full bg-white/50 hover:bg-white/80 text-gray-600 transition-colors shrink-0'
@@ -69,7 +70,7 @@ export default function Modal({
 
   return (
     <div
-      className={`fixed inset-0 z-[200] flex ${containerAlign} justify-center p-0 sm:p-6`}
+      className={`modal fixed inset-0 z-[200] flex ${containerAlign} justify-center p-0 sm:p-6`}
       onClick={onClose}
     >
       {/* Backdrop */}
@@ -118,9 +119,8 @@ export default function Modal({
                   </p>
                 )}
               </div>
-              <button onClick={onClose} className={closeBtnClass}>
-                <X size={15} strokeWidth={2.5} />
-              </button>
+
+              <ButtonIcon iconName='close' clickHandler={onClose} />
             </div>
           )}
         </div>
@@ -132,7 +132,7 @@ export default function Modal({
 
         {/* ── Footer ── */}
         {footer && (
-          <div className="border-t border-gray-100 px-6 py-4 bg-white shrink-0">
+          <div className="modal-footer border-t border-gray-100 px-6 py-4 bg-white shrink-0">
             {footer}
           </div>
         )}

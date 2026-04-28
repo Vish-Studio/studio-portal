@@ -9,7 +9,7 @@ import TableTab, { type TabItem } from '../../components/common/table-tab/table-
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
 import Select from '../../components/common/select/select';
-import Fab from '../../components/common/fab/fab';
+import Fab from '../../components/common/button-fab/button-fab';
 import { ClientStatusBadge } from '../../components/common/status-badge/status-badge';
 import { useClientsStore } from '../../store/clients';
 import { useUIStore } from '../../store/ui';

@@ -7,7 +7,7 @@ import TableData, { RowActions, type Column } from '../components/common/table/t
 import TableToolbar, { type TabItem } from '../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
-import Fab from '../components/common/fab/fab';
+import Fab from '../components/common/button-fab/button-fab';
 import { useTeamStore } from '../store/team';
 import { useUIStore } from '../store/ui';
 import { getMemberColors } from '../data/team';
