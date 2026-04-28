@@ -8,6 +8,11 @@ import Tasks from './pages/Tasks';
 import Calendar from './pages/Calendar';
 import Documents from './pages/Documents';
 import Templates from './pages/Templates';
+import ContractTemplate from './pages/templates/contract';
+import InvoiceTemplate from './pages/templates/invoice';
+import OverdueInvoiceTemplate from './pages/templates/overdue-invoice';
+import ProjectProposalTemplate from './pages/templates/project-proposal';
+import QuotationTemplate from './pages/templates/quotation';
 import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Dashboard from './pages/admin/Dashboard';
@@ -35,6 +40,11 @@ export default function App() {
         <Route path="/admin/calendar" element={<Calendar />} />
         <Route path="/admin/documents" element={<Documents />} />
         <Route path="/admin/templates" element={<Templates />} />
+        <Route path="/admin/templates/contract" element={<ContractTemplate />} />
+        <Route path="/admin/templates/invoice" element={<InvoiceTemplate />} />
+        <Route path="/admin/templates/overdue-invoice" element={<OverdueInvoiceTemplate />} />
+        <Route path="/admin/templates/project-proposal" element={<ProjectProposalTemplate />} />
+        <Route path="/admin/templates/quotation" element={<QuotationTemplate />} />
         <Route path="/admin/settings" element={<Settings />} />
 
         {/* Auth */}
