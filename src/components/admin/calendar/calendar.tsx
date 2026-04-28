@@ -3,9 +3,9 @@ import DailySchedule from '../daily-schedule/daily-schedule';
 import MonthYearNav from '../month-year-nav/month-year-nav';
 import ContentCard from '../../common/card-content/card-content';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
-import type { ScheduleEvent, EventType } from '../schedule/event-types';
+import type { EventType } from '../schedule/event-types';
 import { useCalendarStore } from '@/src/store/calendar';
-import { DAY_NAMES_SHORT, DAY_NAMES_LONG, MOCK_EVENT_SEEDS, TODAY_DEFAULT_EVENTS } from '@/src/data/calendar';
+import { DAY_NAMES_SHORT, DAY_NAMES_LONG, getEventsForDate } from '@/src/data/calendar';
 
 const dateKey = (year: number, month: number, day: number) => `${year}-${month}-${day}`;
 
@@ -17,28 +17,6 @@ const getDayLabel = (date: Date): string => {
     date.getFullYear() === today.getFullYear();
   return isToday ? 'Today' : DAY_NAMES_LONG[date.getDay()];
 };
-
-const getMockEventsForDate = (year: number, month: number, day: number): ScheduleEvent[] => {
-  const events: ScheduleEvent[] = [];
-  const seed = year * 10000 + month * 100 + day;
-
-  for (const s of MOCK_EVENT_SEEDS) {
-    if (seed % s.modulo === 0) {
-      events.push({ id: `mock-${seed}-${s.index}`, type: s.type as EventType, title: s.title, time: s.time });
-    }
-  }
-
-  const today = new Date();
-  if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate() && events.length === 0) {
-    for (const e of TODAY_DEFAULT_EVENTS) {
-      events.push({ id: e.idSuffix, type: e.type as EventType, title: e.title, time: e.time });
-    }
-  }
-
-  return events;
-};
-
-
 
 const Calendar: FunctionComponent = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -56,29 +34,18 @@ const Calendar: FunctionComponent = () => {
 
   const handleSelectDate = (day: number) => setSelectedDate(new Date(year, month, day));
 
-  const getEventsForDate = (y: number, m: number, d: number): ScheduleEvent[] => {
-    const mock = getMockEventsForDate(y, m, d);
-    const custom = customEvents[dateKey(y, m, d)] ?? [];
-
-    // Collect all custom event ids that came from mock events (to filter out edited mock events)
-    const editedMockIds = new Set<string>();
-    Object.values(customEvents).flat().forEach(e => {
-      if (e.id.startsWith('mock-')) {
-        editedMockIds.add(e.id);
-      }
-    });
-
-    // Filter out mock events that have been edited (exist in custom)
-    return [...mock.filter(e => !editedMockIds.has(e.id)), ...custom];
-  };
-
   const selectedEvents = useMemo(
-    () => getEventsForDate(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate()),
-    [selectedDate, customEvents]
+    () => getEventsForDate(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate(),
+      customEvents,
+    ),
+    [selectedDate, customEvents],
   );
 
   return (
-    <div className="calendar grid grid-cols-1 lg:grid-cols-3 gap-6 h-fit md:h-[585px]">
+    <div className="calendar grid grid-cols-1 lg:grid-cols-3 gap-6 h-fit md:h-146.25">
 
       {/* Calendar grid — spans 2 of 3 columns */}
       <ContentCard
@@ -88,7 +55,6 @@ const Calendar: FunctionComponent = () => {
         action={<MonthYearNav value={currentDate} onChange={setCurrentDate} />}
         bodyClassName="px-4 md:px-6 pb-4 md:pb-6 pt-4 flex flex-col gap-4 overflow-y-auto"
       >
-
         {/* Days-of-week header */}
         <div className="grid grid-cols-7 mb-2">
           {DAY_NAMES_SHORT.map(day => (
@@ -111,7 +77,7 @@ const Calendar: FunctionComponent = () => {
               selectedDate.getMonth() === month &&
               selectedDate.getFullYear() === year;
 
-            const events = getEventsForDate(year, month, day);
+            const events = getEventsForDate(year, month, day, customEvents);
             const dotTypes = [...new Set(events.map(e => e.type))].slice(0, 3) as EventType[];
 
             return (
@@ -145,10 +111,15 @@ const Calendar: FunctionComponent = () => {
       </ContentCard>
 
       {/* Daily schedule — spans 1 of 3 columns */}
-      <DailySchedule date={selectedDate} events={selectedEvents} onAddEvent={handleAddEvent} onEditEvent={handleEditEvent} onRemoveEvent={handleRemoveEvent} />
+      <DailySchedule
+        date={selectedDate}
+        events={selectedEvents}
+        onAddEvent={handleAddEvent}
+        onEditEvent={handleEditEvent}
+        onRemoveEvent={handleRemoveEvent}
+      />
     </div>
   );
-}
-
+};
 
 export default Calendar;

@@ -5,7 +5,8 @@ import { format } from 'date-fns';
 import { ArrowLeft, Briefcase } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
-import FormField, { inputCls, selectCls } from '../../components/common/form-field/form-field';
+import FormField, { inputCls } from '../../components/common/form-field/form-field';
+import Select from '../../components/common/select/select';
 import MaterialIcon from '../../components/common/material-icon/material-icon';
 import ProjectCard from '../../components/admin/project-card/project-card';
 import ClientDetailCard from '../../components/admin/client-detail-card/client-detail-card';
@@ -32,9 +33,8 @@ const fieldCls = (hasError: boolean) =>
   inputCls(hasError) +
   ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:shadow-none disabled:focus:ring-0 disabled:focus:bg-transparent';
 
-const fieldSelectCls = (hasError: boolean) =>
-  selectCls(hasError) +
-  ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0';
+const DISABLED_SELECT_CLS =
+  'disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0';
 
 // ─── Client Detail Page ───────────────────────────────────────────────────────
 
@@ -188,15 +188,16 @@ const ClientDetail = () => {
               </FormField>
 
               <FormField label="Status" required={isEditing} error={errors.status?.message}>
-                <select
+                <Select
                   {...register('status', { required: isEditing })}
                   disabled={!isEditing}
-                  className={fieldSelectCls(!!errors.status)}
+                  hasError={!!errors.status}
+                  className={DISABLED_SELECT_CLS}
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                   <option value="lost">Lost</option>
-                </select>
+                </Select>
               </FormField>
 
               {isEditing && (

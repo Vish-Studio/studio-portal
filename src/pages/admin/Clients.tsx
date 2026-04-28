@@ -7,7 +7,8 @@ import Layout from '../../components/common/layout/layout';
 import TableData, { RowActions, type Column } from '../../components/common/table/table';
 import TableTab, { type TabItem } from '../../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
-import FormField, { inputCls, selectCls } from '../../components/common/form-field/form-field';
+import FormField, { inputCls } from '../../components/common/form-field/form-field';
+import Select from '../../components/common/select/select';
 import Fab from '../../components/common/fab/fab';
 import { ClientStatusBadge } from '../../components/common/status-badge/status-badge';
 import { useClientsStore } from '../../store/clients';
@@ -259,14 +260,14 @@ export default function Clients() {
             </FormField>
 
             <FormField label="Status" required error={errors.status?.message}>
-              <select
+              <Select
                 {...register('status', { required: 'Status is required' })}
-                className={selectCls(!!errors.status)}
+                hasError={!!errors.status}
               >
                 <option value="active">Active — recurring client</option>
                 <option value="inactive">Inactive — no longer active</option>
                 <option value="lost">Lost — churned</option>
-              </select>
+              </Select>
             </FormField>
 
           </div>

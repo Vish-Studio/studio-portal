@@ -14,6 +14,13 @@ export interface ScheduleEvent {
   title: string;
   time: string;
   callLink?: string;
+  description?: string;
+  /** Link to a project from the projects store (optional) */
+  projectId?: string;
+  /** Link to a client from the clients store (optional) */
+  clientId?: string;
+  /** IDs of team members assigned to this event (optional) */
+  memberIds?: string[];
 }
 
 export interface EventTypeConfig {

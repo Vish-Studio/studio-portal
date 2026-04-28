@@ -230,7 +230,7 @@ const Payments = () => {
           />
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="flex-1 min-h-0 flex flex-col gap-3">
           {/* Tabs */}
           <TableTab
             tabs={tabs}
@@ -238,7 +238,7 @@ const Payments = () => {
             onTabChange={key => setActiveTab(key as FilterKey)}
           />
 
-          {/* Table */}
+          {/* Table — flex-1 min-h-0 ensures it fills the remaining height */}
           <div className="flex-1 min-h-0">
             <TableData<Payment>
               columns={columns}

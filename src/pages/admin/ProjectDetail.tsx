@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Briefcase, Check } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
-import FormField, { inputCls, selectCls } from '../../components/common/form-field/form-field';
+import FormField, { inputCls } from '../../components/common/form-field/form-field';
+import Select from '../../components/common/select/select';
 import MaterialIcon from '../../components/common/material-icon/material-icon';
 import ProjectHeroCard from '../../components/admin/project-hero-card/project-hero-card';
 import { PhaseTrack, PhaseSelector } from '../../components/admin/project-progress/project-progress';
@@ -12,13 +13,18 @@ import { AvatarStack } from '../../components/common/avatar/avatar';
 import Avatar from '../../components/common/avatar/avatar';
 import ClientPicker from '../../components/admin/pickers/client-picker/client-picker';
 import MemberPicker from '../../components/admin/pickers/member-picker/member-picker';
+import TaskRow from '../../components/admin/task-card/task-row';
+import TaskDetailModal from '../../components/admin/task-detail-modal/task-detail-modal';
+import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
 import { useProjectsStore, getPhaseIndex } from '../../store/projects';
 import { useTeamStore } from '../../store/team';
+import { useTasksStore } from '../../store/tasks';
 import { DEMO_CLIENTS } from '../../data/clients';
 import {
   getProjectAccent, buildStages, SERVICE_META, ALL_STAGES, STAGE_META,
 } from '../../data/projects';
 import type { ServiceType, PackageType } from '../../data/projects';
+import type { Task, TaskStatus } from '../../data/tasks';
 
 // ─── Form values ──────────────────────────────────────────────────────────────
 
@@ -30,15 +36,28 @@ interface ProjectFormValues {
   timeline: string;
 }
 
-// ─── Disabled-aware input helpers (same pattern as ClientDetail) ──────────────
+// ─── Disabled-aware input helper ─────────────────────────────────────────────
 
 const fieldCls = (hasError: boolean) =>
   inputCls(hasError) +
   ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:shadow-none disabled:focus:ring-0 disabled:focus:bg-transparent';
 
-const fieldSelectCls = (hasError: boolean) =>
-  selectCls(hasError) +
-  ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0';
+const DISABLED_SELECT_CLS =
+  'disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0';
+
+// ─── Project Detail Page ──────────────────────────────────────────────────────
+
+// ─── Task status filter options ───────────────────────────────────────────────
+
+type TaskFilter = 'all' | TaskStatus;
+
+const TASK_FILTER_LABELS: Record<TaskFilter, string> = {
+  all:           'All',
+  todo:          'Todo',
+  'in-progress': 'In Progress',
+  'to-test':     'To Test',
+  completed:     'Completed',
+};
 
 // ─── Project Detail Page ──────────────────────────────────────────────────────
 
@@ -46,12 +65,18 @@ const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { projects, updateProject } = useProjectsStore();
   const { members } = useTeamStore();
+  const { tasks, updateTask, removeTask } = useTasksStore();
   const project = projects.find(p => p.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
+
+  // ── Task panel state ──
+  const [taskFilter,  setTaskFilter]  = useState<TaskFilter>('all');
+  const [detailTask,  setDetailTask]  = useState<Task | null>(null);
+  const [confirmTask, setConfirmTask] = useState<Task | null>(null);
 
   const {
     register,
@@ -88,6 +113,16 @@ const ProjectDetail = () => {
   const progress       = Math.round((completedCount / ALL_STAGES.length) * 100);
   const remaining      = project.agreedPayment - project.paidPayment;
   const selectedClient = DEMO_CLIENTS.find(c => c.id === (isEditing ? selectedClientId : project.clientId));
+
+  // ── Project tasks ──
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const projectTasks = useMemo(() => {
+    const base = tasks.filter(t => t.projectId === id);
+    const filtered = taskFilter === 'all' ? base : base.filter(t => t.status === taskFilter);
+    return [...filtered].sort((a, b) => b.createdAt - a.createdAt);
+  }, [tasks, id, taskFilter]);
+
+  const allProjectTaskCount = useMemo(() => tasks.filter(t => t.projectId === id).length, [tasks, id]);
 
   const openEdit = () => {
     reset({
@@ -205,46 +240,49 @@ const ProjectDetail = () => {
 
                 {/* Service */}
                 <FormField label="Service" required={isEditing} error={errors.service?.message}>
-                  <select
+                  <Select
                     {...register('service', { required: isEditing })}
                     disabled={!isEditing}
-                    className={fieldSelectCls(!!errors.service)}
+                    hasError={!!errors.service}
+                    className={DISABLED_SELECT_CLS}
                   >
                     {(Object.entries(SERVICE_META) as [ServiceType, (typeof SERVICE_META)[ServiceType]][]).map(
                       ([key, meta]) => (
                         <option key={key} value={key}>{meta.label}</option>
                       ),
                     )}
-                  </select>
+                  </Select>
                 </FormField>
 
                 {/* Package (website/software only) */}
                 {(isEditing ? hasPackages : ['website', 'software'].includes(project.service)) && (
                   <FormField label="Package" error={errors.package?.message}>
-                    <select
+                    <Select
                       {...register('package')}
                       disabled={!isEditing}
-                      className={fieldSelectCls(!!errors.package)}
+                      hasError={!!errors.package}
+                      className={DISABLED_SELECT_CLS}
                     >
                       <option value="">— None —</option>
                       <option value="essentials">Essentials</option>
                       <option value="growth">Growth</option>
                       <option value="premium">Premium</option>
-                    </select>
+                    </Select>
                   </FormField>
                 )}
 
                 {/* Status */}
                 <FormField label="Status" required={isEditing} error={errors.status?.message}>
-                  <select
+                  <Select
                     {...register('status', { required: isEditing })}
                     disabled={!isEditing}
-                    className={fieldSelectCls(!!errors.status)}
+                    hasError={!!errors.status}
+                    className={DISABLED_SELECT_CLS}
                   >
                     <option value="active">Active</option>
                     <option value="paused">Paused</option>
                     <option value="completed">Completed</option>
-                  </select>
+                  </Select>
                 </FormField>
 
                 {/* Timeline */}
@@ -415,9 +453,74 @@ const ProjectDetail = () => {
               </CardContent>
             </div>
 
+            {/* ── Tasks ── */}
+            <CardContent
+              iconName="task_alt"
+              title="Tasks"
+              variant="white"
+              action={
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-gray-400">
+                    {allProjectTaskCount} total
+                  </span>
+                  <Select
+                    value={taskFilter}
+                    onChange={e => setTaskFilter(e.target.value as TaskFilter)}
+                    className="text-[11px] font-semibold text-gray-600 bg-gray-100 border-0 rounded-lg px-2.5 py-1.5 pr-6 cursor-pointer focus:ring-2 focus:ring-gray-200"
+                  >
+                    {(Object.keys(TASK_FILTER_LABELS) as TaskFilter[]).map(k => (
+                      <option key={k} value={k}>{TASK_FILTER_LABELS[k]}</option>
+                    ))}
+                  </Select>
+                </div>
+              }
+            >
+              {projectTasks.length === 0 ? (
+                <div className="px-6 py-8 flex flex-col items-center gap-2 text-center">
+                  <MaterialIcon name="task_alt" size={22} className="text-gray-200" />
+                  <p className="text-xs font-semibold text-gray-400">
+                    {allProjectTaskCount === 0 ? 'No tasks for this project yet.' : 'No tasks match this filter.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="px-4 md:px-6 py-4 flex flex-col gap-2">
+                  {projectTasks.map(task => (
+                    <TaskRow
+                      key={task.id}
+                      task={task}
+                      showProject={false}
+                      showStatus
+                      onClick={() => setDetailTask(task)}
+                      onDelete={() => setConfirmTask(task)}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+
           </div>
         </div>
       </div>
+
+      {/* ── Task detail modal ── */}
+      {detailTask && (
+        <TaskDetailModal
+          task={detailTask}
+          onClose={() => setDetailTask(null)}
+          onDelete={() => { setDetailTask(null); setConfirmTask(detailTask); }}
+        />
+      )}
+
+      {/* ── Delete confirmation ── */}
+      <ConfirmDialog
+        isOpen={!!confirmTask}
+        title="Delete task"
+        message={confirmTask ? `"${confirmTask.title}" will be permanently removed.` : ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmTask) removeTask(confirmTask.id); setConfirmTask(null); }}
+        onCancel={() => setConfirmTask(null)}
+      />
     </Layout>
   );
 };

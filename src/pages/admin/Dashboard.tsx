@@ -3,17 +3,20 @@ import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-rea
 import { useDocumentsStore } from '@/src/store/documents';
 import { useTeamStore } from '@/src/store/team';
 import { useProjectsStore } from '@/src/store/projects';
+import { useTasksStore } from '@/src/store/tasks';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import ProjectsOverview from '@/src/components/admin/projects-overview/projects-overview';
 import DocumentOverview from '@/src/components/admin/document-overview/document-overview';
+import TasksOverview from '@/src/components/admin/tasks-overview/tasks-overview';
 import Layout from '@/src/components/common/layout/layout';
 import Calendar from '@/src/components/admin/calendar/calendar';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { documents } = useDocumentsStore();
-  const { members } = useTeamStore();
-  const { projects } = useProjectsStore();
+  const { members }   = useTeamStore();
+  const { projects }  = useProjectsStore();
+  const { tasks }     = useTasksStore();
 
   return (
     <Layout>
@@ -65,6 +68,13 @@ const Dashboard = () => {
           </div>
           <div className="lg:col-span-1">
             <DocumentOverview documents={documents} limit={5} />
+          </div>
+        </div>
+
+        {/* Tasks overview */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="lg:col-span-2">
+            <TasksOverview tasks={tasks} limit={5} />
           </div>
         </div>
 

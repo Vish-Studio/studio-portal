@@ -6,7 +6,9 @@ import StatCard from '../components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import MaterialIcon from '../components/common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
-import FormField, { inputCls, selectCls } from '../components/common/form-field/form-field';
+import FormField, { inputCls } from '../components/common/form-field/form-field';
+import Select from '../components/common/select/select';
+import ConfirmDialog from '../components/common/confirm-dialog/confirm-dialog';
 import ProjectCard, { ProjectCardMini } from '../components/admin/project-card/project-card';
 import { PhaseSelector } from '../components/admin/project-progress/project-progress';
 import ClientPicker from '../components/admin/pickers/client-picker/client-picker';
@@ -37,8 +39,9 @@ const Projects = () => {
 
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
+  const [sidebarOpen,      setSidebarOpen]      = useState(false);
+  const [editingProject,   setEditingProject]   = useState<ClientProject | null>(null);
+  const [confirmProject,   setConfirmProject]   = useState<ClientProject | null>(null);
 
   // Picker / phase state — lives outside react-hook-form
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -143,11 +146,7 @@ const Projects = () => {
     setSidebarOpen(false);
   };
 
-  const handleDelete = (project: ClientProject) => {
-    if (window.confirm(`Delete "${project.name}"? This cannot be undone.`)) {
-      removeProject(project.id);
-    }
-  };
+  const handleDelete = (project: ClientProject) => setConfirmProject(project);
 
   const toggleMember = (id: string) =>
     setSelectedMemberIds(prev =>
@@ -289,42 +288,42 @@ const Projects = () => {
 
             {/* Service type */}
             <FormField label="Service" required error={errors.service?.message}>
-              <select
+              <Select
                 {...register('service', { required: true })}
-                className={selectCls(!!errors.service)}
+                hasError={!!errors.service}
               >
                 {(Object.entries(SERVICE_META) as [ServiceType, typeof SERVICE_META[ServiceType]][]).map(
                   ([key, meta]) => (
                     <option key={key} value={key}>{meta.label}</option>
                   ),
                 )}
-              </select>
+              </Select>
             </FormField>
 
             {/* Package — only for website / software */}
             {hasPackages && (
               <FormField label="Package" required error={errors.package?.message}>
-                <select
+                <Select
                   {...register('package', { required: hasPackages })}
-                  className={selectCls(!!errors.package)}
+                  hasError={!!errors.package}
                 >
                   <option value="essentials">Essentials</option>
                   <option value="growth">Growth</option>
                   <option value="premium">Premium</option>
-                </select>
+                </Select>
               </FormField>
             )}
 
             {/* Status */}
             <FormField label="Status" required error={errors.status?.message}>
-              <select
+              <Select
                 {...register('status', { required: true })}
-                className={selectCls(!!errors.status)}
+                hasError={!!errors.status}
               >
                 <option value="active">Active</option>
                 <option value="paused">Paused</option>
                 <option value="completed">Completed</option>
-              </select>
+              </Select>
             </FormField>
 
             {/* Current phase — interactive pill selector */}
@@ -384,6 +383,17 @@ const Projects = () => {
           </FormSidebarFooter>
         </form>
       </FormSidebar>
+
+      {/* ── Delete confirmation ── */}
+      <ConfirmDialog
+        isOpen={!!confirmProject}
+        title="Delete project"
+        message={confirmProject ? `"${confirmProject.name}" will be permanently removed. This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={() => { if (confirmProject) removeProject(confirmProject.id); setConfirmProject(null); }}
+        onCancel={() => setConfirmProject(null)}
+      />
     </Layout>
   );
 };
