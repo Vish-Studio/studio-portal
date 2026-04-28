@@ -5,6 +5,7 @@ import Layout from '../components/common/layout/layout';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Select from '../components/common/select/select';
+import Option from '../components/common/select/option';
 import ConfirmDialog from '../components/common/confirm-dialog/confirm-dialog';
 import Fab from '../components/common/button-fab/button-fab';
 import TaskCard from '../components/admin/task-card/task-card';
@@ -310,9 +311,9 @@ const Tasks = () => {
                 {...register('projectId', { required: 'Select a project' })}
                 hasError={!!errors.projectId}
               >
-                <option value="">— Select project —</option>
+                <Option value="">— Select project —</Option>
                 {projects.map(p => (
-                  <option key={p.id} value={p.id}>{p.name}</option>
+                  <Option key={p.id} value={p.id}>{p.name}</Option>
                 ))}
               </Select>
             </FormField>
@@ -320,18 +321,18 @@ const Tasks = () => {
             <div className="grid grid-cols-2 gap-3">
               <FormField label="Status" error={errors.status?.message}>
                 <Select {...register('status')} hasError={!!errors.status}>
-                  <option value="todo">Todo</option>
-                  <option value="in-progress">In Progress</option>
-                  <option value="to-test">To Test</option>
-                  <option value="completed">Completed</option>
+                  <Option value="todo">Todo</Option>
+                  <Option value="in-progress">In Progress</Option>
+                  <Option value="to-test">To Test</Option>
+                  <Option value="completed">Completed</Option>
                 </Select>
               </FormField>
 
               <FormField label="Priority" error={errors.priority?.message}>
                 <Select {...register('priority')} hasError={!!errors.priority}>
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
+                  <Option value="high">High</Option>
+                  <Option value="medium">Medium</Option>
+                  <Option value="low">Low</Option>
                 </Select>
               </FormField>
             </div>

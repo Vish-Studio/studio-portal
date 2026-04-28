@@ -7,6 +7,7 @@ import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
 import Select from '../../components/common/select/select';
+import Option from '../../components/common/select/option';
 import MaterialIcon from '../../components/common/material-icon/material-icon';
 import ProjectCard from '../../components/admin/project-card/project-card';
 import ClientDetailCard from '../../components/admin/client-detail-card/client-detail-card';
@@ -93,10 +94,10 @@ const ClientDetail = () => {
     );
   }
 
-  const projects      = allProjects.filter(p => p.clientId === id);
-  const activeCount   = projects.filter(p => p.status === 'active').length;
-  const totalAgreed   = projects.reduce((s, p) => s + p.agreedPayment, 0);
-  const totalPaid     = projects.reduce((s, p) => s + p.paidPayment, 0);
+  const projects = allProjects.filter(p => p.clientId === id);
+  const activeCount = projects.filter(p => p.status === 'active').length;
+  const totalAgreed = projects.reduce((s, p) => s + p.agreedPayment, 0);
+  const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
   const totalRemaining = totalAgreed - totalPaid;
 
   return (
@@ -194,9 +195,9 @@ const ClientDetail = () => {
                   hasError={!!errors.status}
                   className={DISABLED_SELECT_CLS}
                 >
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="lost">Lost</option>
+                  <Option value="active">Active</Option>
+                  <Option value="inactive">Inactive</Option>
+                  <Option value="lost">Lost</Option>
                 </Select>
               </FormField>
 

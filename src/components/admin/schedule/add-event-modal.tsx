@@ -5,6 +5,7 @@ import { type ScheduleEvent, type EventType, ALL_EVENT_TYPES, EVENT_TYPE_CONFIG 
 import MaterialIcon from '../../common/material-icon/material-icon';
 import Modal from '../../common/modal/modal';
 import Select from '../../../components/common/select/select';
+import Option from '../../../components/common/select/option';
 import Avatar from '../../common/avatar/avatar';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/store/clients';
@@ -99,15 +100,15 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
     }
     onAdd(
       {
-        id:          initialEvent?.id ?? uuidv4(),
-        type:        selectedType,
-        title:       title.trim(),
+        id: initialEvent?.id ?? uuidv4(),
+        type: selectedType,
+        title: title.trim(),
         time,
-        callLink:    callLink.trim() || undefined,
+        callLink: callLink.trim() || undefined,
         description: description.trim() || undefined,
-        projectId:   linkedProjectId || undefined,
-        clientId:    linkedClientId || undefined,
-        memberIds:   linkedMemberIds.length ? linkedMemberIds : undefined,
+        projectId: linkedProjectId || undefined,
+        clientId: linkedClientId || undefined,
+        memberIds: linkedMemberIds.length ? linkedMemberIds : undefined,
       },
       selectedDate,
     );
@@ -268,9 +269,9 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
                   onChange={e => setLinkedProjectId(e.target.value)}
                   className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
                 >
-                  <option value="">— None —</option>
+                  <Option value="">— None —</Option>
                   {projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
+                    <Option key={p.id} value={p.id}>{p.name}</Option>
                   ))}
                 </Select>
               </div>
@@ -283,9 +284,9 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
                   onChange={e => setLinkedClientId(e.target.value)}
                   className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
                 >
-                  <option value="">— None —</option>
+                  <Option value="">— None —</Option>
                   {clients.map(c => (
-                    <option key={c.id} value={c.id}>{c.displayName}{c.companyName ? ` · ${c.companyName}` : ''}</option>
+                    <Option key={c.id} value={c.id}>{c.displayName}{c.companyName ? ` · ${c.companyName}` : ''}</Option>
                   ))}
                 </Select>
               </div>
@@ -301,11 +302,10 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
                         key={m.id}
                         type="button"
                         onClick={() => toggleMember(m.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all ${
-                          active
+                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all ${active
                             ? 'bg-(--color-ink) text-white border-(--color-ink)'
                             : 'bg-(--color-surface) text-gray-600 border-transparent hover:border-gray-300'
-                        }`}
+                          }`}
                       >
                         <Avatar name={m.name} id={m.id} size="xs" />
                         {m.name.split(' ')[0]}

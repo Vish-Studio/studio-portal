@@ -1,5 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FormField, { inputCls, selectCls } from '../form-field';
+import Select from '../../select/select';
+import Option from '../../select/option';
 
 const meta = {
   title: 'Common/FormField',
@@ -48,11 +50,11 @@ export const SelectField: Story = {
     label: 'Status',
     required: true,
     children: (
-      <select className={selectCls(false)}>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="lost">Lost</option>
-      </select>
+      <Select className={selectCls(false)}>
+        <Option value="active">Active</Option>
+        <Option value="inactive">Inactive</Option>
+        <Option value="lost">Lost</Option>
+      </Select>
     ),
   },
 };
@@ -70,10 +72,10 @@ export const FullForm: StoryObj = {
         <input type="email" placeholder="sarah@acme.com" className={inputCls(true)} />
       </FormField>
       <FormField label="Status" required>
-        <select className={selectCls(false)}>
-          <option>Active</option>
-          <option>Inactive</option>
-        </select>
+        <Select className={selectCls(false)}>
+          <Option value="active">Active</Option>
+          <Option value="inactive">Inactive</Option>
+        </Select>
       </FormField>
     </div>
   ),

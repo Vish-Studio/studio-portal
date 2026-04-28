@@ -42,18 +42,18 @@ const ProjectCard = ({
   const navigate = useNavigate();
   const { clients } = useClientsStore();
 
-  const accent          = getProjectAccent(project.service, project.package);
+  const accent = getProjectAccent(project.service, project.package);
   const { completedCount, progress } = calcProgress(project);
-  const remaining       = project.agreedPayment - project.paidPayment;
-  const projectMembers  = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
-  const client          = clients.find(c => c.id === project.clientId);
-  const currentStage    = project.stages.find(s => s.status === 'current');
-  const currentMeta     = currentStage ? STAGE_META[currentStage.key] : null;
+  const remaining = project.agreedPayment - project.paidPayment;
+  const projectMembers = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
+  const client = clients.find(c => c.id === project.clientId);
+  const currentStage = project.stages.find(s => s.status === 'current');
+  const currentMeta = currentStage ? STAGE_META[currentStage.key] : null;
 
   return (
     <div
       onClick={() => navigate(`/admin/projects/${project.id}`)}
-      className={`project-card bg-white border border-gray-100 rounded-[16px] hover:border-gray-300 hover:shadow-sm hover:cursor-pointer transition-all duration-150 flex flex-col ${className}`}
+      className={`project-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-300 hover:bg-gray-50 hover:cursor-pointer transition-all duration-150 flex flex-col ${className}`}
     >
       {/* ── Header ── */}
       <div className="px-4 pt-4 pb-3">
@@ -137,16 +137,16 @@ export const ProjectCardMini = ({ project, allMembers = [], actions }: ProjectCa
   const navigate = useNavigate();
   const { clients } = useClientsStore();
 
-  const accent          = getProjectAccent(project.service, project.package);
-  const { progress }    = calcProgress(project);
-  const remaining       = project.agreedPayment - project.paidPayment;
-  const projectMembers  = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
-  const client          = clients.find(c => c.id === project.clientId);
+  const accent = getProjectAccent(project.service, project.package);
+  const { progress } = calcProgress(project);
+  const remaining = project.agreedPayment - project.paidPayment;
+  const projectMembers = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
+  const client = clients.find(c => c.id === project.clientId);
 
   return (
     <div
       onClick={() => navigate(`/admin/projects/${project.id}`)}
-      className="project-card-mini bg-white border border-gray-100 rounded-[14px] px-4 py-3 flex items-center gap-3 hover:bg-gray-50 hover:border-gray-200 hover:cursor-pointer transition-all duration-150 group"
+      className="project-card-mini bg-white border border-gray-200 rounded-[14px] px-4 py-3 flex items-center gap-3 hover:bg-gray-50 hover:border-gray-200 hover:cursor-pointer transition-all duration-150 group"
     >
       {/* Service icon — neutral container */}
       <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">

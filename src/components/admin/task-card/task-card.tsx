@@ -13,44 +13,44 @@ import type { Task, TaskPriority } from '@/src/data/tasks';
 // ─── Priority dot colour ──────────────────────────────────────────────────────
 
 export const PRIORITY_DOT: Record<TaskPriority, string> = {
-  high:   'bg-red-400',
+  high: 'bg-red-400',
   medium: 'bg-amber-400',
-  low:    'bg-gray-300',
+  low: 'bg-gray-300',
 };
 
 // ─── TaskCard ─────────────────────────────────────────────────────────────────
 
 export interface TaskCardProps {
-  task:        Task;
+  task: Task;
   showStatus?: boolean;
-  onClick?:    () => void;
-  onEdit?:     () => void;
-  onDelete?:   () => void;
+  onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const TaskCard: FunctionComponent<TaskCardProps> = ({
   task, showStatus = true, onClick, onEdit, onDelete,
 }) => {
   const { projects } = useProjectsStore();
-  const { members }  = useTeamStore();
+  const { members } = useTeamStore();
 
-  const project  = projects.find(p => p.id === task.projectId);
+  const project = projects.find(p => p.id === task.projectId);
   const assignees = members
     .filter(m => task.assigneeIds?.includes(m.id))
     .map(m => ({ name: m.name, id: m.id }));
 
-  const due     = task.dueDate ? parseISO(task.dueDate) : null;
+  const due = task.dueDate ? parseISO(task.dueDate) : null;
   const overdue = due && isPast(due) && task.status !== 'completed';
 
   const menuActions: RowAction[] = [
-    ...(onEdit   ? [{ label: 'Edit task',   icon: <Pencil size={14} />, onClick: onEdit }] : []),
+    ...(onEdit ? [{ label: 'Edit task', icon: <Pencil size={14} />, onClick: onEdit }] : []),
     ...(onDelete ? [{ label: 'Delete task', icon: <Trash2 size={14} />, onClick: onDelete, variant: 'danger' as const }] : []),
   ];
 
   return (
     <div
       onClick={onClick}
-      className={`task-card bg-white border border-gray-100 rounded-[16px] hover:border-gray-200 hover:shadow-sm transition-all duration-150 flex flex-col ${onClick ? 'cursor-pointer' : ''}`}
+      className={`task-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-200 hover:bg-gray-50 transition-all duration-150 flex flex-col ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* ── Body ── */}
       <div className="px-4 pt-4 pb-3 flex-1">
@@ -93,9 +93,8 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         </div>
 
         {due && (
-          <span className={`text-[10px] font-semibold flex items-center gap-0.5 shrink-0 ${
-            overdue ? 'text-red-500' : 'text-gray-400'
-          }`}>
+          <span className={`text-[10px] font-semibold flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
+            }`}>
             {overdue && <MaterialIcon name="warning" size={10} />}
             {format(due, 'MMM d')}
           </span>

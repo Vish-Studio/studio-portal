@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import FormSidebar, { FormSidebarFooter } from '../form-sidebar';
 import FormField, { inputCls, selectCls } from '../../form-field/form-field';
+import Select from '../../select/select';
+import Option from '../../select/option';
 
 const meta = {
   title: 'Common/FormSidebar',
@@ -43,11 +45,11 @@ const SidebarDemo = ({ width = 'md', title = 'New Client', description = 'Fill i
               <input type="email" placeholder="sarah@acme.com" className={inputCls(false)} />
             </FormField>
             <FormField label="Status" required>
-              <select className={selectCls(false)}>
-                <option>Active</option>
-                <option>Inactive</option>
-                <option>Lost</option>
-              </select>
+              <Select className={selectCls(false)}>
+                <Option value="">Active</Option>
+                <Option value="">Inactive</Option>
+                <Option value="">Lost</Option>
+              </Select>
             </FormField>
           </div>
           <FormSidebarFooter>

@@ -8,6 +8,7 @@ import MaterialIcon from '../components/common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Select from '../components/common/select/select';
+import Option from '../components/common/select/option';
 import ConfirmDialog from '../components/common/confirm-dialog/confirm-dialog';
 import ProjectCard, { ProjectCardMini } from '../components/admin/project-card/project-card';
 import { PhaseSelector } from '../components/admin/project-progress/project-progress';
@@ -39,9 +40,9 @@ const Projects = () => {
 
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [sidebarOpen,      setSidebarOpen]      = useState(false);
-  const [editingProject,   setEditingProject]   = useState<ClientProject | null>(null);
-  const [confirmProject,   setConfirmProject]   = useState<ClientProject | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
+  const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
 
   // Picker / phase state — lives outside react-hook-form
   const [selectedClientId, setSelectedClientId] = useState('');
@@ -63,16 +64,16 @@ const Projects = () => {
 
   // ── Tab counts ──
   const tabCounts = useMemo(() => ({
-    all:       projects.length,
-    active:    projects.filter(p => p.status === 'active').length,
-    paused:    projects.filter(p => p.status === 'paused').length,
+    all: projects.length,
+    active: projects.filter(p => p.status === 'active').length,
+    paused: projects.filter(p => p.status === 'paused').length,
     completed: projects.filter(p => p.status === 'completed').length,
   }), [projects]);
 
   const tabs: TabItem[] = [
-    { key: 'all',       label: 'All',       count: tabCounts.all       },
-    { key: 'active',    label: 'Active',    count: tabCounts.active    },
-    { key: 'paused',    label: 'Paused',    count: tabCounts.paused    },
+    { key: 'all', label: 'All', count: tabCounts.all },
+    { key: 'active', label: 'Active', count: tabCounts.active },
+    { key: 'paused', label: 'Paused', count: tabCounts.paused },
     { key: 'completed', label: 'Completed', count: tabCounts.completed },
   ];
 
@@ -92,14 +93,14 @@ const Projects = () => {
 
   // ── Stats ──
   const totalBudget = projects.reduce((s, p) => s + p.agreedPayment, 0);
-  const totalPaid   = projects.reduce((s, p) => s + p.paidPayment, 0);
+  const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
   const avgProgress = projects.length
     ? Math.round(
-        projects.reduce((s, p) => {
-          const done = p.stages.filter(st => st.status === 'completed').length;
-          return s + (done / ALL_STAGES.length) * 100;
-        }, 0) / projects.length,
-      )
+      projects.reduce((s, p) => {
+        const done = p.stages.filter(st => st.status === 'completed').length;
+        return s + (done / ALL_STAGES.length) * 100;
+      }, 0) / projects.length,
+    )
     : 0;
 
   // ── Sidebar helpers ──
@@ -115,10 +116,10 @@ const Projects = () => {
   const openEdit = (project: ClientProject) => {
     setEditingProject(project);
     reset({
-      name:     project.name,
-      service:  project.service,
-      package:  project.package ?? '',
-      status:   project.status,
+      name: project.name,
+      service: project.service,
+      package: project.package ?? '',
+      status: project.status,
       timeline: project.timeline,
     });
     setSelectedClientId(project.clientId);
@@ -129,12 +130,12 @@ const Projects = () => {
 
   const onSubmit = (data: ProjectFormValues) => {
     const payload = {
-      name:              data.name,
-      service:           data.service,
-      package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
-      status:            data.status,
-      timeline:          data.timeline,
-      clientId:          selectedClientId,
+      name: data.name,
+      service: data.service,
+      package: hasPackages && data.package ? (data.package as PackageType) : undefined,
+      status: data.status,
+      timeline: data.timeline,
+      clientId: selectedClientId,
       assignedMemberIds: selectedMemberIds,
     };
 
@@ -210,11 +211,10 @@ const Projects = () => {
                 key={mode}
                 onClick={() => setViewMode(mode)}
                 aria-label={`${mode} view`}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
-                  viewMode === mode
+                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${viewMode === mode
                     ? 'bg-white text-gray-800 shadow-sm'
                     : 'text-gray-400 hover:text-gray-600'
-                }`}
+                  }`}
               >
                 <MaterialIcon name={mode === 'list' ? 'view_list' : 'grid_view'} size={16} />
               </button>
@@ -242,7 +242,7 @@ const Projects = () => {
                 allMembers={members}
                 variant="surface"
                 actions={[
-                  { label: 'Edit project',   icon: <Pencil size={14} />, onClick: () => openEdit(p)    },
+                  { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
                   { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => handleDelete(p), variant: 'danger' },
                 ]}
               />
@@ -256,7 +256,7 @@ const Projects = () => {
                 project={p}
                 allMembers={members}
                 actions={[
-                  { label: 'Edit project',   icon: <Pencil size={14} />, onClick: () => openEdit(p)    },
+                  { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
                   { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => handleDelete(p), variant: 'danger' },
                 ]}
               />
@@ -294,7 +294,7 @@ const Projects = () => {
               >
                 {(Object.entries(SERVICE_META) as [ServiceType, typeof SERVICE_META[ServiceType]][]).map(
                   ([key, meta]) => (
-                    <option key={key} value={key}>{meta.label}</option>
+                    <Option key={key} value={key}>{meta.label}</Option>
                   ),
                 )}
               </Select>
@@ -307,9 +307,9 @@ const Projects = () => {
                   {...register('package', { required: hasPackages })}
                   hasError={!!errors.package}
                 >
-                  <option value="essentials">Essentials</option>
-                  <option value="growth">Growth</option>
-                  <option value="premium">Premium</option>
+                  <Option value="essentials">Essentials</Option>
+                  <Option value="growth">Growth</Option>
+                  <Option value="premium">Premium</Option>
                 </Select>
               </FormField>
             )}
@@ -320,9 +320,9 @@ const Projects = () => {
                 {...register('status', { required: true })}
                 hasError={!!errors.status}
               >
-                <option value="active">Active</option>
-                <option value="paused">Paused</option>
-                <option value="completed">Completed</option>
+                <Option value="active">Active</Option>
+                <Option value="paused">Paused</Option>
+                <Option value="completed">Completed</Option>
               </Select>
             </FormField>
 

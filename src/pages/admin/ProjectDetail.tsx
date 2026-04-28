@@ -6,6 +6,7 @@ import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
 import Select from '../../components/common/select/select';
+import Option from '../../components/common/select/option';
 import MaterialIcon from '../../components/common/material-icon/material-icon';
 import ProjectHeroCard from '../../components/admin/project-hero-card/project-hero-card';
 import { PhaseTrack, PhaseSelector } from '../../components/admin/project-progress/project-progress';
@@ -55,11 +56,11 @@ const DISABLED_SELECT_CLS =
 type TaskFilter = 'all' | TaskStatus;
 
 const TASK_FILTER_LABELS: Record<TaskFilter, string> = {
-  all:           'All',
-  todo:          'Todo',
+  all: 'All',
+  todo: 'Todo',
   'in-progress': 'In Progress',
-  'to-test':     'To Test',
-  completed:     'Completed',
+  'to-test': 'To Test',
+  completed: 'Completed',
 };
 
 // ─── Project Detail Page ──────────────────────────────────────────────────────
@@ -79,13 +80,13 @@ const ProjectDetail = () => {
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(0);
 
   // ── Task panel state ──
-  const [taskFilter,   setTaskFilter]   = useState<TaskFilter>('all');
-  const [detailTask,   setDetailTask]   = useState<Task | null>(null);
-  const [confirmTask,  setConfirmTask]  = useState<Task | null>(null);
+  const [taskFilter, setTaskFilter] = useState<TaskFilter>('all');
+  const [detailTask, setDetailTask] = useState<Task | null>(null);
+  const [confirmTask, setConfirmTask] = useState<Task | null>(null);
 
   // ── Phase Documents state ──
-  const [assignPhase,  setAssignPhase]  = useState<StageKey | null>(null);
-  const [removeDocId,  setRemoveDocId]  = useState<string | null>(null);
+  const [assignPhase, setAssignPhase] = useState<StageKey | null>(null);
+  const [removeDocId, setRemoveDocId] = useState<string | null>(null);
 
   const {
     register,
@@ -96,7 +97,7 @@ const ProjectDetail = () => {
   } = useForm<ProjectFormValues>();
 
   const watchedService = watch('service');
-  const hasPackages    = watchedService === 'website' || watchedService === 'software';
+  const hasPackages = watchedService === 'website' || watchedService === 'software';
 
   // ── Not found ──
   if (!project) {
@@ -116,11 +117,11 @@ const ProjectDetail = () => {
   }
 
   // Derived values
-  const accent         = getProjectAccent(project.service, project.package);
+  const accent = getProjectAccent(project.service, project.package);
   const projectMembers = members.filter(m => project.assignedMemberIds?.includes(m.id));
   const completedCount = project.stages.filter(s => s.status === 'completed').length;
-  const progress       = Math.round((completedCount / ALL_STAGES.length) * 100);
-  const remaining      = project.agreedPayment - project.paidPayment;
+  const progress = Math.round((completedCount / ALL_STAGES.length) * 100);
+  const remaining = project.agreedPayment - project.paidPayment;
   const selectedClient = DEMO_CLIENTS.find(c => c.id === (isEditing ? selectedClientId : project.clientId));
 
   // ── Project tasks ──
@@ -135,10 +136,10 @@ const ProjectDetail = () => {
 
   const openEdit = () => {
     reset({
-      name:     project.name,
-      service:  project.service,
-      package:  project.package ?? '',
-      status:   project.status,
+      name: project.name,
+      service: project.service,
+      package: project.package ?? '',
+      status: project.status,
       timeline: project.timeline,
     });
     setSelectedClientId(project.clientId);
@@ -154,14 +155,14 @@ const ProjectDetail = () => {
 
   const onSubmit = (data: ProjectFormValues) => {
     updateProject(project.id, {
-      name:              data.name,
-      service:           data.service,
-      package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
-      status:            data.status,
-      timeline:          data.timeline,
-      clientId:          selectedClientId,
+      name: data.name,
+      service: data.service,
+      package: hasPackages && data.package ? (data.package as PackageType) : undefined,
+      status: data.status,
+      timeline: data.timeline,
+      clientId: selectedClientId,
       assignedMemberIds: selectedMemberIds,
-      stages:            buildStages(currentPhaseIndex),
+      stages: buildStages(currentPhaseIndex),
     });
     setIsEditing(false);
   };
@@ -257,7 +258,7 @@ const ProjectDetail = () => {
                   >
                     {(Object.entries(SERVICE_META) as [ServiceType, (typeof SERVICE_META)[ServiceType]][]).map(
                       ([key, meta]) => (
-                        <option key={key} value={key}>{meta.label}</option>
+                        <Option key={key} value={key}>{meta.label}</Option>
                       ),
                     )}
                   </Select>
@@ -272,10 +273,10 @@ const ProjectDetail = () => {
                       hasError={!!errors.package}
                       className={DISABLED_SELECT_CLS}
                     >
-                      <option value="">— None —</option>
-                      <option value="essentials">Essentials</option>
-                      <option value="growth">Growth</option>
-                      <option value="premium">Premium</option>
+                      <Option value="">— None —</Option>
+                      <Option value="essentials">Essentials</Option>
+                      <Option value="growth">Growth</Option>
+                      <Option value="premium">Premium</Option>
                     </Select>
                   </FormField>
                 )}
@@ -288,9 +289,9 @@ const ProjectDetail = () => {
                     hasError={!!errors.status}
                     className={DISABLED_SELECT_CLS}
                   >
-                    <option value="active">Active</option>
-                    <option value="paused">Paused</option>
-                    <option value="completed">Completed</option>
+                    <Option value="active">Active</Option>
+                    <Option value="paused">Paused</Option>
+                    <Option value="completed">Completed</Option>
                   </Select>
                 </FormField>
 
@@ -443,8 +444,8 @@ const ProjectDetail = () => {
               <CardContent iconName="payments" title="Financials" variant="white">
                 <div className="px-4 md:px-6 py-4 md:py-5 flex flex-col gap-2.5">
                   {[
-                    { label: 'Agreed',    value: `$${project.agreedPayment.toLocaleString()}`, cls: 'text-gray-900'   },
-                    { label: 'Paid',      value: `$${project.paidPayment.toLocaleString()}`,   cls: 'text-green-600'  },
+                    { label: 'Agreed', value: `$${project.agreedPayment.toLocaleString()}`, cls: 'text-gray-900' },
+                    { label: 'Paid', value: `$${project.paidPayment.toLocaleString()}`, cls: 'text-green-600' },
                     { label: 'Remaining', value: remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled', cls: remaining > 0 ? 'text-amber-600' : 'text-green-600' },
                   ].map(({ label, value, cls }) => (
                     <div key={label} className="flex items-center justify-between">
@@ -478,7 +479,7 @@ const ProjectDetail = () => {
                     className="text-[11px] font-semibold text-gray-600 bg-gray-100 border-0 rounded-lg px-2.5 py-1.5 pr-6 cursor-pointer focus:ring-2 focus:ring-gray-200"
                   >
                     {(Object.keys(TASK_FILTER_LABELS) as TaskFilter[]).map(k => (
-                      <option key={k} value={k}>{TASK_FILTER_LABELS[k]}</option>
+                      <Option key={k} value={k}>{TASK_FILTER_LABELS[k]}</Option>
                     ))}
                   </Select>
                 </div>
@@ -511,9 +512,9 @@ const ProjectDetail = () => {
             <CardContent iconName="folder_open" title="Phase Documents" variant="white">
               <div className="px-4 md:px-6 py-4 flex flex-col gap-2">
                 {ALL_STAGES.map(phaseKey => {
-                  const meta       = STAGE_META[phaseKey];
+                  const meta = STAGE_META[phaseKey];
                   const assignment = getPhaseAssignment(id!, phaseKey);
-                  const tplMeta    = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
+                  const tplMeta = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
 
                   return (
                     <div
@@ -592,14 +593,14 @@ const ProjectDetail = () => {
             const now = Date.now();
             const newId = `ta_${now}`;
             addAssignment({
-              id:            newId,
-              projectId:     id!,
-              phaseKey:      assignPhase,
-              templateSlug:  slug,
+              id: newId,
+              projectId: id!,
+              phaseKey: assignPhase,
+              templateSlug: slug,
               documentTitle: tplMeta.title,
-              blocks:        [],
-              createdAt:     now,
-              updatedAt:     now,
+              blocks: [],
+              createdAt: now,
+              updatedAt: now,
             });
             setAssignPhase(null);
             navigate(`/admin/projects/${id}/templates/${newId}?phase=${assignPhase}&template=${slug}`);

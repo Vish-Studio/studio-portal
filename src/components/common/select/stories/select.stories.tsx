@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import Select from '../select';
+import Option from '../option';
 import FormField from '../../form-field/form-field';
 
 const meta = {
@@ -16,10 +17,10 @@ export const Default: Story = {
   args: {
     children: (
       <>
-        <option value="">— Select an option —</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="lost">Lost</option>
+        <Option value="">— Select an option —</Option>
+        <Option value="active">Active</Option>
+        <Option value="inactive">Inactive</Option>
+        <Option value="lost">Lost</Option>
       </>
     ),
   },
@@ -31,8 +32,8 @@ export const WithError: Story = {
     hasError: true,
     children: (
       <>
-        <option value="">— Select an option —</option>
-        <option value="active">Active</option>
+        <Option value="">— Select an option —</Option>
+        <Option value="active">Active</Option>
       </>
     ),
   },
@@ -45,8 +46,8 @@ export const Disabled: Story = {
     defaultValue: 'active',
     children: (
       <>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
+        <Option value="active">Active</Option>
+        <Option value="inactive">Inactive</Option>
       </>
     ),
   },
@@ -58,11 +59,11 @@ export const CompactFilter: Story = {
     className: 'text-[11px] font-semibold text-gray-600 bg-gray-100 border-0 rounded-lg px-2.5 py-1.5 pr-6',
     children: (
       <>
-        <option value="all">All</option>
-        <option value="todo">Todo</option>
-        <option value="in-progress">In Progress</option>
-        <option value="to-test">To Test</option>
-        <option value="completed">Completed</option>
+        <Option value="all">All</Option>
+        <Option value="todo">Todo</Option>
+        <Option value="in-progress">In Progress</Option>
+        <Option value="to-test">To Test</Option>
+        <Option value="completed">Completed</Option>
       </>
     ),
   },
@@ -73,18 +74,18 @@ export const InsideFormField: StoryObj = {
     <div className="w-72 flex flex-col gap-4">
       <FormField label="Status" required>
         <Select>
-          <option value="">— Select status —</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="lost">Lost</option>
+          <Option value="">— Select status —</Option>
+          <Option value="active">Active</Option>
+          <Option value="inactive">Inactive</Option>
+          <Option value="lost">Lost</Option>
         </Select>
       </FormField>
       <FormField label="Priority" required error="Priority is required">
         <Select hasError>
-          <option value="">— Select priority —</option>
-          <option value="high">High</option>
-          <option value="medium">Medium</option>
-          <option value="low">Low</option>
+          <Option value="">— Select priority —</Option>
+          <Option value="high">High</Option>
+          <Option value="medium">Medium</Option>
+          <Option value="low">Low</Option>
         </Select>
       </FormField>
     </div>

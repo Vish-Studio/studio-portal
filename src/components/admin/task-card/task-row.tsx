@@ -14,42 +14,42 @@ import { PRIORITY_DOT } from './task-card';
 // ─── TaskRow — compact list-row variant ───────────────────────────────────────
 
 export interface TaskRowProps {
-  task:         Task;
+  task: Task;
   showProject?: boolean;
-  showStatus?:  boolean;
-  onClick?:     () => void;
-  onEdit?:      () => void;
-  onDelete?:    () => void;
+  showStatus?: boolean;
+  onClick?: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 const TaskRow: FunctionComponent<TaskRowProps> = ({
   task,
   showProject = true,
-  showStatus  = true,
+  showStatus = true,
   onClick,
   onEdit,
   onDelete,
 }) => {
   const { projects } = useProjectsStore();
-  const { members }  = useTeamStore();
+  const { members } = useTeamStore();
 
-  const project  = projects.find(p => p.id === task.projectId);
+  const project = projects.find(p => p.id === task.projectId);
   const assignees = members
     .filter(m => task.assigneeIds?.includes(m.id))
     .map(m => ({ name: m.name, id: m.id }));
 
-  const due     = task.dueDate ? parseISO(task.dueDate) : null;
+  const due = task.dueDate ? parseISO(task.dueDate) : null;
   const overdue = due && isPast(due) && task.status !== 'completed';
 
   const menuActions: RowAction[] = [
-    ...(onEdit   ? [{ label: 'Edit task',   icon: <Pencil size={14} />, onClick: onEdit }] : []),
+    ...(onEdit ? [{ label: 'Edit task', icon: <Pencil size={14} />, onClick: onEdit }] : []),
     ...(onDelete ? [{ label: 'Delete task', icon: <Trash2 size={14} />, onClick: onDelete, variant: 'danger' as const }] : []),
   ];
 
   return (
     <div
       onClick={onClick}
-      className={`task-row flex items-center gap-3 px-4 py-3 bg-white border border-gray-100 rounded-[14px] hover:bg-gray-50/80 hover:border-gray-200 transition-all duration-150 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`task-row flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-[14px] hover:bg-gray-50/80 hover:border-gray-200 transition-all duration-150 ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* Priority indicator */}
       <span className={`w-1.5 h-1.5 rounded-xs shrink-0 ${PRIORITY_DOT[task.priority]}`} />
@@ -64,9 +64,8 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
 
       {/* Due date */}
       {due && (
-        <span className={`hidden md:flex items-center gap-0.5 text-[11px] font-semibold shrink-0 ${
-          overdue ? 'text-red-500' : 'text-gray-400'
-        }`}>
+        <span className={`hidden md:flex items-center gap-0.5 text-[11px] font-semibold shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
+          }`}>
           {overdue && <MaterialIcon name="warning" size={10} />}
           {format(due, 'MMM d')}
         </span>

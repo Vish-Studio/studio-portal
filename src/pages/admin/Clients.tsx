@@ -9,6 +9,7 @@ import TableTab, { type TabItem } from '../../components/common/table-tab/table-
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
 import Select from '../../components/common/select/select';
+import Option from '../../components/common/select/option';
 import Fab from '../../components/common/button-fab/button-fab';
 import { ClientStatusBadge } from '../../components/common/status-badge/status-badge';
 import { useClientsStore } from '../../store/clients';
@@ -264,9 +265,9 @@ export default function Clients() {
                 {...register('status', { required: 'Status is required' })}
                 hasError={!!errors.status}
               >
-                <option value="active">Active — recurring client</option>
-                <option value="inactive">Inactive — no longer active</option>
-                <option value="lost">Lost — churned</option>
+                <Option value="active">Active — recurring client</Option>
+                <Option value="inactive">Inactive — no longer active</Option>
+                <Option value="lost">Lost — churned</Option>
               </Select>
             </FormField>
 
