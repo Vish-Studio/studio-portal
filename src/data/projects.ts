@@ -86,6 +86,18 @@ export interface ProjectStage {
   status: StageStatus;
 }
 
+// ─── Custom project timeline ──────────────────────────────────────────────────
+
+export interface TimelineEvent {
+  id:           string;
+  icon:         string; // Material Symbol name
+  title:        string;
+  date:         string; // Free-form display string, e.g. "Jan 15, 2025"
+  description?: string;
+}
+
+// ─── Project ──────────────────────────────────────────────────────────────────
+
 export interface ClientProject {
   id: string;
   clientId: string;
@@ -100,6 +112,8 @@ export interface ClientProject {
   package?: PackageType;
   /** IDs referencing TeamMember.id from data/team.ts */
   assignedMemberIds?: string[];
+  /** Admin-managed custom milestone timeline */
+  customTimeline?: TimelineEvent[];
 }
 
 export const STAGE_META: Record<StageKey, { label: string; shortLabel: string; icon: string }> = {

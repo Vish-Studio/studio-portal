@@ -195,31 +195,41 @@ const Projects = () => {
         </div>
 
         {/* ── Toolbar ── */}
-        <div className="flex items-center gap-3 flex-wrap">
-          <TableTab
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            actionLabel="Add Project"
-            onAction={openAdd}
-          />
+        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <TableTab
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              className="min-w-0 flex-1 md:flex-none"
+            />
 
-          {/* View toggle — desktop only */}
-          <div className="ml-auto hidden md:flex items-center gap-0.5 bg-gray-100 rounded-xl p-1 shrink-0">
-            {(['list', 'grid'] as const).map(mode => (
-              <button
-                key={mode}
-                onClick={() => setViewMode(mode)}
-                aria-label={`${mode} view`}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${viewMode === mode
-                    ? 'bg-white text-gray-800 shadow-sm'
-                    : 'text-gray-400 hover:text-gray-600'
-                  }`}
-              >
-                <MaterialIcon name={mode === 'list' ? 'view_list' : 'grid_view'} size={16} />
-              </button>
-            ))}
+            {/* View toggle — desktop only */}
+            <div className="hidden md:flex items-center gap-0.5 bg-gray-100 rounded-xl p-1 shrink-0">
+              {(['list', 'grid'] as const).map(mode => (
+                <button
+                  key={mode}
+                  onClick={() => setViewMode(mode)}
+                  aria-label={`${mode} view`}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${viewMode === mode
+                      ? 'bg-white text-gray-800 shadow-sm'
+                      : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                >
+                  <MaterialIcon name={mode === 'list' ? 'view_list' : 'grid_view'} size={16} />
+                </button>
+              ))}
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={openAdd}
+            className="hidden sm:flex items-center gap-2 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors shrink-0 ml-auto"
+          >
+            <MaterialIcon name="add" size={20} />
+            Add Project
+          </button>
         </div>
 
         {/* ── Content ── */}
@@ -250,6 +260,14 @@ const Projects = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
+            <div className="hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+              <span>Project</span>
+              <span className="text-right">Progress</span>
+              <span className="text-right">Budget</span>
+              <span className="text-right">Remaining</span>
+              <span className="text-right">Status</span>
+              <span />
+            </div>
             {filtered.map(p => (
               <ProjectCardMini
                 key={p.id}

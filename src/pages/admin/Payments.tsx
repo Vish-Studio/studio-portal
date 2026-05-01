@@ -232,11 +232,13 @@ const Payments = () => {
 
         <div className="flex-1 min-h-0 flex flex-col gap-3">
           {/* Tabs */}
-          <TableTab
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={key => setActiveTab(key as FilterKey)}
-          />
+          <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+            <TableTab
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={key => setActiveTab(key as FilterKey)}
+            />
+          </div>
 
           {/* Table — flex-1 min-h-0 ensures it fills the remaining height */}
           <div className="flex-1 min-h-0">

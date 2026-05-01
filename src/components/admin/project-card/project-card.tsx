@@ -3,7 +3,7 @@ import MaterialIcon from '../../common/material-icon/material-icon';
 import { ProjectStatusBadge } from '../../common/status-badge/status-badge';
 import { AvatarStack } from '../../common/avatar/avatar';
 import type { AvatarStackMember } from '../../common/avatar/avatar';
-import { RowActionsMenu, RowActions } from '../../common/table/table';
+import { RowActionsMenu } from '../../common/table/table';
 import type { RowAction } from '../../common/table/table';
 import { ALL_STAGES, STAGE_META, getProjectAccent } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
@@ -133,74 +133,62 @@ export interface ProjectCardMiniProps {
   actions?: RowAction[];
 }
 
-export const ProjectCardMini = ({ project, allMembers = [], actions }: ProjectCardMiniProps) => {
+export const ProjectCardMini = ({ project, actions }: ProjectCardMiniProps) => {
   const navigate = useNavigate();
   const { clients } = useClientsStore();
 
   const accent = getProjectAccent(project.service, project.package);
   const { progress } = calcProgress(project);
   const remaining = project.agreedPayment - project.paidPayment;
-  const projectMembers = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
   const client = clients.find(c => c.id === project.clientId);
 
   return (
     <div
       onClick={() => navigate(`/admin/projects/${project.id}`)}
-      className="project-card-mini bg-white border border-gray-200 rounded-[14px] px-4 py-3 flex items-center gap-3 hover:bg-gray-50 hover:border-gray-200 hover:cursor-pointer transition-all duration-150 group"
+      className="project-card-mini relative bg-white border border-gray-200 rounded-[12px] px-3 py-3 hover:bg-gray-50 hover:border-gray-300 hover:cursor-pointer transition-all duration-150 md:px-4"
     >
-      {/* Service icon — neutral container */}
-      <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-        <MaterialIcon name={accent.icon} size={14} className="text-gray-500" />
-      </div>
-
-      {/* Name + client */}
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{project.name}</p>
-        <p className="text-[10px] text-gray-400 truncate">
-          {accent.label}{client ? ` · ${client.displayName}` : ''}
-        </p>
-      </div>
-
-      {/* Progress bar — desktop only */}
-      <div className="hidden md:flex items-center gap-2 w-28 shrink-0">
-        <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-          <div className="h-full bg-gray-600 rounded-full" style={{ width: `${progress}%` }} />
+      <div className="grid items-center gap-3 md:grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_32px]">
+        {/* Project */}
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <MaterialIcon name={accent.icon} size={15} className="text-gray-400 shrink-0" />
+            <p className="truncate text-sm font-semibold leading-tight text-gray-900">{project.name}</p>
+          </div>
+          <p className="mt-1 truncate pl-6 text-[11px] text-gray-400">
+            {accent.label}{client ? ` · ${client.displayName}` : ''}
+          </p>
         </div>
-        <span className="text-[11px] text-gray-400 tabular-nums w-7 text-right">{progress}%</span>
-      </div>
 
-      {/* Budget — lg+ */}
-      <div className="hidden lg:block shrink-0 text-right w-14">
-        <p className="text-sm font-semibold text-gray-700">${(project.agreedPayment / 1000).toFixed(0)}k</p>
-        <p className="text-[10px] text-gray-400">budget</p>
-      </div>
+        {/* Progress */}
+        <div className="flex items-center gap-2 md:justify-end">
+          <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 md:w-16">
+            <div className="h-full rounded-full bg-gray-600" style={{ width: `${progress}%` }} />
+          </div>
+          <span className="w-8 text-right text-[11px] text-gray-400 tabular-nums">{progress}%</span>
+        </div>
 
-      {/* Remaining — xl+ */}
-      <div className="hidden xl:block shrink-0 text-right w-16">
-        <p className={`text-sm font-semibold ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
+        {/* Budget */}
+        <p className="hidden text-right text-sm font-semibold text-gray-700 tabular-nums md:block">
+          ${(project.agreedPayment / 1000).toFixed(0)}k
+        </p>
+
+        {/* Remaining */}
+        <p className={`hidden text-right text-sm font-semibold tabular-nums md:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
           {remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'}
         </p>
-        <p className="text-[10px] text-gray-400">remaining</p>
-      </div>
 
-      {/* Team avatars */}
-      {projectMembers.length > 0 && (
-        <div className="hidden sm:block shrink-0" onClick={e => e.stopPropagation()}>
-          <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />
+        {/* Status */}
+        <div className="flex justify-start md:justify-end">
+          <ProjectStatusBadge status={project.status} />
         </div>
-      )}
 
-      {/* Status */}
-      <div className="shrink-0">
-        <ProjectStatusBadge status={project.status} />
+        {/* Actions */}
+        {actions && (
+          <div className="absolute right-3 top-3 md:static md:flex md:justify-end" onClick={e => e.stopPropagation()}>
+            <RowActionsMenu actions={actions} />
+          </div>
+        )}
       </div>
-
-      {/* Actions */}
-      {actions && (
-        <div onClick={e => e.stopPropagation()}>
-          <RowActions actions={actions} />
-        </div>
-      )}
     </div>
   );
 };

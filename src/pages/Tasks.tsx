@@ -153,37 +153,49 @@ const Tasks = () => {
       <div className="flex flex-col gap-4 pb-10">
 
         {/* ── Toolbar: tabs + view toggle + add button ── */}
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
 
-          {/* Tab pills */}
-          <div className="flex items-center gap-1 p-1 bg-gray-100 rounded-xl overflow-x-auto">
-            {TABS.map(tab => {
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap ${isActive
-                    ? tab.activeCls + ' shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-white/70'
-                    }`}
-                >
-                  {tab.label}
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none ${isActive ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-500'
-                    }`}>
-                    {counts[tab.key]}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            {/* Mobile tab dropdown */}
+            <Select
+              value={activeTab}
+              onChange={event => setActiveTab(event.target.value as FilterKey)}
+              wrapperClassName="w-full sm:hidden"
+              className="py-2.5"
+            >
+              {TABS.map(tab => (
+                <Option key={tab.key} value={tab.key}>
+                  {tab.label} ({counts[tab.key]})
+                </Option>
+              ))}
+            </Select>
 
-          {/* Right controls — desktop */}
-          <div className="hidden sm:flex items-center gap-2 ml-auto">
+            {/* Tab pills */}
+            <div className="hidden items-center gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1 no-scrollbar sm:flex">
+              {TABS.map(tab => {
+                const isActive = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex shrink-0 items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap ${isActive
+                      ? tab.activeCls + ' shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800 hover:bg-white/70'
+                      }`}
+                  >
+                    {tab.label}
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none ${isActive ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-500'
+                      }`}>
+                      {counts[tab.key]}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
 
-            {/* View toggle */}
-            <div className="flex items-center gap-0.5 p-1 bg-gray-100 rounded-xl">
+            {/* View toggle — desktop */}
+            <div className="hidden sm:flex items-center gap-0.5 p-1 bg-gray-100 rounded-xl shrink-0">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
@@ -203,17 +215,17 @@ const Tasks = () => {
                 <List size={14} />
               </button>
             </div>
-
-            {/* Add Task */}
-            <button
-              type="button"
-              onClick={openAdd}
-              className="flex items-center gap-2 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-700 transition-colors"
-            >
-              <Plus size={14} />
-              Add Task
-            </button>
           </div>
+
+          {/* Add Task */}
+          <button
+            type="button"
+            onClick={openAdd}
+            className="hidden sm:flex items-center gap-2 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-700 transition-colors shrink-0 ml-auto"
+          >
+            <Plus size={14} />
+            Add Task
+          </button>
         </div>
 
         {/* ── Content ── */}
