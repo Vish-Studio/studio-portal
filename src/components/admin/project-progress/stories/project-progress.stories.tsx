@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useState } from 'react';
-import { PhaseTrack, PhaseSelector, ProjectProgressBar } from '../project-progress';
+import { PhaseTrack, ProjectProgressBar } from '../project-progress';
 import { DEMO_PROJECTS, getProjectAccent } from '@/src/data/projects';
 
-const earlyProject  = DEMO_PROJECTS[1]; // 1 stage done
-const midProject    = DEMO_PROJECTS[0]; // 4 stages done
-const lateProject   = DEMO_PROJECTS[2]; // 6 stages done
-const doneProject   = DEMO_PROJECTS[3]; // all 8 done
+const earlyProject = DEMO_PROJECTS[1]; // 1 phase done
+const midProject   = DEMO_PROJECTS[0]; // 4 phases done
+const lateProject  = DEMO_PROJECTS[2]; // 6 phases done
+const doneProject  = DEMO_PROJECTS[3]; // all 9 done
 
 const meta = {
   title: 'Admin/ProjectProgress',
@@ -21,8 +20,8 @@ export default meta;
 export const PhaseTrackEarly: StoryObj = {
   render: () => (
     <div className="max-w-xl">
-      <p className="text-xs text-gray-400 mb-3">Early stage — 1/8 complete</p>
-      <PhaseTrack stages={earlyProject.stages} accent={getProjectAccent(earlyProject.service)} size="md" />
+      <p className="text-xs text-gray-400 mb-3">Early — 1 phase done</p>
+      <PhaseTrack phases={earlyProject.phases} accent={getProjectAccent(earlyProject.service)} size="md" />
     </div>
   ),
 };
@@ -30,8 +29,8 @@ export const PhaseTrackEarly: StoryObj = {
 export const PhaseTrackMid: StoryObj = {
   render: () => (
     <div className="max-w-xl">
-      <p className="text-xs text-gray-400 mb-3">Mid stage — 4/8 complete</p>
-      <PhaseTrack stages={midProject.stages} accent={getProjectAccent(midProject.service, midProject.package)} size="md" />
+      <p className="text-xs text-gray-400 mb-3">Mid — 4 phases done</p>
+      <PhaseTrack phases={midProject.phases} accent={getProjectAccent(midProject.service, midProject.package)} size="md" />
     </div>
   ),
 };
@@ -39,8 +38,8 @@ export const PhaseTrackMid: StoryObj = {
 export const PhaseTrackComplete: StoryObj = {
   render: () => (
     <div className="max-w-xl">
-      <p className="text-xs text-gray-400 mb-3">All stages complete — 8/8</p>
-      <PhaseTrack stages={doneProject.stages} accent={getProjectAccent(doneProject.service)} size="md" />
+      <p className="text-xs text-gray-400 mb-3">All phases complete</p>
+      <PhaseTrack phases={doneProject.phases} accent={getProjectAccent(doneProject.service)} size="md" />
     </div>
   ),
 };
@@ -49,7 +48,7 @@ export const PhaseTrackSmall: StoryObj = {
   render: () => (
     <div className="max-w-sm">
       <p className="text-xs text-gray-400 mb-3">Card size (sm) — horizontal pills</p>
-      <PhaseTrack stages={midProject.stages} accent={getProjectAccent(midProject.service)} size="sm" />
+      <PhaseTrack phases={midProject.phases} accent={getProjectAccent(midProject.service)} size="sm" />
     </div>
   ),
 };
@@ -59,36 +58,9 @@ export const PhaseTrackMobileCollapse: StoryObj = {
   render: () => (
     <div className="max-w-sm p-4">
       <p className="text-xs text-gray-400 mb-3">Mobile: collapsed bar → tap to expand vertical list</p>
-      <PhaseTrack stages={midProject.stages} accent={getProjectAccent(midProject.service)} size="sm" />
+      <PhaseTrack phases={midProject.phases} accent={getProjectAccent(midProject.service)} size="sm" />
     </div>
   ),
-};
-
-// ─── PhaseSelector (form input) ───────────────────────────────────────────────
-
-export const PhaseSelectorInteractive: StoryObj = {
-  render: () => {
-    const [idx, setIdx] = useState(3);
-    return (
-      <div className="max-w-sm flex flex-col gap-3">
-        <p className="text-xs text-gray-400">Selected index: <strong>{idx}</strong></p>
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-x-auto">
-          <PhaseSelector selectedIndex={idx} onChange={setIdx} />
-        </div>
-      </div>
-    );
-  },
-};
-
-export const PhaseSelectorAllDone: StoryObj = {
-  render: () => {
-    const [idx, setIdx] = useState(8);
-    return (
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 overflow-x-auto max-w-sm">
-        <PhaseSelector selectedIndex={idx} onChange={setIdx} />
-      </div>
-    );
-  },
 };
 
 // ─── ProjectProgressBar ───────────────────────────────────────────────────────

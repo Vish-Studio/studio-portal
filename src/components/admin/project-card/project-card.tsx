@@ -5,120 +5,84 @@ import { AvatarStack } from '../../common/avatar/avatar';
 import type { AvatarStackMember } from '../../common/avatar/avatar';
 import { RowActionsMenu } from '../../common/table/table';
 import type { RowAction } from '../../common/table/table';
-import { ALL_STAGES, STAGE_META, getProjectAccent } from '@/src/data/projects';
+import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
 import type { TeamMember } from '@/src/data/team';
 import { useClientsStore } from '@/src/store/clients';
 
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
 export const calcProgress = (project: ClientProject) => {
-  const done = project.stages.filter(s => s.status === 'completed').length;
-  return { completedCount: done, progress: Math.round((done / ALL_STAGES.length) * 100) };
+  const done     = project.phases.filter(p => p.status === 'done').length;
+  const progress = getPhaseProgress(project.phases);
+  return { completedCount: done, progress };
 };
 
 const toStackMembers = (members: TeamMember[]): AvatarStackMember[] =>
   members.map(m => ({ name: m.name, id: m.id }));
 
-// ─── ProjectCard props ────────────────────────────────────────────────────────
-
 export interface ProjectCardProps {
   project: ClientProject;
   allMembers?: TeamMember[];
   actions?: RowAction[];
-  /** 'default' | 'surface' kept for backwards compatibility — both render the same clean card */
   variant?: 'default' | 'surface';
   className?: string;
 }
 
-// ─── ProjectCard — clean, minimal single design ───────────────────────────────
-
-const ProjectCard = ({
-  project,
-  allMembers = [],
-  actions,
-  className = '',
-}: ProjectCardProps) => {
+const ProjectCard = ({ project, allMembers = [], actions, className = '' }: ProjectCardProps) => {
   const navigate = useNavigate();
   const { clients } = useClientsStore();
 
-  const accent = getProjectAccent(project.service, project.package);
+  const accent         = getProjectAccent(project.service, project.package);
   const { completedCount, progress } = calcProgress(project);
-  const remaining = project.agreedPayment - project.paidPayment;
+  const remaining      = project.agreedPayment - project.paidPayment;
   const projectMembers = allMembers.filter(m => project.assignedMemberIds?.includes(m.id));
-  const client = clients.find(c => c.id === project.clientId);
-  const currentStage = project.stages.find(s => s.status === 'current');
-  const currentMeta = currentStage ? STAGE_META[currentStage.key] : null;
+  const client         = clients.find(c => c.id === project.clientId);
+  const activePhase    = project.phases.find(p => p.status === 'active');
 
   return (
     <div
       onClick={() => navigate(`/admin/projects/${project.id}`)}
       className={`project-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-300 hover:bg-gray-50 hover:cursor-pointer transition-all duration-150 flex flex-col ${className}`}
     >
-      {/* ── Header ── */}
       <div className="px-4 pt-4 pb-3">
-
-        {/* Name + status + actions */}
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 flex-1 min-w-0">
-            {project.name}
-          </h3>
-          <div
-            className="flex items-center gap-1 shrink-0 mt-0.5"
-            onClick={e => e.stopPropagation()}
-          >
+          <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 flex-1 min-w-0">{project.name}</h3>
+          <div className="flex items-center gap-1 shrink-0 mt-0.5" onClick={e => e.stopPropagation()}>
             <ProjectStatusBadge status={project.status} />
             {actions && <RowActionsMenu actions={actions} />}
           </div>
         </div>
 
-        {/* Service · Client */}
         <p className="text-[11px] text-gray-400 truncate">
-          {accent.label}
-          {client ? ` · ${client.displayName}` : ''}
+          {accent.label}{client ? ` · ${client.displayName}` : ''}
         </p>
 
-        {/* Progress bar */}
         <div className="mt-3.5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[10px] text-gray-400">
-              {completedCount}/{ALL_STAGES.length} phases
-              {currentMeta && project.status === 'active' && (
-                <span className="text-gray-300"> · {currentMeta.label}</span>
+              {completedCount}/{project.phases.length} phases
+              {activePhase && project.status === 'active' && (
+                <span className="text-gray-300"> · {activePhase.title}</span>
               )}
             </span>
             <span className="text-[11px] font-bold text-gray-600 tabular-nums">{progress}%</span>
           </div>
           <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gray-700 rounded-full transition-all"
-              style={{ width: `${progress}%` }}
-            />
+            <div className="h-full bg-gray-700 rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
       </div>
 
-      {/* ── Footer ── */}
       <div className="px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
         <div className="flex items-center gap-2 text-[11px] text-gray-400 flex-wrap">
           <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>
           <span className="text-gray-200">·</span>
           <span>{project.timeline}</span>
           {remaining === 0 && (
-            <>
-              <span className="text-gray-200">·</span>
-              <span className="font-semibold text-green-500">Settled</span>
-            </>
+            <><span className="text-gray-200">·</span><span className="font-semibold text-green-500">Settled</span></>
           )}
         </div>
-
-        <div
-          className="flex items-center gap-2 shrink-0"
-          onClick={e => e.stopPropagation()}
-        >
-          {projectMembers.length > 0 && (
-            <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />
-          )}
+        <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+          {projectMembers.length > 0 && <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />}
         </div>
       </div>
     </div>
@@ -137,10 +101,10 @@ export const ProjectCardMini = ({ project, actions }: ProjectCardMiniProps) => {
   const navigate = useNavigate();
   const { clients } = useClientsStore();
 
-  const accent = getProjectAccent(project.service, project.package);
+  const accent    = getProjectAccent(project.service, project.package);
   const { progress } = calcProgress(project);
   const remaining = project.agreedPayment - project.paidPayment;
-  const client = clients.find(c => c.id === project.clientId);
+  const client    = clients.find(c => c.id === project.clientId);
 
   return (
     <div
@@ -148,7 +112,6 @@ export const ProjectCardMini = ({ project, actions }: ProjectCardMiniProps) => {
       className="project-card-mini relative bg-white border border-gray-200 rounded-[12px] px-3 py-3 hover:bg-gray-50 hover:border-gray-300 hover:cursor-pointer transition-all duration-150 md:px-4"
     >
       <div className="grid items-center gap-3 md:grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_32px]">
-        {/* Project */}
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <MaterialIcon name={accent.icon} size={15} className="text-gray-400 shrink-0" />
@@ -159,7 +122,6 @@ export const ProjectCardMini = ({ project, actions }: ProjectCardMiniProps) => {
           </p>
         </div>
 
-        {/* Progress */}
         <div className="flex items-center gap-2 md:justify-end">
           <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 md:w-16">
             <div className="h-full rounded-full bg-gray-600" style={{ width: `${progress}%` }} />
@@ -167,22 +129,18 @@ export const ProjectCardMini = ({ project, actions }: ProjectCardMiniProps) => {
           <span className="w-8 text-right text-[11px] text-gray-400 tabular-nums">{progress}%</span>
         </div>
 
-        {/* Budget */}
         <p className="hidden text-right text-sm font-semibold text-gray-700 tabular-nums md:block">
           ${(project.agreedPayment / 1000).toFixed(0)}k
         </p>
 
-        {/* Remaining */}
         <p className={`hidden text-right text-sm font-semibold tabular-nums md:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
           {remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'}
         </p>
 
-        {/* Status */}
         <div className="flex justify-start md:justify-end">
           <ProjectStatusBadge status={project.status} />
         </div>
 
-        {/* Actions */}
         {actions && (
           <div className="absolute right-3 top-3 md:static md:flex md:justify-end" onClick={e => e.stopPropagation()}>
             <RowActionsMenu actions={actions} />

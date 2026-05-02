@@ -173,7 +173,6 @@ export default function Clients() {
       render: row => (
         <RowActions
           actions={[
-            { label: 'View client', icon: <ExternalLink size={14} />, onClick: () => navigate(`/admin/clients/${row.id}`) },
             { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => openEdit(row) },
             { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(row), variant: 'danger' },
           ]}

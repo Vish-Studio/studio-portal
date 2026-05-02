@@ -9,7 +9,7 @@ import { ProjectStatusBadge } from '../components/common/status-badge/status-bad
 import { useProjectsStore } from '../store/projects';
 import { useClientsStore } from '../store/clients';
 import { useTeamStore } from '../store/team';
-import { getProjectAccent, ALL_STAGES } from '../data/projects';
+import { getProjectAccent, getPhaseProgress } from '../data/projects';
 import type { ClientProject } from '../data/projects';
 import type { TeamMember } from '../data/team';
 
@@ -20,8 +20,7 @@ const ProjectRow = ({ project }: { project: ClientProject }) => {
   const { clients } = useClientsStore();
   const accent      = getProjectAccent(project.service, project.package);
   const client      = clients.find(c => c.id === project.clientId);
-  const done        = project.stages.filter(s => s.status === 'completed').length;
-  const progress    = Math.round((done / ALL_STAGES.length) * 100);
+  const progress    = getPhaseProgress(project.phases);
 
   return (
     <button

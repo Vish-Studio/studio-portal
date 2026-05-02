@@ -10,9 +10,7 @@ import { useTemplateAssignmentsStore } from '../../store/template-assignments';
 import { useProjectsStore } from '../../store/projects';
 import { getDefaultBlocks } from '../../data/template-blocks';
 import { TEMPLATES } from '../../data/templates';
-import { STAGE_META } from '../../data/projects';
 import type { TemplateBlock } from '../../data/template-blocks';
-import type { StageKey } from '../../data/projects';
 
 // ─── TemplateEditor Page ──────────────────────────────────────────────────────
 
@@ -28,7 +26,7 @@ export default function TemplateEditor() {
 
   // Determine if creating new or editing existing
   const isNew   = assignmentId === 'new';
-  const phaseKey  = searchParams.get('phase') as StageKey | null;
+  const phaseKey  = searchParams.get('phase');
   const templateSlug = searchParams.get('template') ?? 'contract';
   const tplMeta  = TEMPLATES.find(t => t.slug === templateSlug);
 
@@ -171,15 +169,18 @@ export default function TemplateEditor() {
             </button>
           )}
 
-          {/* Phase badge */}
-          {(phaseKey ?? existing?.phaseKey) && (
-            <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
-              <span className="material-symbols-rounded text-[14px]">
-                {STAGE_META[(phaseKey ?? existing?.phaseKey)!].icon}
+          {/* Phase badge — look up from the project's phases array */}
+          {(() => {
+            const pid = phaseKey ?? existing?.phaseKey;
+            const phase = pid ? project?.phases.find(p => p.id === pid) : null;
+            if (!phase) return null;
+            return (
+              <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                <span className="material-symbols-rounded text-[14px]">{phase.icon}</span>
+                {phase.title}
               </span>
-              {STAGE_META[(phaseKey ?? existing?.phaseKey)!].label}
-            </span>
-          )}
+            );
+          })()}
         </div>
 
         <div className="flex items-center gap-2">

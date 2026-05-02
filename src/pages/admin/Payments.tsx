@@ -6,6 +6,7 @@ import TableData, { RowActions, type Column } from '@/src/components/common/tabl
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
 import { useUIStore } from '@/src/store/ui';
+import MaterialIcon from '@/src/components/common/material-icon/material-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -189,9 +190,16 @@ const Payments = () => {
       render: _row => (
         <RowActions
           actions={[
-            { label: 'View invoice', icon: <Eye size={14} />, onClick: () => { } },
-            { label: 'Edit payment', icon: <Pencil size={14} />, onClick: () => { } },
-            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => { }, variant: 'danger' },
+            {
+              label: 'Edit payment',
+              icon: <MaterialIcon name="edit" size={16} />,
+              onClick: () => { }
+            },
+            {
+              label: 'Delete', icon: <MaterialIcon name="delete" size={16} />,
+              onClick: () => { },
+              variant: 'danger'
+            },
           ]}
         />
       ),

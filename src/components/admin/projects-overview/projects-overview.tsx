@@ -5,7 +5,7 @@ import MaterialIcon from '../../common/material-icon/material-icon';
 import { ProjectStatusBadge } from '../../common/status-badge/status-badge';
 import { AvatarStack } from '../../common/avatar/avatar';
 import type { AvatarStackMember } from '../../common/avatar/avatar';
-import { getProjectAccent, ALL_STAGES } from '@/src/data/projects';
+import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
 import type { TeamMember } from '@/src/data/team';
 
@@ -47,8 +47,7 @@ const ProjectsOverview = ({ projects, members, limit = 4 }: ProjectsOverviewProp
         <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
           {recent.map(project => {
             const accent = getProjectAccent(project.service, project.package);
-            const completedCount = project.stages.filter(s => s.status === 'completed').length;
-            const progress = Math.round((completedCount / ALL_STAGES.length) * 100);
+            const progress = getPhaseProgress(project.phases);
 
             const projectMembers: AvatarStackMember[] = members
               .filter(m => project.assignedMemberIds?.includes(m.id))

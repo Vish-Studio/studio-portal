@@ -8,7 +8,7 @@ import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-
 import { TaskStatusBadge } from '@/src/components/common/status-badge/status-badge';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
-import { getProjectAccent, ALL_STAGES } from '@/src/data/projects';
+import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import { DEMO_CLIENTS } from '@/src/data/clients';
 
 // Simulated logged-in client — would come from auth context in production
@@ -113,8 +113,7 @@ const UserDashboard = () => {
                 <div className="divide-y divide-gray-100">
                   {myProjects.map(project => {
                     const accent = getProjectAccent(project.service, project.package);
-                    const completedCount = project.stages.filter(s => s.status === 'completed').length;
-                    const progress = Math.round((completedCount / ALL_STAGES.length) * 100);
+                    const progress = getPhaseProgress(project.phases);
                     const projectTaskCount = tasks.filter(t => t.projectId === project.id).length;
                     const openTaskCount = tasks.filter(t => t.projectId === project.id && t.status !== 'completed').length;
 
