@@ -20,6 +20,13 @@ import Payments from './pages/admin/Payments';
 import ProjectDetail from './pages/admin/ProjectDetail';
 import TemplateEditor from './pages/admin/TemplateEditor';
 import SignIn from './pages/SignIn';
+import UserDashboard from './pages/user/UserDashboard';
+import UserProjects from './pages/user/UserProjects';
+import UserCalendar from './pages/user/UserCalendar';
+import UserTasks from './pages/user/UserTasks';
+import UserPayments from './pages/user/UserPayments';
+import UserDocuments from './pages/user/UserDocuments';
+import UserSettings from './pages/user/UserSettings';
 
 export default function App() {
   return (
@@ -27,6 +34,15 @@ export default function App() {
       <Routes>
         {/* Redirect root to admin */}
         <Route path="/" element={<Navigate to="/admin" replace />} />
+
+        {/* User / client routes */}
+        <Route path="/user" element={<UserDashboard />} />
+        <Route path="/user/projects" element={<UserProjects />} />
+        <Route path="/user/calendar" element={<UserCalendar />} />
+        <Route path="/user/tasks" element={<UserTasks />} />
+        <Route path="/user/payments" element={<UserPayments />} />
+        <Route path="/user/documents" element={<UserDocuments />} />
+        <Route path="/user/settings" element={<UserSettings />} />
 
         {/* Admin routes */}
         <Route path="/admin" element={<Dashboard />} />
