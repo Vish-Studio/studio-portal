@@ -6,16 +6,17 @@ import MaterialIcon from '../../common/material-icon/material-icon';
 import Avatar from '../../common/avatar/avatar';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
-import { DEMO_CLIENTS } from '@/src/data/clients';
+import { useClientsStore } from '@/src/store/clients';
 
 interface Props { project: ClientProject; className?: string; }
 
 const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) => {
+  const { clients }    = useClientsStore();
   const accent         = getProjectAccent(project.service, project.package);
   const doneCount      = project.phases.filter(p => p.status === 'done').length;
   const progress       = getPhaseProgress(project.phases);
   const remaining      = project.agreedPayment - project.paidPayment;
-  const client         = DEMO_CLIENTS.find(c => c.id === project.clientId);
+  const client         = clients.find(c => c.id === project.clientId);
   const activePhase    = project.phases.find(p => p.status === 'active');
 
   return (

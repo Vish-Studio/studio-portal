@@ -8,6 +8,7 @@ import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
 import ContentCard from '../../common/card-content/card-content';
+import ButtonIcon from '../../common/button-icon/button-icon';
 
 export type { ScheduleEvent };
 
@@ -92,13 +93,16 @@ export default function DailySchedule({ date, events, onAddEvent, onEditEvent, o
         bodyClassName="flex flex-col gap-4 overflow-y-auto flex-1 min-h-0 px-4 md:px-6 py-4"
         action={
           onAddEvent ? (
-            <button
-              onClick={() => setShowModal(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-(--color-ink) text-white hover:bg-gray-700 transition-colors"
-              aria-label="Add event"
-            >
-              <MaterialIcon name="add" size={18} />
-            </button>
+            // <button
+            //   onClick={() => setShowModal(true)}
+            //   className="w-9 h-9 flex items-center justify-center rounded-full bg-(--color-ink) text-white hover:bg-gray-700 transition-colors"
+            //   aria-label="Add event"
+            // >
+            //   <MaterialIcon name="add" size={18} />
+            // </button>
+            <ButtonIcon
+              iconName='add'
+              clickHandler={() => setShowModal(true)} />
           ) : undefined
         }
       >

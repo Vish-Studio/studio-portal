@@ -1,23 +1,25 @@
 import { create } from 'zustand';
-import { DEMO_PROJECTS, buildDefaultPhases, getActivePhaseIndex } from '../data/projects';
+import { buildDefaultPhases, getActivePhaseIndex } from '../data/projects';
 import type { ClientProject, ServiceType, PackageType, Phase } from '../data/projects';
 
 export type { ClientProject };
 
 interface ProjectsState {
   projects: ClientProject[];
+  setProjects:   (projects: ClientProject[]) => void;
   addProject:    (project: ClientProject) => void;
   updateProject: (id: string, updates: Partial<Omit<ClientProject, 'id'>>) => void;
   removeProject: (id: string) => void;
   updatePhase:   (projectId: string, phaseId: string, updates: Partial<Phase>) => void;
   insertPhase:   (projectId: string, afterIndex: number, phase: Phase) => void;
   removePhase:   (projectId: string, phaseId: string) => void;
-  /** Client marks an active flagged phase as done and advances to the next phase */
   completePhase: (projectId: string, phaseId: string) => void;
 }
 
 export const useProjectsStore = create<ProjectsState>((set) => ({
-  projects: DEMO_PROJECTS,
+  projects: [], // hydrated on app start via initStores()
+
+  setProjects: (projects) => set({ projects }),
 
   addProject: (project) =>
     set((s) => ({ projects: [project, ...s.projects] })),

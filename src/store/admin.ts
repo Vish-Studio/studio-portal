@@ -1,9 +1,6 @@
-import { create } from "zustand";
-import { DEMO_STATS, DEMO_EXPENSES } from "../data/admin";
-import { DEMO_RECENT_CLIENTS } from "../data/clients";
-export type { AdminStats, Expense } from "../data/admin";
-
-import type { AdminStats, Expense } from "../data/admin";
+import { create } from 'zustand';
+export type { AdminStats, Expense } from '../data/admin';
+import type { AdminStats, Expense } from '../data/admin';
 
 interface RecentClient {
   id: string;
@@ -17,34 +14,32 @@ interface AdminState {
   recentClients: RecentClient[];
   expenses: Expense[];
   isWorking: boolean;
-  setStats: (stats: AdminStats) => void;
-  setRecentClients: (clients: RecentClient[]) => void;
-  setExpenses: (expenses: Expense[]) => void;
-  addExpense: (expense: Expense) => void;
-  toggleWorking: () => void;
+  setStats:          (stats: AdminStats) => void;
+  setRecentClients:  (clients: RecentClient[]) => void;
+  setExpenses:       (expenses: Expense[]) => void;
+  addExpense:        (expense: Expense) => void;
+  toggleWorking:     () => void;
   incrementExpenseTotal: (amount: number) => void;
 }
 
-export const useAdminStore = create<AdminState>((set) => ({
-  stats: DEMO_STATS,
-  recentClients: DEMO_RECENT_CLIENTS,
-  expenses: DEMO_EXPENSES,
-  isWorking: true,
+const EMPTY_STATS: AdminStats = { totalClients: 0, activeProjects: 0, totalRevenue: 0, totalExpenses: 0 };
 
-  setStats: (stats) => set({ stats }),
+export const useAdminStore = create<AdminState>((set) => ({
+  stats:         EMPTY_STATS, // hydrated on app start via initStores()
+  recentClients: [],
+  expenses:      [],
+  isWorking:     true,
+
+  setStats:         (stats)         => set({ stats }),
   setRecentClients: (recentClients) => set({ recentClients }),
-  setExpenses: (expenses) => set({ expenses }),
+  setExpenses:      (expenses)      => set({ expenses }),
 
   addExpense: (expense) =>
-    set((state) => ({
-      expenses: [expense, ...state.expenses].slice(0, 5),
-    })),
+    set((s) => ({ expenses: [expense, ...s.expenses].slice(0, 5) })),
 
   toggleWorking: () =>
-    set((state) => ({ isWorking: !state.isWorking })),
+    set((s) => ({ isWorking: !s.isWorking })),
 
   incrementExpenseTotal: (amount) =>
-    set((state) => ({
-      stats: { ...state.stats, totalExpenses: state.stats.totalExpenses + amount },
-    })),
+    set((s) => ({ stats: { ...s.stats, totalExpenses: s.stats.totalExpenses + amount } })),
 }));

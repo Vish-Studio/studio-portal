@@ -5,10 +5,12 @@ type Route = {
   pageTitle?: string;
 };
 
-export const ADMIN_ROUTES: {
+type SidebarRoutes = {
   PRIMARY: Route[];
   SECONDARY: Route[];
-} = {
+};
+
+export const ADMIN_ROUTES: SidebarRoutes = {
   PRIMARY: [
     {
       path: "/admin/",
@@ -65,3 +67,7 @@ export const ADMIN_ROUTES: {
     },
   ],
 };
+
+// export const USER_ROUTES extends ADMIN_ROUTES: {
+
+// }

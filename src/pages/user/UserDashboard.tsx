@@ -8,18 +8,18 @@ import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-
 import { TaskStatusBadge } from '@/src/components/common/status-badge/status-badge';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
+import { useClientsStore } from '@/src/store/clients';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
-import { DEMO_CLIENTS } from '@/src/data/clients';
 
 // Simulated logged-in client — would come from auth context in production
 const CURRENT_CLIENT_ID = 'c1';
-
-const currentClient = DEMO_CLIENTS.find(c => c.id === CURRENT_CLIENT_ID)!;
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { projects } = useProjectsStore();
   const { tasks } = useTasksStore();
+  const { clients } = useClientsStore();
+  const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
 
   // This client's projects only
   const myProjects = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
@@ -49,8 +49,8 @@ const UserDashboard = () => {
         {/* Greeting */}
         <div>
           <p className="text-sm text-gray-500 font-medium">{greeting}</p>
-          <h1 className="text-2xl font-bold text-(--color-ink)">{currentClient.displayName}</h1>
-          {currentClient.companyName && (
+          <h1 className="text-2xl font-bold text-(--color-ink)">{currentClient?.displayName}</h1>
+          {currentClient?.companyName && (
             <p className="text-sm text-gray-400 mt-0.5">{currentClient.companyName}</p>
           )}
         </div>

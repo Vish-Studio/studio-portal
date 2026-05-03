@@ -1,7 +1,7 @@
-export type DocumentType = "contract" | "proposal" | "invoice" | "quotation" | "onboarding";
+export type DocumentType = 'contract' | 'proposal' | 'invoice' | 'quotation' | 'onboarding';
 
 export interface DocumentAuthor {
-  type: "client" | "member";
+  type: 'client' | 'member';
   name: string;
 }
 
@@ -17,36 +17,5 @@ export interface StudioDocument {
   author?: DocumentAuthor;
 }
 
-const daysAgo = (n: number, h = 0) => ({
-  toMillis: () => Date.now() - n * 86400000 - h * 3600000,
-});
-
-export const DEMO_DOCUMENTS: StudioDocument[] = [
-  {
-    id: "d1",
-    type: "contract",
-    title: "Service Agreement",
-    url: "#",
-    clientId: "c1",
-    createdAt: daysAgo(1, 2),
-    author: { type: "client", name: "Acme Corp" },
-  },
-  {
-    id: "d2",
-    type: "proposal",
-    title: "Project Proposal 2026",
-    url: "#",
-    clientId: "c1",
-    createdAt: daysAgo(5, 5),
-    author: { type: "member", name: "Aisha Patel" },
-  },
-  {
-    id: "d3",
-    type: "invoice",
-    title: "Initial Deposit Invoice",
-    url: "#",
-    clientId: "c1",
-    createdAt: daysAgo(10, 1),
-    author: { type: "member", name: "Priya Nair" },
-  },
-];
+// Demo data lives in seed.ts — re-exported here for Storybook compatibility
+export { DEMO_DOCUMENTS } from './seed';

@@ -24,7 +24,7 @@ import { useProjectsStore } from '../../store/projects';
 import { useTeamStore } from '../../store/team';
 import { useTasksStore } from '../../store/tasks';
 import { useTemplateAssignmentsStore } from '../../store/template-assignments';
-import { DEMO_CLIENTS } from '../../data/clients';
+import { useClientsStore } from '../../store/clients';
 import { getProjectAccent, getPhaseProgress, SERVICE_META, DEFAULT_PHASE_DEFS } from '../../data/projects';
 import { TEMPLATES } from '../../data/templates';
 import { getDefaultBlocks } from '../../data/template-blocks';
@@ -55,6 +55,7 @@ const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { projects, updateProject, updatePhase, insertPhase, removePhase } = useProjectsStore();
+  const { clients }  = useClientsStore();
   const { members }  = useTeamStore();
   const { tasks, removeTask } = useTasksStore();
   const { getPhaseAssignment, addAssignment, removeAssignment } = useTemplateAssignmentsStore();
@@ -104,7 +105,7 @@ const ProjectDetail = () => {
   const progress       = getPhaseProgress(project.phases);
   const doneCount      = project.phases.filter(p => p.status === 'done').length;
   const remaining      = project.agreedPayment - project.paidPayment;
-  const selectedClient = DEMO_CLIENTS.find(c => c.id === (isEditing ? selectedClientId : project.clientId));
+  const selectedClient = clients.find(c => c.id === (isEditing ? selectedClientId : project.clientId));
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const projectTasks = useMemo(() => {
@@ -237,7 +238,7 @@ const ProjectDetail = () => {
               </FormField>
               <FormField label="Client">
                 {isEditing ? (
-                  <ClientPicker clients={DEMO_CLIENTS} selectedId={selectedClientId} onSelect={setSelectedClientId} />
+                  <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />
                 ) : (
                   <div className="py-1">
                     {selectedClient ? (
@@ -382,6 +383,49 @@ const ProjectDetail = () => {
                           </div>
                           {phaseFlag && <MaterialIcon name="person" size={14} className="text-violet-500 shrink-0 ml-auto" />}
                         </label>
+                        {/* Document assignment for this phase */}
+                        {(() => {
+                          const phaseDoc = getPhaseAssignment(id!, phase.id);
+                          const tpl      = phaseDoc ? TEMPLATES.find(t => t.slug === phaseDoc.templateSlug) : null;
+                          return (
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                                Template Document
+                              </p>
+                              {phaseDoc && tpl ? (
+                                <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
+                                  <MaterialIcon name={tpl.icon} size={14} className="text-gray-500 shrink-0" />
+                                  <span className="text-sm font-medium text-gray-700 flex-1 truncate">
+                                    {phaseDoc.documentTitle}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => navigate(`/admin/projects/${id}/templates/${phaseDoc.id}`)}
+                                    className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                                  >
+                                    <Pencil size={11} /> Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setRemoveDocId(phaseDoc.id)}
+                                    className="w-6 h-6 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => { setAssignPhaseId(phase.id); setEditingPhaseId(null); }}
+                                  className="flex items-center justify-center gap-2 w-full text-[11px] font-semibold text-gray-400 hover:text-gray-700 border border-dashed border-gray-300 hover:border-gray-400 rounded-xl py-2.5 transition-colors"
+                                >
+                                  <Plus size={12} /> Assign template document
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()}
+
                         <div className="flex gap-2 pt-1">
                           <button type="button" onClick={() => setEditingPhaseId(null)} className="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl">Cancel</button>
                           <button type="button" onClick={savePhaseEdit} disabled={!phaseTitle.trim()} className="px-4 py-2 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-xl disabled:opacity-40">Save changes</button>

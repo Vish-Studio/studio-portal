@@ -7,11 +7,10 @@ import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
 import MaterialIcon from '@/src/components/common/material-icon/material-icon';
 import { useProjectsStore } from '@/src/store/projects';
+import { useClientsStore } from '@/src/store/clients';
 import { getProjectAccent } from '@/src/data/projects';
-import { DEMO_CLIENTS } from '@/src/data/clients';
 
 const CURRENT_CLIENT_ID = 'c1';
-const currentClient = DEMO_CLIENTS.find(c => c.id === CURRENT_CLIENT_ID)!;
 
 type PaymentStatus = 'paid' | 'partial' | 'pending';
 type FilterKey = 'all' | 'paid' | 'partial' | 'pending';
@@ -45,6 +44,8 @@ const fmt = (n: number) =>
 
 const UserPayments = () => {
   const { projects } = useProjectsStore();
+  const { clients }  = useClientsStore();
+  const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
 
   const myProjects = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
@@ -204,15 +205,17 @@ const UserPayments = () => {
       <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto pb-6">
 
         {/* Client identity chip */}
-        <div className="flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 rounded-[14px] bg-(--color-accent-lime) flex items-center justify-center shrink-0">
-            <span className="text-sm font-bold text-gray-800">{currentClient.displayName.charAt(0)}</span>
+        {currentClient && (
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 rounded-[14px] bg-(--color-accent-lime) flex items-center justify-center shrink-0">
+              <span className="text-sm font-bold text-gray-800">{currentClient.displayName.charAt(0)}</span>
+            </div>
+            <div>
+              <p className="text-sm font-bold text-(--color-ink)">{currentClient.displayName}</p>
+              <p className="text-[11px] text-gray-400">{currentClient.companyName}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-bold text-(--color-ink)">{currentClient.displayName}</p>
-            <p className="text-[11px] text-gray-400">{currentClient.companyName}</p>
-          </div>
-        </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">

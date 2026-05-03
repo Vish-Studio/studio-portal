@@ -16,7 +16,7 @@ import ClientPicker from '../components/admin/pickers/client-picker/client-picke
 import MemberPicker from '../components/admin/pickers/member-picker/member-picker';
 import { useProjectsStore, makeNewProject } from '../store/projects';
 import { useTeamStore } from '../store/team';
-import { DEMO_CLIENTS } from '../data/clients';
+import { useClientsStore } from '../store/clients';
 import { SERVICE_META, getPhaseProgress } from '../data/projects';
 import type { ClientProject, ServiceType, PackageType } from '../data/projects';
 import { useUIStore } from '../store/ui';
@@ -33,6 +33,7 @@ const Projects = () => {
   const { searchQuery } = useUIStore();
   const { projects, addProject, updateProject, removeProject } = useProjectsStore();
   const { members } = useTeamStore();
+  const { clients } = useClientsStore();
 
   const [activeTab, setActiveTab]             = useState('all');
   const [viewMode, setViewMode]               = useState<'list' | 'grid'>('list');
@@ -212,7 +213,7 @@ const Projects = () => {
               <input {...register('timeline')} placeholder="e.g. Q3 2026" className={inputCls(!!errors.timeline)} />
             </FormField>
             <FormField label="Client" required error={undefined}>
-              <ClientPicker clients={DEMO_CLIENTS} selectedId={selectedClientId} onSelect={setSelectedClientId} />
+              <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />
             </FormField>
             <FormField label="Assign Team">
               <MemberPicker members={members} selectedIds={selectedMemberIds} onToggle={id => setSelectedMemberIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])} />

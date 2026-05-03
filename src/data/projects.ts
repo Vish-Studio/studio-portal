@@ -139,21 +139,5 @@ export interface ClientProject {
   assignedMemberIds?: string[];
 }
 
-// ─── Demo data ────────────────────────────────────────────────────────────────
-
-const daysAgo = (n: number) => Date.now() - n * 86400000;
-
-export const DEMO_PROJECTS: ClientProject[] = [
-  { id: 'p1',  clientId: 'c1', name: 'Brand Refresh',         service: 'branding',    status: 'active',    phases: buildDefaultPhases(4), agreedPayment: 8000,  paidPayment: 5000,  timeline: 'Q3 2026', startedAt: daysAgo(45),  assignedMemberIds: ['m1', 'm7'] },
-  { id: 'p2',  clientId: 'c1', name: 'Social Media Kit',      service: 'logo-design', status: 'active',    phases: buildDefaultPhases(1), agreedPayment: 3500,  paidPayment: 1750,  timeline: 'Q4 2026', startedAt: daysAgo(10),  assignedMemberIds: ['m6'] },
-  { id: 'p3',  clientId: 'c2', name: 'E-Commerce Redesign',   service: 'website',     package: 'premium',  status: 'active',    phases: buildDefaultPhases(6), agreedPayment: 12000, paidPayment: 9500,  timeline: 'Q3 2026', startedAt: daysAgo(60),  assignedMemberIds: ['m2', 'm4'] },
-  { id: 'p4',  clientId: 'c3', name: 'Mobile App MVP',        service: 'mobile-app',  status: 'completed', phases: buildDefaultPhases(9), agreedPayment: 15000, paidPayment: 15000, timeline: 'Q2 2026', startedAt: daysAgo(120), assignedMemberIds: ['m3', 'm8'] },
-  { id: 'p5',  clientId: 'c4', name: 'Marketing Site',        service: 'website',     package: 'growth',   status: 'paused',    phases: buildDefaultPhases(3), agreedPayment: 4500,  paidPayment: 2000,  timeline: 'TBD',     startedAt: daysAgo(90),  assignedMemberIds: ['m8'] },
-  { id: 'p6',  clientId: 'c5', name: 'Dashboard Analytics',   service: 'software',    package: 'premium',  status: 'active',    phases: buildDefaultPhases(2), agreedPayment: 6000,  paidPayment: 2000,  timeline: 'Q4 2026', startedAt: daysAgo(20),  assignedMemberIds: ['m5', 'm2'] },
-  { id: 'p7',  clientId: 'c6', name: 'Platform Redesign',     service: 'software',    package: 'growth',   status: 'paused',    phases: buildDefaultPhases(1), agreedPayment: 9000,  paidPayment: 3000,  timeline: 'TBD',     startedAt: daysAgo(50),  assignedMemberIds: ['m4'] },
-  { id: 'p8',  clientId: 'c2', name: 'iOS Companion App',     service: 'mobile-app',  status: 'active',    phases: buildDefaultPhases(3), agreedPayment: 11000, paidPayment: 4500,  timeline: 'Q1 2027', startedAt: daysAgo(30),  assignedMemberIds: ['m3', 'm5'] },
-  { id: 'p9',  clientId: 'c3', name: 'Brand Identity System', service: 'branding',    status: 'completed', phases: buildDefaultPhases(9), agreedPayment: 7500,  paidPayment: 7500,  timeline: 'Q1 2026', startedAt: daysAgo(180), assignedMemberIds: ['m1'] },
-  { id: 'p10', clientId: 'c4', name: 'SaaS Operations Tool',  service: 'software',    package: 'essentials', status: 'active',  phases: buildDefaultPhases(5), agreedPayment: 5500,  paidPayment: 3000,  timeline: 'Q4 2026', startedAt: daysAgo(35),  assignedMemberIds: ['m2', 'm8'] },
-  { id: 'p11', clientId: 'c5', name: 'Corporate Site',        service: 'website',     package: 'essentials', status: 'paused',  phases: buildDefaultPhases(2), agreedPayment: 3200,  paidPayment: 1000,  timeline: 'TBD',     startedAt: daysAgo(75),  assignedMemberIds: ['m7'] },
-  { id: 'p12', clientId: 'c6', name: 'Logo & Brand Kit',      service: 'logo-design', status: 'active',    phases: buildDefaultPhases(2), agreedPayment: 2800,  paidPayment: 1400,  timeline: 'Q3 2026', startedAt: daysAgo(15),  assignedMemberIds: ['m6', 'm1'] },
-];
+// Demo data lives in seed.ts — re-exported here for Storybook compatibility
+export { DEMO_PROJECTS } from './seed';

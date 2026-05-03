@@ -58,7 +58,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         {/* Meta row: priority dot + project name + actions */}
         <div className="flex items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`w-1.5 h-1.5 rounded-xs shrink-0 ${PRIORITY_DOT[task.priority]}`} />
+            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_DOT[task.priority]}`} />
             <span className="text-[11px] text-gray-400 font-medium truncate">
               {project?.name ?? 'No project'}
             </span>

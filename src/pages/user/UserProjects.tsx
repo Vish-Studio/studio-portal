@@ -15,12 +15,11 @@ import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-
 import { RowActionsMenu } from '@/src/components/common/table/table';
 import { useProjectsStore, makeNewProject } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
+import { useClientsStore } from '@/src/store/clients';
 import { SERVICE_META, getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject, ServiceType, PackageType } from '@/src/data/projects';
-import { DEMO_CLIENTS } from '@/src/data/clients';
 
-const CURRENT_CLIENT_ID = 'c1';
-const currentClient = DEMO_CLIENTS.find(c => c.id === CURRENT_CLIENT_ID)!;
+const CURRENT_CLIENT_ID = 'c1';;
 
 interface ProjectFormValues {
   name: string;
@@ -193,7 +192,9 @@ const UserProjectCardMini = ({
 
 const UserProjects = () => {
   const { projects, addProject, updateProject, removeProject, completePhase } = useProjectsStore();
-  const { tasks } = useTasksStore();
+  const { tasks }    = useTasksStore();
+  const { clients }  = useClientsStore();
+  const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
 
   const myProjects = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
 
@@ -358,7 +359,7 @@ const UserProjects = () => {
 
       </div>
 
-      <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : `Adding a project for ${currentClient.displayName}`} width="md">
+      <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : `Adding a project for ${currentClient?.displayName ?? 'client'}`} width="md">
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
             <FormField label="Project Name" required error={errors.name?.message}>
