@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Printer } from 'lucide-react';
 
 interface TemplateShellProps {
-  title:    string;
+  title: string;
   children: React.ReactNode;
 }
 
 export default function TemplateShell({ title, children }: TemplateShellProps) {
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
+      <style type="text/css" media="print">
+        {"@page { margin: 0; }"}
+      </style>
 
       {/* ── Topbar — matches app topbar style ── */}
       <div className="print:hidden sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6">

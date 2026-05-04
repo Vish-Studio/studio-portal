@@ -1,6 +1,8 @@
 import TemplateShell, {
   DocDivider, SectionHeading, BodyText, BulletList,
 } from '../../components/admin/templates/template-shell';
+import TemplateFooter from './template-footer/template-footer';
+import TemplateHeader from './template-header/template-header';
 
 const PAYMENT_TERMS = [
   'The Client shall pay the Contractor as follows: (i) 25% of the total project fee upon execution of this Agreement, which shall be refundable in the event of termination of this Agreement by the Client prior to the completion of the Work Product, (ii) 50% of the total project fee upon completion of the halfway milestone of the Work Product, and (iii) the remaining 25% of the total project fee upon completion of the Work Product.',
@@ -66,38 +68,16 @@ export default function ContractTemplate() {
     <TemplateShell title="Contract">
       <div className="px-14 py-12">
 
-        {/* ── Title ── */}
-        <h1 className="font-serif text-[56px] font-normal tracking-tight text-gray-900 mb-8 leading-none">
-          Contract
-        </h1>
-
-        <DocDivider className="mb-8" />
-
-        {/* ── Header: To / From / Date ── */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          <div>
-            <p className="text-[10px] font-black tracking-[0.18em] uppercase text-gray-500 mb-2">To</p>
-            <p className="text-[13px] text-gray-800 leading-relaxed">
-              Client Name<br />
-              email@mail.com<br />
-              City, State
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] font-black tracking-[0.18em] uppercase text-gray-500 mb-2">From</p>
-            <p className="text-[13px] text-gray-800 leading-relaxed">
-              My Name<br />
-              email@mail.com<br />
-              City, State
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] font-black tracking-[0.18em] uppercase text-gray-500 mb-2">Date</p>
-            <p className="text-[13px] font-semibold text-gray-800">12 December 2014</p>
-          </div>
-        </div>
-
-        <DocDivider className="mb-10" />
+        <TemplateHeader
+          title='Contract'
+          clientInfo={
+            {
+              name: 'Client Name',
+              email: 'client@email.com',
+              city: 'City',
+              country: 'Mauritius'
+            }}
+        />
 
         {/* ── Budget ── */}
         <SectionHeading>Budget</SectionHeading>
@@ -177,10 +157,7 @@ export default function ContractTemplate() {
         </div>
 
         {/* ── Footer ── */}
-        <div className="text-center">
-          <p className="font-serif text-2xl text-gray-900 mb-2">Thank You!</p>
-          <p className="text-[12px] text-gray-500">Your Name // email@email.com // +00-1111111111</p>
-        </div>
+        <TemplateFooter />
 
       </div>
     </TemplateShell>

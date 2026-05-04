@@ -1,6 +1,7 @@
 import TemplateShell, {
   DocDivider, SectionHeading, BulletList,
 } from '../../components/admin/templates/template-shell';
+import TemplateFooter from './template-footer/template-footer';
 
 const SERVICES = [
   { name: 'Service Name', cost: '$00', qty: 1, amount: '$1,400' },
@@ -19,6 +20,7 @@ export default function OverdueInvoiceTemplate() {
     <TemplateShell title="Overdue Invoice">
       <div className="px-14 py-12">
 
+        {/* //TODO: use template header variant for invoice here */}
         {/* ── Title row ── */}
         <div className="flex items-start justify-between mb-8">
           <h1 className="font-serif text-[44px] font-normal tracking-tight text-gray-900 leading-tight">
@@ -151,10 +153,7 @@ export default function OverdueInvoiceTemplate() {
         <DocDivider className="mb-8" />
 
         {/* ── Footer ── */}
-        <div className="text-right">
-          <p className="font-serif text-2xl text-gray-900 mb-1">Thank You!</p>
-          <p className="text-[12px] text-gray-500">Your Name // email@email.com // +00-1111111111</p>
-        </div>
+        <TemplateFooter />
 
       </div>
     </TemplateShell>

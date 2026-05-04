@@ -1,6 +1,8 @@
 import TemplateShell, {
   DocDivider, SectionHeading, BodyText, BulletList,
 } from '../../components/admin/templates/template-shell';
+import TemplateFooter from './template-footer/template-footer';
+import TemplateHeader from './template-header/template-header';
 
 const SERVICES = [
   { name: 'Service Name', cost: '$00', qty: 1, amount: '$1,400' },
@@ -21,33 +23,16 @@ export default function QuotationTemplate() {
       <div className="px-14 py-12">
 
         {/* ── Title ── */}
-        <h1 className="font-serif text-[56px] font-normal tracking-tight text-gray-900 mb-8 leading-none">
-          Quotation
-        </h1>
-
-        <DocDivider className="mb-8" />
-
-        {/* ── Header ── */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
-          <div>
-            <p className="text-[10px] font-black tracking-[0.18em] uppercase text-gray-500 mb-2">To</p>
-            <p className="text-[13px] text-gray-800 leading-relaxed">
-              Client Name<br />email@mail.com<br />City, State
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] font-black tracking-[0.18em] uppercase text-gray-500 mb-2">From</p>
-            <p className="text-[13px] text-gray-800 leading-relaxed">
-              My Name<br />email@mail.com<br />City, State
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] font-black tracking-[0.18em] uppercase text-gray-500 mb-2">Date</p>
-            <p className="text-[13px] font-semibold text-gray-800">12 December 2014</p>
-          </div>
-        </div>
-
-        <DocDivider className="mb-10" />
+        <TemplateHeader
+          title='Quotation'
+          clientInfo={
+            {
+              name: 'Client Name',
+              email: 'client@email.com',
+              city: 'City',
+              country: 'Mauritius'
+            }}
+        />
 
         {/* ── About project ── */}
         <div className="mb-10">
@@ -125,10 +110,7 @@ export default function QuotationTemplate() {
         </div>
 
         {/* ── Footer ── */}
-        <div className="text-right">
-          <p className="font-serif text-2xl text-gray-900 mb-1">Thank You!</p>
-          <p className="text-[12px] text-gray-500">Your Name // email@email.com // +00-1111111111</p>
-        </div>
+        <TemplateFooter />
 
       </div>
     </TemplateShell>
