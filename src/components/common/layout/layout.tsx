@@ -37,19 +37,19 @@ const Layout = ({ children, title, fullHeight, hideSearch, topbarActions }: Layo
       <div className="flex-1 flex flex-col w-full overflow-hidden relative">
         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8">
           <Topbar
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
-          title={title}
-          hideSearch={hideSearch}
-          actions={topbarActions}
-        />
+            setIsMobileMenuOpen={setIsMobileMenuOpen}
+            title={title}
+            hideSearch={hideSearch}
+            actions={topbarActions}
+          />
         </div>
 
         {fullHeight ? (
-          <div className="flex-1 overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+          <div className="flex-1 overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pt-0">
             {children}
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-10">
+          <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 pt-0">
             {children}
           </div>
         )}

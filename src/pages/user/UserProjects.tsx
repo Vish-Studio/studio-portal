@@ -41,8 +41,8 @@ const UserProjectCard = ({
   onDelete: () => void;
   onCompletePhase: (phaseId: string) => void;
 }) => {
-  const accent    = getProjectAccent(project.service, project.package);
-  const progress  = getPhaseProgress(project.phases);
+  const accent = getProjectAccent(project.service, project.package);
+  const progress = getPhaseProgress(project.phases);
   const doneCount = project.phases.filter(p => p.status === 'done').length;
   const remaining = project.agreedPayment - project.paidPayment;
 
@@ -59,7 +59,7 @@ const UserProjectCard = ({
           <div className="flex items-center gap-1 shrink-0 mt-0.5">
             <ProjectStatusBadge status={project.status} />
             <RowActionsMenu actions={[
-              { label: 'Edit project',   icon: <Pencil size={14} />, onClick: onEdit },
+              { label: 'Edit project', icon: <Pencil size={14} />, onClick: onEdit },
               { label: 'Delete project', icon: <Trash2 size={14} />, onClick: onDelete, variant: 'danger' },
             ]} />
           </div>
@@ -125,8 +125,8 @@ const UserProjectCardMini = ({
   onDelete: () => void;
   onCompletePhase: (phaseId: string) => void;
 }) => {
-  const accent    = getProjectAccent(project.service, project.package);
-  const progress  = getPhaseProgress(project.phases);
+  const accent = getProjectAccent(project.service, project.package);
+  const progress = getPhaseProgress(project.phases);
   const remaining = project.agreedPayment - project.paidPayment;
 
   const pendingPhase = project.phases.find(
@@ -179,7 +179,7 @@ const UserProjectCardMini = ({
 
         <div className="absolute right-3 top-3 md:static md:flex md:justify-end">
           <RowActionsMenu actions={[
-            { label: 'Edit project',   icon: <Pencil size={14} />, onClick: onEdit },
+            { label: 'Edit project', icon: <Pencil size={14} />, onClick: onEdit },
             { label: 'Delete project', icon: <Trash2 size={14} />, onClick: onDelete, variant: 'danger' },
           ]} />
         </div>
@@ -192,17 +192,17 @@ const UserProjectCardMini = ({
 
 const UserProjects = () => {
   const { projects, addProject, updateProject, removeProject, completePhase } = useProjectsStore();
-  const { tasks }    = useTasksStore();
-  const { clients }  = useClientsStore();
+  const { tasks } = useTasksStore();
+  const { clients } = useClientsStore();
   const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
 
   const myProjects = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
 
-  const [activeTab, setActiveTab]             = useState('all');
-  const [viewMode, setViewMode]               = useState<'list' | 'grid'>('list');
-  const [sidebarOpen, setSidebarOpen]         = useState(false);
-  const [editingProject, setEditingProject]   = useState<ClientProject | null>(null);
-  const [confirmProject, setConfirmProject]   = useState<ClientProject | null>(null);
+  const [activeTab, setActiveTab] = useState('all');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
+  const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
 
   const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } =
     useForm<ProjectFormValues>({
@@ -210,19 +210,19 @@ const UserProjects = () => {
     });
 
   const watchedService = watch('service');
-  const hasPackages    = watchedService === 'website' || watchedService === 'software';
+  const hasPackages = watchedService === 'website' || watchedService === 'software';
 
   const tabCounts = useMemo(() => ({
-    all:       myProjects.length,
-    active:    myProjects.filter(p => p.status === 'active').length,
-    paused:    myProjects.filter(p => p.status === 'paused').length,
+    all: myProjects.length,
+    active: myProjects.filter(p => p.status === 'active').length,
+    paused: myProjects.filter(p => p.status === 'paused').length,
     completed: myProjects.filter(p => p.status === 'completed').length,
   }), [myProjects]);
 
   const tabs: TabItem[] = [
-    { key: 'all',       label: 'All',       count: tabCounts.all },
-    { key: 'active',    label: 'Active',    count: tabCounts.active },
-    { key: 'paused',    label: 'Paused',    count: tabCounts.paused },
+    { key: 'all', label: 'All', count: tabCounts.all },
+    { key: 'active', label: 'Active', count: tabCounts.active },
+    { key: 'paused', label: 'Paused', count: tabCounts.paused },
     { key: 'completed', label: 'Completed', count: tabCounts.completed },
   ];
 
@@ -254,10 +254,10 @@ const UserProjects = () => {
 
   const onSubmit = (data: ProjectFormValues) => {
     const payload = {
-      name:     data.name,
-      service:  data.service,
-      package:  hasPackages && data.package ? (data.package as PackageType) : undefined,
-      status:   data.status,
+      name: data.name,
+      service: data.service,
+      package: hasPackages && data.package ? (data.package as PackageType) : undefined,
+      status: data.status,
       timeline: data.timeline,
       clientId: CURRENT_CLIENT_ID,
     };
@@ -276,13 +276,13 @@ const UserProjects = () => {
 
   return (
     <UserLayout title="My Projects">
-      <div className="flex flex-col gap-5 pb-10">
+      <div className="flex flex-col gap-5 py-10">
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <StatCard variant="lime"    icon={<Briefcase size={16} />}   label="Total Projects" value={myProjects.length}   badge={`${tabCounts.active} active`}           badgeLabel="in progress" />
-          <StatCard variant="surface" icon={<CheckCircle size={16} />} label="Completed"     value={tabCounts.completed} badge={`${tabCounts.paused} paused`}             badgeLabel="on hold" />
-          <StatCard variant="dark"    icon={<Layers size={16} />}      label="Avg. Progress" value={`${avgProgress}%`}   badge={`${myProjects.length} project${myProjects.length !== 1 ? 's' : ''}`} badgeLabel="tracked" />
+          <StatCard variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={myProjects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
+          <StatCard variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
+          <StatCard variant="dark" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${myProjects.length} project${myProjects.length !== 1 ? 's' : ''}`} badgeLabel="tracked" />
         </div>
 
         {/* Pending actions banner */}

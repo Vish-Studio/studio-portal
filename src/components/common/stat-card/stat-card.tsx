@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { FunctionComponent } from 'react';
 import MaterialIcon from '../material-icon/material-icon';
 
 export type CardVariant = 'lime' | 'surface' | 'dark' | 'white';
@@ -71,7 +71,7 @@ export interface StatCardProps {
   className?: string;
 }
 
-export default function StatCard({
+const StatCard: FunctionComponent<StatCardProps> = ({
   variant = 'white',
   icon,
   label,
@@ -81,7 +81,7 @@ export default function StatCard({
   badgeLabel,
   onAction,
   className = '',
-}: StatCardProps) {
+}) => {
   const s = VARIANT_STYLES[variant];
 
   return (
@@ -129,3 +129,6 @@ export default function StatCard({
     </div>
   );
 }
+
+
+export default StatCard;

@@ -44,7 +44,7 @@ const fmt = (n: number) =>
 
 const UserPayments = () => {
   const { projects } = useProjectsStore();
-  const { clients }  = useClientsStore();
+  const { clients } = useClientsStore();
   const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
 
@@ -52,39 +52,39 @@ const UserPayments = () => {
 
   const rows: PaymentRow[] = myProjects.map(p => {
     const accent = getProjectAccent(p.service, p.package);
-    const due    = p.agreedPayment - p.paidPayment;
+    const due = p.agreedPayment - p.paidPayment;
     const status: PaymentStatus =
       p.paidPayment >= p.agreedPayment ? 'paid'
-      : p.paidPayment > 0              ? 'partial'
-      : 'pending';
+        : p.paidPayment > 0 ? 'partial'
+          : 'pending';
 
     return {
-      id:           p.id,
-      project:      p.name,
-      service:      accent.label,
-      serviceIcon:  accent.icon,
+      id: p.id,
+      project: p.name,
+      service: accent.label,
+      serviceIcon: accent.icon,
       agreedAmount: p.agreedPayment,
-      paidAmount:   p.paidPayment,
-      dueAmount:    due,
+      paidAmount: p.paidPayment,
+      dueAmount: due,
       status,
-      timeline:     p.timeline,
+      timeline: p.timeline,
     };
   });
 
   const totalAgreed = rows.reduce((s, r) => s + r.agreedAmount, 0);
-  const totalPaid   = rows.reduce((s, r) => s + r.paidAmount, 0);
-  const totalDue    = rows.reduce((s, r) => s + r.dueAmount, 0);
+  const totalPaid = rows.reduce((s, r) => s + r.paidAmount, 0);
+  const totalDue = rows.reduce((s, r) => s + r.dueAmount, 0);
 
   const tabCounts = useMemo(() => ({
-    all:     rows.length,
-    paid:    rows.filter(r => r.status === 'paid').length,
+    all: rows.length,
+    paid: rows.filter(r => r.status === 'paid').length,
     partial: rows.filter(r => r.status === 'partial').length,
     pending: rows.filter(r => r.status === 'pending').length,
   }), [rows]);
 
   const tabs: TabItem[] = [
-    { key: 'all',     label: 'All',     count: tabCounts.all },
-    { key: 'paid',    label: 'Paid',    count: tabCounts.paid },
+    { key: 'all', label: 'All', count: tabCounts.all },
+    { key: 'paid', label: 'Paid', count: tabCounts.paid },
     { key: 'partial', label: 'Partial', count: tabCounts.partial },
     { key: 'pending', label: 'Pending', count: tabCounts.pending },
   ];
@@ -117,11 +117,10 @@ const UserPayments = () => {
               <div className="flex items-center gap-1.5">
                 <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${
-                      row.status === 'paid' ? 'bg-green-400'
-                      : row.status === 'partial' ? 'bg-amber-400'
-                      : 'bg-gray-300'
-                    }`}
+                    className={`h-full rounded-full ${row.status === 'paid' ? 'bg-green-400'
+                        : row.status === 'partial' ? 'bg-amber-400'
+                          : 'bg-gray-300'
+                      }`}
                     style={{ width: `${pct(row)}%` }}
                   />
                 </div>
@@ -161,11 +160,10 @@ const UserPayments = () => {
           <span className="text-sm font-semibold text-green-600 tabular-nums">{fmt(row.paidAmount)}</span>
           <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full ${
-                row.status === 'paid' ? 'bg-green-400'
-                : row.status === 'partial' ? 'bg-amber-400'
-                : 'bg-gray-300'
-              }`}
+              className={`h-full rounded-full ${row.status === 'paid' ? 'bg-green-400'
+                  : row.status === 'partial' ? 'bg-amber-400'
+                    : 'bg-gray-300'
+                }`}
               style={{ width: `${pct(row)}%` }}
             />
           </div>
@@ -202,7 +200,7 @@ const UserPayments = () => {
 
   return (
     <UserLayout title="Payments" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto pb-6">
+      <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto py-10">
 
         {/* Client identity chip */}
         {currentClient && (

@@ -35,12 +35,12 @@ const Projects = () => {
   const { members } = useTeamStore();
   const { clients } = useClientsStore();
 
-  const [activeTab, setActiveTab]             = useState('all');
-  const [viewMode, setViewMode]               = useState<'list' | 'grid'>('list');
-  const [sidebarOpen, setSidebarOpen]         = useState(false);
-  const [editingProject, setEditingProject]   = useState<ClientProject | null>(null);
-  const [confirmProject, setConfirmProject]   = useState<ClientProject | null>(null);
-  const [selectedClientId, setSelectedClientId]   = useState('');
+  const [activeTab, setActiveTab] = useState('all');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
+  const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } =
@@ -49,19 +49,19 @@ const Projects = () => {
     });
 
   const watchedService = watch('service');
-  const hasPackages    = watchedService === 'website' || watchedService === 'software';
+  const hasPackages = watchedService === 'website' || watchedService === 'software';
 
   const tabCounts = useMemo(() => ({
-    all:       projects.length,
-    active:    projects.filter(p => p.status === 'active').length,
-    paused:    projects.filter(p => p.status === 'paused').length,
+    all: projects.length,
+    active: projects.filter(p => p.status === 'active').length,
+    paused: projects.filter(p => p.status === 'paused').length,
     completed: projects.filter(p => p.status === 'completed').length,
   }), [projects]);
 
   const tabs: TabItem[] = [
-    { key: 'all',       label: 'All',       count: tabCounts.all },
-    { key: 'active',    label: 'Active',    count: tabCounts.active },
-    { key: 'paused',    label: 'Paused',    count: tabCounts.paused },
+    { key: 'all', label: 'All', count: tabCounts.all },
+    { key: 'active', label: 'Active', count: tabCounts.active },
+    { key: 'paused', label: 'Paused', count: tabCounts.paused },
     { key: 'completed', label: 'Completed', count: tabCounts.completed },
   ];
 
@@ -78,7 +78,7 @@ const Projects = () => {
   }, [projects, activeTab, searchQuery]);
 
   const totalBudget = projects.reduce((s, p) => s + p.agreedPayment, 0);
-  const totalPaid   = projects.reduce((s, p) => s + p.paidPayment, 0);
+  const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
   const avgProgress = projects.length
     ? Math.round(projects.reduce((s, p) => s + getPhaseProgress(p.phases), 0) / projects.length)
     : 0;
@@ -101,12 +101,12 @@ const Projects = () => {
 
   const onSubmit = (data: ProjectFormValues) => {
     const payload = {
-      name:              data.name,
-      service:           data.service,
-      package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
-      status:            data.status,
-      timeline:          data.timeline,
-      clientId:          selectedClientId,
+      name: data.name,
+      service: data.service,
+      package: hasPackages && data.package ? (data.package as PackageType) : undefined,
+      status: data.status,
+      timeline: data.timeline,
+      clientId: selectedClientId,
       assignedMemberIds: selectedMemberIds,
     };
     if (editingProject) {
@@ -119,13 +119,13 @@ const Projects = () => {
 
   return (
     <Layout title="Projects">
-      <div className="flex flex-col gap-5 pb-10">
+      <div className="flex flex-col gap-5 py-10">
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard variant="lime"    icon={<Briefcase size={16} />}    label="Total Projects" value={projects.length}  badge={`${tabCounts.active} active`}                badgeLabel="in progress" />
-          <StatCard variant="surface" icon={<CheckCircle size={16} />}  label="Completed"     value={tabCounts.completed} badge={`${tabCounts.paused} paused`}              badgeLabel="on hold" />
-          <StatCard variant="dark"    icon={<TrendingUp size={16} />}   label="Total Value"   value={`$${(totalBudget / 1000).toFixed(0)}k`} badge={`$${(totalPaid / 1000).toFixed(0)}k collected`} badgeLabel="to date" />
-          <StatCard variant="white"   icon={<Layers size={16} />}       label="Avg. Progress" value={`${avgProgress}%`} badge={`${projects.length} projects`}                badgeLabel="tracked" />
+          <StatCard variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={projects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
+          <StatCard variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
+          <StatCard variant="dark" icon={<TrendingUp size={16} />} label="Total Value" value={`$${(totalBudget / 1000).toFixed(0)}k`} badge={`$${(totalPaid / 1000).toFixed(0)}k collected`} badgeLabel="to date" />
+          <StatCard variant="white" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${projects.length} projects`} badgeLabel="tracked" />
         </div>
 
         <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
@@ -159,7 +159,7 @@ const Projects = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map(p => (
               <ProjectCard key={p.id} project={p} allMembers={members} variant="surface" actions={[
-                { label: 'Edit project',   icon: <Pencil size={14} />, onClick: () => openEdit(p) },
+                { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
                 { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => setConfirmProject(p), variant: 'danger' },
               ]} />
             ))}
@@ -171,7 +171,7 @@ const Projects = () => {
             </div>
             {filtered.map(p => (
               <ProjectCardMini key={p.id} project={p} allMembers={members} actions={[
-                { label: 'Edit project',   icon: <Pencil size={14} />, onClick: () => openEdit(p) },
+                { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
                 { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => setConfirmProject(p), variant: 'danger' },
               ]} />
             ))}

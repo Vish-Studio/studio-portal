@@ -15,11 +15,11 @@ const CURRENT_CLIENT_ID = 'c1';
 // ─── Document type metadata ───────────────────────────────────────────────────
 
 const DOC_META: Record<DocumentType, { icon: string; label: string; iconClass: string; bgClass: string }> = {
-  contract:   { icon: 'draw',         label: 'Contract',   iconClass: 'text-violet-500', bgClass: 'bg-violet-50' },
-  proposal:   { icon: 'description',  label: 'Proposal',   iconClass: 'text-blue-500',   bgClass: 'bg-blue-50'   },
-  invoice:    { icon: 'receipt',      label: 'Invoice',    iconClass: 'text-green-500',  bgClass: 'bg-green-50'  },
-  quotation:  { icon: 'request_quote',label: 'Quotation',  iconClass: 'text-amber-500',  bgClass: 'bg-amber-50'  },
-  onboarding: { icon: 'person_add',   label: 'Onboarding', iconClass: 'text-rose-500',   bgClass: 'bg-rose-50'   },
+  contract: { icon: 'draw', label: 'Contract', iconClass: 'text-violet-500', bgClass: 'bg-violet-50' },
+  proposal: { icon: 'description', label: 'Proposal', iconClass: 'text-blue-500', bgClass: 'bg-blue-50' },
+  invoice: { icon: 'receipt', label: 'Invoice', iconClass: 'text-green-500', bgClass: 'bg-green-50' },
+  quotation: { icon: 'request_quote', label: 'Quotation', iconClass: 'text-amber-500', bgClass: 'bg-amber-50' },
+  onboarding: { icon: 'person_add', label: 'Onboarding', iconClass: 'text-rose-500', bgClass: 'bg-rose-50' },
 };
 
 type FilterKey = 'all' | DocumentType;
@@ -99,10 +99,10 @@ const DocumentRow = ({
   doc: StudioDocument;
   onSign: () => void;
 }) => {
-  const meta             = DOC_META[doc.type];
-  const isContract       = doc.type === 'contract';
-  const needsSignature   = isContract && !doc.isSigned;
-  const isSigned         = isContract && !!doc.isSigned;
+  const meta = DOC_META[doc.type];
+  const isContract = doc.type === 'contract';
+  const needsSignature = isContract && !doc.isSigned;
+  const isSigned = isContract && !!doc.isSigned;
 
   return (
     <div className="flex items-center gap-3 px-4 md:px-6 py-3.5 hover:bg-(--color-surface-subtle) transition-colors group">
@@ -171,14 +171,14 @@ const DocumentRow = ({
 
 const UserDocuments = () => {
   const { documents, signDocument } = useDocumentsStore();
-  const [signingDoc,  setSigningDoc]  = useState<StudioDocument | null>(null);
-  const [activeTab,   setActiveTab]   = useState<FilterKey>('all');
+  const [signingDoc, setSigningDoc] = useState<StudioDocument | null>(null);
+  const [activeTab, setActiveTab] = useState<FilterKey>('all');
 
   const myDocuments = documents.filter(d => !d.clientId || d.clientId === CURRENT_CLIENT_ID);
 
-  const contracts        = myDocuments.filter(d => d.type === 'contract');
+  const contracts = myDocuments.filter(d => d.type === 'contract');
   const pendingSignature = contracts.filter(d => !d.isSigned).length;
-  const signedCount      = contracts.filter(d => d.isSigned).length;
+  const signedCount = contracts.filter(d => d.isSigned).length;
 
   // Unique types for tabs
   const presentTypes = [...new Set(myDocuments.map(d => d.type))] as DocumentType[];
@@ -199,7 +199,7 @@ const UserDocuments = () => {
 
   return (
     <UserLayout title="Documents">
-      <div className="flex flex-col gap-5 pb-10">
+      <div className="flex flex-col gap-5 py-10">
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

@@ -14,13 +14,13 @@ import Calendar from '@/src/components/admin/calendar/calendar';
 const Dashboard = () => {
   const navigate = useNavigate();
   const { documents } = useDocumentsStore();
-  const { members }   = useTeamStore();
-  const { projects }  = useProjectsStore();
-  const { tasks }     = useTasksStore();
+  const { members } = useTeamStore();
+  const { projects } = useProjectsStore();
+  const { tasks } = useTasksStore();
 
   return (
     <Layout>
-      <div className="flex-1 flex flex-col gap-4 md:gap-6">
+      <div className="flex-1 flex flex-col gap-4 md:gap-6 py-10">
 
         {/* Stats row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

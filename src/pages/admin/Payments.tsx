@@ -208,7 +208,7 @@ const Payments = () => {
 
   return (
     <Layout title="Payments" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto pb-6">
+      <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto py-10 pb-3">
 
         {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">
