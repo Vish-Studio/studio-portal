@@ -81,8 +81,13 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
         aria-label={title}
       >
         {/* Header */}
-        <div className="flex items-center justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
+          <div className="min-w-0">
+            <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+            {description && (
+              <p className="mt-1 text-sm leading-5 text-gray-400">{description}</p>
+            )}
+          </div>
 
           <button
             type="button"

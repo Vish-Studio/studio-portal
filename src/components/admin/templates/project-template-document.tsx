@@ -1,6 +1,6 @@
 import BlockRenderer from '../template-editor/block-renderer';
-import TemplateHeader from '@/src/pages/templates/template-header/template-header';
-import TemplateFooter from '@/src/pages/templates/template-footer/template-footer';
+import TemplateHeader from './template-header';
+import TemplateFooter from './template-footer';
 import { DocDivider } from './template-shell';
 import type { TemplateBlock } from '@/src/data/template-blocks';
 

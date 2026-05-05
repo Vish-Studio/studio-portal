@@ -4,6 +4,7 @@ import MaterialIcon from "../material-icon/material-icon";
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
   iconName: string;
+  label?: string;
   children?: React.ReactNode;
   clickHandler: () => void;
 }
@@ -13,6 +14,7 @@ const baseStyles = "relative w-10 h-10 flex items-center justify-center bg-gray-
 const ButtonIcon: React.FC<Props> = ({
   className = '',
   iconName,
+  label,
   clickHandler,
   children,
   ...rest
@@ -21,7 +23,7 @@ const ButtonIcon: React.FC<Props> = ({
     <button
       className={`button-icon ${baseStyles} ${className}`}
       onClick={clickHandler}
-      aria-label={iconName}
+      aria-label={rest['aria-label'] ?? label ?? iconName}
       {...rest}>
       <MaterialIcon name={iconName} size={18} />
       {children}

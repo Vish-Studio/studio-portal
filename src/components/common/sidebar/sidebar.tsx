@@ -33,6 +33,11 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
 }) => {
   const isExpanded = isMobile ? true : isSidebarOpen;
   const location = useLocation();
+  const isRouteActive = (path: string) => {
+    const normalizedPath = path.endsWith('/') ? path.slice(0, -1) : path;
+    if (normalizedPath === '/admin') return location.pathname === '/admin';
+    return location.pathname === normalizedPath || location.pathname.startsWith(`${normalizedPath}/`);
+  };
 
   const navItems = [
     { icon: <Home size={18} />, label: "Home", path: "/admin" },
@@ -107,7 +112,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
           {/* Nav Icons */}
           <div className="flex flex-col gap-2 text-(--color-sidebar-text)">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = isRouteActive(item.path);
               const btnClass = isActive
                 ? `bg-(--color-sidebar-active) text-white shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
                 : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;
@@ -135,7 +140,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
         {/* Bottom Settings */}
         <div className={`flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-4'}`}>
           {(() => {
-            const isActive = location.pathname === '/admin/settings';
+            const isActive = isRouteActive('/admin/settings');
             const btnClass = isActive
               ? `bg-(--color-sidebar-active) text-white shadow-md transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
               : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;

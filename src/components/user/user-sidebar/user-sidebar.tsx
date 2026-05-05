@@ -38,6 +38,10 @@ const UserSidebar: FunctionComponent<UserSidebarProps> = ({
 }) => {
   const isExpanded = isMobile ? true : isSidebarOpen;
   const location = useLocation();
+  const isRouteActive = (path: string) => {
+    if (path === '/user') return location.pathname === '/user';
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   return (
     <>
@@ -98,7 +102,7 @@ const UserSidebar: FunctionComponent<UserSidebarProps> = ({
           {/* Nav Items */}
           <div className="flex flex-col gap-2 text-(--color-sidebar-text)">
             {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
+              const isActive = isRouteActive(item.path);
               const btnClass = isActive
                 ? `bg-(--color-sidebar-active) text-white shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
                 : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;
@@ -125,7 +129,7 @@ const UserSidebar: FunctionComponent<UserSidebarProps> = ({
         {/* Bottom: Settings */}
         <div className={`flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-4'}`}>
           {(() => {
-            const isActive = location.pathname === '/user/settings';
+            const isActive = isRouteActive('/user/settings');
             const btnClass = isActive
               ? `bg-(--color-sidebar-active) text-white shadow-md transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
               : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;
