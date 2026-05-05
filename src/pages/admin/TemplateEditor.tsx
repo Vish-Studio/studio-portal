@@ -2,15 +2,21 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, Printer, Check } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
-import BlockRenderer from '../../components/admin/template-editor/block-renderer';
 import BlockEditorPanel from '../../components/admin/template-editor/block-editor-panel';
 import AddBlockMenu from '../../components/admin/template-editor/add-block-menu';
 import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
 import { useTemplateAssignmentsStore } from '../../store/template-assignments';
 import { useProjectsStore } from '../../store/projects';
+import { useClientsStore } from '../../store/clients';
 import { getDefaultBlocks } from '../../data/template-blocks';
 import { TEMPLATES } from '../../data/templates';
-import type { TemplateBlock } from '../../data/template-blocks';
+import ProjectTemplateDocument from '../../components/admin/templates/project-template-document';
+import type { BlockType, TemplateBlock } from '../../data/template-blocks';
+
+const LOCKED_TEMPLATE_BLOCKS: BlockType[] = ['parties-header', 'footer'];
+
+const editableBlocksOnly = (items: TemplateBlock[]) =>
+  items.filter(block => !LOCKED_TEMPLATE_BLOCKS.includes(block.type));
 
 // ─── TemplateEditor Page ──────────────────────────────────────────────────────
 
@@ -20,9 +26,11 @@ export default function TemplateEditor() {
   const navigate = useNavigate();
 
   const { projects }                                         = useProjectsStore();
+  const { clients }                                          = useClientsStore();
   const { assignments, addAssignment, updateAssignment }     = useTemplateAssignmentsStore();
 
   const project = projects.find(p => p.id === projectId);
+  const client = project ? clients.find(c => c.id === project.clientId) : null;
 
   // Determine if creating new or editing existing
   const isNew   = assignmentId === 'new';
@@ -31,6 +39,8 @@ export default function TemplateEditor() {
   const tplMeta  = TEMPLATES.find(t => t.slug === templateSlug);
 
   const existing = isNew ? null : assignments.find(a => a.id === assignmentId);
+  const currentTemplateSlug = existing?.templateSlug ?? templateSlug;
+  const currentTplMeta = TEMPLATES.find(t => t.slug === currentTemplateSlug);
 
   // ── Local block state ──
   const [blocks,       setBlocks]       = useState<TemplateBlock[]>([]);
@@ -43,10 +53,10 @@ export default function TemplateEditor() {
   // ── Initialise ──
   useEffect(() => {
     if (existing) {
-      setBlocks(existing.blocks);
+      setBlocks(editableBlocksOnly(existing.blocks));
       setDocTitle(existing.documentTitle);
     } else if (isNew && templateSlug) {
-      setBlocks(getDefaultBlocks(templateSlug));
+      setBlocks(editableBlocksOnly(getDefaultBlocks(templateSlug)));
       setDocTitle(tplMeta?.title ?? 'Document');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,6 +99,7 @@ export default function TemplateEditor() {
   const handleSave = () => {
     if (!projectId) return;
     const now = Date.now();
+    const saveBlocks = editableBlocksOnly(blocks);
 
     if (isNew && phaseKey) {
       addAssignment({
@@ -97,12 +108,12 @@ export default function TemplateEditor() {
         phaseKey,
         templateSlug,
         documentTitle: docTitle,
-        blocks,
+        blocks: saveBlocks,
         createdAt:     now,
         updatedAt:     now,
       });
     } else if (existing) {
-      updateAssignment(existing.id, { blocks, documentTitle: docTitle });
+      updateAssignment(existing.id, { blocks: saveBlocks, documentTitle: docTitle });
     }
 
     setSaved(true);
@@ -199,7 +210,7 @@ export default function TemplateEditor() {
                 : 'bg-gray-900 text-white hover:bg-gray-700'
             }`}
           >
-            {saved ? <><Check size={14} />Saved</> : 'Save & Close'}
+            {saved ? <><Check size={14} />Saved</> : isNew ? 'Save to Project' : 'Save & Close'}
           </button>
         </div>
       </div>
@@ -288,34 +299,15 @@ export default function TemplateEditor() {
         {/* ── Document preview ── */}
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 px-1 print:hidden">Preview</p>
-          <div
-            className="bg-[#F5EFE4] mx-auto"
-            style={{ fontFamily: "'Outfit', sans-serif" }}
-          >
-            {/* Document title */}
-            <div className="px-14 pt-12 pb-6">
-              <h1 className="font-serif text-[52px] font-normal tracking-tight text-gray-900 leading-none">
-                {docTitle}
-              </h1>
-            </div>
-
-            {/* Blocks */}
-            <div className="px-14 pb-12 flex flex-col gap-6">
-              {blocks.map(block => (
-                <div
-                  key={block.id}
-                  onClick={() => setEditingId(block.id)}
-                  className={`cursor-pointer transition-all rounded-lg print:cursor-default print:rounded-none ${
-                    editingId === block.id
-                      ? 'ring-2 ring-gray-900 ring-offset-2 ring-offset-[#F5EFE4]'
-                      : 'hover:ring-2 hover:ring-gray-200 hover:ring-offset-2 hover:ring-offset-[#F5EFE4]'
-                  }`}
-                >
-                  <BlockRenderer block={block} />
-                </div>
-              ))}
-            </div>
-          </div>
+          <ProjectTemplateDocument
+            slug={currentTemplateSlug}
+            title={currentTplMeta?.title ?? docTitle}
+            blocks={blocks}
+            selectedBlockId={editingId}
+            onSelectBlock={setEditingId}
+            clientName={client?.displayName ?? 'Client Name'}
+            clientEmail={client?.email ?? 'client@email.com'}
+          />
         </div>
       </div>
 

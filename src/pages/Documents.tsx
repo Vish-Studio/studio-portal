@@ -1,124 +1,314 @@
-import React, { useState } from 'react';
-import { ExternalLink, FileText, Loader2, Presentation, FileCheck2, FileHeart, FolderOpen, PenTool } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import Layout from '../components/common/layout/layout';
+import CardContent from '../components/common/card-content/card-content';
+import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
+import StatusBadge from '../components/common/status-badge/status-badge';
+import MaterialIcon from '../components/common/material-icon/material-icon';
 import { useDocumentsStore } from '../store/documents';
-import type { StudioDocument } from '../store/documents';
+import { useTemplateAssignmentsStore } from '../store/template-assignments';
+import { useProjectsStore } from '../store/projects';
+import { useClientsStore } from '../store/clients';
+import { TEMPLATES } from '../data/templates';
+import type { StudioDocument, DocumentType } from '../store/documents';
+import type { TemplateAssignment } from '../store/template-assignments';
+
+// ─── Document type icons ──────────────────────────────────────────────────────
+
+const DOC_TYPE_ICON: Record<DocumentType, string> = {
+  contract:   'draw',
+  proposal:   'description',
+  invoice:    'receipt',
+  quotation:  'request_quote',
+  onboarding: 'person_add',
+};
+
+const DOC_TYPE_LABEL: Record<DocumentType, string> = {
+  contract:   'Contract',
+  proposal:   'Proposal',
+  invoice:    'Invoice',
+  quotation:  'Quotation',
+  onboarding: 'Onboarding',
+};
+
+// ─── Unified entry shape ──────────────────────────────────────────────────────
+
+type DocStatus =
+  | 'awaits-client'    // phase flagged for client, not yet completed
+  | 'admin-action'     // admin-owned active phase with a doc
+  | 'awaits-signature' // contract not yet signed (StudioDoc)
+  | 'signed'           // signed contract
+  | 'complete'         // phase done
+  | 'pending';         // phase not yet started
+
+interface UnifiedDoc {
+  id:           string;
+  title:        string;
+  source:       'studio' | 'template';
+  icon:         string;
+  typeLabel:    string;
+  projectId?:   string;
+  projectName?: string;
+  clientName?:  string;
+  phaseName?:   string;
+  date:         number; // ms timestamp — used for sorting
+  status:       DocStatus;
+  studioDoc?:   StudioDocument;
+  assignment?:  TemplateAssignment;
+}
+
+const STATUS_LABEL: Record<DocStatus, string> = {
+  'awaits-client':    'Awaits Client',
+  'admin-action':     'Admin Action',
+  'awaits-signature': 'Awaits Signature',
+  'signed':           'Signed',
+  'complete':         'Complete',
+  'pending':          'Pending',
+};
+
+const STATUS_VARIANT: Record<DocStatus, 'violet' | 'amber' | 'purple' | 'green' | 'gray' | 'blue'> = {
+  'awaits-client':    'violet',
+  'admin-action':     'amber',
+  'awaits-signature': 'purple',
+  'signed':           'green',
+  'complete':         'green',
+  'pending':          'gray',
+};
+
+type FilterKey = 'all' | DocStatus;
+
+// ─── Documents page ───────────────────────────────────────────────────────────
 
 export default function Documents() {
-  const { documents, signDocument } = useDocumentsStore();
-  const [signingDoc, setSigningDoc] = useState<StudioDocument | null>(null);
-  const [signatureName, setSignatureName] = useState('');
+  const navigate = useNavigate();
+  const { documents }   = useDocumentsStore();
+  const { assignments } = useTemplateAssignmentsStore();
+  const { projects }    = useProjectsStore();
+  const { clients }     = useClientsStore();
 
-  const handleSign = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!signingDoc || !signatureName.trim()) return;
-    signDocument(signingDoc.id, signatureName);
-    setSigningDoc(null);
-    setSignatureName('');
-    alert('Contract signed successfully!');
-  };
+  const [activeTab, setActiveTab] = useState<FilterKey>('all');
 
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'quotation':   return <span className="font-extrabold text-2xl">Q</span>;
-      case 'proposal':    return <Presentation className="text-gray-400 w-6 h-6 shrink-0" />;
-      case 'invoice':     return <FileCheck2 className="text-green-500 w-6 h-6 shrink-0" />;
-      case 'onboarding':  return <FileHeart className="text-red-500 w-6 h-6 shrink-0" />;
-      case 'contract':    return <PenTool className="text-purple-500 w-6 h-6 shrink-0" />;
-      default:            return <FileText className="text-gray-400 w-6 h-6 shrink-0" />;
+  // ── Build unified list ────────────────────────────────────────────────────
+
+  const unified = useMemo<UnifiedDoc[]>(() => {
+    const entries: UnifiedDoc[] = [];
+
+    // 1. StudioDocuments
+    for (const doc of documents) {
+      const client  = clients.find(c => c.id === doc.clientId);
+      const isContract = doc.type === 'contract';
+      let status: DocStatus = 'pending';
+      if (isContract && doc.isSigned)  status = 'signed';
+      else if (isContract && !doc.isSigned) status = 'awaits-signature';
+      else status = 'complete'; // proposals, invoices etc.
+
+      entries.push({
+        id:          doc.id,
+        title:       doc.title,
+        source:      'studio',
+        icon:        DOC_TYPE_ICON[doc.type] ?? 'description',
+        typeLabel:   DOC_TYPE_LABEL[doc.type] ?? doc.type,
+        clientName:  client?.displayName,
+        date:        doc.createdAt.toMillis(),
+        status,
+        studioDoc:   doc,
+      });
+    }
+
+    // 2. TemplateAssignments (project template docs)
+    for (const a of assignments) {
+      const project = projects.find(p => p.id === a.projectId);
+      if (!project) continue;
+
+      const phase   = project.phases.find(ph => ph.id === a.phaseKey);
+      const client  = clients.find(c => c.id === project.clientId);
+      const tpl     = TEMPLATES.find(t => t.slug === a.templateSlug);
+
+      let status: DocStatus = 'pending';
+      if (phase) {
+        if (phase.status === 'done') {
+          status = 'complete';
+        } else if (phase.status === 'active') {
+          status = phase.requiresClientAction && !phase.clientCompleted
+            ? 'awaits-client'
+            : 'admin-action';
+        } else {
+          status = 'pending';
+        }
+      }
+
+      entries.push({
+        id:          a.id,
+        title:       a.documentTitle,
+        source:      'template',
+        icon:        tpl?.icon ?? 'edit_document',
+        typeLabel:   tpl?.title ?? 'Document',
+        projectId:   project.id,
+        projectName: project.name,
+        clientName:  client?.displayName,
+        phaseName:   phase?.title,
+        date:        a.updatedAt,
+        status,
+        assignment:  a,
+      });
+    }
+
+    // Sort most recent first
+    return entries.sort((a, b) => b.date - a.date);
+  }, [documents, assignments, projects, clients]);
+
+  // ── Tab counts ────────────────────────────────────────────────────────────
+
+  const tabCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: unified.length };
+    for (const doc of unified) {
+      counts[doc.status] = (counts[doc.status] ?? 0) + 1;
+    }
+    return counts;
+  }, [unified]);
+
+  const tabs: TabItem[] = [
+    { key: 'all',             label: 'All',             count: tabCounts['all'] ?? 0 },
+    { key: 'awaits-client',   label: 'Awaits Client',   count: tabCounts['awaits-client'] ?? 0 },
+    { key: 'admin-action',    label: 'Admin Action',    count: tabCounts['admin-action'] ?? 0 },
+    { key: 'awaits-signature',label: 'Awaits Signature',count: tabCounts['awaits-signature'] ?? 0 },
+    { key: 'signed',          label: 'Signed',          count: tabCounts['signed'] ?? 0 },
+    { key: 'complete',        label: 'Complete',        count: tabCounts['complete'] ?? 0 },
+  ].filter(t => t.key === 'all' || (t.count ?? 0) > 0);
+
+  const filtered = activeTab === 'all'
+    ? unified
+    : unified.filter(d => d.status === activeTab);
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+
+  const openDoc = (doc: UnifiedDoc) => {
+    if (doc.source === 'template' && doc.assignment) {
+      navigate(`/admin/projects/${doc.assignment.projectId}/templates/${doc.assignment.id}`);
+    } else if (doc.studioDoc) {
+      window.open(doc.studioDoc.url, '_blank', 'noreferrer');
     }
   };
 
   return (
     <Layout title="Documents">
-      <div className="space-y-6 max-w-[1200px] mx-auto w-full">
-        <div className="flex justify-end mb-6">
-          <p className="text-gray-500 font-medium text-sm">All relevant files and agreements for your project.</p>
+      <div className="flex flex-col gap-5 pb-10">
+
+        {/* Stats row */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[
+            { label: 'Total',          value: unified.length,                                           cls: 'bg-white border border-gray-200' },
+            { label: 'Awaits Client',  value: tabCounts['awaits-client']    ?? 0,                       cls: 'bg-violet-50 border border-violet-200' },
+            { label: 'Admin Action',   value: tabCounts['admin-action']     ?? 0,                       cls: 'bg-amber-50  border border-amber-200'  },
+            { label: 'Signed',         value: (tabCounts['signed'] ?? 0) + (tabCounts['complete'] ?? 0), cls: 'bg-green-50  border border-green-200'  },
+          ].map(({ label, value, cls }) => (
+            <div key={label} className={`${cls} rounded-[14px] px-4 py-3 flex flex-col gap-1`}>
+              <span className="text-[11px] font-semibold text-gray-500">{label}</span>
+              <span className="text-2xl font-bold text-(--color-ink)">{value}</span>
+            </div>
+          ))}
         </div>
 
-        {signingDoc && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <div className="bg-white p-8 rounded-[28px] max-w-md w-full shadow-2xl">
-              <h3 className="text-2xl font-extrabold text-gray-900 mb-2">Sign Contract</h3>
-              <p className="text-sm font-medium text-gray-500 mb-6">
-                By typing your name below, you electronically sign:{' '}
-                <span className="font-bold text-gray-900">{signingDoc.title}</span>
-              </p>
-              <form onSubmit={handleSign} className="space-y-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Full Legal Name</label>
-                  <input
-                    required value={signatureName} onChange={e => setSignatureName(e.target.value)}
-                    type="text"
-                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium py-3 px-4 rounded-[12px] focus:outline-none focus:border-gray-400 font-sans"
-                    placeholder="John Doe"
-                  />
-                </div>
-                <div className="flex gap-3 pt-4">
-                  <button type="button" onClick={() => setSigningDoc(null)} className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xs font-extrabold uppercase tracking-widest rounded-full transition-colors">Cancel</button>
-                  <button type="submit" className="flex-1 py-3 bg-black hover:bg-gray-800 text-white text-xs font-extrabold uppercase tracking-widest rounded-full transition-colors">Confirm & Sign</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        {/* Tab toolbar */}
+        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
+          <TableTab
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={key => setActiveTab(key as FilterKey)}
+          />
+        </div>
 
-        {documents.length === 0 ? (
-          <div className="bg-white border border-gray-200 p-12 rounded-[28px] text-center shadow-sm">
-            <FolderOpen className="mx-auto text-gray-300 mb-4 h-12 w-12" />
-            <h2 className="text-lg font-bold text-gray-900">No documents yet</h2>
-            <p className="text-gray-500 mt-2 font-medium text-sm">When documents are shared they will appear here.</p>
+        {/* Document list */}
+        {filtered.length === 0 ? (
+          <div className="bg-white border border-gray-200 rounded-[18px] py-16 flex flex-col items-center gap-3 text-center">
+            <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center">
+              <MaterialIcon name="folder_open" size={22} className="text-gray-300" />
+            </div>
+            <p className="text-sm font-semibold text-gray-400">No documents found</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {documents.map(document => {
-              const isContract = document.type === 'contract';
-              const pendingSignature = isContract && !document.isSigned;
-              return (
-                <div key={document.id} className="bg-white border border-gray-200 rounded-[28px] p-6 hover:shadow-lg transition-all group flex flex-col justify-between h-full hover:border-gray-300 relative">
-                  {pendingSignature && (
-                    <span className="absolute -top-3 -right-3 bg-purple-100 text-purple-700 text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full border border-purple-200 shadow-sm animate-pulse">
-                      Action Required
-                    </span>
-                  )}
-                  {isContract && document.isSigned && (
-                    <span className="absolute -top-3 -right-3 bg-green-100 text-green-700 text-[10px] font-extrabold uppercase tracking-widest px-3 py-1.5 rounded-full border border-green-200 shadow-sm">
-                      Signed
-                    </span>
-                  )}
-                  <div>
-                    <div className="flex justify-between items-start mb-6">
-                      <div className="h-12 w-12 rounded-[14px] bg-gray-50 border border-gray-100 flex items-center justify-center font-extrabold text-gray-900 shrink-0">
-                        {getIcon(document.type)}
-                      </div>
-                      <span className="text-[10px] uppercase font-extrabold tracking-widest text-gray-500 bg-gray-50 border border-gray-100 px-2.5 py-1 rounded-[8px]">
-                        {document.type}
-                      </span>
+          <CardContent
+            iconName="folder"
+            title={`${filtered.length} document${filtered.length !== 1 ? 's' : ''}`}
+          >
+            <div className="divide-y divide-gray-100">
+              {filtered.map(doc => (
+                <div
+                  key={doc.id}
+                  onClick={() => openDoc(doc)}
+                  className="flex items-center gap-3 px-4 md:px-6 py-3.5 hover:bg-(--color-surface-subtle) transition-colors cursor-pointer group"
+                >
+                  {/* Type icon */}
+                  <div className="w-9 h-9 rounded-[12px] bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
+                    <MaterialIcon name={doc.icon} size={16} className="text-gray-500" />
+                  </div>
+
+                  {/* Title + meta */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="text-sm font-semibold text-(--color-ink) truncate leading-tight">
+                        {doc.title}
+                      </p>
+                      <StatusBadge
+                        label={STATUS_LABEL[doc.status]}
+                        variant={STATUS_VARIANT[doc.status]}
+                      />
                     </div>
-                    <h3 className="text-lg font-extrabold text-gray-900 mb-2 leading-tight group-hover:text-gray-700 transition-colors">
-                      {document.title}
-                    </h3>
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-6">
-                      {document.createdAt ? format(document.createdAt.toMillis(), 'MMM dd, yyyy') : 'Unknown date'}
-                    </p>
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                      {/* Type label */}
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        {doc.typeLabel}
+                      </span>
+                      {/* Project */}
+                      {doc.projectName && (
+                        <>
+                          <span className="text-gray-200 text-[10px]">·</span>
+                          <span className="text-[10px] text-gray-400 truncate flex items-center gap-0.5">
+                            <MaterialIcon name="work" size={9} />
+                            {doc.projectName}
+                          </span>
+                        </>
+                      )}
+                      {/* Phase */}
+                      {doc.phaseName && (
+                        <>
+                          <span className="text-gray-200 text-[10px]">·</span>
+                          <span className="text-[10px] text-gray-400 truncate flex items-center gap-0.5">
+                            <MaterialIcon name="route" size={9} />
+                            {doc.phaseName}
+                          </span>
+                        </>
+                      )}
+                      {/* Client */}
+                      {doc.clientName && (
+                        <>
+                          <span className="text-gray-200 text-[10px]">·</span>
+                          <span className="text-[10px] text-gray-400 truncate">
+                            {doc.clientName}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="mt-auto flex flex-col gap-2">
-                    <a href={document.url} target="_blank" rel="noreferrer" className="flex items-center justify-center w-full px-6 py-3.5 bg-gray-50 text-gray-900 border border-gray-200 font-bold text-xs rounded-[16px] hover:bg-gray-100 transition-colors shadow-sm">
-                      Open Document
-                      <ExternalLink size={14} className="ml-2 opacity-80" />
-                    </a>
-                    {pendingSignature && (
-                      <button onClick={() => setSigningDoc(document)} className="flex items-center justify-center w-full px-6 py-3.5 bg-black text-white font-extrabold text-xs uppercase tracking-widest rounded-[16px] hover:bg-gray-800 transition-colors shadow-sm">
-                        Sign Now
-                      </button>
-                    )}
-                  </div>
+
+                  {/* Date */}
+                  <span className="hidden sm:block text-[11px] text-gray-400 shrink-0 tabular-nums">
+                    {format(doc.date, 'MMM d, yyyy')}
+                  </span>
+
+                  {/* Open arrow */}
+                  <MaterialIcon
+                    name="arrow_outward"
+                    size={14}
+                    className="text-gray-300 group-hover:text-gray-600 transition-colors shrink-0"
+                  />
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          </CardContent>
         )}
+
       </div>
     </Layout>
   );

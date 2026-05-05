@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Briefcase, Check, Pencil, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Briefcase, Check, Pencil, Trash2, Plus, UserRound } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
+import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
 import Select from '../../components/common/select/select';
 import Option from '../../components/common/select/option';
@@ -12,7 +13,6 @@ import ButtonIcon from '../../components/common/button-icon/button-icon';
 import IconPicker from '../../components/common/icon-picker/icon-picker';
 import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
 import ProjectHeroCard from '../../components/admin/project-hero-card/project-hero-card';
-import { PhaseTrack } from '../../components/admin/project-progress/project-progress';
 import { AvatarStack } from '../../components/common/avatar/avatar';
 import Avatar from '../../components/common/avatar/avatar';
 import ClientPicker from '../../components/admin/pickers/client-picker/client-picker';
@@ -27,7 +27,6 @@ import { useTemplateAssignmentsStore } from '../../store/template-assignments';
 import { useClientsStore } from '../../store/clients';
 import { getProjectAccent, getPhaseProgress, SERVICE_META, DEFAULT_PHASE_DEFS } from '../../data/projects';
 import { TEMPLATES } from '../../data/templates';
-import { getDefaultBlocks } from '../../data/template-blocks';
 import type { ServiceType, PackageType, Phase, PhaseStatus } from '../../data/projects';
 import type { Task, TaskStatus } from '../../data/tasks';
 
@@ -54,11 +53,11 @@ const PHASE_STATUS_CLS: Record<PhaseStatus, string> = {
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { projects, updateProject, updatePhase, insertPhase, removePhase } = useProjectsStore();
+  const { projects, updateProject, updatePhase, insertPhase, removePhase, completePhase, movePhase, setActivePhase } = useProjectsStore();
   const { clients }  = useClientsStore();
   const { members }  = useTeamStore();
   const { tasks, removeTask } = useTasksStore();
-  const { getPhaseAssignment, addAssignment, removeAssignment } = useTemplateAssignmentsStore();
+  const { getPhaseAssignment, removeAssignment } = useTemplateAssignmentsStore();
   const project = projects.find(p => p.id === id);
 
   const [isEditing, setIsEditing]               = useState(false);
@@ -149,11 +148,15 @@ const ProjectDetail = () => {
 
   const savePhaseEdit = () => {
     if (!editingPhaseId || !phaseTitle.trim()) return;
-    updatePhase(project.id, editingPhaseId, {
+    const updates = {
       title: phaseTitle.trim(), icon: phaseIcon,
       targetDate: phaseDate.trim() || undefined, description: phaseDesc.trim() || undefined,
       status: phaseStatus, requiresClientAction: phaseFlag,
-    });
+      ...(phaseFlag ? { clientCompleted: false } : {}),
+    };
+    updatePhase(project.id, editingPhaseId, updates);
+    if (phaseStatus === 'active') setActivePhase(project.id, editingPhaseId);
+    if (phaseStatus === 'done') completePhase(project.id, editingPhaseId);
     setEditingPhaseId(null);
   };
 
@@ -174,6 +177,7 @@ const ProjectDetail = () => {
   };
 
   const assignedPhase = assignPhaseId ? project.phases.find(p => p.id === assignPhaseId) : null;
+  const editingPhase = editingPhaseId ? project.phases.find(p => p.id === editingPhaseId) : null;
 
   return (
     <Layout title={project.name}>
@@ -269,243 +273,157 @@ const ProjectDetail = () => {
           </CardContent>
         </div>
 
-        {/* Phases — view mode shows pill track, edit mode shows vertical editor */}
+        {/* Phases */}
         <CardContent
           iconName="route"
-          title="Phases"
+          title="Timeline"
           action={
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-gray-400">{doneCount}/{project.phases.length} done · {progress}%</span>
-              {isPhasesEditing ? (
-                <>
-                  <button type="button" onClick={() => openInsert(project.phases.length - 1)} className="flex items-center gap-1 text-[12px] font-semibold text-gray-500 hover:text-gray-800 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                    <Plus size={13} /> Add
-                  </button>
-                  <button type="button" onClick={() => { setIsPhasesEditing(false); setEditingPhaseId(null); setInsertAfterIdx(null); }} className="text-[12px] font-semibold text-white bg-(--color-ink) hover:bg-gray-700 px-3 py-1.5 rounded-lg transition-colors">
-                    Done
-                  </button>
-                </>
-              ) : (
-                <ButtonIcon iconName="edit" clickHandler={() => setIsPhasesEditing(true)} />
-              )}
+            <div className="flex flex-wrap items-center justify-end gap-1.5">
+              <span className="hidden sm:inline text-[11px] font-semibold text-gray-400">{doneCount}/{project.phases.length} done · {progress}%</span>
+              <button type="button" onClick={() => openInsert(project.phases.length - 1)} className="hidden sm:flex items-center gap-1 text-[12px] font-semibold text-gray-600 hover:text-gray-900 px-2.5 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                <Plus size={13} /> Add
+              </button>
+              <button type="button" onClick={() => setIsPhasesEditing(v => !v)} className={`text-[12px] font-semibold px-3 py-1.5 rounded-lg transition-colors ${isPhasesEditing ? 'bg-(--color-ink) text-white hover:bg-gray-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
+                {isPhasesEditing ? 'Done' : 'Manage'}
+              </button>
             </div>
           }
-          bodyClassName={isPhasesEditing ? undefined : 'px-4 md:px-6 py-4 md:py-5'}
+          bodyClassName="px-4 md:px-6 py-4 md:py-5"
         >
-          {!isPhasesEditing ? (
-            /* ── View mode: same pill display as Phase Overview ── */
-            <PhaseTrack phases={project.phases} accent={accent} size="md" />
-          ) : (
-            /* ── Edit mode: vertical editable list ── */
-          <div className="px-4 md:px-6 py-4 space-y-0">
-            {project.phases.map((phase, i) => {
-              const isEditing_ = editingPhaseId === phase.id;
-              return (
-                <div key={phase.id}>
-                  {i > 0 && (
-                    <div className="flex items-center gap-2 py-0.5 group">
-                      <div className="flex-1 h-px bg-gray-100" />
-                      {insertAfterIdx !== i - 1 && (
-                        <button type="button" onClick={() => openInsert(i - 1)} className="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-700 transition-all">
-                          <Plus size={10} />
-                        </button>
-                      )}
-                      <div className="flex-1 h-px bg-gray-100" />
-                    </div>
-                  )}
+          <div className="space-y-5">
+            <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 sm:hidden">
+              <span className="text-[11px] font-semibold text-gray-400">{doneCount}/{project.phases.length} done · {progress}%</span>
+              <button type="button" onClick={() => openInsert(project.phases.length - 1)} className="flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-gray-700 border border-gray-100">
+                <Plus size={13} /> Add phase
+              </button>
+            </div>
 
-                  {insertAfterIdx === i - 1 && (
-                    <div className="mb-3 bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Insert phase after "{project.phases[i - 1].title}"</p>
-                      <div className="grid grid-cols-[160px_1fr] gap-3">
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Icon</p>
-                          <IconPicker value={newPhaseIcon} onChange={setNewPhaseIcon} />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Phase Title <span className="text-red-400">*</span></p>
-                          <input value={newPhaseTitle} onChange={e => setNewPhaseTitle(e.target.value)} placeholder="e.g. Approval" className="w-full bg-white border border-gray-200 text-gray-900 text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200" />
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <button type="button" onClick={() => setInsertAfterIdx(null)} className="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl transition-colors">Cancel</button>
-                        <button type="button" onClick={confirmInsert} disabled={!newPhaseTitle.trim()} className="px-4 py-2 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-xl disabled:opacity-40 transition-colors">Insert</button>
-                      </div>
-                    </div>
-                  )}
+            <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                {project.phases.map((phase, i) => {
+                  const isDone = phase.status === 'done';
+                  const isActive = phase.status === 'active';
+                  return (
+                    <button
+                      key={phase.id}
+                      type="button"
+                      onClick={() => openPhaseEdit(phase)}
+                      className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-bold transition-colors ${
+                        isDone
+                          ? 'bg-(--color-ink) text-white'
+                          : isActive
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-white text-gray-400 border border-gray-100 hover:text-gray-700'
+                      }`}
+                    >
+                      {isDone ? <Check size={11} strokeWidth={3} /> : <MaterialIcon name={phase.icon} size={12} />}
+                      <span>{i + 1}. {phase.title}</span>
+                      {phase.requiresClientAction && !isDone && <UserRound size={10} />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                  <div className={`rounded-2xl transition-colors ${isEditing_ ? 'bg-gray-50 border border-gray-200' : 'hover:bg-gray-50'}`}>
-                    {isEditing_ ? (
-                      <div className="p-4 space-y-4">
-                        <div className="flex items-center justify-between gap-2 mb-1">
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Editing phase</p>
-                          <button type="button" onClick={() => setEditingPhaseId(null)} className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-200 text-gray-400">
-                            <MaterialIcon name="close" size={14} />
-                          </button>
-                        </div>
-                        <div className="grid grid-cols-[160px_1fr] gap-3">
-                          <div>
-                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Icon</p>
-                            <IconPicker value={phaseIcon} onChange={setPhaseIcon} />
-                          </div>
-                          <div className="space-y-3">
-                            <div>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Title <span className="text-red-400">*</span></p>
-                              <input value={phaseTitle} onChange={e => setPhaseTitle(e.target.value)} className="w-full bg-white border border-gray-200 text-gray-900 text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Status</p>
-                                <select value={phaseStatus} onChange={e => setPhaseStatus(e.target.value as PhaseStatus)} className="w-full bg-white border border-gray-200 text-gray-900 text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200">
-                                  <option value="pending">Pending</option>
-                                  <option value="active">Active</option>
-                                  <option value="done">Done</option>
-                                </select>
-                              </div>
-                              <div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Target Date</p>
-                                <input value={phaseDate} onChange={e => setPhaseDate(e.target.value)} placeholder="e.g. Jun 15, 2026" className="w-full bg-white border border-gray-200 text-gray-900 text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200" />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Notes (optional)</p>
-                          <input value={phaseDesc} onChange={e => setPhaseDesc(e.target.value)} placeholder="Short note…" className="w-full bg-white border border-gray-200 text-gray-900 text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200" />
-                        </div>
-                        <label className="flex items-center gap-3 cursor-pointer select-none">
-                          <div onClick={() => setPhaseFlag(v => !v)} className={`w-9 h-5 rounded-full relative transition-colors cursor-pointer ${phaseFlag ? 'bg-violet-500' : 'bg-gray-200'}`}>
-                            <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${phaseFlag ? 'translate-x-4' : 'translate-x-0.5'}`} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-semibold text-gray-800">Client action required</p>
-                            <p className="text-[11px] text-gray-400">Flag this phase for the client to complete and mark as done</p>
-                          </div>
-                          {phaseFlag && <MaterialIcon name="person" size={14} className="text-violet-500 shrink-0 ml-auto" />}
-                        </label>
-                        {/* Document assignment for this phase */}
-                        {(() => {
-                          const phaseDoc = getPhaseAssignment(id!, phase.id);
-                          const tpl      = phaseDoc ? TEMPLATES.find(t => t.slug === phaseDoc.templateSlug) : null;
-                          return (
-                            <div>
-                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
-                                Template Document
-                              </p>
-                              {phaseDoc && tpl ? (
-                                <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl px-3 py-2.5">
-                                  <MaterialIcon name={tpl.icon} size={14} className="text-gray-500 shrink-0" />
-                                  <span className="text-sm font-medium text-gray-700 flex-1 truncate">
-                                    {phaseDoc.documentTitle}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => navigate(`/admin/projects/${id}/templates/${phaseDoc.id}`)}
-                                    className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
-                                  >
-                                    <Pencil size={11} /> Edit
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => setRemoveDocId(phaseDoc.id)}
-                                    className="w-6 h-6 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                  >
-                                    <Trash2 size={12} />
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => { setAssignPhaseId(phase.id); setEditingPhaseId(null); }}
-                                  className="flex items-center justify-center gap-2 w-full text-[11px] font-semibold text-gray-400 hover:text-gray-700 border border-dashed border-gray-300 hover:border-gray-400 rounded-xl py-2.5 transition-colors"
-                                >
-                                  <Plus size={12} /> Assign template document
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })()}
+            <div className="hidden grid-cols-[minmax(260px,1fr)_minmax(220px,340px)_170px] items-center gap-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-300 lg:grid">
+              <span>Phase</span>
+              <span>Document</span>
+              <span className="text-right">Action</span>
+            </div>
 
-                        <div className="flex gap-2 pt-1">
-                          <button type="button" onClick={() => setEditingPhaseId(null)} className="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl">Cancel</button>
-                          <button type="button" onClick={savePhaseEdit} disabled={!phaseTitle.trim()} className="px-4 py-2 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-xl disabled:opacity-40">Save changes</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3 px-3 py-3 group">
-                        <span className="text-[10px] font-bold text-gray-300 w-5 text-right shrink-0">{i + 1}</span>
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
-                          phase.status === 'done'   ? 'bg-(--color-ink) text-white' :
-                          phase.status === 'active' ? `${accent.bg} ${accent.iconText}` :
+            <div className="grid gap-2.5">
+              {project.phases.map((phase, i) => {
+                const assignment = getPhaseAssignment(id!, phase.id);
+                const tplMeta = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
+                const isActive = phase.status === 'active';
+                const isDone = phase.status === 'done';
+                return (
+                  <div key={phase.id} className={`group rounded-[14px] border bg-white transition-colors ${
+                    isActive ? 'border-amber-300 bg-amber-50/30 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]' : 'border-gray-100 hover:border-gray-200'
+                  }`}>
+                    <div className="grid gap-3 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(260px,1fr)_minmax(220px,340px)_170px] lg:items-center">
+                      <button type="button" onClick={() => openPhaseEdit(phase)} className="flex min-w-0 items-center gap-3 text-left">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                          isDone ? 'bg-(--color-ink) text-white' :
+                          isActive ? 'bg-amber-50 text-amber-600' :
                           'bg-gray-50 text-gray-300'
                         }`}>
-                          {phase.status === 'done' ? <Check size={14} strokeWidth={2.5} /> : <MaterialIcon name={phase.icon} size={14} />}
+                          {isDone ? <Check size={15} strokeWidth={2.6} /> : <MaterialIcon name={phase.icon} size={15} />}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className={`text-sm font-semibold leading-tight ${phase.status === 'done' ? 'text-gray-400' : phase.status === 'active' ? 'text-gray-900' : 'text-gray-400'}`}>{phase.title}</p>
-                            {phase.requiresClientAction && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-violet-50 text-violet-600 border border-violet-200 shrink-0">
-                                <MaterialIcon name="person" size={8} /> Client
-                              </span>
-                            )}
-                            {phase.clientCompleted && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-green-50 text-green-600 border border-green-200 shrink-0">
-                                <Check size={8} strokeWidth={3} /> Confirmed
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-[5px] border ${PHASE_STATUS_CLS[phase.status]}`}>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] font-bold text-gray-300 tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+                            <p className={`truncate text-sm font-bold ${isDone ? 'text-gray-500' : 'text-gray-900'}`}>{phase.title}</p>
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-[6px] border ${PHASE_STATUS_CLS[phase.status]}`}>
                               {phase.status.charAt(0).toUpperCase() + phase.status.slice(1)}
                             </span>
-                            {phase.targetDate && (
-                              <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
-                                <MaterialIcon name="schedule" size={9} /> {phase.targetDate}
+                            {phase.requiresClientAction && (
+                              <span className="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-violet-50 text-violet-600 border border-violet-200">
+                                <UserRound size={8} /> Client input
                               </span>
                             )}
-                            {phase.description && <span className="text-[10px] text-gray-400 truncate max-w-40">{phase.description}</span>}
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-2">
+                            <span className="text-[10px] text-gray-400 flex items-center gap-0.5">
+                              <MaterialIcon name="schedule" size={9} />
+                              {phase.targetDate || 'No target date'}
+                            </span>
+                            {phase.description && <span className="text-[10px] text-gray-400 truncate max-w-80">{phase.description}</span>}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button type="button" onClick={() => openPhaseEdit(phase)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100">
-                            <Pencil size={12} />
-                          </button>
-                          <button type="button" onClick={() => setDeletePhaseId(phase.id)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50">
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                      </button>
 
-            {insertAfterIdx === project.phases.length - 1 && (
-              <div className="mt-3 bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Add phase at end</p>
-                <div className="grid grid-cols-[160px_1fr] gap-3">
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Icon</p>
-                    <IconPicker value={newPhaseIcon} onChange={setNewPhaseIcon} />
+                      {assignment && tplMeta ? (
+                        <button type="button" onClick={() => navigate(`/admin/projects/${id}/templates/${assignment.id}`)} className="flex min-w-0 items-center gap-2 rounded-xl bg-gray-50 px-3 py-2.5 text-left hover:bg-gray-100">
+                          <MaterialIcon name={tplMeta.icon} size={15} className="text-gray-400 shrink-0" />
+                          <span className="truncate text-xs font-bold text-gray-600">{assignment.documentTitle}</span>
+                          <MaterialIcon name="edit" size={13} className="ml-auto text-gray-300 shrink-0" />
+                        </button>
+                      ) : (
+                        <button type="button" onClick={() => setAssignPhaseId(phase.id)} className="rounded-xl border border-dashed border-gray-200 px-3 py-2.5 text-left text-xs font-bold text-gray-400 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700">
+                          Assign template document
+                        </button>
+                      )}
+
+                      <div className="flex items-center justify-end gap-1.5">
+                        {isActive && !isDone && (
+                          <button type="button" onClick={() => completePhase(project.id, phase.id)} className="rounded-lg bg-(--color-ink) px-3 py-2 text-xs font-bold text-white hover:bg-gray-800">
+                            Complete & advance
+                          </button>
+                        )}
+                        {!isActive && !isDone && !isPhasesEditing && (
+                          <button type="button" onClick={() => setActivePhase(project.id, phase.id)} className="rounded-lg bg-gray-100 px-3 py-2 text-xs font-bold text-gray-600 hover:bg-gray-200">
+                            Set active
+                          </button>
+                        )}
+                        {isPhasesEditing ? (
+                          <>
+                            <button type="button" title="Move up" disabled={i === 0} onClick={() => movePhase(project.id, phase.id, 'up')} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition-colors">
+                              <MaterialIcon name="arrow_upward" size={14} />
+                            </button>
+                            <button type="button" title="Move down" disabled={i === project.phases.length - 1} onClick={() => movePhase(project.id, phase.id, 'down')} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 hover:text-gray-600 hover:bg-gray-100 disabled:opacity-20 disabled:cursor-not-allowed transition-colors">
+                              <MaterialIcon name="arrow_downward" size={14} />
+                            </button>
+                            <button type="button" onClick={() => setDeletePhaseId(phase.id)} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors">
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        ) : (
+                          <button type="button" onClick={() => openPhaseEdit(phase)} className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-300 hover:text-gray-700 hover:bg-gray-100">
+                            <Pencil size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Phase Title <span className="text-red-400">*</span></p>
-                    <input value={newPhaseTitle} onChange={e => setNewPhaseTitle(e.target.value)} placeholder="e.g. Sign-off" className="w-full bg-white border border-gray-200 text-gray-900 text-sm py-2.5 px-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-gray-200" />
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setInsertAfterIdx(null)} className="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-800 bg-white hover:bg-gray-100 border border-gray-200 rounded-xl">Cancel</button>
-                  <button type="button" onClick={confirmInsert} disabled={!newPhaseTitle.trim()} className="px-4 py-2 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-xl disabled:opacity-40">Add phase</button>
-                </div>
-              </div>
-            )}
+                );
+              })}
 
             {project.phases.length === 0 && (
               <div className="py-8 flex flex-col items-center gap-3 text-center">
                 <MaterialIcon name="checklist" size={24} className="text-gray-200" />
-                <p className="text-xs font-semibold text-gray-400">No phases yet. Add phases to track progress.</p>
+                <p className="text-xs font-semibold text-gray-400">No phases yet. Add a phase or start with a default timeline.</p>
+                <button type="button" onClick={() => openInsert(-1)} className="px-3 py-2 text-xs font-semibold text-white bg-(--color-ink) rounded-xl">Add phase</button>
                 <div className="flex flex-wrap gap-2 justify-center mt-1">
                   {DEFAULT_PHASE_DEFS.map((def, i) => (
                     <button key={def.title} type="button" onClick={() => insertPhase(project.id, i - 1, { id: `ph_${Date.now()}_${i}`, title: def.title, icon: def.icon, status: i === 0 ? 'active' : 'pending', requiresClientAction: false, clientCompleted: false })}
@@ -517,7 +435,7 @@ const ProjectDetail = () => {
               </div>
             )}
           </div>
-          )}
+          </div>
         </CardContent>
 
         {/* Team & Financials */}
@@ -588,67 +506,133 @@ const ProjectDetail = () => {
           )}
         </CardContent>
 
-        {/* Phase Documents */}
-        <CardContent iconName="folder_open" title="Phase Documents">
-          <div className="px-4 md:px-6 py-4 flex flex-col gap-2">
-            {project.phases.map(phase => {
-              const assignment = getPhaseAssignment(id!, phase.id);
-              const tplMeta    = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
-              return (
-                <div key={phase.id} className="flex items-center gap-3 py-2.5 border-b border-gray-50 last:border-0">
-                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                    <MaterialIcon name={phase.icon} size={14} className="text-gray-500" />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-700 w-28 shrink-0 truncate">{phase.title}</span>
-                  {assignment && tplMeta ? (
-                    <>
-                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                        <MaterialIcon name={tplMeta.icon} size={13} className="text-gray-400 shrink-0" />
-                        <span className="text-xs text-gray-500 truncate">{assignment.documentTitle}</span>
-                      </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <button type="button" onClick={() => navigate(`/admin/projects/${id}/templates/${assignment.id}`)} className="flex items-center gap-1 text-[11px] font-semibold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg hover:bg-gray-100">
-                          <Pencil size={11} /> Edit
-                        </button>
-                        <button type="button" onClick={() => setRemoveDocId(assignment.id)} className="w-6 h-6 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50">
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <span className="flex-1 text-xs text-gray-300 italic">No document assigned</span>
-                      <button type="button" onClick={() => setAssignPhaseId(phase.id)} className="text-[11px] font-semibold text-gray-500 hover:text-gray-900 px-2.5 py-1 rounded-lg border border-gray-200 hover:border-gray-400 transition-colors shrink-0">
-                        + Assign
-                      </button>
-                    </>
-                  )}
-                </div>
-              );
-            })}
-            {project.phases.length === 0 && (
-              <p className="text-sm text-gray-400 py-4">No phases — add phases above to assign documents.</p>
-            )}
-          </div>
-        </CardContent>
-
       </div>
 
       {detailTask && (
         <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} onDelete={() => { setDetailTask(null); setConfirmTask(detailTask); }} />
       )}
 
+      <FormSidebar
+        isOpen={!!editingPhase || insertAfterIdx !== null}
+        onClose={() => { setEditingPhaseId(null); setInsertAfterIdx(null); }}
+        title={editingPhase ? 'Edit Phase' : 'Add Phase'}
+        description={editingPhase ? editingPhase.title : 'Create a new step in this project timeline.'}
+        width="md"
+      >
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            {editingPhase ? (
+              <>
+                <div className="rounded-2xl bg-(--color-surface) border border-gray-100 p-4 flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${editingPhase.status === 'active' ? `${accent.bg} ${accent.iconText}` : 'bg-white text-gray-500'}`}>
+                    <MaterialIcon name={editingPhase.icon} size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-gray-400">Timeline phase</p>
+                    <p className="text-sm font-bold text-gray-900 truncate">{editingPhase.title}</p>
+                  </div>
+                </div>
+
+                <FormField label="Icon">
+                  <IconPicker value={phaseIcon} onChange={setPhaseIcon} />
+                </FormField>
+
+                <FormField label="Title" required>
+                  <input value={phaseTitle} onChange={e => setPhaseTitle(e.target.value)} className={inputCls(!phaseTitle.trim())} />
+                </FormField>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField label="Status">
+                    <Select value={phaseStatus} onChange={e => setPhaseStatus(e.target.value as PhaseStatus)}>
+                      <Option value="pending">Pending</Option>
+                      <Option value="active">Active</Option>
+                      <Option value="done">Done</Option>
+                    </Select>
+                  </FormField>
+                  <FormField label="Target Date">
+                    <input value={phaseDate} onChange={e => setPhaseDate(e.target.value)} placeholder="e.g. Jun 15, 2026" className={inputCls(false)} />
+                  </FormField>
+                </div>
+
+                <FormField label="Notes">
+                  <textarea value={phaseDesc} onChange={e => setPhaseDesc(e.target.value)} rows={3} placeholder="Short note for this phase" className={`${inputCls(false)} resize-none`} />
+                </FormField>
+
+                <button type="button" onClick={() => setPhaseFlag(v => !v)} className="w-full flex items-center justify-between gap-4 rounded-2xl border border-gray-100 bg-white px-4 py-3 text-left hover:bg-gray-50 transition-colors">
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Client action required</p>
+                    <p className="text-xs text-gray-400">Show this phase as client-owned until completion.</p>
+                  </div>
+                  <div className={`w-9 h-5 rounded-full relative transition-colors shrink-0 ${phaseFlag ? 'bg-violet-500' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${phaseFlag ? 'translate-x-4' : 'translate-x-0.5'}`} />
+                  </div>
+                </button>
+
+                {(() => {
+                  const phaseDoc = getPhaseAssignment(id!, editingPhase.id);
+                  const tpl = phaseDoc ? TEMPLATES.find(t => t.slug === phaseDoc.templateSlug) : null;
+                  return (
+                    <div>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Document</p>
+                      {phaseDoc && tpl ? (
+                        <div className="flex items-center gap-3 rounded-2xl border border-gray-100 bg-(--color-surface) px-3 py-3">
+                          <MaterialIcon name={tpl.icon} size={16} className="text-gray-500 shrink-0" />
+                          <span className="min-w-0 flex-1 truncate text-sm font-medium text-gray-700">{phaseDoc.documentTitle}</span>
+                          <button type="button" onClick={() => navigate(`/admin/projects/${id}/templates/${phaseDoc.id}`)} className="text-xs font-semibold text-gray-600 hover:text-gray-900">Edit</button>
+                          <button type="button" onClick={() => setRemoveDocId(phaseDoc.id)} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50">
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ) : (
+                        <button type="button" onClick={() => { setAssignPhaseId(editingPhase.id); setEditingPhaseId(null); }} className="w-full rounded-2xl border border-dashed border-gray-300 px-4 py-3 text-sm font-semibold text-gray-500 hover:border-gray-400 hover:text-gray-800">
+                          Assign template document
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
+              </>
+            ) : (
+              <>
+                <div className="rounded-2xl bg-(--color-surface) border border-gray-100 p-4">
+                  <p className="text-xs font-semibold text-gray-400">Position</p>
+                  <p className="mt-1 text-sm font-bold text-gray-900">
+                    {insertAfterIdx === null || insertAfterIdx < 0
+                      ? 'At the start of the timeline'
+                      : `After ${project.phases[insertAfterIdx]?.title ?? 'the selected phase'}`}
+                  </p>
+                </div>
+                <FormField label="Icon">
+                  <IconPicker value={newPhaseIcon} onChange={setNewPhaseIcon} />
+                </FormField>
+                <FormField label="Title" required>
+                  <input value={newPhaseTitle} onChange={e => setNewPhaseTitle(e.target.value)} placeholder="e.g. Client approval" className={inputCls(!newPhaseTitle.trim())} />
+                </FormField>
+              </>
+            )}
+          </div>
+
+          <FormSidebarFooter>
+            <button type="button" onClick={() => { setEditingPhaseId(null); setInsertAfterIdx(null); }} className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
+            <button
+              type="button"
+              onClick={editingPhase ? savePhaseEdit : confirmInsert}
+              disabled={editingPhase ? !phaseTitle.trim() : !newPhaseTitle.trim()}
+              className="flex-1 py-2.5 text-sm font-semibold text-white bg-(--color-ink) hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-40"
+            >
+              {editingPhase ? 'Save Phase' : 'Add Phase'}
+            </button>
+          </FormSidebarFooter>
+        </div>
+      </FormSidebar>
+
       {assignPhaseId && assignedPhase && (
         <AssignTemplateModal
           phaseTitle={assignedPhase.title}
           onCancel={() => setAssignPhaseId(null)}
           onConfirm={slug => {
-            const tplMeta  = TEMPLATES.find(t => t.slug === slug)!;
-            const now      = Date.now();
-            const newAssId = `ta_${now}`;
-            addAssignment({ id: newAssId, projectId: id!, phaseKey: assignPhaseId, templateSlug: slug, documentTitle: tplMeta.title, blocks: getDefaultBlocks(slug), createdAt: now, updatedAt: now });
             setAssignPhaseId(null);
-            navigate(`/admin/projects/${id}/templates/${newAssId}?phase=${assignPhaseId}&template=${slug}`);
+            navigate(`/admin/projects/${id}/templates/new?phase=${assignPhaseId}&template=${slug}`);
           }}
         />
       )}

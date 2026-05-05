@@ -15,25 +15,33 @@ export default function AssignTemplateModal({ phaseTitle, onConfirm, onCancel }:
       onClose={onCancel}
       size="md"
       title={`Assign template — ${phaseTitle}`}
-      description="Choose which template to attach to this project phase."
+      description="Choose a template, edit it, then save it to this project phase."
     >
-      <div className="px-6 pb-6 pt-2 flex flex-col gap-2">
+      <div className="px-6 pb-6 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {TEMPLATES.map(tpl => (
           <button
             key={tpl.slug}
             type="button"
             onClick={() => onConfirm(tpl.slug)}
-            className="flex items-center gap-4 w-full text-left px-4 py-3 rounded-2xl border border-gray-100 bg-white hover:border-gray-200 hover:bg-gray-50 transition-all hover:shadow-sm"
+            className="group flex min-h-40 flex-col gap-4 w-full text-left p-5 rounded-[18px] border border-gray-100 bg-white hover:border-gray-300 hover:shadow-sm transition-all"
           >
-            <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-              <MaterialIcon name={tpl.icon} size={18} className="text-gray-500" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center shrink-0 transition-colors">
+                <MaterialIcon name={tpl.icon} size={20} className="text-gray-600" />
+              </div>
+              <MaterialIcon name="arrow_forward" size={16} className="text-gray-300 group-hover:text-gray-600 transition-colors" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-gray-900">{tpl.title}</p>
-              <p className="text-xs text-gray-400 truncate">{tpl.description}</p>
+              <p className="text-sm font-bold text-gray-900 mb-1">{tpl.title}</p>
+              <p className="text-xs text-gray-400 leading-relaxed line-clamp-3">{tpl.description}</p>
             </div>
+            <span className="text-xs font-semibold text-gray-400 group-hover:text-gray-700 transition-colors">
+              Use template
+            </span>
           </button>
         ))}
+        </div>
       </div>
     </Modal>
   );

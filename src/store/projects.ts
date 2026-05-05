@@ -1,19 +1,23 @@
 import { create } from 'zustand';
 import { buildDefaultPhases, getActivePhaseIndex } from '../data/projects';
-import type { ClientProject, ServiceType, PackageType, Phase } from '../data/projects';
+import type { ClientProject, ServiceType, PackageType, Phase, PhaseStatus } from '../data/projects';
 
 export type { ClientProject };
 
 interface ProjectsState {
   projects: ClientProject[];
-  setProjects:   (projects: ClientProject[]) => void;
-  addProject:    (project: ClientProject) => void;
-  updateProject: (id: string, updates: Partial<Omit<ClientProject, 'id'>>) => void;
-  removeProject: (id: string) => void;
-  updatePhase:   (projectId: string, phaseId: string, updates: Partial<Phase>) => void;
-  insertPhase:   (projectId: string, afterIndex: number, phase: Phase) => void;
-  removePhase:   (projectId: string, phaseId: string) => void;
-  completePhase: (projectId: string, phaseId: string) => void;
+  setProjects:     (projects: ClientProject[]) => void;
+  addProject:      (project: ClientProject) => void;
+  updateProject:   (id: string, updates: Partial<Omit<ClientProject, 'id'>>) => void;
+  removeProject:   (id: string) => void;
+  updatePhase:     (projectId: string, phaseId: string, updates: Partial<Phase>) => void;
+  insertPhase:     (projectId: string, afterIndex: number, phase: Phase) => void;
+  removePhase:     (projectId: string, phaseId: string) => void;
+  completePhase:   (projectId: string, phaseId: string) => void;
+  /** Move a phase one step up or down in the ordered list */
+  movePhase:       (projectId: string, phaseId: string, dir: 'up' | 'down') => void;
+  /** Make the given phase active; all phases before it become done, all after become pending */
+  setActivePhase:  (projectId: string, phaseId: string) => void;
 }
 
 export const useProjectsStore = create<ProjectsState>((set) => ({
@@ -66,6 +70,34 @@ export const useProjectsStore = create<ProjectsState>((set) => ({
         );
         const nextIdx = phases.findIndex((ph) => ph.status === 'pending');
         if (nextIdx !== -1) phases[nextIdx] = { ...phases[nextIdx], status: 'active' };
+        return { ...p, phases };
+      }),
+    })),
+
+  movePhase: (projectId, phaseId, dir) =>
+    set((s) => ({
+      projects: s.projects.map((p) => {
+        if (p.id !== projectId) return p;
+        const phases = [...p.phases];
+        const idx    = phases.findIndex((ph) => ph.id === phaseId);
+        const swap   = dir === 'up' ? idx - 1 : idx + 1;
+        if (swap < 0 || swap >= phases.length) return p;
+        [phases[idx], phases[swap]] = [phases[swap], phases[idx]];
+        return { ...p, phases };
+      }),
+    })),
+
+  setActivePhase: (projectId, phaseId) =>
+    set((s) => ({
+      projects: s.projects.map((p) => {
+        if (p.id !== projectId) return p;
+        const targetIdx = p.phases.findIndex((ph) => ph.id === phaseId);
+        if (targetIdx === -1) return p;
+        const phases = p.phases.map((ph, i) => ({
+          ...ph,
+          status: (i < targetIdx ? 'done' : i === targetIdx ? 'active' : 'pending') as PhaseStatus,
+          clientCompleted: i < targetIdx ? ph.clientCompleted : false,
+        }));
         return { ...p, phases };
       }),
     })),

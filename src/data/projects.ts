@@ -84,15 +84,15 @@ export interface Phase {
 // ─── Default phase definitions ────────────────────────────────────────────────
 
 export const DEFAULT_PHASE_DEFS: { title: string; icon: string }[] = [
-  { title: 'Quotation',   icon: 'request_quote'   },
-  { title: 'Brief',       icon: 'description'     },
-  { title: 'Onboarding',  icon: 'person_add'      },
-  { title: 'Contract',    icon: 'draw'            },
-  { title: 'Invoice',     icon: 'receipt'         },
-  { title: 'Design',      icon: 'design_services' },
-  { title: 'Development', icon: 'code'            },
-  { title: 'QA',          icon: 'bug_report'      },
-  { title: 'Launch',      icon: 'rocket_launch'   },
+  { title: 'Discovery/Brief', icon: 'explore'         },
+  { title: 'Proposal',        icon: 'description'     },
+  { title: 'Quotation',       icon: 'request_quote'   },
+  { title: 'Invoice',         icon: 'receipt'         },
+  { title: 'Design',          icon: 'design_services' },
+  { title: 'Revision',        icon: 'rate_review'     },
+  { title: 'Development',     icon: 'code'            },
+  { title: 'Review',          icon: 'fact_check'      },
+  { title: 'Invoice',         icon: 'receipt_long'    },
 ];
 
 /**

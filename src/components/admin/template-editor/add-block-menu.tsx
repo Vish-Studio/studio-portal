@@ -11,12 +11,10 @@ const BLOCK_OPTIONS: { type: BlockType; label: string; icon: string; description
   { type: 'bullet-list',    icon: 'list',         label: 'Bullet list',     description: 'Unordered list' },
   { type: 'numbered-list',  icon: 'format_list_numbered', label: 'Numbered list', description: 'Ordered list' },
   { type: 'divider',        icon: 'horizontal_rule', label: 'Divider',      description: 'Horizontal separator line' },
-  { type: 'parties-header', icon: 'contacts',     label: 'Parties header',  description: 'To / From / Date columns' },
   { type: 'service-table',  icon: 'table_chart',  label: 'Service table',   description: 'Line items with totals' },
   { type: 'two-column',     icon: 'view_column',  label: 'Two column',      description: 'Side-by-side content' },
   { type: 'payment-info',   icon: 'payments',     label: 'Payment info',    description: 'Payment details table' },
   { type: 'signatures',     icon: 'draw',         label: 'Signatures',      description: 'Signature lines' },
-  { type: 'footer',         icon: 'sentiment_satisfied', label: 'Footer',   description: '"Thank you" footer' },
 ];
 
 // ─── Default content for a new block ─────────────────────────────────────────

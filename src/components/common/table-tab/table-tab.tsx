@@ -86,6 +86,27 @@ const TableTab: FunctionComponent<TableTabProps> = ({
         </div>
       )}
 
+      {/* View toggle */}
+      {/* <div className="hidden sm:flex items-center gap-0.5 p-1 bg-gray-100 rounded-xl shrink-0">
+        <button
+          type="button"
+          onClick={() => setViewMode('grid')}
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
+          aria-label="Grid view"
+        >
+          <LayoutGrid size={14} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setViewMode('list')}
+          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
+          aria-label="List view"
+        >
+          <List size={14} />
+        </button>
+      </div> */}
+
       {/* Right — action button (hidden on mobile; use Fab instead) */}
       {actionLabel && onAction && (
         <button

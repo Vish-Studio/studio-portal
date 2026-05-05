@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { addDays, format, isSameDay, startOfDay } from 'date-fns';
 import { type ScheduleEvent, type EventType, ALL_EVENT_TYPES, EVENT_TYPE_CONFIG } from './event-types';
 import MaterialIcon from '../../common/material-icon/material-icon';
-import Modal from '../../common/modal/modal';
+import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-sidebar';
 import Select from '../../../components/common/select/select';
 import Option from '../../../components/common/select/option';
 import Avatar from '../../common/avatar/avatar';
@@ -116,22 +116,24 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   };
 
   return (
-    <Modal
-      variant="sheet"
-      size="md"
+    <FormSidebar
+      isOpen
       onClose={onClose}
-      headerClassName={config.iconBgClass}
-      titleClassName={config.textClass}
-      descriptionClassName={`${config.textClass} opacity-60`}
-      headerIcon={
-        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${config.textClass} bg-white/60`}>
-          <MaterialIcon name={config.icon} size={22} fill />
-        </div>
-      }
       title={initialEvent ? 'Edit Event' : 'New Event'}
       description={format(selectedDate, 'EEEE, MMMM d · yyyy')}
+      width="md"
     >
-      <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-5 overflow-y-auto max-h-[70vh]">
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          <div className={`flex items-center gap-3 rounded-2xl ${config.iconBgClass} px-4 py-3`}>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${config.textClass} bg-white/60`}>
+              <MaterialIcon name={config.icon} size={20} fill />
+            </div>
+            <div className="min-w-0">
+              <p className={`text-sm font-bold ${config.textClass}`}>{config.label}</p>
+              <p className={`text-xs font-semibold ${config.textClass} opacity-60`}>{format(selectedDate, 'EEEE, MMMM d · yyyy')}</p>
+            </div>
+          </div>
 
         {/* Title */}
         <div>
@@ -331,8 +333,10 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
           )}
         </div>
 
+        </div>
+
         {/* Submit */}
-        <div className="flex gap-3 pt-2">
+        <FormSidebarFooter>
           <button
             type="button"
             onClick={onClose}
@@ -348,9 +352,9 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
             <MaterialIcon name={initialEvent ? 'edit' : 'add'} size={16} className="text-white" />
             {initialEvent ? 'Update Event' : 'Add Event'}
           </button>
-        </div>
+        </FormSidebarFooter>
 
       </form>
-    </Modal>
+    </FormSidebar>
   );
 }

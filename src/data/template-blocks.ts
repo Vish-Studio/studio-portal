@@ -118,10 +118,7 @@ export function getDefaultBlocks(slug: string): TemplateBlock[] {
 }
 
 function contractBlocks(): TemplateBlock[] {
-  const p = defaultParties();
   return [
-    { id: newId(), type: 'parties-header', ...p, date: '12 December 2024' },
-    { id: newId(), type: 'divider' },
     { id: newId(), type: 'heading', content: 'Budget' },
     {
       id: newId(), type: 'service-table',
@@ -162,20 +159,11 @@ function contractBlocks(): TemplateBlock[] {
     { id: newId(), type: 'paragraph', content: 'Neither party shall be liable for failure or delay caused by events beyond their reasonable control, including acts of God, war, natural disasters, or pandemics.' },
     { id: newId(), type: 'divider' },
     { id: newId(), type: 'signatures', signLeft: 'Client Signature', signRight: 'Contractor Signature' },
-    { id: newId(), type: 'footer', footerName: 'Your Name', footerEmail: 'you@studio.com', footerPhone: '+00-1111111111' },
   ];
 }
 
 function invoiceBlocks(): TemplateBlock[] {
-  const p = defaultParties();
   return [
-    {
-      id: newId(), type: 'parties-header', ...p,
-      date: '12 December 2024',
-      docLabel: 'Invoice No.', docNumber: '0001',
-      extraDates: [{ label: 'Due Date', value: '9 January 2025' }],
-    },
-    { id: newId(), type: 'divider' },
     { id: newId(), type: 'service-table', services: defaultServices(), showQty: true, showDiscount: true, discount: '$00' },
     { id: newId(), type: 'divider' },
     { id: newId(), type: 'heading', content: 'Payment Info' },
@@ -189,20 +177,11 @@ function invoiceBlocks(): TemplateBlock[] {
       ],
     },
     { id: newId(), type: 'divider' },
-    { id: newId(), type: 'footer', footerName: 'Your Name', footerEmail: 'you@studio.com', footerPhone: '+00-1111111111' },
   ];
 }
 
 function overdueInvoiceBlocks(): TemplateBlock[] {
-  const p = defaultParties();
   return [
-    {
-      id: newId(), type: 'parties-header', ...p,
-      date: '12 December 2024',
-      docLabel: 'Invoice No.', docNumber: '0001',
-      extraDates: [{ label: 'Due Date', value: '12 December 2024 // Overdue' }],
-    },
-    { id: newId(), type: 'divider' },
     { id: newId(), type: 'heading', content: 'Overdue Notice' },
     { id: newId(), type: 'paragraph', content: 'This invoice has been overdue for 54 days and I kindly request prompt payment. I would like to respectfully remind you of your obligation to make payment in a timely manner. If you could arrange for payment at your earliest convenience, it would be greatly appreciated.' },
     { id: newId(), type: 'divider' },
@@ -218,15 +197,11 @@ function overdueInvoiceBlocks(): TemplateBlock[] {
       ],
     },
     { id: newId(), type: 'divider' },
-    { id: newId(), type: 'footer', footerName: 'Your Name', footerEmail: 'you@studio.com', footerPhone: '+00-1111111111' },
   ];
 }
 
 function projectProposalBlocks(): TemplateBlock[] {
-  const p = defaultParties();
   return [
-    { id: newId(), type: 'parties-header', ...p, date: '12 December 2024' },
-    { id: newId(), type: 'divider' },
     { id: newId(), type: 'heading', content: 'About Project' },
     { id: newId(), type: 'paragraph', content: 'We aim to empower users with the tools they need to make informed decisions and reach their goals. Our solution will provide a comprehensive platform for all of their needs.' },
     { id: newId(), type: 'divider' },
@@ -239,15 +214,11 @@ function projectProposalBlocks(): TemplateBlock[] {
     { id: newId(), type: 'heading', content: 'Benefits for You' },
     { id: newId(), type: 'paragraph', content: 'Focusing on quality design yields improved user experience, enhanced brand identity, boosted user trust, and increased adoption. A well-designed product instils confidence and encourages ongoing engagement.' },
     { id: newId(), type: 'divider' },
-    { id: newId(), type: 'footer', footerName: 'Your Name', footerEmail: 'you@studio.com', footerPhone: '+00-1111111111' },
   ];
 }
 
 function quotationBlocks(): TemplateBlock[] {
-  const p = defaultParties();
   return [
-    { id: newId(), type: 'parties-header', ...p, date: '12 December 2024' },
-    { id: newId(), type: 'divider' },
     { id: newId(), type: 'heading', content: 'About Project' },
     { id: newId(), type: 'paragraph', content: 'We aim to deliver a high-quality solution that meets your goals and exceeds expectations. This quotation outlines the scope, services, and investment required.' },
     { id: newId(), type: 'divider' },
@@ -263,6 +234,5 @@ function quotationBlocks(): TemplateBlock[] {
     },
     { id: newId(), type: 'divider' },
     { id: newId(), type: 'signatures', signLeft: 'Client Signature', signRight: 'Contractor Signature' },
-    { id: newId(), type: 'footer', footerName: 'Your Name', footerEmail: 'you@studio.com', footerPhone: '+00-1111111111' },
   ];
 }
