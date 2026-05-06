@@ -6,7 +6,12 @@ export type EventType =
   | "qa-test"
   | "launch"
   | "client-feedback"
-  | "discovery";
+  | "discovery"
+  | "phase-call"
+  | "client-meeting"
+  | "admin-focus"
+  | "admin-task"
+  | "personal";
 
 export interface ScheduleEvent {
   id: string;
@@ -17,6 +22,8 @@ export interface ScheduleEvent {
   description?: string;
   /** Link to a project from the projects store (optional) */
   projectId?: string;
+  /** Link to a phase within the selected project (optional) */
+  phaseId?: string;
   /** Link to a client from the clients store (optional) */
   clientId?: string;
   /** IDs of team members assigned to this event (optional) */
@@ -105,6 +112,51 @@ export const EVENT_TYPE_CONFIG: Record<EventType, EventTypeConfig> = {
     textClass: "text-teal-600",
     dotClass: "bg-teal-400",
     iconBgClass: "bg-teal-100",
+  },
+  "phase-call": {
+    label: "Phase Call",
+    shortLabel: "Phase",
+    icon: "route",
+    bgClass: "bg-lime-50",
+    textClass: "text-lime-700",
+    dotClass: "bg-lime-400",
+    iconBgClass: "bg-lime-100",
+  },
+  "client-meeting": {
+    label: "Client Meeting",
+    shortLabel: "Client",
+    icon: "video_call",
+    bgClass: "bg-cyan-50",
+    textClass: "text-cyan-700",
+    dotClass: "bg-cyan-400",
+    iconBgClass: "bg-cyan-100",
+  },
+  "admin-focus": {
+    label: "Focus Block",
+    shortLabel: "Focus",
+    icon: "timer",
+    bgClass: "bg-gray-100",
+    textClass: "text-gray-700",
+    dotClass: "bg-gray-500",
+    iconBgClass: "bg-gray-200",
+  },
+  "admin-task": {
+    label: "Admin Task",
+    shortLabel: "Admin",
+    icon: "checklist",
+    bgClass: "bg-stone-100",
+    textClass: "text-stone-700",
+    dotClass: "bg-stone-500",
+    iconBgClass: "bg-stone-200",
+  },
+  personal: {
+    label: "Personal",
+    shortLabel: "Personal",
+    icon: "self_improvement",
+    bgClass: "bg-fuchsia-50",
+    textClass: "text-fuchsia-700",
+    dotClass: "bg-fuchsia-400",
+    iconBgClass: "bg-fuchsia-100",
   },
 };
 

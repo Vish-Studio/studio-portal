@@ -2,6 +2,10 @@ import { Phone } from 'lucide-react';
 import { type ScheduleEvent, EVENT_TYPE_CONFIG } from './event-types';
 import MaterialIcon from '../../common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-sidebar';
+import Button from '../../common/button/button';
+import { useProjectsStore } from '@/src/store/projects';
+import { useClientsStore } from '@/src/store/clients';
+import { useTeamStore } from '@/src/store/team';
 
 interface EventDetailsModalProps {
   event: ScheduleEvent;
@@ -11,6 +15,13 @@ interface EventDetailsModalProps {
 
 export default function EventDetailsModal({ event, onClose, onEdit }: EventDetailsModalProps) {
   const config = EVENT_TYPE_CONFIG[event.type];
+  const { projects } = useProjectsStore();
+  const { clients } = useClientsStore();
+  const { members } = useTeamStore();
+  const project = projects.find(p => p.id === event.projectId);
+  const phase = project?.phases.find(p => p.id === event.phaseId);
+  const client = clients.find(c => c.id === event.clientId);
+  const assignedMembers = members.filter(m => event.memberIds?.includes(m.id));
 
   const openCallLink = () => {
     if (event.callLink && (event.callLink.startsWith('http://') || event.callLink.startsWith('https://'))) {
@@ -74,6 +85,40 @@ export default function EventDetailsModal({ event, onClose, onEdit }: EventDetai
             </div>
           )}
 
+          {(project || phase || client || assignedMembers.length > 0) && (
+            <div>
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Linked work</p>
+              <div className="rounded-2xl bg-(--color-surface) border border-gray-100 p-4 space-y-3">
+                {project && (
+                  <div className="flex items-center gap-2">
+                    <MaterialIcon name="work" size={15} className="text-gray-400" />
+                    <p className="text-sm font-semibold text-gray-800">{project.name}</p>
+                  </div>
+                )}
+                {phase && (
+                  <div className="flex items-center gap-2">
+                    <MaterialIcon name={phase.icon} size={15} className="text-gray-400" />
+                    <p className="text-sm font-medium text-gray-700">{phase.title}</p>
+                  </div>
+                )}
+                {client && (
+                  <div className="flex items-center gap-2">
+                    <MaterialIcon name="person" size={15} className="text-gray-400" />
+                    <p className="text-sm font-medium text-gray-700">{client.displayName}</p>
+                  </div>
+                )}
+                {assignedMembers.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <MaterialIcon name="group" size={15} className="text-gray-400" />
+                    <p className="text-sm font-medium text-gray-700">
+                      {assignedMembers.map(member => member.name).join(', ')}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Event Details */}
           <div className="bg-(--color-surface) rounded-2xl p-4 border border-gray-100">
             <div className="flex items-start gap-3">
@@ -90,19 +135,20 @@ export default function EventDetailsModal({ event, onClose, onEdit }: EventDetai
         </div>
 
         <FormSidebarFooter>
-          <button
+          <Button
             onClick={onClose}
-            className="flex-1 px-4 py-3 bg-(--color-surface) rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-colors"
+            variant="secondary"
+            className="flex-1"
           >
             Close
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={onEdit}
-            className="flex-1 px-4 py-3 bg-(--color-ink) rounded-2xl text-sm font-bold text-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+            className="flex-1"
+            iconLeft={<MaterialIcon name="edit" size={16} className="text-white" />}
           >
-            <MaterialIcon name="edit" size={16} className="text-white" />
             Edit
-          </button>
+          </Button>
         </FormSidebarFooter>
       </div>
     </FormSidebar>

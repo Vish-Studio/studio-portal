@@ -63,7 +63,7 @@ export interface CardContentProps {
 }
 
 /**
- * Reusable panel card used by Calendar, DailySchedule, ProjectsOverview,
+ * Reusable panel card used by Calendar, ProjectsOverview,
  * DocumentOverview, and any future dashboard-style content panel.
  *
  * Provides:

@@ -7,6 +7,7 @@ import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-s
 import Select from '../../../components/common/select/select';
 import Option from '../../../components/common/select/option';
 import Avatar from '../../common/avatar/avatar';
+import Button from '../../common/button/button';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/store/clients';
 import { useTeamStore } from '@/src/store/team';
@@ -70,10 +71,13 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   const { members } = useTeamStore();
 
   const [linkedProjectId, setLinkedProjectId] = useState(initialEvent?.projectId ?? '');
+  const [linkedPhaseId, setLinkedPhaseId] = useState(initialEvent?.phaseId ?? '');
   const [linkedClientId, setLinkedClientId] = useState(initialEvent?.clientId ?? '');
   const [linkedMemberIds, setLinkedMemberIds] = useState<string[]>(initialEvent?.memberIds ?? []);
   const [showLinks, setShowLinks] = useState(
-    !!(initialEvent?.projectId || initialEvent?.clientId || initialEvent?.memberIds?.length),
+    selectedType === 'phase-call' ||
+    selectedType === 'client-meeting' ||
+    !!(initialEvent?.projectId || initialEvent?.phaseId || initialEvent?.clientId || initialEvent?.memberIds?.length),
   );
 
   const stripRef = useRef<HTMLDivElement>(null);
@@ -85,9 +89,24 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   }, []);
 
   const config = EVENT_TYPE_CONFIG[selectedType];
+  const linkedProject = projects.find(p => p.id === linkedProjectId);
 
   const toggleMember = (id: string) =>
     setLinkedMemberIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const handleTypeChange = (type: EventType) => {
+    setSelectedType(type);
+    if (type === 'phase-call' || type === 'client-meeting' || type === 'admin-focus' || type === 'admin-task') {
+      setShowLinks(true);
+    }
+  };
+
+  const handleProjectChange = (projectId: string) => {
+    setLinkedProjectId(projectId);
+    setLinkedPhaseId('');
+    const project = projects.find(p => p.id === projectId);
+    if (project && !linkedClientId) setLinkedClientId(project.clientId);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,6 +126,7 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
         callLink: callLink.trim() || undefined,
         description: description.trim() || undefined,
         projectId: linkedProjectId || undefined,
+        phaseId: linkedPhaseId || undefined,
         clientId: linkedClientId || undefined,
         memberIds: linkedMemberIds.length ? linkedMemberIds : undefined,
       },
@@ -218,7 +238,7 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
                 <button
                   key={type}
                   type="button"
-                  onClick={() => setSelectedType(type)}
+                  onClick={() => handleTypeChange(type)}
                   className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all border
                     ${isActive ? 'bg-(--color-ink) border-(--color-ink) shadow-sm' : `${c.bgClass} border-transparent hover:border-gray-200`}`}
                 >
@@ -268,7 +288,7 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project</p>
                 <Select
                   value={linkedProjectId}
-                  onChange={e => setLinkedProjectId(e.target.value)}
+                  onChange={e => handleProjectChange(e.target.value)}
                   className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
                 >
                   <Option value="">— None —</Option>
@@ -277,6 +297,22 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
                   ))}
                 </Select>
               </div>
+
+              {linkedProject && (
+                <div>
+                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project phase</p>
+                  <Select
+                    value={linkedPhaseId}
+                    onChange={e => setLinkedPhaseId(e.target.value)}
+                    className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
+                  >
+                    <Option value="">— None —</Option>
+                    {linkedProject.phases.map(phase => (
+                      <Option key={phase.id} value={phase.id}>{phase.title}</Option>
+                    ))}
+                  </Select>
+                </div>
+              )}
 
               {/* Client */}
               <div>
@@ -337,21 +373,22 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
 
         {/* Submit */}
         <FormSidebarFooter>
-          <button
+          <Button
             type="button"
             onClick={onClose}
-            className="flex-1 px-4 py-3 bg-(--color-surface) rounded-2xl text-sm font-semibold text-gray-500 hover:bg-gray-100 transition-colors"
+            variant="secondary"
+            className="flex-1"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
             disabled={!title.trim()}
-            className="flex-2 px-6 py-3 bg-(--color-ink) rounded-2xl text-sm font-bold text-white hover:opacity-90 transition-opacity disabled:opacity-30 flex items-center justify-center gap-2"
+            className="flex-2"
+            iconLeft={<MaterialIcon name={initialEvent ? 'edit' : 'add'} size={16} className="text-white" />}
           >
-            <MaterialIcon name={initialEvent ? 'edit' : 'add'} size={16} className="text-white" />
             {initialEvent ? 'Update Event' : 'Add Event'}
-          </button>
+          </Button>
         </FormSidebarFooter>
 
       </form>

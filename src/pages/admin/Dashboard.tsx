@@ -55,11 +55,7 @@ const Dashboard = () => {
         </div>
 
         {/* Calendar */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          <div className="lg:col-span-3">
-            <Calendar />
-          </div>
-        </div>
+        <Calendar variant="dashboard" />
 
         {/* Projects + Documents overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">

@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/common/layout/layout';
 import CardContent from '../components/common/card-content/card-content';
+import StatCard from '../components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import StatusBadge from '../components/common/status-badge/status-badge';
 import MaterialIcon from '../components/common/material-icon/material-icon';
@@ -195,19 +196,39 @@ export default function Documents() {
     <Layout title="Documents">
       <div className="flex flex-col gap-5 pb-10">
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: 'Total',          value: unified.length,                                           cls: 'bg-white border border-gray-200' },
-            { label: 'Awaits Client',  value: tabCounts['awaits-client']    ?? 0,                       cls: 'bg-violet-50 border border-violet-200' },
-            { label: 'Admin Action',   value: tabCounts['admin-action']     ?? 0,                       cls: 'bg-amber-50  border border-amber-200'  },
-            { label: 'Signed',         value: (tabCounts['signed'] ?? 0) + (tabCounts['complete'] ?? 0), cls: 'bg-green-50  border border-green-200'  },
-          ].map(({ label, value, cls }) => (
-            <div key={label} className={`${cls} rounded-[14px] px-4 py-3 flex flex-col gap-1`}>
-              <span className="text-[11px] font-semibold text-gray-500">{label}</span>
-              <span className="text-2xl font-bold text-(--color-ink)">{value}</span>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            variant="white"
+            icon={<MaterialIcon name="folder" size={16} />}
+            label="Total Documents"
+            value={unified.length}
+            badge={tabCounts['pending'] ?? 0}
+            badgeLabel="pending"
+          />
+          <StatCard
+            variant="surface"
+            icon={<MaterialIcon name="person_check" size={16} />}
+            label="Awaits Client"
+            value={tabCounts['awaits-client'] ?? 0}
+            badge={tabCounts['awaits-signature'] ?? 0}
+            badgeLabel="awaiting signature"
+          />
+          <StatCard
+            variant="lime"
+            icon={<MaterialIcon name="edit_document" size={16} />}
+            label="Admin Action"
+            value={tabCounts['admin-action'] ?? 0}
+            badge={filtered.length}
+            badgeLabel="visible"
+          />
+          <StatCard
+            variant="dark"
+            icon={<MaterialIcon name="verified" size={16} />}
+            label="Completed"
+            value={(tabCounts['signed'] ?? 0) + (tabCounts['complete'] ?? 0)}
+            badge={tabCounts['signed'] ?? 0}
+            badgeLabel="signed"
+          />
         </div>
 
         {/* Tab toolbar */}
