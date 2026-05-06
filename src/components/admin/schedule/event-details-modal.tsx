@@ -11,9 +11,10 @@ interface EventDetailsModalProps {
   event: ScheduleEvent;
   onClose: () => void;
   onEdit: () => void;
+  onDelete?: () => void;
 }
 
-export default function EventDetailsModal({ event, onClose, onEdit }: EventDetailsModalProps) {
+export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: EventDetailsModalProps) {
   const config = EVENT_TYPE_CONFIG[event.type];
   const { projects } = useProjectsStore();
   const { clients } = useClientsStore();
@@ -142,6 +143,16 @@ export default function EventDetailsModal({ event, onClose, onEdit }: EventDetai
           >
             Close
           </Button>
+          {onDelete && (
+            <Button
+              onClick={onDelete}
+              variant="danger"
+              className="flex-1"
+              iconLeft={<MaterialIcon name="delete" size={16} />}
+            >
+              Delete
+            </Button>
+          )}
           <Button
             onClick={onEdit}
             className="flex-1"

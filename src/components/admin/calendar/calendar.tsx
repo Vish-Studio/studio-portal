@@ -89,9 +89,8 @@ const Calendar: FunctionComponent<CalendarProps> = ({
 
   return (
     <section
-      className={`rounded-[18px] bg-(--color-ink) text-white ${
-        compact ? 'p-4 sm:p-5' : 'w-full p-4 md:p-6'
-      } ${className}`}
+      className={`rounded-[18px] bg-(--color-ink) text-white ${compact ? 'p-4 sm:p-5' : 'w-full p-4 md:p-6'
+        } ${className}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
@@ -101,7 +100,7 @@ const Calendar: FunctionComponent<CalendarProps> = ({
             className="text-left"
             aria-expanded={pickerOpen}
           >
-            <h2 className={`${compact ? 'text-[22px] sm:text-[24px]' : 'text-[28px] md:text-[32px]'} font-bold leading-none text-white`}>
+            <h2 className={`${compact ? 'text-sm lg:text-[24px]' : 'text-[28px] md:text-[32px]'} font-bold leading-none text-white`}>
               {monthNames[visibleMonth.getMonth()]} {visibleMonth.getFullYear()}
             </h2>
           </button>
@@ -172,13 +171,11 @@ const Calendar: FunctionComponent<CalendarProps> = ({
               key={date.toISOString()}
               type="button"
               onClick={() => selectDate(date)}
-              className={`flex items-center justify-center rounded-full font-bold transition-colors ${
-                compact ? 'h-8 text-xs' : 'h-10 text-sm'
-              } ${
-                selected
+              className={`flex items-center justify-center rounded-full font-bold transition-colors ${compact ? 'h-8 text-xs' : 'h-10 text-sm'
+                } ${selected
                   ? 'bg-(--color-accent-lime) text-(--color-ink)'
                   : 'text-gray-300 hover:bg-white/10 hover:text-white'
-              }`}
+                }`}
             >
               {date.getDate()}
             </button>

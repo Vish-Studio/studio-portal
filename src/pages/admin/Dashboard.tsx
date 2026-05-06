@@ -1,11 +1,10 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
 import { useDocumentsStore } from '@/src/store/documents';
 import { useTeamStore } from '@/src/store/team';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
-import { useCalendarStore } from '@/src/store/calendar';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import ProjectsOverview from '@/src/components/admin/projects-overview/projects-overview';
 import DocumentOverview from '@/src/components/admin/document-overview/document-overview';
@@ -14,20 +13,13 @@ import Layout from '@/src/components/common/layout/layout';
 import Calendar from '@/src/components/admin/calendar/calendar';
 import ScheduleList from '@/src/components/admin/calendar/schedule-list';
 
-const calendarDateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-
 const Dashboard = () => {
   const navigate = useNavigate();
   const { documents } = useDocumentsStore();
   const { members } = useTeamStore();
   const { projects } = useProjectsStore();
   const { tasks } = useTasksStore();
-  const customEvents = useCalendarStore((state) => state.customEvents);
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
-  const selectedCalendarEvents = useMemo(
-    () => customEvents[calendarDateKey(selectedCalendarDate)] ?? [],
-    [customEvents, selectedCalendarDate],
-  );
 
   return (
     <Layout>
@@ -74,7 +66,7 @@ const Dashboard = () => {
             className="aspect-square"
           />
           <div className="lg:col-span-2">
-            <ScheduleList date={selectedCalendarDate} events={selectedCalendarEvents} />
+            <ScheduleList date={selectedCalendarDate} />
           </div>
         </div>
 

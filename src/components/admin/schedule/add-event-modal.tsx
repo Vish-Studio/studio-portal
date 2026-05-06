@@ -1,39 +1,57 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { addDays, format, isSameDay, startOfDay } from 'date-fns';
+import { format, startOfDay } from 'date-fns';
 import { type ScheduleEvent, type EventType, ALL_EVENT_TYPES, EVENT_TYPE_CONFIG } from './event-types';
 import MaterialIcon from '../../common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-sidebar';
-import Select from '../../../components/common/select/select';
-import Option from '../../../components/common/select/option';
+import Select from '../../common/select/select';
+import Option from '../../common/select/option';
 import Avatar from '../../common/avatar/avatar';
 import Button from '../../common/button/button';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/store/clients';
 import { useTeamStore } from '@/src/store/team';
 
-// ─── Time helpers ─────────────────────────────────────────────────────────────
-
-const toDisplayTime = (t: string) => {
-  if (!t) return '';
-  const [h, m] = t.split(':').map(Number);
-  const period = h >= 12 ? 'PM' : 'AM';
-  return `${h % 12 || 12}:${m.toString().padStart(2, '0')} ${period}`;
+const toDisplayTime = (time: string) => {
+  if (!time) return '';
+  const [hour, minute] = time.split(':').map(Number);
+  const period = hour >= 12 ? 'PM' : 'AM';
+  return `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${period}`;
 };
 
-const parseTimeFromDisplay = (displayTime: string): string => {
+const parseTimeFromDisplay = (displayTime: string) => {
   if (!displayTime || displayTime === 'All Day') return '';
   const match = displayTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
   if (!match) return '';
-  let hours = parseInt(match[1], 10);
-  const minutes = match[2];
-  const meridiem = match[3].toUpperCase();
-  if (meridiem === 'PM' && hours !== 12) hours += 12;
-  if (meridiem === 'AM' && hours === 12) hours = 0;
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  let hour = Number(match[1]);
+  const minute = match[2];
+  const period = match[3].toUpperCase();
+  if (period === 'PM' && hour !== 12) hour += 12;
+  if (period === 'AM' && hour === 12) hour = 0;
+  return `${String(hour).padStart(2, '0')}:${minute}`;
 };
 
-// ─── Props ────────────────────────────────────────────────────────────────────
+const toDateInputValue = (date: Date) => format(date, 'yyyy-MM-dd');
+
+const fromDateInputValue = (value: string) => {
+  const [year, month, day] = value.split('-').map(Number);
+  return startOfDay(new Date(year, month - 1, day));
+};
+
+const projectTypes: EventType[] = [
+  'discovery',
+  'brief',
+  'revision',
+  'design-review',
+  'qa-test',
+  'launch',
+  'client-feedback',
+  'phase-call',
+];
+
+const clientTypes: EventType[] = [...projectTypes, 'client-meeting', 'onboarding'];
+const meetingTypes: EventType[] = ['team-meeting', 'client-meeting', 'phase-call'];
+const teamTypes: EventType[] = [...meetingTypes, 'admin-task'];
 
 interface AddEventModalProps {
   date: Date;
@@ -42,30 +60,20 @@ interface AddEventModalProps {
   initialEvent?: ScheduleEvent;
 }
 
-// ─── AddEventModal ────────────────────────────────────────────────────────────
-
 export default function AddEventModal({ date, onAdd, onClose, initialEvent }: AddEventModalProps) {
-  const today = startOfDay(new Date());
   const [selectedDate, setSelectedDate] = useState(startOfDay(date));
   const [selectedType, setSelectedType] = useState<EventType>(initialEvent?.type ?? 'brief');
   const [title, setTitle] = useState(initialEvent?.title ?? '');
   const [description, setDescription] = useState(initialEvent?.description ?? '');
   const [callLink, setCallLink] = useState(initialEvent?.callLink ?? '');
+  const [allDay, setAllDay] = useState(!initialEvent || initialEvent.time === 'All Day');
 
-  const isAllDay = !initialEvent || initialEvent.time === 'All Day';
-  const [allDay, setAllDay] = useState(isAllDay);
+  const timeParts = initialEvent?.time && initialEvent.time !== 'All Day'
+    ? initialEvent.time.split(' – ')
+    : [];
+  const [startTime, setStartTime] = useState(parseTimeFromDisplay(timeParts[0] ?? ''));
+  const [endTime, setEndTime] = useState(parseTimeFromDisplay(timeParts[1] ?? ''));
 
-  let initialStartTime = '';
-  let initialEndTime = '';
-  if (initialEvent && initialEvent.time !== 'All Day') {
-    const timeParts = initialEvent.time.split(' – ');
-    initialStartTime = parseTimeFromDisplay(timeParts[0]);
-    initialEndTime = timeParts[1] ? parseTimeFromDisplay(timeParts[1]) : '';
-  }
-  const [startTime, setStartTime] = useState(initialStartTime);
-  const [endTime, setEndTime] = useState(initialEndTime);
-
-  // ── Entity links ──
   const { projects } = useProjectsStore();
   const { clients } = useClientsStore();
   const { members } = useTeamStore();
@@ -74,49 +82,58 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   const [linkedPhaseId, setLinkedPhaseId] = useState(initialEvent?.phaseId ?? '');
   const [linkedClientId, setLinkedClientId] = useState(initialEvent?.clientId ?? '');
   const [linkedMemberIds, setLinkedMemberIds] = useState<string[]>(initialEvent?.memberIds ?? []);
-  const [showLinks, setShowLinks] = useState(
-    selectedType === 'phase-call' ||
-    selectedType === 'client-meeting' ||
-    !!(initialEvent?.projectId || initialEvent?.phaseId || initialEvent?.clientId || initialEvent?.memberIds?.length),
-  );
-
-  const stripRef = useRef<HTMLDivElement>(null);
-  const activeDateRef = useRef<HTMLButtonElement>(null);
-  const dateRange = Array.from({ length: 26 }, (_, i) => addDays(today, i - 5));
-
-  useEffect(() => {
-    activeDateRef.current?.scrollIntoView({ block: 'nearest', inline: 'center' });
-  }, []);
 
   const config = EVENT_TYPE_CONFIG[selectedType];
-  const linkedProject = projects.find(p => p.id === linkedProjectId);
-
-  const toggleMember = (id: string) =>
-    setLinkedMemberIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  const linkedProject = projects.find(project => project.id === linkedProjectId);
+  const showProject = projectTypes.includes(selectedType);
+  const showClient = clientTypes.includes(selectedType);
+  const showTeam = teamTypes.includes(selectedType);
+  const showCallLink = meetingTypes.includes(selectedType);
 
   const handleTypeChange = (type: EventType) => {
     setSelectedType(type);
-    if (type === 'phase-call' || type === 'client-meeting' || type === 'admin-focus' || type === 'admin-task') {
-      setShowLinks(true);
+    if (!projectTypes.includes(type)) {
+      setLinkedProjectId('');
+      setLinkedPhaseId('');
+    }
+    if (!clientTypes.includes(type)) {
+      setLinkedClientId('');
+    }
+    if (!teamTypes.includes(type)) {
+      setLinkedMemberIds([]);
+    }
+    if (!meetingTypes.includes(type)) {
+      setCallLink('');
     }
   };
 
   const handleProjectChange = (projectId: string) => {
     setLinkedProjectId(projectId);
     setLinkedPhaseId('');
-    const project = projects.find(p => p.id === projectId);
+
+    const project = projects.find(item => item.id === projectId);
     if (project && !linkedClientId) setLinkedClientId(project.clientId);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const toggleMember = (memberId: string) => {
+    setLinkedMemberIds(prev =>
+      prev.includes(memberId)
+        ? prev.filter(id => id !== memberId)
+        : [...prev, memberId],
+    );
+  };
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     if (!title.trim()) return;
+
     let time = 'All Day';
     if (!allDay && startTime) {
       time = endTime
         ? `${toDisplayTime(startTime)} – ${toDisplayTime(endTime)}`
         : toDisplayTime(startTime);
     }
+
     onAdd(
       {
         id: initialEvent?.id ?? uuidv4(),
@@ -139,239 +156,197 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
     <FormSidebar
       isOpen
       onClose={onClose}
-      title={initialEvent ? 'Edit Event' : 'New Event'}
-      description={format(selectedDate, 'EEEE, MMMM d · yyyy')}
+      title={initialEvent ? 'Edit schedule' : 'Add schedule'}
+      description={format(selectedDate, 'EEEE, MMMM d, yyyy')}
       width="md"
     >
-      <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
-          <div className={`flex items-center gap-3 rounded-2xl ${config.iconBgClass} px-4 py-3`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${config.textClass} bg-white/60`}>
-              <MaterialIcon name={config.icon} size={20} fill />
-            </div>
-            <div className="min-w-0">
-              <p className={`text-sm font-bold ${config.textClass}`}>{config.label}</p>
-              <p className={`text-xs font-semibold ${config.textClass} opacity-60`}>{format(selectedDate, 'EEEE, MMMM d · yyyy')}</p>
+      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="mb-5 rounded-[18px] bg-(--color-surface-alt) p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-(--color-ink)">
+                <MaterialIcon name={config.icon} size={19} fill />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-(--color-ink)">{config.label}</p>
+                <p className="text-xs font-semibold text-gray-400">
+                  {format(selectedDate, 'EEE, d MMM yyyy')}
+                </p>
+              </div>
             </div>
           </div>
 
-        {/* Title */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Title</p>
-          <input
-            type="text"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            placeholder={`e.g. ${config.label} with Acme Corp`}
-            autoFocus
-            className="w-full px-4 py-3 bg-(--color-surface) border border-transparent rounded-2xl text-sm font-medium text-gray-900 placeholder-gray-300 outline-none focus:border-gray-200 focus:ring-2 focus:ring-gray-100 transition-all"
-          />
-        </div>
+          <div className="space-y-5">
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Title</p>
+              <input
+                type="text"
+                value={title}
+                onChange={event => setTitle(event.target.value)}
+                placeholder={`e.g. ${config.label} with Acme Corp`}
+                autoFocus
+                className="w-full rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100"
+              />
+            </div>
 
-        {/* Time */}
-        <div>
-          <div className="flex items-center justify-between mb-2.5">
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Time</p>
-            <label className="flex items-center gap-1.5 cursor-pointer select-none">
-              <div
-                onClick={() => setAllDay(v => !v)}
-                className={`w-8 h-4.5 rounded-full relative transition-colors cursor-pointer ${allDay ? 'bg-(--color-ink)' : 'bg-gray-200'}`}
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</p>
+              <Select
+                value={selectedType}
+                onChange={event => handleTypeChange(event.target.value as EventType)}
+                className="rounded-2xl bg-(--color-surface) font-semibold"
               >
-                <div className={`absolute top-0.5 w-3.5 h-3.5 rounded-full bg-white shadow transition-transform ${allDay ? 'translate-x-3.5' : 'translate-x-0.5'}`} />
-              </div>
-              <span className="text-xs font-semibold text-gray-500">All day</span>
-            </label>
-          </div>
-          <div className={`flex items-center gap-2 transition-opacity ${allDay ? 'opacity-30 pointer-events-none' : ''}`}>
-            <input
-              type="time"
-              value={startTime}
-              onChange={e => setStartTime(e.target.value)}
-              className="flex-1 px-4 py-3 bg-(--color-surface) border border-transparent rounded-2xl text-sm font-medium text-gray-900 outline-none focus:border-gray-200 focus:ring-2 focus:ring-gray-100 transition-all"
-            />
-            <span className="text-xs font-bold text-gray-300 shrink-0">→</span>
-            <input
-              type="time"
-              value={endTime}
-              onChange={e => setEndTime(e.target.value)}
-              className="flex-1 px-4 py-3 bg-(--color-surface) border border-transparent rounded-2xl text-sm font-medium text-gray-900 outline-none focus:border-gray-200 focus:ring-2 focus:ring-gray-100 transition-all"
-            />
-          </div>
-        </div>
+                {ALL_EVENT_TYPES.map(type => (
+                  <Option key={type} value={type}>
+                    {EVENT_TYPE_CONFIG[type].label}
+                  </Option>
+                ))}
+              </Select>
+            </div>
 
-        {/* Date strip */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">When</p>
-          <div ref={stripRef} className="flex gap-2 overflow-x-auto no-scrollbar pb-1 -mx-1 px-1">
-            {dateRange.map(d => {
-              const isActive = isSameDay(d, selectedDate);
-              const isToday_ = isSameDay(d, today);
-              return (
-                <button
-                  key={d.toISOString()}
-                  ref={isActive ? activeDateRef : undefined}
-                  type="button"
-                  onClick={() => setSelectedDate(d)}
-                  className={`flex flex-col items-center gap-0.5 min-w-11 py-2.5 rounded-2xl shrink-0 transition-all
-                    ${isActive ? 'bg-(--color-ink) text-white shadow-sm' : 'bg-(--color-surface) text-gray-600 hover:bg-gray-200'}`}
-                >
-                  <span className={`text-[9px] font-bold uppercase tracking-widest ${isActive ? 'text-white/60' : isToday_ ? 'text-blue-500' : 'text-gray-400'}`}>
-                    {format(d, 'EEE')}
-                  </span>
-                  <span className={`text-sm font-bold leading-none ${isActive ? 'text-white' : isToday_ ? 'text-blue-600' : 'text-gray-800'}`}>
-                    {format(d, 'd')}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Date and time</p>
+              <div className="rounded-2xl bg-(--color-surface) p-3">
+                <input
+                  type="date"
+                  value={toDateInputValue(selectedDate)}
+                  onChange={event => setSelectedDate(fromDateInputValue(event.target.value))}
+                  className="w-full rounded-xl border border-transparent bg-white px-3 py-2.5 text-sm font-semibold text-gray-800 outline-none focus:border-gray-200 focus:ring-4 focus:ring-gray-100"
+                />
 
-        {/* Event type grid */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Type</p>
-          <div className="grid grid-cols-4 gap-2">
-            {ALL_EVENT_TYPES.map(type => {
-              const c = EVENT_TYPE_CONFIG[type];
-              const isActive = selectedType === type;
-              return (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => handleTypeChange(type)}
-                  className={`flex flex-col items-center gap-1.5 py-3 px-1 rounded-2xl transition-all border
-                    ${isActive ? 'bg-(--color-ink) border-(--color-ink) shadow-sm' : `${c.bgClass} border-transparent hover:border-gray-200`}`}
-                >
-                  <MaterialIcon
-                    name={c.icon}
-                    size={20}
-                    fill={isActive}
-                    className={isActive ? 'text-white' : c.textClass}
-                  />
-                  <span className={`text-[9px] font-bold leading-none tracking-tight text-center ${isActive ? 'text-white/80' : c.textClass}`}>
-                    {c.shortLabel}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Call Link */}
-        <div>
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Call Link (Optional)</p>
-          <input
-            type="url"
-            value={callLink}
-            onChange={e => setCallLink(e.target.value)}
-            placeholder="https://meet.google.com/…"
-            className="w-full px-4 py-3 bg-(--color-surface) border border-transparent rounded-2xl text-sm font-medium text-gray-900 placeholder-gray-300 outline-none focus:border-gray-200 focus:ring-2 focus:ring-gray-100 transition-all"
-          />
-        </div>
-
-        {/* ── Entity links (collapsible) ── */}
-        <div>
-          <button
-            type="button"
-            onClick={() => setShowLinks(v => !v)}
-            className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 transition-colors"
-          >
-            <MaterialIcon name={showLinks ? 'expand_less' : 'expand_more'} size={14} />
-            Link Project, Client or Team
-          </button>
-
-          {showLinks && (
-            <div className="mt-3 flex flex-col gap-4">
-
-              {/* Project */}
-              <div>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project</p>
-                <Select
-                  value={linkedProjectId}
-                  onChange={e => handleProjectChange(e.target.value)}
-                  className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
-                >
-                  <Option value="">— None —</Option>
-                  {projects.map(p => (
-                    <Option key={p.id} value={p.id}>{p.name}</Option>
-                  ))}
-                </Select>
-              </div>
-
-              {linkedProject && (
-                <div>
-                  <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Project phase</p>
-                  <Select
-                    value={linkedPhaseId}
-                    onChange={e => setLinkedPhaseId(e.target.value)}
-                    className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-gray-500">All day</span>
+                  <button
+                    type="button"
+                    onClick={() => setAllDay(value => !value)}
+                    className={`relative h-5 w-9 rounded-full transition-colors ${allDay ? 'bg-(--color-ink)' : 'bg-gray-300'}`}
+                    aria-pressed={allDay}
                   >
-                    <Option value="">— None —</Option>
-                    {linkedProject.phases.map(phase => (
-                      <Option key={phase.id} value={phase.id}>{phase.title}</Option>
-                    ))}
-                  </Select>
+                    <span
+                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${allDay ? 'translate-x-4' : 'translate-x-0.5'}`}
+                    />
+                  </button>
                 </div>
-              )}
 
-              {/* Client */}
-              <div>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Client</p>
-                <Select
-                  value={linkedClientId}
-                  onChange={e => setLinkedClientId(e.target.value)}
-                  className="bg-(--color-surface) border-transparent rounded-2xl py-2.5 font-medium focus:ring-0 focus:bg-(--color-surface)"
-                >
-                  <Option value="">— None —</Option>
-                  {clients.map(c => (
-                    <Option key={c.id} value={c.id}>{c.displayName}{c.companyName ? ` · ${c.companyName}` : ''}</Option>
-                  ))}
-                </Select>
+                {!allDay && (
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <input
+                      type="time"
+                      value={startTime}
+                      onChange={event => setStartTime(event.target.value)}
+                      className="min-w-0 rounded-xl border border-transparent bg-white px-3 py-2.5 text-sm font-semibold text-gray-800 outline-none focus:border-gray-200 focus:ring-4 focus:ring-gray-100"
+                    />
+                    <input
+                      type="time"
+                      value={endTime}
+                      onChange={event => setEndTime(event.target.value)}
+                      className="min-w-0 rounded-xl border border-transparent bg-white px-3 py-2.5 text-sm font-semibold text-gray-800 outline-none focus:border-gray-200 focus:ring-4 focus:ring-gray-100"
+                    />
+                  </div>
+                )}
               </div>
+            </div>
 
-              {/* Team members */}
+            {showCallLink && (
               <div>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Assign Team Members</p>
-                <div className="flex flex-wrap gap-2">
-                  {members.map(m => {
-                    const active = linkedMemberIds.includes(m.id);
-                    return (
-                      <button
-                        key={m.id}
-                        type="button"
-                        onClick={() => toggleMember(m.id)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border transition-all ${active
-                            ? 'bg-(--color-ink) text-white border-(--color-ink)'
-                            : 'bg-(--color-surface) text-gray-600 border-transparent hover:border-gray-300'
-                          }`}
-                      >
-                        <Avatar name={m.name} id={m.id} size="xs" />
-                        {m.name.split(' ')[0]}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Notes (Optional)</p>
-                <textarea
-                  value={description}
-                  onChange={e => setDescription(e.target.value)}
-                  rows={2}
-                  placeholder="Add any notes or agenda…"
-                  className="w-full px-4 py-3 bg-(--color-surface) border border-transparent rounded-2xl text-sm font-medium text-gray-900 placeholder-gray-300 outline-none focus:border-gray-200 focus:ring-2 focus:ring-gray-100 transition-all resize-none"
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Call link</p>
+                <input
+                  type="url"
+                  value={callLink}
+                  onChange={event => setCallLink(event.target.value)}
+                  placeholder="https://meet.google.com/..."
+                  className="w-full rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100"
                 />
               </div>
+            )}
 
+            {(showProject || showClient || showTeam) && (
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Assignments</p>
+                <div className="space-y-3 rounded-2xl bg-(--color-surface) p-3">
+                  {showProject && (
+                    <>
+                      <Select
+                        value={linkedProjectId}
+                        onChange={event => handleProjectChange(event.target.value)}
+                        className="rounded-xl bg-white font-medium"
+                      >
+                        <Option value="">No project</Option>
+                        {projects.map(project => (
+                          <Option key={project.id} value={project.id}>{project.name}</Option>
+                        ))}
+                      </Select>
+
+                      {linkedProject && (
+                        <Select
+                          value={linkedPhaseId}
+                          onChange={event => setLinkedPhaseId(event.target.value)}
+                          className="rounded-xl bg-white font-medium"
+                        >
+                          <Option value="">No phase</Option>
+                          {linkedProject.phases.map(phase => (
+                            <Option key={phase.id} value={phase.id}>{phase.title}</Option>
+                          ))}
+                        </Select>
+                      )}
+                    </>
+                  )}
+
+                  {showClient && (
+                    <Select
+                      value={linkedClientId}
+                      onChange={event => setLinkedClientId(event.target.value)}
+                      className="rounded-xl bg-white font-medium"
+                    >
+                      <Option value="">No client</Option>
+                      {clients.map(client => (
+                        <Option key={client.id} value={client.id}>
+                          {client.displayName}{client.companyName ? ` - ${client.companyName}` : ''}
+                        </Option>
+                      ))}
+                    </Select>
+                  )}
+
+                  {showTeam && (
+                    <div className="flex flex-wrap gap-2">
+                      {members.map(member => {
+                        const active = linkedMemberIds.includes(member.id);
+
+                        return (
+                          <button
+                            key={member.id}
+                            type="button"
+                            onClick={() => toggleMember(member.id)}
+                            className={`flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
+                              active
+                                ? 'border-(--color-ink) bg-(--color-ink) text-white'
+                                : 'border-transparent bg-white text-gray-600 hover:border-gray-200'
+                            }`}
+                          >
+                            <Avatar name={member.name} id={member.id} size="xs" />
+                            {member.name.split(' ')[0]}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</p>
+              <textarea
+                value={description}
+                onChange={event => setDescription(event.target.value)}
+                rows={3}
+                placeholder="Add agenda, notes, or preparation details..."
+                className="w-full resize-none rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100"
+              />
             </div>
-          )}
+          </div>
         </div>
 
-        </div>
-
-        {/* Submit */}
         <FormSidebarFooter>
           <Button
             type="button"
@@ -384,13 +359,12 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
           <Button
             type="submit"
             disabled={!title.trim()}
-            className="flex-2"
+            className="flex-[1.4]"
             iconLeft={<MaterialIcon name={initialEvent ? 'edit' : 'add'} size={16} className="text-white" />}
           >
-            {initialEvent ? 'Update Event' : 'Add Event'}
+            {initialEvent ? 'Update schedule' : 'Add schedule'}
           </Button>
         </FormSidebarFooter>
-
       </form>
     </FormSidebar>
   );

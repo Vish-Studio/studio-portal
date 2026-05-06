@@ -7,6 +7,7 @@ export type EventType =
   | "launch"
   | "client-feedback"
   | "discovery"
+  | "team-meeting"
   | "phase-call"
   | "client-meeting"
   | "admin-focus"
@@ -112,6 +113,15 @@ export const EVENT_TYPE_CONFIG: Record<EventType, EventTypeConfig> = {
     textClass: "text-teal-600",
     dotClass: "bg-teal-400",
     iconBgClass: "bg-teal-100",
+  },
+  "team-meeting": {
+    label: "Team Meeting",
+    shortLabel: "Team",
+    icon: "groups",
+    bgClass: "bg-indigo-50",
+    textClass: "text-indigo-600",
+    dotClass: "bg-indigo-400",
+    iconBgClass: "bg-indigo-100",
   },
   "phase-call": {
     label: "Phase Call",
