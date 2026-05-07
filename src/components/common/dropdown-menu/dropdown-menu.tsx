@@ -49,7 +49,7 @@ const DropdownMenu: FunctionComponent<DropdownMenuProps> = ({
                 }`}
               onClick={item.onClick}
             >
-              <span className={item.description ? 'font-semibold text-gray-800' : ''}>{item.label}</span>
+              <span>{item.label}</span>
               {item.description && (
                 <span className="text-xs text-gray-500 font-normal">{item.description}</span>
               )}

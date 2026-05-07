@@ -6,6 +6,7 @@ import { useUIStore } from '@/src/store/ui';
 import ButtonIcon from '../button-icon/button-icon';
 import DropdownMenu from '../dropdown-menu/dropdown-menu';
 import type { DropdownMenuSectionType } from '../dropdown-menu/dropdown-menu';
+import { usePwaInstall } from '@/src/hooks/usePwaInstall';
 
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -24,29 +25,38 @@ const notifSections: DropdownMenuSectionType[] = [
   },
 ];
 
-const userMenuSections: DropdownMenuSectionType[] = [
-  {
-    header: 'Vishroy Seenarain',
-    items: [
-      { label: 'Profile', onClick: () => { } },
-      { label: 'Settings', onClick: () => { } },
-    ],
-  },
-  {
-    items: [{ label: 'Log out', onClick: () => { }, danger: true }],
-  },
-];
-
 const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, actions }: TopbarProps) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const { canInstall, installed, installApp } = usePwaInstall();
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
   const location = useLocation();
   const { searchQuery, setSearchQuery, clearSearch } = useUIStore();
+
+  const userMenuSections: DropdownMenuSectionType[] = [
+    {
+      header: 'Vishroy Seenarain',
+      items: [
+        { label: 'Profile', onClick: () => { setIsUserOpen(false); } },
+        { label: 'Settings', onClick: () => { setIsUserOpen(false); } },
+        {
+          label: installed ? 'App installed' : 'Install app',
+          description: canInstall ? 'Add Studio Portal to this device.' : 'Available from supported browsers.',
+          onClick: () => {
+            setIsUserOpen(false);
+            installApp();
+          },
+        },
+      ],
+    },
+    {
+      items: [{ label: 'Log out', onClick: () => { setIsUserOpen(false); }, danger: true }],
+    },
+  ];
 
   // Close mobile search and clear query on route change
   useEffect(() => {

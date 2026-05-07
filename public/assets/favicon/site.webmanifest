@@ -1,21 +1,27 @@
 {
   "name": "VISH studio",
   "short_name": "Studio Portal",
+  "description": "Client process board and studio portal for projects, documents, tasks, payments, and planning.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
-      "src": "/favicon/web-app-manifest-192x192.png",
+      "src": "/assets/favicon/web-app-manifest-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     },
     {
-      "src": "/favicon/web-app-manifest-512x512.png",
+      "src": "/assets/favicon/web-app-manifest-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#000000",
-  "background_color": "#000000",
-  "display": "standalone"
+  "theme_color": "#101113",
+  "background_color": "#e2e5e2",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity"]
 }
