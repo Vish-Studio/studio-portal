@@ -3,8 +3,8 @@ import { useForm } from 'react-hook-form';
 import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
 import Layout from '../components/common/layout/layout';
 import Modal from '../components/common/modal/modal';
-import TableData, { RowActions, type Column } from '../components/common/table/table';
-import TableToolbar, { type TabItem } from '../components/common/table-tab/table-tab';
+import { RowActionsMenu } from '../components/common/table/table';
+import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Fab from '../components/common/button-fab/button-fab';
@@ -18,6 +18,7 @@ import StatusIcon from '../components/common/status-icon/status-icon';
 
 type MemberRow = TeamMember & { project?: TeamProject };
 type FilterKey = 'all' | 'assigned' | 'unassigned';
+type SortKey = 'name' | 'role';
 
 interface MemberFormValues {
   name: string;
@@ -82,18 +83,6 @@ function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) 
   );
 }
 
-// ─── Member avatar cell ───────────────────────────────────────────────────────
-
-function TeamMember({ member }: { member: TeamMember }) {
-  const colors = getMemberColors(member.id);
-  return (
-    <div className="flex items-center gap-3 min-w-0">
-      <StatusIcon status={member.assignedProjectId ? 'active' : 'inactive'} />
-      <span className="font-normal text-gray-900 truncate">{member.name}</span>
-    </div>
-  );
-}
-
 // ─── Team Page ────────────────────────────────────────────────────────────────
 
 export default function Team() {
@@ -101,6 +90,8 @@ export default function Team() {
   const { searchQuery } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
@@ -138,8 +129,15 @@ export default function Team() {
         m.role.toLowerCase().includes(q),
       );
     }
-    return list.map(m => ({ ...m, project: projects.find(p => p.id === m.assignedProjectId) }));
-  }, [members, projects, activeTab, searchQuery]);
+    return list
+      .map(m => ({ ...m, project: projects.find(p => p.id === m.assignedProjectId) }))
+      .sort((a, b) => {
+        const aVal = sortKey === 'role' ? a.role : a.name;
+        const bVal = sortKey === 'role' ? b.role : b.name;
+        const result = aVal.localeCompare(bVal, undefined, { sensitivity: 'base' });
+        return sortDirection === 'asc' ? result : -result;
+      });
+  }, [members, projects, activeTab, searchQuery, sortKey, sortDirection]);
 
   const openAdd = () => {
     setEditingMember(null);
@@ -166,79 +164,92 @@ export default function Team() {
     if (confirm(`Remove ${member.name} from the team?`)) removeMember(member.id);
   };
 
-
-
-  const columns: Column<MemberRow>[] = [
-    {
-      key: 'name',
-      label: 'Name',
-      render: row => <TeamMember member={row} />
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      hideBelow: 'md',
-      render: row => <span className="text-sm text-gray-900">{row.email || '—'}</span>,
-    },
-    {
-      key: 'role',
-      label: 'Role',
-      hideBelow: 'sm',
-      render: row => <span className="text-sm text-gray-900">{row.role}</span>,
-    },
-    {
-      key: 'project',
-      label: 'Project',
-      render: row =>
-        row.project ? (
-          <div>
-            <span className="text-sm text-gray-900">{row.project.name}</span>
-          </div>
-        ) : (
-          <div>
-            <span className="text-sm text-gray-400">Unassigned</span>
-          </div>
-        ),
-    },
-    {
-      key: 'actions',
-      label: 'Actions',
-      align: 'right',
-      width: 'w-10 md:w-auto',
-      render: row => (
-        <RowActions
-          actions={[
-            { label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(row) },
-            { label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(row) },
-            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(row), variant: 'danger' },
-          ]}
-        />
-      ),
-    },
-  ];
-
   return (
-    <Layout title="Team" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-3 w-full mx-auto pb-6">
+    <Layout title="Team">
+      <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
         <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-          <TableToolbar
+          <TableTab
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={key => setActiveTab(key as FilterKey)}
+            sortValue={sortKey}
+            sortOptions={[
+              { key: 'name', label: 'Name' },
+              { key: 'role', label: 'Role' },
+            ]}
+            onSortChange={key => setSortKey(key as SortKey)}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
             actionLabel="Add Member"
             onAction={openAdd}
           />
         </div>
 
-        <div className="flex-1 min-h-0">
-          <TableData<MemberRow>
-            columns={columns}
-            data={tableData}
-            className="h-full"
-            emptyMessage={searchQuery ? `No members match "${searchQuery}".` : 'No team members yet.'}
-            onRowClick={openEdit}
-          />
-        </div>
+        {tableData.length === 0 ? (
+          <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+            <p className="text-sm font-semibold text-gray-500">
+              {searchQuery ? `No members match "${searchQuery}".` : 'No team members yet.'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="hidden grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+              <span>Member</span>
+              <span>Role</span>
+              <span>Assignment</span>
+              <span />
+            </div>
+
+            {tableData.map(member => {
+              const colors = getMemberColors(member.id);
+
+              return (
+                <div
+                  key={member.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openEdit(member)}
+                  onKeyDown={event => { if (event.key === 'Enter') openEdit(member); }}
+                  className="grid cursor-pointer gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] md:items-center"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-sm font-bold text-white`}>
+                      {member.name.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-(--color-ink)">{member.name}</p>
+                      <p className="truncate text-xs font-medium text-gray-400">{member.email || 'No email'}</p>
+                    </div>
+                  </div>
+
+                  <p className="truncate text-sm font-semibold text-gray-600">{member.role}</p>
+
+                  <div className="flex min-w-0 items-center gap-2">
+                    <StatusIcon status={member.assignedProjectId ? 'active' : 'inactive'} />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-gray-800">
+                        {member.project?.name ?? 'Unassigned'}
+                      </p>
+                      <p className="truncate text-xs font-medium text-gray-400">
+                        {member.project?.client ?? 'Available for a project'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end" onClick={event => event.stopPropagation()}>
+                    <RowActionsMenu
+                      actions={[
+                        { label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(member) },
+                        { label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(member) },
+                        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(member), variant: 'danger' },
+                      ]}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
       </div>
 

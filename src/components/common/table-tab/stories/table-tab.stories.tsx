@@ -46,6 +46,36 @@ export const WithAction: StoryObj = {
   },
 };
 
+export const WithPageControls: StoryObj = {
+  render: () => {
+    const [active, setActive] = useState('all');
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+    const [sort, setSort] = useState('recent');
+    const [direction, setDirection] = useState<'asc' | 'desc'>('desc');
+
+    return (
+      <TableTab
+        tabs={TABS}
+        activeTab={active}
+        onTabChange={setActive}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        sortValue={sort}
+        sortOptions={[
+          { key: 'recent', label: 'Most recent' },
+          { key: 'name', label: 'Name' },
+          { key: 'created', label: 'Date created' },
+        ]}
+        onSortChange={setSort}
+        sortDirection={direction}
+        onSortDirectionChange={setDirection}
+        actionLabel="Add Task"
+        onAction={() => {}}
+      />
+    );
+  },
+};
+
 export const TabsOnly: StoryObj = {
   render: () => {
     const [active, setActive] = useState('all');

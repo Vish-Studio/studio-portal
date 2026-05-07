@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Pencil, Trash2, Eye } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Trash2 } from 'lucide-react';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import Layout from '@/src/components/common/layout/layout';
-import TableData, { RowActions, type Column } from '@/src/components/common/table/table';
+import { RowActionsMenu } from '@/src/components/common/table/table';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
 import { useUIStore } from '@/src/store/ui';
@@ -14,6 +14,7 @@ type PaymentStatus = 'paid' | 'pending' | 'overdue';
 type PaymentType = 'one-time' | 'recurring';
 type RecurringInterval = 'monthly' | 'quarterly' | 'annually';
 type FilterKey = 'all' | 'paid' | 'pending' | 'overdue' | 'recurring';
+type SortKey = 'date' | 'amount';
 
 interface Payment {
   id: string;
@@ -73,6 +74,8 @@ const clientColor = (name: string) =>
 const Payments = () => {
   const { searchQuery } = useUIStore();
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   // ── Tab counts ──
   const tabCounts = useMemo(() => ({
@@ -104,111 +107,23 @@ const Payments = () => {
         p.invoiceId.toLowerCase().includes(q),
       );
     }
-    return list;
-  }, [activeTab, searchQuery]);
+    return [...list].sort((a, b) => {
+      const result = sortKey === 'amount'
+        ? a.amount - b.amount
+        : Date.parse(a.date) - Date.parse(b.date);
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [activeTab, searchQuery, sortKey, sortDirection]);
 
   // ── Stat totals ──
   const totalCollected = PAYMENTS.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
   const totalPending = PAYMENTS.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0);
   const totalOverdue = PAYMENTS.filter(p => p.status === 'overdue').reduce((s, p) => s + p.amount, 0);
 
-  // ── Table columns ──
-  const columns: Column<Payment>[] = [
-    {
-      key: 'invoiceId',
-      label: 'Invoice',
-      render: row => (
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-[11px] text-gray-400">{row.invoiceId}</span>
-          {row.type === 'recurring' && (
-            <span className="inline-flex items-center gap-1 bg-violet-50 text-violet-600 text-[10px] font-semibold px-1.5 py-0.5 rounded-md">
-              <RefreshCw size={9} />
-              {row.interval ? INTERVAL_LABEL[row.interval] : 'Recurring'}
-            </span>
-          )}
-        </div>
-      ),
-    },
-    {
-      key: 'client',
-      label: 'Client',
-      render: row => (
-        <div className="flex items-center gap-2.5">
-          <div className={`w-7 h-7 rounded-full ${clientColor(row.client)} flex items-center justify-center text-white font-bold text-[11px] shrink-0`}>
-            {row.client.charAt(0)}
-          </div>
-          <span className="text-sm font-medium text-gray-900 whitespace-nowrap">{row.client}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'project',
-      label: 'Project',
-      hideBelow: 'md',
-      render: row => (
-        <span className="text-sm text-gray-500 whitespace-nowrap">{row.project}</span>
-      ),
-    },
-    {
-      key: 'amount',
-      label: 'Amount',
-      align: 'right',
-      render: row => (
-        <span className="text-sm font-semibold text-gray-900 tabular-nums">{fmt(row.amount)}</span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: row => (
-        <StatusBadge label={row.status} variant={STATUS_VARIANT[row.status]} />
-      ),
-    },
-    {
-      key: 'date',
-      label: 'Date',
-      hideBelow: 'lg',
-      render: row => (
-        <span className="text-sm text-gray-400 tabular-nums whitespace-nowrap">{row.date}</span>
-      ),
-    },
-    {
-      key: 'nextDate',
-      label: 'Next Payment',
-      hideBelow: 'lg',
-      render: row => (
-        <span className="text-sm text-gray-400 tabular-nums whitespace-nowrap">
-          {row.nextDate ?? '—'}
-        </span>
-      ),
-    },
-    {
-      key: 'actions',
-      label: '',
-      align: 'right',
-      width: 'w-10 md:w-auto',
-      render: _row => (
-        <RowActions
-          actions={[
-            {
-              label: 'Edit payment',
-              icon: <MaterialIcon name="edit" size={16} />,
-              onClick: () => { }
-            },
-            {
-              label: 'Delete', icon: <MaterialIcon name="delete" size={16} />,
-              onClick: () => { },
-              variant: 'danger'
-            },
-          ]}
-        />
-      ),
-    },
-  ];
-
   return (
-    <Layout title="Payments" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto py-10 pb-3">
+    <Layout title="Payments">
+      <div className="flex flex-col gap-6 w-full mx-auto py-6 md:min-h-full md:gap-8 md:py-10">
 
         {/* Stats row */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">
@@ -238,25 +153,89 @@ const Payments = () => {
           />
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col gap-3">
+        <div className="flex flex-col gap-3 md:flex-1 md:min-h-0">
           {/* Tabs */}
           <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
             <TableTab
               tabs={tabs}
               activeTab={activeTab}
               onTabChange={key => setActiveTab(key as FilterKey)}
+              sortValue={sortKey}
+              sortOptions={[
+                { key: 'date', label: 'Date created' },
+                { key: 'amount', label: 'Amount' },
+              ]}
+              onSortChange={key => setSortKey(key as SortKey)}
+              sortDirection={sortDirection}
+              onSortDirectionChange={setSortDirection}
             />
           </div>
 
-          {/* Table — flex-1 min-h-0 ensures it fills the remaining height */}
-          <div className="flex-1 min-h-0">
-            <TableData<Payment>
-              columns={columns}
-              data={filtered}
-              className="h-full"
-              emptyMessage={searchQuery ? `No payments match "${searchQuery}".` : 'No payments found.'}
-            />
-          </div>
+          {filtered.length === 0 ? (
+            <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+              <p className="text-sm font-semibold text-gray-500">
+                {searchQuery ? `No payments match "${searchQuery}".` : 'No payments found.'}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="hidden grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+                <span>Invoice</span>
+                <span>Client / Project</span>
+                <span className="text-right">Amount</span>
+                <span>Status</span>
+                <span>Next</span>
+                <span />
+              </div>
+
+              {filtered.map(payment => (
+                <div
+                  key={payment.id}
+                  className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] md:items-center"
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-xs font-semibold text-gray-500">{payment.invoiceId}</span>
+                      {payment.type === 'recurring' && (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-600">
+                          <RefreshCw size={9} />
+                          {payment.interval ? INTERVAL_LABEL[payment.interval] : 'Recurring'}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs font-medium text-gray-400">{payment.date}</p>
+                  </div>
+
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-xs font-bold text-white`}>
+                      {payment.client.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-(--color-ink)">{payment.client}</p>
+                      <p className="truncate text-xs font-medium text-gray-400">{payment.project}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-left text-xl font-bold tabular-nums text-(--color-ink) md:text-right md:text-sm">
+                    {fmt(payment.amount)}
+                  </p>
+
+                  <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
+
+                  <p className="text-xs font-semibold text-gray-400">{payment.nextDate ?? '—'}</p>
+
+                  <div className="flex justify-end">
+                    <RowActionsMenu
+                      actions={[
+                        { label: 'Edit payment', icon: <MaterialIcon name="edit" size={16} />, onClick: () => { } },
+                        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => { }, variant: 'danger' },
+                      ]}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </Layout>

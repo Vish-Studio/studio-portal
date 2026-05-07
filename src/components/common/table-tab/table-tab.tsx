@@ -1,4 +1,4 @@
-import React, { FunctionComponent } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import MaterialIcon from '../material-icon/material-icon';
 import Select from '../select/select';
 import Option from '../select/option';
@@ -11,11 +11,27 @@ export interface TabItem {
   count?: number;
 }
 
+export interface SortOption {
+  key: string;
+  label: string;
+}
+
 export interface TableTabProps {
   /** Tab items rendered in the left pill container. Omit to hide tabs. */
   tabs?: TabItem[];
   activeTab?: string;
   onTabChange?: (key: string) => void;
+  /** Optional grid/list view toggle rendered beside the tabs. */
+  viewMode?: 'grid' | 'list';
+  onViewModeChange?: (mode: 'grid' | 'list') => void;
+  /** Optional sort dropdown rendered beside the tabs. */
+  sortOptions?: SortOption[];
+  sortValue?: string;
+  onSortChange?: (key: string) => void;
+  sortDirection?: 'asc' | 'desc';
+  onSortDirectionChange?: (direction: 'asc' | 'desc') => void;
+  /** Optional custom controls rendered after built-in view/sort controls. */
+  controls?: React.ReactNode;
   /**
    * Primary action label and handler.
    * On ≥sm screens the button shows label + icon.
@@ -33,18 +49,44 @@ const TableTab: FunctionComponent<TableTabProps> = ({
   tabs,
   activeTab,
   onTabChange,
+  viewMode,
+  onViewModeChange,
+  sortOptions,
+  sortValue,
+  onSortChange,
+  sortDirection,
+  onSortDirectionChange,
+  controls,
   actionLabel,
   onAction,
 }) => {
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+  const showViewToggle = viewMode && onViewModeChange;
+  const showSort = Boolean(sortOptions?.length && sortValue && onSortChange);
+  const selectedSort = sortOptions?.find(option => option.key === sortValue) ?? sortOptions?.[0];
+  const currentDirection = sortDirection ?? 'desc';
+  const hasControls = showViewToggle || showSort || controls;
+
+  useEffect(() => {
+    if (!isSortOpen) return;
+    const close = (event: MouseEvent) => {
+      if (!sortRef.current?.contains(event.target as Node)) setIsSortOpen(false);
+    };
+
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [isSortOpen]);
+
   return (
-    <div className={`table-tab flex items-center justify-between gap-3 flex-wrap w-full md:w-auto ${className}`}>
+    <div className={`table-tab flex items-center justify-between gap-3 flex-wrap w-full ${className}`}>
 
       {/* Mobile — dropdown tabs */}
       {tabs && tabs.length > 0 && (
         <Select
           value={activeTab}
           onChange={event => onTabChange?.(event.target.value)}
-          wrapperClassName="w-full md:hidden"
+          wrapperClassName="min-w-0 flex-1 md:hidden"
           className="py-2.5"
         >
           {tabs.map(tab => (
@@ -57,7 +99,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
 
       {/* Desktop — filter tabs */}
       {tabs && tabs.length > 0 && (
-        <div className="hidden items-center gap-1 p-1.5 bg-gray-100 rounded-xl w-full md:flex md:w-auto overflow-x-auto no-scrollbar">
+        <div className="hidden min-w-0 items-center gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1.5 no-scrollbar md:flex">
           {tabs.map(tab => {
             const isActive = tab.key === activeTab;
             return (
@@ -86,33 +128,115 @@ const TableTab: FunctionComponent<TableTabProps> = ({
         </div>
       )}
 
-      {/* View toggle */}
-      {/* <div className="hidden sm:flex items-center gap-0.5 p-1 bg-gray-100 rounded-xl shrink-0">
-        <button
-          type="button"
-          onClick={() => setViewMode('grid')}
-          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
-          aria-label="Grid view"
-        >
-          <LayoutGrid size={14} />
-        </button>
+      {hasControls && (
+        <div className="flex shrink-0 items-center gap-2 md:mr-auto">
+          {showViewToggle && (
+            <div className="hidden items-center gap-0.5 rounded-xl bg-gray-100 p-1 sm:flex">
+              <button
+                type="button"
+                onClick={() => onViewModeChange('grid')}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-400 hover:bg-white/70 hover:text-gray-700'
+                }`}
+                aria-label="Grid view"
+              >
+                <MaterialIcon name="grid_view" size={17} />
+              </button>
+              <button
+                type="button"
+                onClick={() => onViewModeChange('list')}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-white text-gray-800 shadow-sm'
+                    : 'text-gray-400 hover:bg-white/70 hover:text-gray-700'
+                }`}
+                aria-label="List view"
+              >
+                <MaterialIcon name="view_list" size={18} />
+              </button>
+            </div>
+          )}
 
-        <button
-          type="button"
-          onClick={() => setViewMode('list')}
-          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
-          aria-label="List view"
-        >
-          <List size={14} />
-        </button>
-      </div> */}
+          {showSort && (
+            <div ref={sortRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsSortOpen(open => !open)}
+                className="flex h-10 items-center gap-2 rounded-xl bg-gray-100 px-3 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                aria-label="Sort"
+                aria-haspopup="listbox"
+                aria-expanded={isSortOpen}
+              >
+                <MaterialIcon name="sort" size={17} />
+                <span className="hidden sm:inline">{selectedSort?.label ?? 'Sort'}</span>
+                <MaterialIcon name="expand_more" size={16} className={isSortOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
+              </button>
+
+              {isSortOpen && (
+                <div
+                  role="listbox"
+                  className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-52 rounded-2xl border border-gray-200 bg-white p-2 shadow-[0_18px_50px_rgba(15,23,42,0.16)]"
+                >
+                  {onSortDirectionChange && (
+                    <div className="mb-2 grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                      {(['asc', 'desc'] as const).map(direction => (
+                        <button
+                          key={direction}
+                          type="button"
+                          onClick={() => onSortDirectionChange(direction)}
+                          className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                            currentDirection === direction
+                              ? 'bg-white text-gray-900 shadow-sm'
+                              : 'text-gray-400 hover:text-gray-700'
+                          }`}
+                        >
+                          {direction === 'asc' ? 'Ascending' : 'Descending'}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {sortOptions?.map(option => {
+                    const isSelected = option.key === sortValue;
+
+                    return (
+                      <button
+                        key={option.key}
+                        type="button"
+                        role="option"
+                        aria-selected={isSelected}
+                        onClick={() => {
+                          onSortChange?.(option.key);
+                          setIsSortOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors ${
+                          isSelected
+                            ? 'bg-gray-100 text-gray-900'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        }`}
+                      >
+                        <span className="flex-1 truncate">{option.label}</span>
+                        {isSelected && <MaterialIcon name="check" size={16} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {controls}
+        </div>
+      )}
 
       {/* Right — action button (hidden on mobile; use Fab instead) */}
       {actionLabel && onAction && (
         <button
           type="button"
           onClick={onAction}
-          className="hidden sm:flex items-center gap-2 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors shrink-0 ml-auto"
+          className="ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-gray-800 sm:flex"
         >
           <MaterialIcon name='add' size={20} />
           {actionLabel}

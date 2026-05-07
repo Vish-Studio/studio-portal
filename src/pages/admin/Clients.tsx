@@ -2,9 +2,9 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { Pencil, Trash2, ExternalLink } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
-import TableData, { RowActions, type Column } from '../../components/common/table/table';
+import { RowActionsMenu } from '../../components/common/table/table';
 import TableTab, { type TabItem } from '../../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
@@ -19,6 +19,7 @@ import type { Client, ClientStatus } from '../../store/clients';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type FilterKey = 'all' | 'active' | 'inactive' | 'lost';
+type SortKey = 'name' | 'newest';
 
 interface ClientFormValues {
   displayName: string;
@@ -36,6 +37,8 @@ export default function Clients() {
   const { searchQuery } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
 
@@ -76,8 +79,14 @@ export default function Clients() {
         (c.phone ?? '').includes(q),
       );
     }
-    return list;
-  }, [clients, activeTab, searchQuery]);
+    return [...list].sort((a, b) => {
+      const result = sortKey === 'newest'
+        ? a.createdAt.toMillis() - b.createdAt.toMillis()
+        : a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' });
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [clients, activeTab, searchQuery, sortKey, sortDirection]);
 
   // ── Sidebar helpers ──
   const openAdd = () => {
@@ -112,97 +121,90 @@ export default function Clients() {
     if (confirm(`Remove ${client.displayName}?`)) removeClient(client.id);
   };
 
-  // ── Table columns ──
-  const columns: Column<Client>[] = [
-    {
-      key: 'displayName',
-      label: 'Name',
-      render: row => {
-        const circleBg: Record<string, string> = { active: 'bg-green-500', inactive: 'bg-amber-400', lost: 'bg-red-400' };
-        return (
-          <div className="flex items-center gap-3">
-            <div className={`w-8 h-8 rounded-full ${circleBg[row.status] ?? 'bg-gray-400'} flex items-center justify-center text-white font-bold text-sm shrink-0`}>
-              {row.displayName.charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-900 truncate">{row.displayName}</p>
-              <p className="text-[11px] text-gray-400 font-mono truncate">{row.id}</p>
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      key: 'companyName',
-      label: 'Company',
-      hideBelow: 'md',
-      render: row => <span className="text-sm text-gray-600">{row.companyName || '—'}</span>,
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      hideBelow: 'lg',
-      render: row => <span className="text-sm text-gray-500">{row.email}</span>,
-    },
-    {
-      key: 'phone',
-      label: 'Phone',
-      hideBelow: 'lg',
-      render: row => <span className="text-sm text-gray-500">{row.phone || '—'}</span>,
-    },
-    {
-      key: 'createdAt',
-      label: 'Created',
-      hideBelow: 'md',
-      render: row => (
-        <span className="text-sm text-gray-400 tabular-nums">
-          {row.createdAt?.toDate ? format(row.createdAt.toDate(), 'MMM d, yyyy') : '—'}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: row => <ClientStatusBadge status={row.status} />,
-    },
-    {
-      key: 'actions',
-      label: '',
-      align: 'right',
-      width: 'w-10 md:w-auto',
-      render: row => (
-        <RowActions
-          actions={[
-            { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => openEdit(row) },
-            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(row), variant: 'danger' },
-          ]}
-        />
-      ),
-    },
-  ];
-
   return (
-    <Layout title="Clients" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-3 w-full mx-auto py-10">
+    <Layout title="Clients">
+      <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
         <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <TableTab
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={key => setActiveTab(key as FilterKey)}
+            sortValue={sortKey}
+            sortOptions={[
+              { key: 'name', label: 'Name' },
+              { key: 'newest', label: 'Date created' },
+            ]}
+            onSortChange={key => setSortKey(key as SortKey)}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
             actionLabel="Add Client"
             onAction={openAdd}
           />
         </div>
 
-        <div className="flex-1 min-h-0">
-          <TableData<Client>
-            columns={columns}
-            data={filtered}
-            className="h-full"
-            emptyMessage={searchQuery ? `No clients match "${searchQuery}".` : 'No clients yet.'}
-            onRowClick={row => navigate(`/admin/clients/${row.id}`)}
-          />
-        </div>
+        {filtered.length === 0 ? (
+          <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+            <p className="text-sm font-semibold text-gray-500">
+              {searchQuery ? `No clients match "${searchQuery}".` : 'No clients yet.'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <div className="hidden grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+              <span>Client</span>
+              <span>Contact</span>
+              <span>Created</span>
+              <span className="text-right">Status</span>
+              <span />
+            </div>
+
+            {filtered.map(client => {
+              const circleBg: Record<ClientStatus, string> = { active: 'bg-green-500', inactive: 'bg-amber-400', lost: 'bg-red-400' };
+
+              return (
+                <div
+                  key={client.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate(`/admin/clients/${client.id}`)}
+                  onKeyDown={event => { if (event.key === 'Enter') navigate(`/admin/clients/${client.id}`); }}
+                  className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 cursor-pointer md:grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] md:items-center"
+                >
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${circleBg[client.status]} text-sm font-bold text-white`}>
+                      {client.displayName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-bold text-(--color-ink)">{client.displayName}</p>
+                      <p className="truncate text-xs font-medium text-gray-400">{client.companyName || 'No company'}</p>
+                    </div>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-gray-600">{client.email}</p>
+                    <p className="mt-0.5 truncate text-xs font-medium text-gray-400">{client.phone || 'No phone'}</p>
+                  </div>
+
+                  <span className="text-xs font-semibold text-gray-400">
+                    {client.createdAt?.toDate ? format(client.createdAt.toDate(), 'MMM d, yyyy') : '—'}
+                  </span>
+
+                  <div className="flex items-center justify-between gap-3 md:justify-end">
+                    <ClientStatusBadge status={client.status} />
+                    <div onClick={event => event.stopPropagation()}>
+                      <RowActionsMenu
+                        actions={[
+                          { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => openEdit(client) },
+                          { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(client), variant: 'danger' },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Mobile FAB */}

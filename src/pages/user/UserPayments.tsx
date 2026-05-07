@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import { CreditCard, Clock, CheckCircle } from 'lucide-react';
 import UserLayout from '@/src/components/user/user-layout/user-layout';
 import StatCard from '@/src/components/common/stat-card/stat-card';
-import TableData, { type Column } from '@/src/components/common/table/table';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
 import MaterialIcon from '@/src/components/common/material-icon/material-icon';
@@ -14,6 +13,7 @@ const CURRENT_CLIENT_ID = 'c1';
 
 type PaymentStatus = 'paid' | 'partial' | 'pending';
 type FilterKey = 'all' | 'paid' | 'partial' | 'pending';
+type SortKey = 'due' | 'project';
 
 interface PaymentRow {
   id: string;
@@ -47,6 +47,8 @@ const UserPayments = () => {
   const { clients } = useClientsStore();
   const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('due');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
 
   const myProjects = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
 
@@ -89,118 +91,24 @@ const UserPayments = () => {
     { key: 'pending', label: 'Pending', count: tabCounts.pending },
   ];
 
-  const filtered = useMemo(
-    () => activeTab === 'all' ? rows : rows.filter(r => r.status === activeTab),
-    [activeTab, rows],
-  );
+  const filtered = useMemo(() => {
+    const list = activeTab === 'all' ? rows : rows.filter(r => r.status === activeTab);
+    return [...list].sort((a, b) => {
+      const result = sortKey === 'project'
+        ? a.project.localeCompare(b.project, undefined, { sensitivity: 'base' })
+        : a.dueAmount - b.dueAmount;
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [activeTab, rows, sortKey, sortDirection]);
 
   // ── Progress bar width for each row ──────────────────────────────────────────
   const pct = (row: PaymentRow) =>
     row.agreedAmount > 0 ? Math.round((row.paidAmount / row.agreedAmount) * 100) : 0;
 
-  // ── Columns: project cell carries amounts on mobile, separate cols on sm+ ────
-  const columns: Column<PaymentRow>[] = [
-    {
-      key: 'project',
-      label: 'Project',
-      render: row => (
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-8 h-8 rounded-[10px] bg-gray-100 flex items-center justify-center shrink-0">
-            <MaterialIcon name={row.serviceIcon} size={14} className="text-gray-500" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{row.project}</p>
-            {/* Service on all sizes */}
-            <p className="text-[10px] text-gray-400 truncate">{row.service}</p>
-            {/* Payment summary visible only on mobile (hidden sm+) */}
-            <div className="sm:hidden mt-1.5 flex flex-col gap-1">
-              <div className="flex items-center gap-1.5">
-                <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${row.status === 'paid' ? 'bg-green-400'
-                        : row.status === 'partial' ? 'bg-amber-400'
-                          : 'bg-gray-300'
-                      }`}
-                    style={{ width: `${pct(row)}%` }}
-                  />
-                </div>
-                <span className="text-[10px] font-semibold text-gray-400 tabular-nums w-7 text-right shrink-0">
-                  {pct(row)}%
-                </span>
-              </div>
-              <p className="text-[11px] text-gray-500">
-                <span className="font-semibold text-green-600">{fmt(row.paidAmount)}</span>
-                <span className="text-gray-300"> / </span>
-                <span className="font-medium">{fmt(row.agreedAmount)}</span>
-                {row.dueAmount > 0 && (
-                  <span className="text-amber-600 font-semibold"> · {fmt(row.dueAmount)} due</span>
-                )}
-              </p>
-            </div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'agreedAmount',
-      label: 'Agreed',
-      align: 'right',
-      hideBelow: 'sm',
-      render: row => (
-        <span className="text-sm font-semibold text-gray-700 tabular-nums">{fmt(row.agreedAmount)}</span>
-      ),
-    },
-    {
-      key: 'paidAmount',
-      label: 'Paid',
-      align: 'right',
-      hideBelow: 'sm',
-      render: row => (
-        <div className="flex flex-col items-end gap-1">
-          <span className="text-sm font-semibold text-green-600 tabular-nums">{fmt(row.paidAmount)}</span>
-          <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden">
-            <div
-              className={`h-full rounded-full ${row.status === 'paid' ? 'bg-green-400'
-                  : row.status === 'partial' ? 'bg-amber-400'
-                    : 'bg-gray-300'
-                }`}
-              style={{ width: `${pct(row)}%` }}
-            />
-          </div>
-        </div>
-      ),
-    },
-    {
-      key: 'dueAmount',
-      label: 'Outstanding',
-      align: 'right',
-      hideBelow: 'md',
-      render: row => (
-        <span className={`text-sm font-semibold tabular-nums ${row.dueAmount > 0 ? 'text-amber-600' : 'text-gray-300'}`}>
-          {row.dueAmount > 0 ? fmt(row.dueAmount) : '—'}
-        </span>
-      ),
-    },
-    {
-      key: 'status',
-      label: 'Status',
-      render: row => (
-        <StatusBadge label={STATUS_LABEL[row.status]} variant={STATUS_VARIANT[row.status]} />
-      ),
-    },
-    {
-      key: 'timeline',
-      label: 'Timeline',
-      hideBelow: 'lg',
-      render: row => (
-        <span className="text-sm text-gray-400 whitespace-nowrap">{row.timeline || '—'}</span>
-      ),
-    },
-  ];
-
   return (
-    <UserLayout title="Payments" fullHeight>
-      <div className="flex-1 min-h-0 flex flex-col gap-6 md:gap-8 w-full mx-auto py-10">
+    <UserLayout title="Payments">
+      <div className="flex flex-col gap-6 md:gap-8 w-full mx-auto py-6 md:py-10">
 
         {/* Client identity chip */}
         {currentClient && (
@@ -250,18 +158,68 @@ const UserPayments = () => {
               tabs={tabs}
               activeTab={activeTab}
               onTabChange={key => setActiveTab(key as FilterKey)}
+              sortValue={sortKey}
+              sortOptions={[
+                { key: 'due', label: 'Outstanding' },
+                { key: 'project', label: 'Project' },
+              ]}
+              onSortChange={key => setSortKey(key as SortKey)}
+              sortDirection={sortDirection}
+              onSortDirectionChange={setSortDirection}
             />
           </div>
 
-          {/* Table — mobile shows project cell with embedded payment summary */}
-          <div className="flex-1 min-h-0">
-            <TableData<PaymentRow>
-              columns={columns}
-              data={filtered}
-              className="h-full"
-              emptyMessage="No payments found."
-            />
-          </div>
+          {filtered.length === 0 ? (
+            <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+              <p className="text-sm font-semibold text-gray-500">No payments found.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {filtered.map(row => (
+                <div key={row.id} className="rounded-[18px] border border-gray-200 bg-white p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gray-100">
+                        <MaterialIcon name={row.serviceIcon} size={16} className="text-gray-500" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-bold text-(--color-ink)">{row.project}</p>
+                        <p className="truncate text-xs font-medium text-gray-400">{row.service} · {row.timeline || 'No timeline'}</p>
+                      </div>
+                    </div>
+                    <StatusBadge label={STATUS_LABEL[row.status]} variant={STATUS_VARIANT[row.status]} />
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-(--color-surface) p-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Agreed</p>
+                      <p className="mt-1 text-sm font-bold text-(--color-ink)">{fmt(row.agreedAmount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Paid</p>
+                      <p className="mt-1 text-sm font-bold text-green-600">{fmt(row.paidAmount)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Due</p>
+                      <p className={`mt-1 text-sm font-bold ${row.dueAmount > 0 ? 'text-amber-600' : 'text-gray-300'}`}>
+                        {row.dueAmount > 0 ? fmt(row.dueAmount) : '—'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-gray-100">
+                      <div
+                        className={`h-full rounded-full ${row.status === 'paid' ? 'bg-green-400' : row.status === 'partial' ? 'bg-amber-400' : 'bg-gray-300'}`}
+                        style={{ width: `${pct(row)}%` }}
+                      />
+                    </div>
+                    <span className="w-9 text-right text-[11px] font-bold text-gray-400">{pct(row)}%</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>

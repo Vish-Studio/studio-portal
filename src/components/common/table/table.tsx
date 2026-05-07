@@ -189,10 +189,10 @@ const TableData = <T extends { id: string }>({
   const isSortable = (col: Column<T>) => col.label !== '' && col.sortable !== false;
 
   return (
-    <div className={`table-data w-full max-h-200 bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col h-full ${className}`}>
+    <div className={`table-data w-full max-w-full bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col h-full ${className}`}>
 
       <div className="overflow-auto flex-1 min-h-0">
-        <table className="min-w-full border-separate border-spacing-0">
+        <table className="min-w-[720px] border-separate border-spacing-0 sm:min-w-full">
 
           <thead className="sticky top-0 z-10">
             <tr className="bg-gray-50">

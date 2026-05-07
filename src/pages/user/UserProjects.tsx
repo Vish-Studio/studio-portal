@@ -29,6 +29,8 @@ interface ProjectFormValues {
   timeline: string;
 }
 
+type SortKey = 'updated' | 'name';
+
 // ─── UserProjectCard — grid variant ──────────────────────────────────────────
 
 const UserProjectCard = ({
@@ -200,6 +202,8 @@ const UserProjects = () => {
 
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [sortKey, setSortKey] = useState<SortKey>('updated');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
   const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
@@ -226,10 +230,16 @@ const UserProjects = () => {
     { key: 'completed', label: 'Completed', count: tabCounts.completed },
   ];
 
-  const filtered = useMemo(
-    () => activeTab === 'all' ? myProjects : myProjects.filter(p => p.status === activeTab),
-    [myProjects, activeTab],
-  );
+  const filtered = useMemo(() => {
+    const list = activeTab === 'all' ? myProjects : myProjects.filter(p => p.status === activeTab);
+    return [...list].sort((a, b) => {
+      const result = sortKey === 'name'
+        ? a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
+        : a.startedAt - b.startedAt;
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [myProjects, activeTab, sortKey, sortDirection]);
 
   const avgProgress = myProjects.length
     ? Math.round(myProjects.reduce((s, p) => s + getPhaseProgress(p.phases), 0) / myProjects.length)
@@ -299,16 +309,22 @@ const UserProjects = () => {
         {/* Toolbar */}
         <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <TableTab tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} className="min-w-0 flex-1 md:flex-none" />
-            <div className="hidden md:flex items-center gap-0.5 bg-gray-100 rounded-xl p-1 shrink-0">
-              {(['list', 'grid'] as const).map(mode => (
-                <button key={mode} onClick={() => setViewMode(mode)} aria-label={`${mode} view`}
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${viewMode === mode ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
-                >
-                  <MaterialIcon name={mode === 'list' ? 'view_list' : 'grid_view'} size={16} />
-                </button>
-              ))}
-            </div>
+            <TableTab
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              sortValue={sortKey}
+              sortOptions={[
+                { key: 'updated', label: 'Most recent' },
+                { key: 'name', label: 'Name' },
+              ]}
+              onSortChange={key => setSortKey(key as SortKey)}
+              sortDirection={sortDirection}
+              onSortDirectionChange={setSortDirection}
+              className="min-w-0 flex-1"
+            />
           </div>
           <button type="button" onClick={openAdd} className="hidden sm:flex items-center gap-2 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors shrink-0 ml-auto">
             <MaterialIcon name="add" size={20} />

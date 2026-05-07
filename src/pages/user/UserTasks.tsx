@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckSquare, LayoutGrid, List, Plus } from 'lucide-react';
+import { CheckSquare } from 'lucide-react';
 import UserLayout from '@/src/components/user/user-layout/user-layout';
 import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '@/src/components/common/form-field/form-field';
@@ -8,6 +8,7 @@ import Select from '@/src/components/common/select/select';
 import Option from '@/src/components/common/select/option';
 import ConfirmDialog from '@/src/components/common/confirm-dialog/confirm-dialog';
 import Fab from '@/src/components/common/button-fab/button-fab';
+import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import TaskCard from '@/src/components/admin/task-card/task-card';
 import TaskRow from '@/src/components/admin/task-card/task-row';
 import TaskDetailModal from '@/src/components/admin/task-detail-modal/task-detail-modal';
@@ -24,12 +25,14 @@ type FilterKey = 'all' | TaskStatus;
 interface TabDef { key: FilterKey; label: string; activeCls: string; }
 
 const TABS: TabDef[] = [
-  { key: 'all',         label: 'All',         activeCls: 'bg-gray-900 text-white' },
-  { key: 'todo',        label: 'Todo',         activeCls: 'bg-gray-600 text-white' },
-  { key: 'in-progress', label: 'In Progress',  activeCls: 'bg-blue-600 text-white' },
-  { key: 'to-test',     label: 'To Test',      activeCls: 'bg-amber-500 text-white' },
-  { key: 'completed',   label: 'Completed',    activeCls: 'bg-green-600 text-white' },
+  { key: 'all',         label: 'All',         activeCls: '' },
+  { key: 'todo',        label: 'Todo',         activeCls: '' },
+  { key: 'in-progress', label: 'In Progress',  activeCls: '' },
+  { key: 'to-test',     label: 'To Test',      activeCls: '' },
+  { key: 'completed',   label: 'Completed',    activeCls: '' },
 ];
+
+type SortKey = 'updated' | 'due';
 
 const EMPTY_MSG: Record<FilterKey, string> = {
   all:          'No tasks yet. Add your first one.',
@@ -61,6 +64,8 @@ const UserTasks = () => {
 
   const [activeTab,     setActiveTab]     = useState<FilterKey>('all');
   const [viewMode,      setViewMode]      = useState<'grid' | 'list'>('grid');
+  const [sortKey,       setSortKey]       = useState<SortKey>('updated');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
   const [editingTask,   setEditingTask]   = useState<Task | null>(null);
   const [confirmTask,   setConfirmTask]   = useState<Task | null>(null);
@@ -80,11 +85,21 @@ const UserTasks = () => {
     completed:    myTasks.filter(t => t.status === 'completed').length,
   }), [myTasks]);
 
+  const tabs = useMemo<TabItem[]>(() => (
+    TABS.map(tab => ({ key: tab.key, label: tab.label, count: counts[tab.key] }))
+  ), [counts]);
+
   // ── Filtered list ──
   const filtered = useMemo(() => {
     const list = activeTab === 'all' ? myTasks : myTasks.filter(t => t.status === activeTab);
-    return [...list].sort((a, b) => b.updatedAt - a.updatedAt);
-  }, [myTasks, activeTab]);
+    return [...list].sort((a, b) => {
+      const result = sortKey === 'due'
+        ? (a.dueDate ?? '9999-12-31').localeCompare(b.dueDate ?? '9999-12-31')
+        : a.updatedAt - b.updatedAt;
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [myTasks, activeTab, sortKey, sortDirection]);
 
   // ── Sidebar helpers ──
   const openAdd = () => {
@@ -134,77 +149,25 @@ const UserTasks = () => {
     <UserLayout title="Tasks">
       <div className="flex flex-col gap-4 pb-10">
 
-        {/* Toolbar — identical structure to admin Tasks */}
-        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-
-            {/* Mobile tab dropdown */}
-            <Select
-              value={activeTab}
-              onChange={e => setActiveTab(e.target.value as FilterKey)}
-              wrapperClassName="w-full sm:hidden"
-              className="py-2.5"
-            >
-              {TABS.map(tab => (
-                <Option key={tab.key} value={tab.key}>
-                  {tab.label} ({counts[tab.key]})
-                </Option>
-              ))}
-            </Select>
-
-            {/* Desktop tab pills */}
-            <div className="hidden items-center gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1 no-scrollbar sm:flex">
-              {TABS.map(tab => {
-                const isActive = activeTab === tab.key;
-                return (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex shrink-0 items-center gap-1.5 px-3.5 py-2 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap ${
-                      isActive ? tab.activeCls + ' shadow-sm' : 'text-gray-500 hover:text-gray-800 hover:bg-white/70'
-                    }`}
-                  >
-                    {tab.label}
-                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none ${
-                      isActive ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-500'
-                    }`}>
-                      {counts[tab.key]}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* View toggle */}
-            <div className="hidden sm:flex items-center gap-0.5 p-1 bg-gray-100 rounded-xl shrink-0">
-              <button
-                type="button"
-                onClick={() => setViewMode('grid')}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
-                aria-label="Grid view"
-              >
-                <LayoutGrid size={14} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setViewMode('list')}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${viewMode === 'list' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-400 hover:text-gray-700'}`}
-                aria-label="List view"
-              >
-                <List size={14} />
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={openAdd}
-            className="hidden sm:flex items-center gap-2 bg-gray-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-700 transition-colors shrink-0 ml-auto"
-          >
-            <Plus size={14} />
-            Add Task
-          </button>
+        {/* Toolbar — shared table/list controls */}
+        <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <TableTab
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={key => setActiveTab(key as FilterKey)}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            sortValue={sortKey}
+            sortOptions={[
+              { key: 'updated', label: 'Recently updated' },
+              { key: 'due', label: 'Due date' },
+            ]}
+            onSortChange={key => setSortKey(key as SortKey)}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            actionLabel="Add Task"
+            onAction={openAdd}
+          />
         </div>
 
         {/* Content */}
