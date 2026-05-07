@@ -37,7 +37,7 @@ export default function FormField({ label, required, error, hint, children }: Fo
  */
 export function inputCls(hasError?: boolean): string {
   return [
-    'w-full bg-gray-50 border text-gray-900 text-sm py-3 px-4 rounded-xl',
+    'w-full bg-gray-50 border text-gray-900 text-base sm:text-sm py-3 px-4 rounded-xl',
     'focus:outline-none focus:bg-white focus:ring-4 focus:ring-gray-100 transition-all',
     hasError
       ? 'border-red-300 focus:border-red-400'

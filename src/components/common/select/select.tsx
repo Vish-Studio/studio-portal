@@ -144,7 +144,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
             }
           }}
           className={cn(
-            'flex w-full items-center justify-between gap-3 border bg-gray-50 px-4 py-3 text-left text-sm text-gray-900 rounded-xl',
+            'flex w-full items-center justify-between gap-3 border bg-gray-50 px-4 py-3 text-left text-base text-gray-900 rounded-xl sm:text-sm',
             'focus:outline-none focus:bg-white focus:ring-4 focus:ring-gray-100 transition-all',
             disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-white',
             hasError
