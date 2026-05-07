@@ -57,7 +57,7 @@ const UserTasks = () => {
   // User's projects only
   const myProjects   = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
   const myProjectIds = new Set(myProjects.map(p => p.id));
-  const myTasks      = tasks.filter(t => myProjectIds.has(t.projectId));
+  const myTasks      = tasks.filter(t => t.clientAssigneeId === CURRENT_CLIENT_ID && myProjectIds.has(t.projectId));
 
   const [activeTab,     setActiveTab]     = useState<FilterKey>('all');
   const [viewMode,      setViewMode]      = useState<'grid' | 'list'>('grid');
@@ -119,6 +119,7 @@ const UserTasks = () => {
       status:      data.status,
       priority:    data.priority,
       dueDate:     data.dueDate || undefined,
+      clientAssigneeId: CURRENT_CLIENT_ID,
       updatedAt:   Date.now(),
     };
     if (editingTask) {

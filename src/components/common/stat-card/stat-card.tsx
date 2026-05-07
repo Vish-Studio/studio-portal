@@ -5,6 +5,7 @@ export type CardVariant = 'lime' | 'surface' | 'dark' | 'white';
 
 interface VariantStyle {
   container: string;
+  hoverContainer: string;
   labelText: string;
   valueText: string;
   badgeBg: string;
@@ -16,39 +17,43 @@ interface VariantStyle {
 const VARIANT_STYLES: Record<CardVariant, VariantStyle> = {
   lime: {
     container: 'bg-(--color-accent-lime)',
+    hoverContainer: 'hover:brightness-[0.98]',
     labelText: 'text-gray-800',
     valueText: 'text-(--color-ink)',
     badgeBg: 'bg-white/60',
     badgeText: 'text-gray-900',
     footerText: 'text-gray-700',
-    actionText: 'text-gray-400 hover:text-gray-600',
+    actionText: 'text-gray-500 group-hover:text-gray-700',
   },
   surface: {
     container: 'bg-(--color-surface-alt)',
+    hoverContainer: 'hover:bg-gray-100',
     labelText: 'text-gray-600',
     valueText: 'text-(--color-ink)',
     badgeBg: 'bg-white',
     badgeText: 'text-gray-900',
     footerText: 'text-gray-500',
-    actionText: 'text-gray-400 hover:text-gray-600',
+    actionText: 'text-gray-400 group-hover:text-gray-600',
   },
   dark: {
     container: 'bg-(--color-ink)',
+    hoverContainer: 'hover:bg-gray-900',
     labelText: 'text-gray-400',
     valueText: 'text-white',
     badgeBg: 'bg-white/10',
     badgeText: 'text-white',
     footerText: 'text-gray-400',
-    actionText: 'text-gray-400 hover:text-gray-300',
+    actionText: 'text-gray-400 group-hover:text-gray-200',
   },
   white: {
     container: 'bg-white border border-gray-200',
+    hoverContainer: 'hover:bg-(--color-surface-alt)',
     labelText: 'text-gray-500',
     valueText: 'text-(--color-ink)',
     badgeBg: 'bg-gray-100',
     badgeText: 'text-gray-700',
     footerText: 'text-gray-400',
-    actionText: 'text-gray-400 hover:text-gray-600',
+    actionText: 'text-gray-400 group-hover:text-gray-600',
   },
 };
 
@@ -83,27 +88,31 @@ const StatCard: FunctionComponent<StatCardProps> = ({
   className = '',
 }) => {
   const s = VARIANT_STYLES[variant];
+  const baseClassName = `stat-card ${s.container} rounded-[18px] p-4 md:p-6 flex flex-col items-start gap-4 transition-all duration-200 ${className}`;
+  const clickableClassName = onAction
+    ? `group w-full text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-gray-100 ${s.hoverContainer}`
+    : '';
 
-  return (
-    <div
-      className={`stat-card ${s.container} rounded-[18px] p-4 md:p-6 flex flex-col items-start gap-4 ${className}`}
-    >
+  const content = (
+    <>
       {/* Top row: icon + label | action */}
       <div className="flex w-full justify-between items-center">
-        <div className={`flex items-center gap-2 font-medium text-sm ${s.labelText}`}>
+        <div className={`flex items-center gap-2 font-medium text-xs md:text-sm ${s.labelText}`}>
           {icon}
           <span>{label}</span>
         </div>
         {onAction && (
-          <button onClick={onAction} className={`transition-colors cursor-pointer ${s.actionText}`}>
-            <MaterialIcon name="arrow_outward" size={16} />
-          </button>
+          <MaterialIcon
+            name="arrow_forward"
+            size={18}
+            className={`shrink-0 transition-transform duration-200 group-hover:translate-x-1 ${s.actionText}`}
+          />
         )}
       </div>
 
       {/* Value */}
-      <div className="mt-2 flex items-baseline gap-2">
-        <span className={`text-[32px] md:text-[42px] font-bold tracking-tight leading-none ${s.valueText}`}>
+      <div className="flex items-baseline gap-2">
+        <span className={`text-[26px] md:text-[42px] font-bold tracking-tight leading-none ${s.valueText}`}>
           {value}
         </span>
         {valueSubLabel && (
@@ -122,10 +131,28 @@ const StatCard: FunctionComponent<StatCardProps> = ({
             </div>
           )}
           {badgeLabel && (
-            <span className={`text-sm font-medium ${s.footerText}`}>{badgeLabel}</span>
+            <span className={`text-[12px] md:text-sm font-medium ${s.footerText}`}>{badgeLabel}</span>
           )}
         </div>
       )}
+    </>
+  );
+
+  if (onAction) {
+    return (
+      <button
+        type="button"
+        onClick={onAction}
+        className={`${baseClassName} ${clickableClassName}`}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={baseClassName}>
+      {content}
     </div>
   );
 }

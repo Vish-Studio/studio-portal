@@ -23,7 +23,7 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="flex-1 flex flex-col gap-4 md:gap-6 py-10">
+      <div className="flex-1 flex flex-col gap-4 md:gap-6 py-10 pt-6">
 
         {/* Stats row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -72,16 +72,16 @@ const Dashboard = () => {
 
         {/* Projects + Documents overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-3">
             <ProjectsOverview projects={projects} members={members} limit={4} />
-          </div>
-          <div className="lg:col-span-1">
-            <DocumentOverview documents={documents} limit={5} />
           </div>
         </div>
 
         {/* Tasks overview */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="lg:col-span-1">
+            <DocumentOverview documents={documents} limit={5} />
+          </div>
           <div className="lg:col-span-2">
             <TasksOverview tasks={tasks} limit={5} />
           </div>

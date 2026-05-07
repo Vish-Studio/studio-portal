@@ -11,6 +11,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   assigneeIds?: string[];
+  clientAssigneeId?: string;
   dueDate?: string; // 'YYYY-MM-DD'
   createdAt: number;
   updatedAt: number;

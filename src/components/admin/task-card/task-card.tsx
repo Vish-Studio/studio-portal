@@ -8,6 +8,7 @@ import type { RowAction } from '../../common/table/table';
 import { TaskStatusBadge } from '../../common/status-badge/status-badge';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTeamStore } from '@/src/store/team';
+import { useClientsStore } from '@/src/store/clients';
 import type { Task, TaskPriority } from '@/src/data/tasks';
 
 // ─── Priority dot colour ──────────────────────────────────────────────────────
@@ -33,8 +34,10 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
 }) => {
   const { projects } = useProjectsStore();
   const { members } = useTeamStore();
+  const { clients } = useClientsStore();
 
   const project = projects.find(p => p.id === task.projectId);
+  const clientAssignee = clients.find(client => client.id === task.clientAssigneeId);
   const assignees = members
     .filter(m => task.assigneeIds?.includes(m.id))
     .map(m => ({ name: m.name, id: m.id }));
@@ -87,6 +90,12 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
       <div className="px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
         <div className="flex items-center gap-2 min-w-0">
           {showStatus && <TaskStatusBadge status={task.status} />}
+          {clientAssignee && (
+            <span className="hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 sm:flex">
+              <MaterialIcon name="person" size={11} />
+              Client
+            </span>
+          )}
           {assignees.length > 0 && (
             <AvatarStack members={assignees} size="xs" limit={3} />
           )}

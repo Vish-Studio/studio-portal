@@ -6,6 +6,7 @@ import FormSidebar, { FormSidebarFooter } from '../components/common/form-sideba
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Select from '../components/common/select/select';
 import Option from '../components/common/select/option';
+import Checkbox from '../components/common/checkbox/checkbox';
 import ConfirmDialog from '../components/common/confirm-dialog/confirm-dialog';
 import Fab from '../components/common/button-fab/button-fab';
 import TaskCard from '../components/admin/task-card/task-card';
@@ -15,6 +16,7 @@ import MemberPicker from '../components/admin/pickers/member-picker/member-picke
 import { useTasksStore } from '../store/tasks';
 import { useProjectsStore } from '../store/projects';
 import { useTeamStore } from '../store/team';
+import { useClientsStore } from '../store/clients';
 import { useUIStore } from '../store/ui';
 import type { Task, TaskStatus, TaskPriority } from '../data/tasks';
 
@@ -62,19 +64,25 @@ const Tasks = () => {
   const { tasks, addTask, updateTask, removeTask } = useTasksStore();
   const { projects } = useProjectsStore();
   const { members } = useTeamStore();
+  const { clients } = useClientsStore();
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [assignToClient, setAssignToClient] = useState(false);
   const [confirmTask, setConfirmTask] = useState<Task | null>(null);
   const [detailTask, setDetailTask] = useState<Task | null>(null);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } =
     useForm<TaskFormValues>({
       defaultValues: { title: '', description: '', projectId: '', status: 'todo', priority: 'medium', dueDate: '' },
     });
+
+  const selectedProjectId = watch('projectId');
+  const selectedProject = projects.find(project => project.id === selectedProjectId);
+  const selectedClient = clients.find(client => client.id === selectedProject?.clientId);
 
   // ── Counts per status ──
   const counts = useMemo(() => ({
@@ -107,6 +115,7 @@ const Tasks = () => {
       priority: 'medium', dueDate: '',
     });
     setSelectedMemberIds([]);
+    setAssignToClient(false);
     setSidebarOpen(true);
   };
 
@@ -121,6 +130,7 @@ const Tasks = () => {
       dueDate: task.dueDate ?? '',
     });
     setSelectedMemberIds(task.assigneeIds ?? []);
+    setAssignToClient(Boolean(task.clientAssigneeId));
     setSidebarOpen(true);
   };
 
@@ -133,6 +143,7 @@ const Tasks = () => {
       priority: data.priority,
       dueDate: data.dueDate || undefined,
       assigneeIds: selectedMemberIds.length ? selectedMemberIds : undefined,
+      clientAssigneeId: assignToClient ? selectedProject?.clientId : undefined,
       updatedAt: Date.now(),
     };
 
@@ -366,6 +377,21 @@ const Tasks = () => {
                     prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id],
                   )
                 }
+              />
+            </FormField>
+
+            <FormField label="Client Task">
+              <Checkbox
+                checked={assignToClient}
+                disabled={!selectedClient}
+                onChange={event => setAssignToClient(event.target.checked)}
+                label={selectedClient ? `Assign to ${selectedClient.displayName}` : 'Select a project first'}
+                description={
+                  selectedClient
+                    ? `This task will appear in ${selectedClient.displayName}'s client dashboard and task list.`
+                    : 'Client tasks are linked through the selected project.'
+                }
+                className="rounded-2xl border border-gray-100 bg-(--color-surface) p-4"
               />
             </FormField>
 

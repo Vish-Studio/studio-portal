@@ -26,8 +26,8 @@ const UserDashboard = () => {
   const myProjectIds = new Set(myProjects.map(p => p.id));
   const ongoingProjects = myProjects.filter(p => p.status === 'active');
 
-  // Tasks belonging to this client's projects
-  const myTasks = tasks.filter(t => myProjectIds.has(t.projectId));
+  // Tasks explicitly assigned to this client through their projects
+  const myTasks = tasks.filter(t => t.clientAssigneeId === CURRENT_CLIENT_ID && myProjectIds.has(t.projectId));
   const myOpenTasks = myTasks.filter(t => t.status !== 'completed');
 
   // Payment summary for this client's projects
@@ -114,8 +114,8 @@ const UserDashboard = () => {
                   {myProjects.map(project => {
                     const accent = getProjectAccent(project.service, project.package);
                     const progress = getPhaseProgress(project.phases);
-                    const projectTaskCount = tasks.filter(t => t.projectId === project.id).length;
-                    const openTaskCount = tasks.filter(t => t.projectId === project.id && t.status !== 'completed').length;
+                    const projectTaskCount = myTasks.filter(t => t.projectId === project.id).length;
+                    const openTaskCount = myTasks.filter(t => t.projectId === project.id && t.status !== 'completed').length;
 
                     return (
                       <div
