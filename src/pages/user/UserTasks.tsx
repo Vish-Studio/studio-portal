@@ -8,6 +8,8 @@ import Select from '@/src/components/common/select/select';
 import Option from '@/src/components/common/select/option';
 import ConfirmDialog from '@/src/components/common/confirm-dialog/confirm-dialog';
 import Fab from '@/src/components/common/button-fab/button-fab';
+import Button from '@/src/components/common/button/button';
+import DatePicker from '@/src/components/common/date-picker/date-picker';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import TaskCard from '@/src/components/admin/task-card/task-card';
 import TaskRow from '@/src/components/admin/task-card/task-row';
@@ -291,26 +293,27 @@ const UserTasks = () => {
             </div>
 
             <FormField label="Due Date" error={errors.dueDate?.message}>
-              <input type="date" {...register('dueDate')} className={inputCls(false)} />
+              <DatePicker {...register('dueDate')} hasError={!!errors.dueDate} />
             </FormField>
 
           </div>
 
           <FormSidebarFooter>
-            <button
+            <Button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              variant="secondary"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-(--color-ink) hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50"
+              loading={isSubmitting}
+              className="flex-1"
             >
               {editingTask ? 'Save Changes' : 'Add Task'}
-            </button>
+            </Button>
           </FormSidebarFooter>
         </form>
       </FormSidebar>

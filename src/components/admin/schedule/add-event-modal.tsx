@@ -1,13 +1,23 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { format, startOfDay } from 'date-fns';
-import { type ScheduleEvent, type EventType, ALL_EVENT_TYPES, EVENT_TYPE_CONFIG } from './event-types';
+import {
+  type ScheduleEvent,
+  type EventType,
+  type ScheduleCategory,
+  EVENT_TYPES_BY_CATEGORY,
+  EVENT_TYPE_CONFIG,
+  SCHEDULE_CATEGORY_CONFIG,
+  getEventCategory,
+} from './event-types';
 import MaterialIcon from '../../common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-sidebar';
 import Select from '../../common/select/select';
 import Option from '../../common/select/option';
 import Avatar from '../../common/avatar/avatar';
 import Button from '../../common/button/button';
+import Toggle from '../../common/toggle/toggle';
+import DatePicker from '../../common/date-picker/date-picker';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/store/clients';
 import { useTeamStore } from '@/src/store/team';
@@ -38,20 +48,22 @@ const fromDateInputValue = (value: string) => {
   return startOfDay(new Date(year, month - 1, day));
 };
 
-const projectTypes: EventType[] = [
-  'discovery',
-  'brief',
-  'revision',
-  'design-review',
-  'qa-test',
-  'launch',
+const scheduleCategories: ScheduleCategory[] = ['team', 'project', 'client'];
+const callLinkTypes: EventType[] = [
+  'team-weekly',
+  'team-project-brief',
+  'team-issues',
+  'team-client-feedback',
+  'client-requirements',
   'client-feedback',
+  'client-revisions',
+  'client-monthly',
+  'client-onboarding',
+  'client-issues',
+  'team-meeting',
+  'client-meeting',
   'phase-call',
 ];
-
-const clientTypes: EventType[] = [...projectTypes, 'client-meeting', 'onboarding'];
-const meetingTypes: EventType[] = ['team-meeting', 'client-meeting', 'phase-call'];
-const teamTypes: EventType[] = [...meetingTypes, 'admin-task'];
 
 interface AddEventModalProps {
   date: Date;
@@ -62,7 +74,11 @@ interface AddEventModalProps {
 
 export default function AddEventModal({ date, onAdd, onClose, initialEvent }: AddEventModalProps) {
   const [selectedDate, setSelectedDate] = useState(startOfDay(date));
-  const [selectedType, setSelectedType] = useState<EventType>(initialEvent?.type ?? 'brief');
+  const initialCategory = initialEvent?.category ?? (initialEvent ? getEventCategory(initialEvent.type) : 'project');
+  const [selectedCategory, setSelectedCategory] = useState<ScheduleCategory>(initialCategory);
+  const [selectedType, setSelectedType] = useState<EventType>(
+    initialEvent?.type ?? EVENT_TYPES_BY_CATEGORY[initialCategory][0],
+  );
   const [title, setTitle] = useState(initialEvent?.title ?? '');
   const [description, setDescription] = useState(initialEvent?.description ?? '');
   const [callLink, setCallLink] = useState(initialEvent?.callLink ?? '');
@@ -84,25 +100,35 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   const [linkedMemberIds, setLinkedMemberIds] = useState<string[]>(initialEvent?.memberIds ?? []);
 
   const config = EVENT_TYPE_CONFIG[selectedType];
+  const categoryConfig = SCHEDULE_CATEGORY_CONFIG[selectedCategory];
+  const availableTypes = EVENT_TYPES_BY_CATEGORY[selectedCategory];
   const linkedProject = projects.find(project => project.id === linkedProjectId);
-  const showProject = projectTypes.includes(selectedType);
-  const showClient = clientTypes.includes(selectedType);
-  const showTeam = teamTypes.includes(selectedType);
-  const showCallLink = meetingTypes.includes(selectedType);
+  const showProject = selectedCategory === 'project';
+  const showClient = selectedCategory === 'client' || selectedCategory === 'project';
+  const showTeam = selectedCategory === 'team';
+  const showCallLink = callLinkTypes.includes(selectedType);
 
-  const handleTypeChange = (type: EventType) => {
-    setSelectedType(type);
-    if (!projectTypes.includes(type)) {
+  const handleCategoryChange = (category: ScheduleCategory) => {
+    setSelectedCategory(category);
+    const nextType = EVENT_TYPES_BY_CATEGORY[category][0];
+    setSelectedType(nextType);
+    setCallLink(callLinkTypes.includes(nextType) ? callLink : '');
+
+    if (category !== 'project') {
       setLinkedProjectId('');
       setLinkedPhaseId('');
     }
-    if (!clientTypes.includes(type)) {
+    if (category === 'team') {
       setLinkedClientId('');
     }
-    if (!teamTypes.includes(type)) {
+    if (category !== 'team') {
       setLinkedMemberIds([]);
     }
-    if (!meetingTypes.includes(type)) {
+  };
+
+  const handleTypeChange = (type: EventType) => {
+    setSelectedType(type);
+    if (!callLinkTypes.includes(type)) {
       setCallLink('');
     }
   };
@@ -137,6 +163,7 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
     onAdd(
       {
         id: initialEvent?.id ?? uuidv4(),
+        category: selectedCategory,
         type: selectedType,
         title: title.trim(),
         time,
@@ -165,12 +192,12 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
           <div className="mb-5 rounded-[18px] bg-(--color-surface-alt) p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-(--color-ink)">
-                <MaterialIcon name={config.icon} size={19} fill />
+                <MaterialIcon name={categoryConfig.icon} size={19} fill />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-(--color-ink)">{config.label}</p>
+                <p className="text-sm font-bold text-(--color-ink)">{categoryConfig.label} schedule</p>
                 <p className="text-xs font-semibold text-gray-400">
-                  {format(selectedDate, 'EEE, d MMM yyyy')}
+                  {config.label} · {format(selectedDate, 'EEE, d MMM yyyy')}
                 </p>
               </div>
             </div>
@@ -192,11 +219,27 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
             <div>
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</p>
               <Select
+                value={selectedCategory}
+                onChange={event => handleCategoryChange(event.target.value as ScheduleCategory)}
+                className="rounded-2xl bg-(--color-surface) font-semibold"
+              >
+                {scheduleCategories.map(category => (
+                  <Option key={category} value={category}>
+                    {SCHEDULE_CATEGORY_CONFIG[category].label}
+                  </Option>
+                ))}
+              </Select>
+              <p className="mt-2 text-xs font-medium leading-5 text-gray-400">{categoryConfig.description}</p>
+            </div>
+
+            <div>
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Schedule type</p>
+              <Select
                 value={selectedType}
                 onChange={event => handleTypeChange(event.target.value as EventType)}
                 className="rounded-2xl bg-(--color-surface) font-semibold"
               >
-                {ALL_EVENT_TYPES.map(type => (
+                {availableTypes.map(type => (
                   <Option key={type} value={type}>
                     {EVENT_TYPE_CONFIG[type].label}
                   </Option>
@@ -207,25 +250,15 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
             <div>
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Date and time</p>
               <div className="rounded-2xl bg-(--color-surface) p-3">
-                <input
-                  type="date"
+                <DatePicker
                   value={toDateInputValue(selectedDate)}
                   onChange={event => setSelectedDate(fromDateInputValue(event.target.value))}
-                  className="w-full rounded-xl border border-transparent bg-white px-3 py-2.5 text-sm font-semibold text-gray-800 outline-none focus:border-gray-200 focus:ring-4 focus:ring-gray-100"
+                  className="rounded-xl border-transparent bg-white"
                 />
 
                 <div className="mt-3 flex items-center justify-between">
                   <span className="text-xs font-semibold text-gray-500">All day</span>
-                  <button
-                    type="button"
-                    onClick={() => setAllDay(value => !value)}
-                    className={`relative h-5 w-9 rounded-full transition-colors ${allDay ? 'bg-(--color-ink)' : 'bg-gray-300'}`}
-                    aria-pressed={allDay}
-                  >
-                    <span
-                      className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-transform ${allDay ? 'translate-x-4' : 'translate-x-0.5'}`}
-                    />
-                  </button>
+                  <Toggle checked={allDay} onChange={setAllDay} />
                 </div>
 
                 {!allDay && (

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import type { TemplateBlock, ServiceRow, PaymentRow, PartyInfo } from '../../../data/template-blocks';
 import { newId } from '../../../data/template-blocks';
+import Checkbox from '../../common/checkbox/checkbox';
 
 // ─── Shared editor primitives ─────────────────────────────────────────────────
 
@@ -178,15 +179,21 @@ export default function BlockEditorPanel({ block, onChange }: Props) {
     const updSvc = (rows: ServiceRow[]) => upd({ services: rows });
     return (
       <div className="space-y-4">
-        <div className="flex items-center gap-6">
-          <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer">
-            <input type="checkbox" checked={!!block.showQty} onChange={e => upd({ showQty: e.target.checked })} className="rounded" />
-            Show Qty column
-          </label>
-          <label className="flex items-center gap-2 text-xs font-semibold text-gray-600 cursor-pointer">
-            <input type="checkbox" checked={!!block.showDiscount} onChange={e => upd({ showDiscount: e.target.checked })} className="rounded" />
-            Show Discount
-          </label>
+        <div className="flex flex-wrap items-center gap-5">
+          <Checkbox
+            checked={!!block.showQty}
+            onChange={e => upd({ showQty: e.target.checked })}
+            label="Show Qty column"
+            className="items-center gap-2"
+            labelClassName="text-xs font-semibold text-gray-600"
+          />
+          <Checkbox
+            checked={!!block.showDiscount}
+            onChange={e => upd({ showDiscount: e.target.checked })}
+            label="Show Discount"
+            className="items-center gap-2"
+            labelClassName="text-xs font-semibold text-gray-600"
+          />
         </div>
 
         {/* Header */}

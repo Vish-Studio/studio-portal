@@ -11,6 +11,7 @@ import FormField, { inputCls } from '../../components/common/form-field/form-fie
 import Select from '../../components/common/select/select';
 import Option from '../../components/common/select/option';
 import Fab from '../../components/common/button-fab/button-fab';
+import Button from '../../components/common/button/button';
 import { ClientStatusBadge } from '../../components/common/status-badge/status-badge';
 import { useClientsStore } from '../../store/clients';
 import { useUIStore } from '../../store/ui';
@@ -277,20 +278,21 @@ export default function Clients() {
           </div>
 
           <FormSidebarFooter>
-            <button
+            <Button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              variant="secondary"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-black hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50"
+              loading={isSubmitting}
+              className="flex-1"
             >
               {editingClient ? 'Save Changes' : 'Add Client'}
-            </button>
+            </Button>
           </FormSidebarFooter>
         </form>
       </FormSidebar>

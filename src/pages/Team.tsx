@@ -8,6 +8,7 @@ import TableTab, { type TabItem } from '../components/common/table-tab/table-tab
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Fab from '../components/common/button-fab/button-fab';
+import Button from '../components/common/button/button';
 import { useTeamStore } from '../store/team';
 import { useUIStore } from '../store/ui';
 import { getMemberColors } from '../data/team';
@@ -292,14 +293,12 @@ export default function Team() {
             </FormField>
           </div>
           <FormSidebarFooter>
-            <button type="button" onClick={() => setSidebarOpen(false)}
-              className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+            <Button type="button" onClick={() => setSidebarOpen(false)} variant="secondary" className="flex-1">
               Cancel
-            </button>
-            <button type="submit" disabled={isSubmitting}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-black hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50">
+            </Button>
+            <Button type="submit" loading={isSubmitting} className="flex-1">
               {editingMember ? 'Save' : 'Add Member'}
-            </button>
+            </Button>
           </FormSidebarFooter>
         </form>
       </FormSidebar>

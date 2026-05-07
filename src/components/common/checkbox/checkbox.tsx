@@ -5,9 +5,19 @@ import { cn } from '@/src/lib/utils';
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
   label?: string;
   description?: ReactNode;
+  labelClassName?: string;
+  descriptionClassName?: string;
 }
 
-export default function Checkbox({ label, description, checked, className = '', ...props }: CheckboxProps) {
+export default function Checkbox({
+  label,
+  description,
+  checked,
+  className = '',
+  labelClassName = '',
+  descriptionClassName = '',
+  ...props
+}: CheckboxProps) {
   return (
     <label className={cn('flex cursor-pointer items-start gap-3', props.disabled && 'cursor-not-allowed opacity-50', className)}>
       <span className="relative mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center">
@@ -23,8 +33,12 @@ export default function Checkbox({ label, description, checked, className = '', 
       </span>
       {(label || description) && (
         <span className="min-w-0">
-          {label && <span className="block text-sm font-bold text-(--color-ink)">{label}</span>}
-          {description && <span className="mt-1 block text-xs font-medium leading-5 text-gray-400">{description}</span>}
+          {label && <span className={cn('block text-sm font-bold text-(--color-ink)', labelClassName)}>{label}</span>}
+          {description && (
+            <span className={cn('mt-1 block text-xs font-medium leading-5 text-gray-400', descriptionClassName)}>
+              {description}
+            </span>
+          )}
         </span>
       )}
     </label>

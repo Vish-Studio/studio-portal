@@ -9,9 +9,10 @@ import {
   CreditCard,
   Eye,
   EyeOff,
-  RefreshCw,
 } from 'lucide-react';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
+import Button from '../components/common/button/button';
+import Checkbox from '../components/common/checkbox/checkbox';
 
 interface SignInFormValues {
   email: string;
@@ -143,32 +144,24 @@ const SignIn = () => {
               </FormField>
 
               <div className="flex items-center justify-between gap-3">
-                <label className="flex items-center gap-2 text-xs font-semibold text-gray-400">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300 text-black focus:ring-gray-200"
-                  />
-                  Remember me
-                </label>
+                <Checkbox
+                  label="Remember me"
+                  className="items-center gap-2"
+                  labelClassName="text-xs font-semibold text-gray-400"
+                />
                 <button type="button" className="text-xs font-bold text-gray-500 transition-colors hover:text-gray-900">
                   Forgot password?
                 </button>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                disabled={isSubmitting}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-black px-6 py-3.5 text-sm font-bold tracking-tight text-white transition-all hover:bg-gray-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                loading={isSubmitting}
+                iconRight={!isSubmitting ? <ArrowRight size={15} /> : undefined}
+                className="mt-1 h-12 w-full font-bold tracking-tight active:scale-[0.98]"
               >
-                {isSubmitting ? (
-                  <RefreshCw size={15} className="animate-spin" />
-                ) : (
-                  <>
-                    Sign in
-                    <ArrowRight size={15} />
-                  </>
-                )}
-              </button>
+                Sign in
+              </Button>
             </form>
 
             <p className="mt-5 text-center text-[12px] text-gray-400">

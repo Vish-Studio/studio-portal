@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, CheckCircle, TrendingUp, Layers, Pencil, Trash2 } from 'lucide-react';
 import Layout from '../components/common/layout/layout';
 import Fab from '../components/common/button-fab/button-fab';
+import Button from '../components/common/button/button';
 import StatCard from '../components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import MaterialIcon from '../components/common/material-icon/material-icon';
@@ -236,10 +237,10 @@ const Projects = () => {
             </FormField>
           </div>
           <FormSidebarFooter>
-            <button type="button" onClick={() => setSidebarOpen(false)} className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">Cancel</button>
-            <button type="submit" disabled={isSubmitting} className="flex-1 py-2.5 text-sm font-semibold text-white bg-(--color-ink) hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50">
+            <Button type="button" onClick={() => setSidebarOpen(false)} variant="secondary" className="flex-1">Cancel</Button>
+            <Button type="submit" loading={isSubmitting} className="flex-1">
               {editingProject ? 'Save Changes' : 'Add Project'}
-            </button>
+            </Button>
           </FormSidebarFooter>
         </form>
       </FormSidebar>

@@ -9,6 +9,8 @@ import Option from '../components/common/select/option';
 import Checkbox from '../components/common/checkbox/checkbox';
 import ConfirmDialog from '../components/common/confirm-dialog/confirm-dialog';
 import Fab from '../components/common/button-fab/button-fab';
+import Button from '../components/common/button/button';
+import DatePicker from '../components/common/date-picker/date-picker';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import TaskCard from '../components/admin/task-card/task-card';
 import TaskRow from '../components/admin/task-card/task-row';
@@ -320,11 +322,7 @@ const Tasks = () => {
             </div>
 
             <FormField label="Due Date" error={errors.dueDate?.message}>
-              <input
-                type="date"
-                {...register('dueDate')}
-                className={inputCls(false)}
-              />
+              <DatePicker {...register('dueDate')} hasError={!!errors.dueDate} />
             </FormField>
 
             <FormField label="Assign Members">
@@ -357,20 +355,21 @@ const Tasks = () => {
           </div>
 
           <FormSidebarFooter>
-            <button
+            <Button
               type="button"
               onClick={() => setSidebarOpen(false)}
-              className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+              variant="secondary"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              disabled={isSubmitting}
-              className="flex-1 py-2.5 text-sm font-semibold text-white bg-(--color-ink) hover:bg-gray-800 rounded-xl transition-colors disabled:opacity-50"
+              loading={isSubmitting}
+              className="flex-1"
             >
               {editingTask ? 'Save Changes' : 'Add Task'}
-            </button>
+            </Button>
           </FormSidebarFooter>
         </form>
       </FormSidebar>
