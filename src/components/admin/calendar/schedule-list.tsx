@@ -3,7 +3,7 @@ import { CalendarDays, Plus } from 'lucide-react';
 import { useCalendarStore } from '@/src/store/calendar';
 import Button from '../../common/button/button';
 import MaterialIcon from '../../common/material-icon/material-icon';
-import AddEventModal from '../schedule/add-event-modal';
+import ScheduleSidebarForm from '../schedule/schedule-sidebar-form';
 import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
@@ -159,7 +159,7 @@ export default function ScheduleList({ date }: ScheduleListProps) {
       </section>
 
       {showEventForm && (
-        <AddEventModal
+        <ScheduleSidebarForm
           date={date}
           initialEvent={editingEvent ?? undefined}
           onAdd={handleSaveEvent}

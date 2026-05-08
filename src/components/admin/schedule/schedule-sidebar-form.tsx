@@ -21,6 +21,7 @@ import DatePicker from '../../common/date-picker/date-picker';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/store/clients';
 import { useTeamStore } from '@/src/store/team';
+import { cn } from '@/src/lib/utils';
 
 const toDisplayTime = (time: string) => {
   if (!time) return '';
@@ -49,30 +50,15 @@ const fromDateInputValue = (value: string) => {
 };
 
 const scheduleCategories: ScheduleCategory[] = ['team', 'project', 'client'];
-const callLinkTypes: EventType[] = [
-  'team-weekly',
-  'team-project-brief',
-  'team-issues',
-  'team-client-feedback',
-  'client-requirements',
-  'client-feedback',
-  'client-revisions',
-  'client-monthly',
-  'client-onboarding',
-  'client-issues',
-  'team-meeting',
-  'client-meeting',
-  'phase-call',
-];
 
-interface AddEventModalProps {
+interface ScheduleSidebarFormProps {
   date: Date;
   onAdd: (event: ScheduleEvent, date: Date) => void;
   onClose: () => void;
   initialEvent?: ScheduleEvent;
 }
 
-export default function AddEventModal({ date, onAdd, onClose, initialEvent }: AddEventModalProps) {
+export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent }: ScheduleSidebarFormProps) {
   const [selectedDate, setSelectedDate] = useState(startOfDay(date));
   const initialCategory = initialEvent?.category ?? (initialEvent ? getEventCategory(initialEvent.type) : 'project');
   const [selectedCategory, setSelectedCategory] = useState<ScheduleCategory>(initialCategory);
@@ -106,13 +92,11 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
   const showProject = selectedCategory === 'project';
   const showClient = selectedCategory === 'client' || selectedCategory === 'project';
   const showTeam = selectedCategory === 'team';
-  const showCallLink = callLinkTypes.includes(selectedType);
 
   const handleCategoryChange = (category: ScheduleCategory) => {
     setSelectedCategory(category);
     const nextType = EVENT_TYPES_BY_CATEGORY[category][0];
     setSelectedType(nextType);
-    setCallLink(callLinkTypes.includes(nextType) ? callLink : '');
 
     if (category !== 'project') {
       setLinkedProjectId('');
@@ -128,9 +112,6 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
 
   const handleTypeChange = (type: EventType) => {
     setSelectedType(type);
-    if (!callLinkTypes.includes(type)) {
-      setCallLink('');
-    }
   };
 
   const handleProjectChange = (projectId: string) => {
@@ -188,56 +169,70 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
       width="md"
     >
       <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          <div className="mb-5 rounded-[18px] bg-(--color-surface-alt) p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-(--color-ink)">
-                <MaterialIcon name={categoryConfig.icon} size={19} fill />
+        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50/90 to-white px-6 py-5">
+          <div className="mb-5 overflow-hidden rounded-[22px] bg-(--color-ink) text-white">
+            <div className="flex items-start gap-3 p-5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+                <MaterialIcon name={categoryConfig.icon} size={20} fill />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold text-(--color-ink)">{categoryConfig.label} schedule</p>
-                <p className="text-xs font-semibold text-gray-400">
-                  {config.label} · {format(selectedDate, 'EEE, d MMM yyyy')}
+                <p className="text-[11px] font-bold uppercase tracking-widest text-white/45">{categoryConfig.label} schedule</p>
+                <p className="mt-1 text-lg font-bold leading-tight">{config.label}</p>
+                <p className="mt-1 text-xs font-semibold text-white/50">
+                  {format(selectedDate, 'EEEE, d MMM yyyy')} · {allDay ? 'All day' : startTime ? toDisplayTime(startTime) : 'No time set'}
                 </p>
               </div>
             </div>
+            <div className="grid grid-cols-3 border-t border-white/10">
+              {scheduleCategories.map(category => {
+                const categoryItem = SCHEDULE_CATEGORY_CONFIG[category];
+                const active = selectedCategory === category;
+
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => handleCategoryChange(category)}
+                    className={cn(
+                      'flex items-center justify-center gap-2 px-3 py-3 text-xs font-bold transition-colors',
+                      active ? 'bg-(--color-accent-lime) text-(--color-ink)' : 'text-white/55 hover:bg-white/5 hover:text-white',
+                    )}
+                  >
+                    <MaterialIcon name={categoryItem.icon} size={15} fill={active} />
+                    {categoryItem.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="space-y-5">
-            <div>
+          <div className="space-y-4">
+            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Title</p>
               <input
                 type="text"
                 value={title}
                 onChange={event => setTitle(event.target.value)}
                 placeholder={`e.g. ${config.label} with Acme Corp`}
-                autoFocus
-                className="w-full rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100"
+                className="w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-300 focus:bg-white focus:ring-4 focus:ring-gray-100"
               />
             </div>
 
-            <div>
-              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</p>
-              <Select
-                value={selectedCategory}
-                onChange={event => handleCategoryChange(event.target.value as ScheduleCategory)}
-                className="rounded-2xl bg-(--color-surface) font-semibold"
-              >
-                {scheduleCategories.map(category => (
-                  <Option key={category} value={category}>
-                    {SCHEDULE_CATEGORY_CONFIG[category].label}
-                  </Option>
-                ))}
-              </Select>
-              <p className="mt-2 text-xs font-medium leading-5 text-gray-400">{categoryConfig.description}</p>
-            </div>
-
-            <div>
+            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+              <div className="mb-3 flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-(--color-surface-alt) text-(--color-ink)">
+                  <MaterialIcon name={categoryConfig.icon} size={17} fill />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-(--color-ink)">{categoryConfig.label}</p>
+                  <p className="mt-0.5 text-xs font-medium leading-5 text-gray-400">{categoryConfig.description}</p>
+                </div>
+              </div>
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Schedule type</p>
               <Select
                 value={selectedType}
                 onChange={event => handleTypeChange(event.target.value as EventType)}
-                className="rounded-2xl bg-(--color-surface) font-semibold"
+                className="rounded-2xl bg-gray-50 font-semibold"
               >
                 {availableTypes.map(type => (
                   <Option key={type} value={type}>
@@ -247,9 +242,9 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
               </Select>
             </div>
 
-            <div>
+            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Date and time</p>
-              <div className="rounded-2xl bg-(--color-surface) p-3">
+              <div className="rounded-2xl bg-gray-50 p-3">
                 <DatePicker
                   value={toDateInputValue(selectedDate)}
                   onChange={event => setSelectedDate(fromDateInputValue(event.target.value))}
@@ -280,23 +275,27 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
               </div>
             </div>
 
-            {showCallLink && (
-              <div>
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Call link</p>
+            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Call link</p>
+                <span className="rounded-full bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-400">Optional</span>
+              </div>
+              <div className="relative">
+                <MaterialIcon name="link" size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input
                   type="url"
                   value={callLink}
                   onChange={event => setCallLink(event.target.value)}
                   placeholder="https://meet.google.com/..."
-                  className="w-full rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100"
+                  className="w-full rounded-2xl border border-gray-100 bg-gray-50 py-3 pl-11 pr-4 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-300 focus:bg-white focus:ring-4 focus:ring-gray-100"
                 />
               </div>
-            )}
+            </div>
 
             {(showProject || showClient || showTeam) && (
-              <div>
+              <div className="rounded-[20px] border border-gray-100 bg-white p-4">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Assignments</p>
-                <div className="space-y-3 rounded-2xl bg-(--color-surface) p-3">
+                <div className="space-y-3 rounded-2xl bg-gray-50 p-3">
                   {showProject && (
                     <>
                       <Select
@@ -367,14 +366,14 @@ export default function AddEventModal({ date, onAdd, onClose, initialEvent }: Ad
               </div>
             )}
 
-            <div>
+            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</p>
               <textarea
                 value={description}
                 onChange={event => setDescription(event.target.value)}
                 rows={3}
                 placeholder="Add agenda, notes, or preparation details..."
-                className="w-full resize-none rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100"
+                className="w-full resize-none rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-300 focus:bg-white focus:ring-4 focus:ring-gray-100"
               />
             </div>
           </div>

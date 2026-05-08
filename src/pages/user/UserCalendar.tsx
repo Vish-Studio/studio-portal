@@ -4,7 +4,7 @@ import CardContent from '@/src/components/common/card-content/card-content';
 import MonthYearNav from '@/src/components/admin/month-year-nav/month-year-nav';
 import MaterialIcon from '@/src/components/common/material-icon/material-icon';
 import ButtonIcon from '@/src/components/common/button-icon/button-icon';
-import AddEventModal from '@/src/components/admin/schedule/add-event-modal';
+import ScheduleSidebarForm from '@/src/components/admin/schedule/schedule-sidebar-form';
 import { EVENT_TYPE_CONFIG } from '@/src/components/admin/schedule/event-types';
 import type { EventType } from '@/src/components/admin/schedule/event-types';
 import { useCalendarStore } from '@/src/store/calendar';
@@ -173,9 +173,9 @@ const UserCalendar = () => {
 
       </div>
 
-      {/* Add event modal — events go to shared store and are visible in admin */}
+      {/* Add event sidebar — events go to shared store and are visible in admin */}
       {addModalOpen && (
-        <AddEventModal
+        <ScheduleSidebarForm
           date={selectedDate}
           onAdd={(event, date) => { addEvent(event, date); }}
           onClose={() => setAddModalOpen(false)}

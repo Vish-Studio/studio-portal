@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import AddEventModal from '../add-event-modal';
+import ScheduleSidebarForm from '../schedule-sidebar-form';
 
 const meta = {
-  title: 'Admin/Schedule/AddEventModal',
-  component: AddEventModal,
+  title: 'Admin/Schedule/ScheduleSidebarForm',
+  component: ScheduleSidebarForm,
   tags: ['autodocs'],
   parameters: { layout: 'fullscreen' },
-} satisfies Meta<typeof AddEventModal>;
+} satisfies Meta<typeof ScheduleSidebarForm>;
 
 export default meta;
 
@@ -23,7 +23,7 @@ export const NewEvent: StoryObj = {
           Add Event
         </button>
         {open && (
-          <AddEventModal
+          <ScheduleSidebarForm
             date={new Date()}
             onAdd={(event, date) => { console.log('Added', event, date); setOpen(false); }}
             onClose={() => setOpen(false)}
@@ -46,7 +46,7 @@ export const EditEvent: StoryObj = {
           Edit Event
         </button>
         {open && (
-          <AddEventModal
+          <ScheduleSidebarForm
             date={new Date()}
             initialEvent={{
               id: 'ev1',

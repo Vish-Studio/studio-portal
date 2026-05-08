@@ -14,9 +14,9 @@ export interface FormSidebarProps {
 }
 
 const WIDTH: Record<SidebarWidth, string> = {
-  sm: 'w-3/4 sm:max-w-[300px]',
-  md: 'w-3/4 sm:max-w-[460px]',
-  lg: 'w-3/4 sm:max-w-[560px]',
+  sm: 'w-full sm:max-w-[300px]',
+  md: 'w-full sm:max-w-[460px]',
+  lg: 'w-full sm:max-w-[560px]',
 };
 
 /**
