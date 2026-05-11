@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Team from './pages/Team';
 import Dashboard from './pages/admin/Dashboard';
 import Payments from './pages/admin/Payments';
+import Chat from './pages/admin/Chat';
 import ProjectDetail from './pages/admin/ProjectDetail';
 import TemplateEditor from './pages/admin/TemplateEditor';
 import SignIn from './pages/SignIn';
@@ -26,6 +27,7 @@ import UserCalendar from './pages/user/UserCalendar';
 import UserTasks from './pages/user/UserTasks';
 import UserPayments from './pages/user/UserPayments';
 import UserDocuments from './pages/user/UserDocuments';
+import UserChat from './pages/user/UserChat';
 import UserSettings from './pages/user/UserSettings';
 
 export default function App() {
@@ -42,6 +44,7 @@ export default function App() {
         <Route path="/user/tasks" element={<UserTasks />} />
         <Route path="/user/payments" element={<UserPayments />} />
         <Route path="/user/documents" element={<UserDocuments />} />
+        <Route path="/user/chat" element={<UserChat />} />
         <Route path="/user/settings" element={<UserSettings />} />
 
         {/* Admin routes */}
@@ -51,6 +54,7 @@ export default function App() {
         <Route path="/admin/team" element={<Team />} />
         <Route path="/admin/expenses" element={<Expenses />} />
         <Route path="/admin/payments" element={<Payments />} />
+        <Route path="/admin/chat" element={<Chat />} />
         <Route path="/admin/projects" element={<Projects />} />
         <Route path="/admin/projects/:id" element={<ProjectDetail />} />
         <Route path="/admin/projects/:projectId/templates/:assignmentId" element={<TemplateEditor />} />

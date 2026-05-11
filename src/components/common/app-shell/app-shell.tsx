@@ -6,6 +6,7 @@ interface AppShellProps {
   children: React.ReactNode;
   title?: string;
   fullHeight?: boolean;
+  fixedFromLarge?: boolean;
   hideSearch?: boolean;
   topbarActions?: React.ReactNode;
   sidebar: (props: {
@@ -22,6 +23,7 @@ export default function AppShell({
   children,
   title,
   fullHeight,
+  fixedFromLarge,
   hideSearch,
   topbarActions,
   sidebar,
@@ -60,7 +62,11 @@ export default function AppShell({
           />
         </div>
 
-        {fullHeight ? (
+        {fixedFromLarge ? (
+          <div className={`flex-1 overflow-y-auto lg:overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pb-10 lg:pb-0 pt-0 ${contentClassName}`}>
+            {children}
+          </div>
+        ) : fullHeight ? (
           <div className={`flex-1 overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pt-0 ${contentClassName}`}>
             {children}
           </div>

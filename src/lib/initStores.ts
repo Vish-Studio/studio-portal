@@ -20,6 +20,8 @@ import { useClientsStore }   from '../store/clients';
 import { useTeamStore }      from '../store/team';
 import { useDocumentsStore } from '../store/documents';
 import { useAdminStore }     from '../store/admin';
+import { useChatStore }      from '../store/chat';
+import { DEMO_CHAT_CONVERSATIONS } from '../data/chat';
 
 export function initStores(): void {
   useProjectsStore.getState().setProjects(DEMO_PROJECTS);
@@ -31,4 +33,5 @@ export function initStores(): void {
   useAdminStore.getState().setStats(DEMO_STATS);
   useAdminStore.getState().setRecentClients(DEMO_RECENT_CLIENTS);
   useAdminStore.getState().setExpenses(DEMO_EXPENSES);
+  useChatStore.getState().setConversations(DEMO_CHAT_CONVERSATIONS);
 }

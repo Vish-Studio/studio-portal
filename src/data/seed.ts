@@ -36,6 +36,20 @@ export const DEMO_CLIENTS: Client[] = [
   { id: 'c4', displayName: 'Tony Nguyen',    companyName: 'Stark Ind.',   email: 'tony@stark.com',    phone: '+1 (555) 876-0012', role: 'client', status: 'lost',     createdAt: createdAt(60) },
   { id: 'c5', displayName: 'Elena Vasquez',  companyName: 'Umbrella',     email: 'elena@umbrella.com',phone: '+1 (555) 437-5519', role: 'client', status: 'active',   createdAt: createdAt(2)  },
   { id: 'c6', displayName: 'Marcus Webb',    companyName: 'Weyland Co',   email: 'm.webb@weyland.io', phone: '+44 20 7946 0321',  role: 'client', status: 'inactive', createdAt: createdAt(45) },
+  { id: 'c7', displayName: 'Nora Kim',       companyName: 'Northstar',    email: 'nora@northstar.io', phone: '+1 (555) 237-7710', role: 'client', status: 'active',   createdAt: createdAt(7) },
+  { id: 'c8', displayName: 'Owen Brooks',    companyName: 'BluePeak',     email: 'owen@bluepeak.co',  phone: '+1 (555) 991-2044', role: 'client', status: 'active',   createdAt: createdAt(12) },
+  { id: 'c9', displayName: 'Maya Chen',      companyName: 'Luma Labs',    email: 'maya@lumalabs.ai',  phone: '+1 (555) 605-1188', role: 'client', status: 'active',   createdAt: createdAt(14) },
+  { id: 'c10', displayName: 'Leo Martin',    companyName: 'ForgeWorks',   email: 'leo@forge.works',   phone: '+44 20 1111 4200',  role: 'client', status: 'inactive', createdAt: createdAt(20) },
+  { id: 'c11', displayName: 'Ava Stone',     companyName: 'PixelKind',    email: 'ava@pixelkind.com', phone: '+1 (555) 308-7820', role: 'client', status: 'active',   createdAt: createdAt(21) },
+  { id: 'c12', displayName: 'Rafael Costa',  companyName: 'Orbit Media',  email: 'rafael@orbit.media',phone: '+55 11 90000-1020', role: 'client', status: 'active',   createdAt: createdAt(22) },
+  { id: 'c13', displayName: 'Ivy Morgan',    companyName: 'Signal Studio',email: 'ivy@signal.studio', phone: '+1 (555) 700-8891', role: 'client', status: 'inactive', createdAt: createdAt(24) },
+  { id: 'c14', displayName: 'Ethan Price',   companyName: 'BrightPath',   email: 'ethan@brightpath.io',phone: '+1 (555) 431-6618', role: 'client', status: 'active',  createdAt: createdAt(26) },
+  { id: 'c15', displayName: 'Sofia Rossi',   companyName: 'Casa Verde',   email: 'sofia@casaverde.it',phone: '+39 02 5555 1180',  role: 'client', status: 'active',   createdAt: createdAt(28) },
+  { id: 'c16', displayName: 'Daniel Park',   companyName: 'Helio Systems',email: 'daniel@helio.systems', phone: '+82 2 555 0144', role: 'client', status: 'lost',     createdAt: createdAt(32) },
+  { id: 'c17', displayName: 'Grace Miller',  companyName: 'Evergreen Co', email: 'grace@evergreen.co',phone: '+1 (555) 640-2187', role: 'client', status: 'active',   createdAt: createdAt(34) },
+  { id: 'c18', displayName: 'Amir Haddad',   companyName: 'Cedra Group',  email: 'amir@cedra.group', phone: '+971 50 555 2210',  role: 'client', status: 'active',   createdAt: createdAt(38) },
+  { id: 'c19', displayName: 'Hannah Reed',   companyName: 'Kindred',      email: 'hannah@kindred.co',phone: '+1 (555) 812-9055', role: 'client', status: 'inactive', createdAt: createdAt(42) },
+  { id: 'c20', displayName: 'Noah Singh',    companyName: 'Atlas Apps',   email: 'noah@atlasapps.io',phone: '+65 8123 9001',     role: 'client', status: 'active',   createdAt: createdAt(44) },
 ];
 
 export const DEMO_RECENT_CLIENTS = [

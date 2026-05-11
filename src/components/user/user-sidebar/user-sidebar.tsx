@@ -6,11 +6,13 @@ import {
   CheckSquare,
   CreditCard,
   FileText,
+  MessageCircle,
   Settings,
   PanelLeftClose,
   X,
 } from 'lucide-react';
 import { FunctionComponent } from 'react';
+import { useChatStore } from '@/src/store/chat';
 
 interface UserSidebarProps {
   isSidebarOpen: boolean;
@@ -20,14 +22,7 @@ interface UserSidebarProps {
   isMobile: boolean;
 }
 
-const navItems = [
-  { icon: <Home size={18} />, label: 'Dashboard', path: '/user' },
-  { icon: <Calendar size={18} />, label: 'Calendar', path: '/user/calendar' },
-  { icon: <Briefcase size={18} />, label: 'Projects', path: '/user/projects' },
-  { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/user/tasks' },
-  { icon: <CreditCard size={18} />, label: 'Payments', path: '/user/payments' },
-  { icon: <FileText size={18} />, label: 'Documents', path: '/user/documents' },
-];
+const CURRENT_CLIENT_ID = 'c1';
 
 const UserSidebar: FunctionComponent<UserSidebarProps> = ({
   isSidebarOpen,
@@ -38,6 +33,23 @@ const UserSidebar: FunctionComponent<UserSidebarProps> = ({
 }) => {
   const isExpanded = isMobile ? true : isSidebarOpen;
   const location = useLocation();
+  const conversation = useChatStore(state => state.conversations.find(
+    item => (item.type ?? 'client') === 'client' && (item.participantId ?? item.clientId) === CURRENT_CLIENT_ID,
+  ));
+  const unreadChatCount = conversation?.messages.filter(
+    message => message.senderRole === 'admin' && message.createdAt > (conversation.lastReadByClientAt ?? 0),
+  ).length ?? 0;
+
+  const navItems = [
+    { icon: <Home size={18} />, label: 'Dashboard', path: '/user' },
+    { icon: <Calendar size={18} />, label: 'Calendar', path: '/user/calendar' },
+    { icon: <Briefcase size={18} />, label: 'Projects', path: '/user/projects' },
+    { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/user/tasks' },
+    { icon: <CreditCard size={18} />, label: 'Payments', path: '/user/payments' },
+    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/user/chat', badge: unreadChatCount },
+    { icon: <FileText size={18} />, label: 'Documents', path: '/user/documents' },
+  ];
+
   const isRouteActive = (path: string) => {
     if (path === '/user') return location.pathname === '/user';
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -103,19 +115,41 @@ const UserSidebar: FunctionComponent<UserSidebarProps> = ({
           <div className="flex flex-col gap-2 text-(--color-sidebar-text)">
             {navItems.map((item) => {
               const isActive = isRouteActive(item.path);
+              const hasBadge = !!item.badge && item.badge > 0;
+              const showIconBadge = hasBadge && (!isExpanded || isMobile);
+              const showRowBadge = hasBadge && isExpanded && !isMobile;
               const btnClass = isActive
                 ? `bg-(--color-sidebar-active) text-white shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
                 : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;
 
               return isExpanded ? (
                 <Link to={item.path} key={item.label} className={btnClass}>
-                  <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
+                  <div className="relative shrink-0 flex items-center justify-center">
+                    {item.icon}
+                    {showIconBadge && (
+                      <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-[9px] font-bold text-(--color-ink)">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                  </div>
                   <span className="ml-4 font-medium text-[15px] whitespace-nowrap">{item.label}</span>
+                  {showRowBadge && (
+                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-[10px] font-bold text-(--color-ink)">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
                 </Link>
               ) : (
                 <div key={item.label} className="group relative flex justify-center">
                   <Link to={item.path} className={btnClass}>
-                    <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
+                    <div className="relative shrink-0 flex items-center justify-center">
+                      {item.icon}
+                      {showIconBadge && (
+                        <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-[9px] font-bold text-(--color-ink)">
+                          {item.badge > 9 ? '9+' : item.badge}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                   <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-100 shadow-md border border-gray-700/50">
                     {item.label}

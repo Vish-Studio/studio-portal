@@ -25,6 +25,28 @@ body {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  .chat-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink) transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-ink);
+    border-radius: 999px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--color-sidebar-active);
+  }
 }
 
 @theme inline {

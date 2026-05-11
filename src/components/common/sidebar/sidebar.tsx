@@ -12,9 +12,11 @@ import {
   X,
   Settings,
   UserCircle2,
-  CreditCard
+  CreditCard,
+  MessageCircle
 } from 'lucide-react';
 import { FunctionComponent } from 'react';
+import { useChatStore } from '@/src/store/chat';
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -33,6 +35,12 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
 }) => {
   const isExpanded = isMobile ? true : isSidebarOpen;
   const location = useLocation();
+  const conversations = useChatStore(state => state.conversations);
+  const unreadChatCount = conversations.reduce((total, conversation) => {
+    const lastReadAt = conversation.lastReadByAdminAt ?? 0;
+    return total + conversation.messages.filter(message => message.senderRole !== 'admin' && message.createdAt > lastReadAt).length;
+  }, 0);
+
   const isRouteActive = (path: string) => {
     const normalizedPath = path.endsWith('/') ? path.slice(0, -1) : path;
     if (normalizedPath === '/admin') return location.pathname === '/admin';
@@ -46,6 +54,7 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
     { icon: <Users size={18} />, label: "Clients", path: "/admin/clients" },
     { icon: <Briefcase size={18} />, label: "Projects", path: "/admin/projects" },
     { icon: <CreditCard size={18} />, label: "Payments", path: "/admin/payments" },
+    { icon: <MessageCircle size={18} />, label: "Chat", path: "/admin/chat", badge: unreadChatCount },
     { icon: <FileText size={18} />, label: "Documents", path: "/admin/documents" },
     { icon: <UserCircle2 size={18} />, label: "Team", path: "/admin/team" },
     { icon: <Receipt size={18} />, label: "Expenses", path: "/admin/expenses" },
@@ -113,19 +122,41 @@ const Sidebar: FunctionComponent<SidebarProps> = ({
           <div className="flex flex-col gap-2 text-(--color-sidebar-text)">
             {navItems.map((item) => {
               const isActive = isRouteActive(item.path);
+              const hasBadge = !!item.badge && item.badge > 0;
+              const showIconBadge = hasBadge && (!isExpanded || isMobile);
+              const showRowBadge = hasBadge && isExpanded && !isMobile;
               const btnClass = isActive
                 ? `bg-(--color-sidebar-active) text-white shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-[48px] h-[48px] rounded-[16px] justify-center'}`
                 : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-[48px] h-[48px] rounded-[16px] justify-center hover:bg-white/5'}`;
 
               return isExpanded ? (
                 <Link to={item.path} key={item.label} className={btnClass}>
-                  <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
+                  <div className="relative shrink-0 flex items-center justify-center">
+                    {item.icon}
+                    {showIconBadge && (
+                      <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-[9px] font-bold text-(--color-ink)">
+                        {item.badge > 9 ? '9+' : item.badge}
+                      </span>
+                    )}
+                  </div>
                   <span className="ml-4 font-medium text-[15px] whitespace-nowrap">{item.label}</span>
+                  {showRowBadge && (
+                    <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-[10px] font-bold text-(--color-ink)">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
                 </Link>
               ) : (
                 <div key={item.label} className="group relative flex justify-center">
                   <Link to={item.path} className={btnClass}>
-                    <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
+                    <div className="relative shrink-0 flex items-center justify-center">
+                      {item.icon}
+                      {showIconBadge && (
+                        <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-[9px] font-bold text-(--color-ink)">
+                          {item.badge > 9 ? '9+' : item.badge}
+                        </span>
+                      )}
+                    </div>
                   </Link>
                   {/* Custom Tailwind Tooltip */}
                   <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-100 shadow-md border border-gray-700/50">
