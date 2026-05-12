@@ -25,13 +25,13 @@ const Sidebar: FunctionComponent<SidebarProps> = (props) => {
   }, 0);
 
   const navItems: SidebarNavItem[] = [
-    { icon: <Home size={18} />, label: 'Home', path: '/admin' },
+    { icon: <Home size={18} />, label: 'Dashboard', path: '/admin' },
     { icon: <Calendar size={18} />, label: 'Calendar', path: '/admin/calendar' },
     { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/admin/tasks' },
+    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount },
     { icon: <Users size={18} />, label: 'Clients', path: '/admin/clients' },
     { icon: <Briefcase size={18} />, label: 'Projects', path: '/admin/projects' },
     { icon: <CreditCard size={18} />, label: 'Payments', path: '/admin/payments' },
-    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount },
     { icon: <FileText size={18} />, label: 'Documents', path: '/admin/documents' },
     { icon: <UserCircle2 size={18} />, label: 'Team', path: '/admin/team' },
     { icon: <Receipt size={18} />, label: 'Expenses', path: '/admin/expenses' },

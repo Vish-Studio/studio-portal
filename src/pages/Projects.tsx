@@ -183,8 +183,8 @@ const Projects = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
-              <span>Project</span><span className="text-right">Progress</span><span className="text-right">Budget</span><span className="text-right">Remaining</span><span className="text-right">Status</span><span />
+            <div className="hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+              <span>Project</span><span className="text-right">Progress</span><span className="text-right">Budget</span><span className="text-right">Remaining</span><span /><span className="text-right">Status</span><span />
             </div>
             {filtered.map(p => (
               <ProjectCardMini key={p.id} project={p} allMembers={members} actions={[

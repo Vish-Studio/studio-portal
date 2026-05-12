@@ -1,15 +1,10 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 import MaterialIcon from '../material-icon/material-icon';
-import Select from '../select/select';
-import Option from '../select/option';
+import Tabs from '../tabs/tabs';
+import type { TabItem } from '../tabs/tabs';
+export type { TabItem } from '../tabs/tabs';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface TabItem {
-  key: string;
-  label: string;
-  count?: number;
-}
 
 export interface SortOption {
   key: string;
@@ -81,51 +76,14 @@ const TableTab: FunctionComponent<TableTabProps> = ({
   return (
     <div className={`table-tab flex items-center justify-between gap-3 flex-wrap w-full ${className}`}>
 
-      {/* Mobile — dropdown tabs */}
       {tabs && tabs.length > 0 && (
-        <Select
+        <Tabs
+          items={tabs}
           value={activeTab}
-          onChange={event => onTabChange?.(event.target.value)}
-          wrapperClassName="min-w-0 flex-1 md:hidden"
-          className="py-2.5"
-        >
-          {tabs.map(tab => (
-            <Option key={tab.key} value={tab.key}>
-              {tab.count !== undefined ? `${tab.label} (${tab.count})` : tab.label}
-            </Option>
-          ))}
-        </Select>
-      )}
-
-      {/* Desktop — filter tabs */}
-      {tabs && tabs.length > 0 && (
-        <div className="hidden min-w-0 items-center gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1.5 no-scrollbar md:flex">
-          {tabs.map(tab => {
-            const isActive = tab.key === activeTab;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => onTabChange?.(tab.key)}
-                className={`flex shrink-0 items-center gap-2 px-3.5 py-2 rounded-lg text-[12px] font-medium transition-colors
-                  ${isActive
-                    ? 'bg-black text-white shadow-sm'
-                    : 'text-gray-500 hover:text-gray-800 hover:bg-gray-200'
-                  }`}
-              >
-                {tab.label}
-                {tab.count !== undefined && (
-                  <span
-                    className={`hidden md:block text-[10px] font-bold px-1.5 py-0.5 rounded-md leading-none
-                      ${isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-500'}`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+          onChange={onTabChange}
+          className="min-w-0 flex-1 md:flex-none"
+          ariaLabel="Table filters"
+        />
       )}
 
       {hasControls && (

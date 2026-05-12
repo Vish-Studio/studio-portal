@@ -1,6 +1,6 @@
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckCircle, Layers, Trash2, Pencil, Check } from 'lucide-react';
+import { Briefcase, CheckCircle, Layers, Pencil, Trash2 } from 'lucide-react';
 import UserLayout from '@/src/components/user/user-layout/user-layout';
 import Fab from '@/src/components/common/button-fab/button-fab';
 import Button from '@/src/components/common/button/button';
@@ -12,15 +12,14 @@ import FormField, { inputCls } from '@/src/components/common/form-field/form-fie
 import Select from '@/src/components/common/select/select';
 import Option from '@/src/components/common/select/option';
 import ConfirmDialog from '@/src/components/common/confirm-dialog/confirm-dialog';
-import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-badge';
-import { RowActionsMenu } from '@/src/components/common/table/table';
+import ProjectCard, { ProjectCardMini } from '@/src/components/admin/project-card/project-card';
 import { useProjectsStore, makeNewProject } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
 import { useClientsStore } from '@/src/store/clients';
-import { SERVICE_META, getProjectAccent, getPhaseProgress } from '@/src/data/projects';
+import { SERVICE_META, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject, ServiceType, PackageType } from '@/src/data/projects';
 
-const CURRENT_CLIENT_ID = 'c1';;
+const CURRENT_CLIENT_ID = 'c1';
 
 interface ProjectFormValues {
   name: string;
@@ -30,178 +29,20 @@ interface ProjectFormValues {
   timeline: string;
 }
 
+type FilterKey = 'all' | 'active' | 'paused' | 'completed';
 type SortKey = 'updated' | 'name';
 
-// ─── UserProjectCard — grid variant ──────────────────────────────────────────
+const getPendingClientPhase = (project: ClientProject) =>
+  project.phases.find(phase => phase.status === 'active' && phase.requiresClientAction && !phase.clientCompleted);
 
-const UserProjectCard = ({
-  project, taskCount, openTaskCount, onEdit, onDelete, onCompletePhase,
-}: {
-  project: ClientProject;
-  taskCount: number;
-  openTaskCount: number;
-  onEdit: () => void;
-  onDelete: () => void;
-  onCompletePhase: (phaseId: string) => void;
-}) => {
-  const accent = getProjectAccent(project.service, project.package);
-  const progress = getPhaseProgress(project.phases);
-  const doneCount = project.phases.filter(p => p.status === 'done').length;
-  const remaining = project.agreedPayment - project.paidPayment;
-
-  // Phase that is active AND flagged for client action AND not yet confirmed
-  const pendingPhase = project.phases.find(
-    p => p.status === 'active' && p.requiresClientAction && !p.clientCompleted,
-  );
-
-  return (
-    <div className="project-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-300 transition-all duration-150 flex flex-col">
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 flex-1 min-w-0">{project.name}</h3>
-          <div className="flex items-center gap-1 shrink-0 mt-0.5">
-            <ProjectStatusBadge status={project.status} />
-            <RowActionsMenu actions={[
-              { label: 'Edit project', icon: <Pencil size={14} />, onClick: onEdit },
-              { label: 'Delete project', icon: <Trash2 size={14} />, onClick: onDelete, variant: 'danger' },
-            ]} />
-          </div>
-        </div>
-
-        <p className="text-[11px] text-gray-400 truncate">{accent.label} · {project.timeline || 'TBD'}</p>
-
-        <div className="mt-3.5">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] text-gray-400">
-              {doneCount}/{project.phases.length} phases
-              {openTaskCount > 0 && <span className="text-gray-300"> · {openTaskCount} task{openTaskCount !== 1 ? 's' : ''} open</span>}
-            </span>
-            <span className="text-[11px] font-bold text-gray-600 tabular-nums">{progress}%</span>
-          </div>
-          <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-gray-700 rounded-full transition-all" style={{ width: `${progress}%` }} />
-          </div>
-        </div>
-      </div>
-
-      {/* Client action callout */}
-      {pendingPhase && (
-        <div className="mx-4 mb-3 flex items-center gap-3 bg-violet-50 border border-violet-200 rounded-[12px] px-3 py-2.5">
-          <MaterialIcon name="person" size={14} className="text-violet-500 shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] font-semibold text-violet-900 truncate">Action needed: {pendingPhase.title}</p>
-            <p className="text-[10px] text-violet-500">Mark complete when done</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => onCompletePhase(pendingPhase.id)}
-            className="flex items-center gap-1 text-[10px] font-bold text-white bg-violet-600 hover:bg-violet-700 px-2.5 py-1.5 rounded-[8px] transition-colors shrink-0"
-          >
-            <Check size={10} strokeWidth={3} />
-            Done
-          </button>
-        </div>
-      )}
-
-      <div className="px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 flex-wrap">
-          {project.agreedPayment > 0 && <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>}
-          {project.agreedPayment > 0 && <span className="text-gray-200">·</span>}
-          <span>{project.timeline || 'TBD'}</span>
-          {remaining === 0 && project.agreedPayment > 0 && (
-            <><span className="text-gray-200">·</span><span className="font-semibold text-green-500">Settled</span></>
-          )}
-        </div>
-        <span className="text-[10px] text-gray-400">{taskCount} task{taskCount !== 1 ? 's' : ''}</span>
-      </div>
-    </div>
-  );
-};
-
-// ─── UserProjectCardMini — list-row variant ───────────────────────────────────
-
-const UserProjectCardMini = ({
-  project, onEdit, onDelete, onCompletePhase,
-}: {
-  project: ClientProject;
-  onEdit: () => void;
-  onDelete: () => void;
-  onCompletePhase: (phaseId: string) => void;
-}) => {
-  const accent = getProjectAccent(project.service, project.package);
-  const progress = getPhaseProgress(project.phases);
-  const remaining = project.agreedPayment - project.paidPayment;
-
-  const pendingPhase = project.phases.find(
-    p => p.status === 'active' && p.requiresClientAction && !p.clientCompleted,
-  );
-
-  return (
-    <div className="project-card-mini bg-white border border-gray-200 rounded-[12px] px-3 py-3 hover:bg-gray-50 hover:border-gray-300 transition-all duration-150 md:px-4">
-      <div className="grid items-center gap-3 md:grid-cols-[minmax(200px,1fr)_120px_90px_110px_auto_120px_32px]">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <MaterialIcon name={accent.icon} size={15} className="text-gray-400 shrink-0" />
-            <p className="truncate text-sm font-semibold leading-tight text-gray-900">{project.name}</p>
-          </div>
-          <p className="mt-1 truncate pl-6 text-[11px] text-gray-400">{accent.label}</p>
-        </div>
-
-        <div className="flex items-center gap-2 md:justify-end">
-          <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 md:w-16">
-            <div className="h-full rounded-full bg-gray-600" style={{ width: `${progress}%` }} />
-          </div>
-          <span className="w-8 text-right text-[11px] text-gray-400 tabular-nums">{progress}%</span>
-        </div>
-
-        <p className="hidden text-right text-sm font-semibold text-gray-700 tabular-nums md:block">
-          {project.agreedPayment > 0 ? `$${(project.agreedPayment / 1000).toFixed(0)}k` : '—'}
-        </p>
-
-        <p className={`hidden text-right text-sm font-semibold tabular-nums md:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
-          {project.agreedPayment === 0 ? '—' : remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'}
-        </p>
-
-        {/* Client action pill */}
-        <div className="hidden md:flex justify-end">
-          {pendingPhase ? (
-            <button
-              type="button"
-              onClick={() => onCompletePhase(pendingPhase.id)}
-              className="flex items-center gap-1.5 text-[10px] font-bold text-violet-700 bg-violet-50 border border-violet-200 hover:bg-violet-100 px-2.5 py-1 rounded-full transition-colors whitespace-nowrap"
-            >
-              <MaterialIcon name="person" size={10} />
-              {pendingPhase.title}
-            </button>
-          ) : <span />}
-        </div>
-
-        <div className="flex justify-start md:justify-end">
-          <ProjectStatusBadge status={project.status} />
-        </div>
-
-        <div className="absolute right-3 top-3 md:static md:flex md:justify-end">
-          <RowActionsMenu actions={[
-            { label: 'Edit project', icon: <Pencil size={14} />, onClick: onEdit },
-            { label: 'Delete project', icon: <Trash2 size={14} />, onClick: onDelete, variant: 'danger' },
-          ]} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ─── UserProjects page ────────────────────────────────────────────────────────
-
-const UserProjects = () => {
+export default function UserProjects() {
   const { projects, addProject, updateProject, removeProject, completePhase } = useProjectsStore();
   const { tasks } = useTasksStore();
   const { clients } = useClientsStore();
-  const currentClient = clients.find(c => c.id === CURRENT_CLIENT_ID);
+  const currentClient = clients.find(client => client.id === CURRENT_CLIENT_ID);
+  const myProjects = projects.filter(project => project.clientId === CURRENT_CLIENT_ID);
 
-  const myProjects = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
-
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [sortKey, setSortKey] = useState<SortKey>('updated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -219,9 +60,9 @@ const UserProjects = () => {
 
   const tabCounts = useMemo(() => ({
     all: myProjects.length,
-    active: myProjects.filter(p => p.status === 'active').length,
-    paused: myProjects.filter(p => p.status === 'paused').length,
-    completed: myProjects.filter(p => p.status === 'completed').length,
+    active: myProjects.filter(project => project.status === 'active').length,
+    paused: myProjects.filter(project => project.status === 'paused').length,
+    completed: myProjects.filter(project => project.status === 'completed').length,
   }), [myProjects]);
 
   const tabs: TabItem[] = [
@@ -232,7 +73,7 @@ const UserProjects = () => {
   ];
 
   const filtered = useMemo(() => {
-    const list = activeTab === 'all' ? myProjects : myProjects.filter(p => p.status === activeTab);
+    const list = activeTab === 'all' ? myProjects : myProjects.filter(project => project.status === activeTab);
     return [...list].sort((a, b) => {
       const result = sortKey === 'name'
         ? a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
@@ -240,16 +81,12 @@ const UserProjects = () => {
 
       return sortDirection === 'asc' ? result : -result;
     });
-  }, [myProjects, activeTab, sortKey, sortDirection]);
+  }, [activeTab, myProjects, sortDirection, sortKey]);
 
   const avgProgress = myProjects.length
-    ? Math.round(myProjects.reduce((s, p) => s + getPhaseProgress(p.phases), 0) / myProjects.length)
+    ? Math.round(myProjects.reduce((sum, project) => sum + getPhaseProgress(project.phases), 0) / myProjects.length)
     : 0;
-
-  // Count projects that have a pending client action
-  const pendingActions = myProjects.filter(p =>
-    p.phases.some(ph => ph.status === 'active' && ph.requiresClientAction && !ph.clientCompleted),
-  ).length;
+  const pendingActions = myProjects.filter(project => getPendingClientPhase(project)).length;
 
   const openAdd = () => {
     setEditingProject(null);
@@ -259,7 +96,13 @@ const UserProjects = () => {
 
   const openEdit = (project: ClientProject) => {
     setEditingProject(project);
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
+    reset({
+      name: project.name,
+      service: project.service,
+      package: project.package ?? '',
+      status: project.status,
+      timeline: project.timeline,
+    });
     setSidebarOpen(true);
   };
 
@@ -272,113 +115,109 @@ const UserProjects = () => {
       timeline: data.timeline,
       clientId: CURRENT_CLIENT_ID,
     };
-    if (editingProject) {
-      updateProject(editingProject.id, payload);
-    } else {
-      addProject(makeNewProject(payload));
-    }
+
+    if (editingProject) updateProject(editingProject.id, payload);
+    else addProject(makeNewProject(payload));
     setSidebarOpen(false);
   };
 
-  const getTaskCounts = (projectId: string) => {
-    const pt = tasks.filter(t => t.projectId === projectId);
-    return { taskCount: pt.length, openTaskCount: pt.filter(t => t.status !== 'completed').length };
+  const clientActionFor = (project: ClientProject) => {
+    const phase = getPendingClientPhase(project);
+    if (!phase) return undefined;
+    return {
+      label: phase.title,
+      description: 'Mark complete when done',
+      onClick: () => completePhase(project.id, phase.id),
+    };
   };
 
   return (
     <UserLayout title="My Projects">
       <div className="flex flex-col gap-5 py-10">
-
-        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           <StatCard variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={myProjects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
           <StatCard variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
           <StatCard variant="dark" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${myProjects.length} project${myProjects.length !== 1 ? 's' : ''}`} badgeLabel="tracked" />
         </div>
 
-        {/* Pending actions banner */}
         {pendingActions > 0 && (
-          <div className="flex items-center gap-3 px-4 py-3.5 bg-violet-50 border border-violet-200 rounded-[14px]">
-            <MaterialIcon name="person" size={16} className="text-violet-500 shrink-0" />
+          <div className="flex items-center gap-3 rounded-[14px] border border-violet-200 bg-violet-50 px-4 py-3.5">
+            <MaterialIcon name="person" size={16} className="shrink-0 text-violet-500" />
             <p className="text-sm font-semibold text-violet-900">
               {pendingActions} project{pendingActions !== 1 ? 's' : ''} need{pendingActions === 1 ? 's' : ''} your action
             </p>
-            <p className="text-[11px] text-violet-500 ml-auto">Look for the purple badge on each card</p>
+            <p className="ml-auto hidden text-[11px] text-violet-500 sm:block">Use the action badge on each project</p>
           </div>
         )}
 
-        {/* Toolbar */}
-        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <TableTab
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              sortValue={sortKey}
-              sortOptions={[
-                { key: 'updated', label: 'Most recent' },
-                { key: 'name', label: 'Name' },
-              ]}
-              onSortChange={key => setSortKey(key as SortKey)}
-              sortDirection={sortDirection}
-              onSortDirectionChange={setSortDirection}
-              className="min-w-0 flex-1"
-            />
-          </div>
-          <button type="button" onClick={openAdd} className="hidden sm:flex items-center gap-2 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors shrink-0 ml-auto">
-            <MaterialIcon name="add" size={20} />
-            Add Project
-          </button>
+        <div className="sticky top-0 z-20 -mx-4 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <TableTab
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={key => setActiveTab(key as FilterKey)}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            sortValue={sortKey}
+            sortOptions={[
+              { key: 'updated', label: 'Most recent' },
+              { key: 'name', label: 'Name' },
+            ]}
+            onSortChange={key => setSortKey(key as SortKey)}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            actionLabel="Add Project"
+            onAction={openAdd}
+            className="min-w-0 flex-1"
+          />
         </div>
 
-        {/* Content */}
         {filtered.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-[18px] py-16 flex flex-col items-center gap-3 text-center">
-            <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-(--color-surface)">
               <Briefcase size={20} className="text-gray-300" />
             </div>
             <p className="text-sm font-semibold text-gray-500">No projects found</p>
-            <button onClick={openAdd} className="mt-1 text-xs font-semibold text-gray-400 hover:text-gray-700 underline transition-colors">Add your first project</button>
+            <button onClick={openAdd} className="mt-1 text-xs font-semibold text-gray-400 underline transition-colors hover:text-gray-700">Add your first project</button>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filtered.map(p => {
-              const { taskCount, openTaskCount } = getTaskCounts(p.id);
-              return (
-                <UserProjectCard key={p.id} project={p} taskCount={taskCount} openTaskCount={openTaskCount}
-                  onEdit={() => openEdit(p)} onDelete={() => setConfirmProject(p)}
-                  onCompletePhase={(phaseId) => completePhase(p.id, phaseId)}
-                />
-              );
-            })}
+            {filtered.map(project => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                detailPath="/user/projects"
+                clientAction={clientActionFor(project)}
+                actions={[
+                  { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(project) },
+                  { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => setConfirmProject(project), variant: 'danger' },
+                ]}
+              />
+            ))}
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="hidden grid-cols-[minmax(200px,1fr)_120px_90px_110px_auto_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
-              <span>Project</span>
-              <span className="text-right">Progress</span>
-              <span className="text-right">Budget</span>
-              <span className="text-right">Remaining</span>
-              <span className="text-right">Action</span>
-              <span className="text-right">Status</span>
-              <span />
+            <div className="hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+              <span>Project</span><span className="text-right">Progress</span><span className="text-right">Budget</span><span className="text-right">Remaining</span><span className="text-right">Action</span><span className="text-right">Status</span><span />
             </div>
-            {filtered.map(p => (
-              <UserProjectCardMini key={p.id} project={p}
-                onEdit={() => openEdit(p)} onDelete={() => setConfirmProject(p)}
-                onCompletePhase={(phaseId) => completePhase(p.id, phaseId)}
+            {filtered.map(project => (
+              <ProjectCardMini
+                key={project.id}
+                project={project}
+                detailPath="/user/projects"
+                clientAction={clientActionFor(project)}
+                actions={[
+                  { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(project) },
+                  { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => setConfirmProject(project), variant: 'danger' },
+                ]}
               />
             ))}
           </div>
         )}
-
       </div>
 
       <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : `Adding a project for ${currentClient?.displayName ?? 'client'}`} width="md">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <FormField label="Project Name" required error={errors.name?.message}>
               <input {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" className={inputCls(!!errors.name)} />
             </FormField>
@@ -420,12 +259,15 @@ const UserProjects = () => {
 
       <Fab onClick={openAdd} ariaLabel="Add project" />
 
-      <ConfirmDialog isOpen={!!confirmProject} title="Delete project" message={confirmProject ? `"${confirmProject.name}" will be permanently removed. This cannot be undone.` : ''} confirmLabel="Delete" variant="danger"
+      <ConfirmDialog
+        isOpen={!!confirmProject}
+        title="Delete project"
+        message={confirmProject ? `"${confirmProject.name}" will be permanently removed. This cannot be undone.` : ''}
+        confirmLabel="Delete"
+        variant="danger"
         onConfirm={() => { if (confirmProject) removeProject(confirmProject.id); setConfirmProject(null); }}
         onCancel={() => setConfirmProject(null)}
       />
     </UserLayout>
   );
-};
-
-export default UserProjects;
+}
