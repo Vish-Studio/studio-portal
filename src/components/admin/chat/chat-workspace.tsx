@@ -171,14 +171,13 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
     <div className="grid w-full gap-4 lg:h-full lg:min-h-[560px] lg:overflow-hidden lg:grid-cols-[360px_minmax(0,1fr)]">
       <aside
         className={cn(
-          'flex min-w-0 flex-col rounded-[24px] border border-gray-100 bg-white p-4 lg:min-h-0 lg:overflow-hidden',
+          'flex min-w-0 flex-col rounded-[18px] border border-gray-200 bg-white p-4 lg:min-h-0 lg:overflow-hidden',
           mode === 'client' && 'hidden lg:block',
           !showInbox && 'hidden lg:block',
         )}
       >
         <div className="mb-4 flex items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400">Inbox</p>
             <h2 className="mt-1 text-xl font-bold text-(--color-ink)">Messages</h2>
           </div>
           <span className="rounded-full bg-(--color-accent-lime) px-2.5 py-1 text-xs font-bold text-(--color-ink)">
@@ -227,8 +226,8 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
                 type="button"
                 onClick={() => selectParticipant(participant)}
                 className={cn(
-                  'flex w-full min-w-0 items-start gap-3 overflow-hidden rounded-2xl p-3 text-left transition-colors',
-                  active ? 'bg-(--color-ink) text-white' : 'bg-gray-50 hover:bg-gray-100',
+                  'flex w-full min-w-0 items-start gap-3 overflow-hidden rounded-lg p-3 text-left transition-colors',
+                  active ? 'bg-(--color-ink) text-white' : 'bg-gray-100 hover:bg-gray-200',
                 )}
               >
                 <Avatar name={participant.name} id={participant.id} size="md" />
@@ -247,9 +246,9 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
                     {participant.meta}
                   </p>
                   <div className="mt-2 flex items-center gap-2">
-                    <p className={cn('min-w-0 flex-1 truncate text-xs font-medium', active ? 'text-white/60' : 'text-gray-500')}>
+                    {/* <p className={cn('min-w-0 flex-1 truncate text-xs font-medium', active ? 'text-white/60' : 'text-gray-500')}>
                       {getPreview(conversation)}
-                    </p>
+                    </p> */}
                     {unread > 0 && (
                       <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-[10px] font-bold text-(--color-ink)">
                         {unread}
@@ -265,7 +264,7 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
 
       <section
         className={cn(
-          'min-h-[640px] flex-col overflow-hidden rounded-[24px] border border-gray-100 bg-white',
+          'min-h-[640px] flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white',
           showThread ? 'flex' : 'hidden lg:flex',
         )}
       >
@@ -286,12 +285,12 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
                   )}
                   <Avatar name={mode === 'admin' ? activeParticipant.name : ADMIN_NAME} id={activeParticipant.id} size="md" />
                   <div className="min-w-0">
-                    <h2 className="truncate text-lg font-bold text-(--color-ink)">
+                    <h2 className="truncate text-md font-bold text-(--color-ink)">
                       {mode === 'admin' ? activeParticipant.name : ADMIN_NAME}
                     </h2>
                     <p className="truncate text-xs font-semibold text-gray-400">
                       {mode === 'admin'
-                        ? `${activeParticipant.type === 'team' ? 'Team' : 'Client'} · ${activeParticipant.meta}`
+                        ? `${activeParticipant.meta}`
                         : 'Direct support for your project work'}
                     </p>
                   </div>
