@@ -186,4 +186,43 @@ export const DEMO_CHAT_CONVERSATIONS: ChatConversation[] = [
       ],
     };
   }),
+  ...[
+    {
+      projectId: 'p1',
+      name: 'Social Media Kit',
+      body: 'Project thread opened for phase notes, reviews, and launch coordination.',
+      minutes: 140,
+    },
+    {
+      projectId: 'p2',
+      name: 'Logo & Brand Kit',
+      body: 'Use this thread for proposal feedback and asset handoff questions.',
+      minutes: 260,
+    },
+    {
+      projectId: 'p3',
+      name: 'Dashboard Analytics',
+      body: 'Development planning notes can stay in this project thread.',
+      minutes: 520,
+    },
+  ].map(({ projectId, name, body, minutes }): ChatConversation => {
+    const conversationId = `chat_project_${projectId}`;
+    return {
+      id: conversationId,
+      type: 'project',
+      participantId: projectId,
+      projectId,
+      lastReadByAdminAt: minutesAgo(minutes + 40),
+      messages: [
+        {
+          id: `msg_${projectId}_1`,
+          conversationId,
+          senderRole: 'admin',
+          senderName: 'Studio Admin',
+          body,
+          createdAt: minutesAgo(minutes),
+        },
+      ],
+    };
+  }),
 ];

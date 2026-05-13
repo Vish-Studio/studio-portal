@@ -20,7 +20,7 @@ export const getChatPreview = (conversation?: ChatConversation) => {
 };
 
 export const getConversationParticipantId = (conversation: ChatConversation) =>
-  conversation.participantId ?? conversation.clientId ?? conversation.teamMemberId;
+  conversation.participantId ?? conversation.clientId ?? conversation.teamMemberId ?? conversation.projectId;
 
 export const getConversationType = (conversation: ChatConversation): ChatConversationType =>
   conversation.type ?? 'client';

@@ -8,9 +8,11 @@ import {
 import { useClientsStore } from '@/src/store/clients';
 import { useTeamStore } from '@/src/store/team';
 import { useUIStore } from '@/src/store/ui';
+import { useProjectsStore } from '@/src/store/projects';
+import { getProjectAccent } from '@/src/data/projects';
 import ChatBox from './chat-box';
 import ChatThread from './chat-thread';
-import NewChatModal from './new-chat-modal';
+import NewChatSidebar from './new-chat-sidebar';
 import { getConversationFor, type ChatParticipant } from './chat-types';
 
 interface ChatWorkspaceProps {
@@ -23,14 +25,16 @@ const ADMIN_NAME = 'Studio Admin';
 export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWorkspaceProps) {
   const clients = useClientsStore(state => state.clients);
   const teamMembers = useTeamStore(state => state.members);
+  const projects = useProjectsStore(state => state.projects);
   const conversations = useChatStore(state => state.conversations);
   const sendConversationMessage = useChatStore(state => state.sendConversationMessage);
   const markConversationRead = useChatStore(state => state.markConversationRead);
   const searchQuery = useUIStore(state => state.searchQuery);
   const [draft, setDraft] = useState('');
-  const [activeSection, setActiveSection] = useState<ChatConversationType>('client');
-  const [newChatSection, setNewChatSection] = useState<ChatConversationType>('client');
+  const [activeSection, setActiveSection] = useState<ChatConversationType>('team');
+  const [newChatSection, setNewChatSection] = useState<ChatConversationType>('team');
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
+  const [newChatQuery, setNewChatQuery] = useState('');
   const [selectedParticipant, setSelectedParticipant] = useState<Pick<ChatParticipant, 'id' | 'type'> | null>(
     mode === 'client' ? { id: currentClientId, type: 'client' } : null,
   );
@@ -59,9 +63,28 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
     [teamMembers],
   );
 
+  const projectParticipants = useMemo<ChatParticipant[]>(
+    () => projects.map(project => {
+      const client = clients.find(item => item.id === project.clientId);
+      const accent = getProjectAccent(project.service, project.package);
+
+      return {
+        id: project.id,
+        type: 'project',
+        name: project.name,
+        meta: `${accent.label}${client ? ` · ${client.displayName}` : ''}`,
+      };
+    }),
+    [clients, projects],
+  );
+
   const visibleParticipants = useMemo(() => {
     const source = mode === 'admin'
-      ? activeSection === 'client' ? clientParticipants : teamParticipants
+      ? activeSection === 'client'
+        ? clientParticipants
+        : activeSection === 'team'
+          ? teamParticipants
+          : projectParticipants
       : clientParticipants.filter(client => client.id === currentClientId);
 
     if (!searchQuery.trim()) return source;
@@ -71,9 +94,23 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
       participant.meta.toLowerCase().includes(query) ||
       (participant.email ?? '').toLowerCase().includes(query),
     );
-  }, [activeSection, clientParticipants, currentClientId, mode, searchQuery, teamParticipants]);
+  }, [activeSection, clientParticipants, currentClientId, mode, projectParticipants, searchQuery, teamParticipants]);
 
-  const newChatParticipants = newChatSection === 'client' ? clientParticipants : teamParticipants;
+  const newChatParticipants = useMemo(() => {
+    const source = newChatSection === 'client'
+      ? clientParticipants
+      : newChatSection === 'team'
+        ? teamParticipants
+        : projectParticipants;
+
+    if (!newChatQuery.trim()) return source;
+    const query = newChatQuery.toLowerCase();
+    return source.filter(participant =>
+      participant.name.toLowerCase().includes(query) ||
+      participant.meta.toLowerCase().includes(query) ||
+      (participant.email ?? '').toLowerCase().includes(query),
+    );
+  }, [clientParticipants, newChatQuery, newChatSection, projectParticipants, teamParticipants]);
 
   useEffect(() => {
     if (mode === 'client') {
@@ -92,9 +129,13 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
 
   const activeParticipant = useMemo(() => {
     if (!selectedParticipant) return null;
-    const source = selectedParticipant.type === 'client' ? clientParticipants : teamParticipants;
+    const source = selectedParticipant.type === 'client'
+      ? clientParticipants
+      : selectedParticipant.type === 'team'
+        ? teamParticipants
+        : projectParticipants;
     return source.find(participant => participant.id === selectedParticipant.id) ?? null;
-  }, [clientParticipants, selectedParticipant, teamParticipants]);
+  }, [clientParticipants, projectParticipants, selectedParticipant, teamParticipants]);
 
   const activeConversation = getConversationFor(conversations, activeParticipant);
   const senderRole: ChatSenderRole = mode === 'admin' ? 'admin' : 'client';
@@ -110,6 +151,7 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
 
   const openNewChat = () => {
     setNewChatSection(activeSection);
+    setNewChatQuery('');
     setIsNewChatOpen(true);
   };
 
@@ -141,6 +183,7 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
         activeSection={activeSection}
         clientCount={clientParticipants.length}
         teamCount={teamParticipants.length}
+        projectCount={projectParticipants.length}
         participants={visibleParticipants}
         activeParticipant={activeParticipant}
         conversations={conversations}
@@ -164,11 +207,13 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
       />
 
       {isNewChatOpen && mode === 'admin' && (
-        <NewChatModal
+        <NewChatSidebar
           section={newChatSection}
+          search={newChatQuery}
           participants={newChatParticipants}
           conversations={conversations}
           onSectionChange={setNewChatSection}
+          onSearchChange={setNewChatQuery}
           onSelectParticipant={selectParticipant}
           onClose={() => setIsNewChatOpen(false)}
         />

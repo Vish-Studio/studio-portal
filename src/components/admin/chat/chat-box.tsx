@@ -17,6 +17,7 @@ interface ChatBoxProps {
   activeSection: ChatConversationType;
   clientCount: number;
   teamCount: number;
+  projectCount: number;
   participants: ChatParticipant[];
   activeParticipant: ChatParticipant | null;
   conversations: ChatConversation[];
@@ -32,6 +33,7 @@ export default function ChatBox({
   activeSection,
   clientCount,
   teamCount,
+  projectCount,
   participants,
   activeParticipant,
   conversations,
@@ -54,7 +56,7 @@ export default function ChatBox({
           <div className="min-w-0">
             <h2 className="type-section-title text-(--color-ink)">Messages</h2>
             <p className="type-muted mt-0.5 text-gray-400">
-              Clients and team conversations
+              Team, client, and project conversations
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -77,8 +79,9 @@ export default function ChatBox({
         {mode === 'admin' && (
           <Tabs
             items={[
-              { key: 'client', label: 'Clients', count: clientCount },
               { key: 'team', label: 'Team', count: teamCount },
+              { key: 'client', label: 'Client', count: clientCount },
+              { key: 'project', label: 'Projects', count: projectCount },
             ]}
             value={activeSection}
             onChange={(section) => onSectionChange(section as ChatConversationType)}

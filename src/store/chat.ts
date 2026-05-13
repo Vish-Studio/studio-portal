@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type ChatConversationType = 'client' | 'team';
+export type ChatConversationType = 'client' | 'team' | 'project';
 export type ChatSenderRole = 'admin' | 'client' | 'team';
 
 export interface ChatMessage {
@@ -18,6 +18,7 @@ export interface ChatConversation {
   participantId?: string;
   clientId?: string;
   teamMemberId?: string;
+  projectId?: string;
   lastReadByAdminAt?: number;
   lastReadByClientAt?: number;
   lastReadByTeamAt?: number;
@@ -41,7 +42,11 @@ interface ChatState {
 
 const conversationIdForClient = (clientId: string) => `chat_${clientId}`;
 const conversationIdFor = (conversationType: ChatConversationType, participantId: string) =>
-  conversationType === 'client' ? conversationIdForClient(participantId) : `chat_team_${participantId}`;
+  conversationType === 'client'
+    ? conversationIdForClient(participantId)
+    : conversationType === 'team'
+      ? `chat_team_${participantId}`
+      : `chat_project_${participantId}`;
 
 const matchesConversation = (
   conversation: ChatConversation,
@@ -49,7 +54,8 @@ const matchesConversation = (
   participantId: string,
 ) => {
   const storedType = conversation.type ?? 'client';
-  const storedParticipantId = conversation.participantId ?? conversation.clientId ?? conversation.teamMemberId;
+  const storedParticipantId =
+    conversation.participantId ?? conversation.clientId ?? conversation.teamMemberId ?? conversation.projectId;
   return storedType === conversationType && storedParticipantId === participantId;
 };
 
@@ -90,6 +96,7 @@ export const useChatStore = create<ChatState>((set) => ({
               participantId,
               clientId: conversationType === 'client' ? participantId : undefined,
               teamMemberId: conversationType === 'team' ? participantId : undefined,
+              projectId: conversationType === 'project' ? participantId : undefined,
               ...readPatchForRole(senderRole, now),
               messages: [message],
             },

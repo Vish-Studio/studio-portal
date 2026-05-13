@@ -137,7 +137,7 @@ export default function ChatThread({
           </div>
           <p className="type-section-title mt-4 text-(--color-ink)">Select a conversation</p>
           <p className="type-body mt-1 max-w-xs text-gray-400">
-            Choose a client or team member to view messages, reply, and keep communication in one place.
+            Choose a team, client, or project chat to view messages, reply, and keep communication in one place.
           </p>
           {mode === 'admin' && (
             <Button className="mt-5" iconLeft={<Plus size={15} />} onClick={onStartChat}>
