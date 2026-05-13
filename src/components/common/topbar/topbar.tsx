@@ -7,6 +7,7 @@ import ButtonIcon from '../button-icon/button-icon';
 import DropdownMenu from '../dropdown-menu/dropdown-menu';
 import type { DropdownMenuSectionType } from '../dropdown-menu/dropdown-menu';
 import { usePwaInstall } from '@/src/hooks/usePwaInstall';
+import { useAuthStore } from '@/src/store/auth';
 
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
@@ -30,6 +31,8 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const { canInstall, installed, installApp } = usePwaInstall();
+  const profile = useAuthStore(state => state.profile);
+  const signOutUser = useAuthStore(state => state.signOutUser);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
@@ -39,7 +42,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
 
   const userMenuSections: DropdownMenuSectionType[] = [
     {
-      header: 'Vishroy Seenarain',
+      header: profile?.displayName ?? 'Studio Portal',
       items: [
         { label: 'Profile', onClick: () => { setIsUserOpen(false); } },
         { label: 'Settings', onClick: () => { setIsUserOpen(false); } },
@@ -54,7 +57,14 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
       ],
     },
     {
-      items: [{ label: 'Log out', onClick: () => { setIsUserOpen(false); }, danger: true }],
+      items: [{
+        label: 'Log out',
+        onClick: () => {
+          setIsUserOpen(false);
+          signOutUser();
+        },
+        danger: true,
+      }],
     },
   ];
 
