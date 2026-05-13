@@ -173,13 +173,13 @@ const Payments = () => {
 
           {filtered.length === 0 ? (
             <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
-              <p className="text-sm font-semibold text-gray-500">
+              <p className="type-card-title text-gray-500">
                 {searchQuery ? `No payments match "${searchQuery}".` : 'No payments found.'}
               </p>
             </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <div className="hidden grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+              <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] items-center gap-3 px-4 text-gray-400 md:grid">
                 <span>Invoice</span>
                 <span>Client / Project</span>
                 <span className="text-right">Amount</span>
@@ -195,34 +195,34 @@ const Payments = () => {
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-xs font-semibold text-gray-500">{payment.invoiceId}</span>
+                      <span className="type-label font-mono text-gray-500">{payment.invoiceId}</span>
                       {payment.type === 'recurring' && (
-                        <span className="inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-600">
+                        <span className="type-count inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-violet-600">
                           <RefreshCw size={9} />
                           {payment.interval ? INTERVAL_LABEL[payment.interval] : 'Recurring'}
                         </span>
                       )}
                     </div>
-                    <p className="mt-1 text-xs font-medium text-gray-400">{payment.date}</p>
+                    <p className="type-muted mt-1 text-gray-400">{payment.date}</p>
                   </div>
 
                   <div className="flex min-w-0 items-center gap-2.5">
-                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-xs font-bold text-white`}>
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-[11px] font-bold text-white`}>
                       {payment.client.charAt(0)}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-(--color-ink)">{payment.client}</p>
-                      <p className="truncate text-xs font-medium text-gray-400">{payment.project}</p>
+                      <p className="type-card-title truncate text-(--color-ink)">{payment.client}</p>
+                      <p className="type-muted truncate text-gray-400">{payment.project}</p>
                     </div>
                   </div>
 
-                  <p className="text-left text-xl font-bold tabular-nums text-(--color-ink) md:text-right md:text-sm">
+                  <p className="type-card-title text-left tabular-nums text-(--color-ink) md:text-right">
                     {fmt(payment.amount)}
                   </p>
 
                   <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
 
-                  <p className="text-xs font-semibold text-gray-400">{payment.nextDate ?? '—'}</p>
+                  <p className="type-label text-gray-400">{payment.nextDate ?? '—'}</p>
 
                   <div className="flex justify-end">
                     <RowActionsMenu

@@ -145,13 +145,13 @@ export default function Clients() {
 
         {filtered.length === 0 ? (
           <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
-            <p className="text-sm font-semibold text-gray-500">
+            <p className="type-card-title text-gray-500">
               {searchQuery ? `No clients match "${searchQuery}".` : 'No clients yet.'}
             </p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="hidden grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] items-center gap-3 px-4 text-gray-400 md:grid">
               <span>Client</span>
               <span>Contact</span>
               <span>Created</span>
@@ -172,21 +172,21 @@ export default function Clients() {
                   className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 cursor-pointer md:grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] md:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${circleBg[client.status]} text-sm font-bold text-white`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${circleBg[client.status]} text-xs font-bold text-white`}>
                       {client.displayName.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-(--color-ink)">{client.displayName}</p>
-                      <p className="truncate text-xs font-medium text-gray-400">{client.companyName || 'No company'}</p>
+                      <p className="type-card-title truncate text-(--color-ink)">{client.displayName}</p>
+                      <p className="type-muted truncate text-gray-400">{client.companyName || 'No company'}</p>
                     </div>
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-semibold text-gray-600">{client.email}</p>
-                    <p className="mt-0.5 truncate text-xs font-medium text-gray-400">{client.phone || 'No phone'}</p>
+                    <p className="type-label truncate text-gray-600">{client.email}</p>
+                    <p className="type-muted mt-0.5 truncate text-gray-400">{client.phone || 'No phone'}</p>
                   </div>
 
-                  <span className="text-xs font-semibold text-gray-400">
+                  <span className="type-label text-gray-400">
                     {client.createdAt?.toDate ? format(client.createdAt.toDate(), 'MMM d, yyyy') : '—'}
                   </span>
 

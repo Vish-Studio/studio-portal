@@ -97,7 +97,7 @@ const StatCard: FunctionComponent<StatCardProps> = ({
     <>
       {/* Top row: icon + label | action */}
       <div className="flex w-full justify-between items-center">
-        <div className={`flex items-center gap-2 font-medium text-xs md:text-sm ${s.labelText}`}>
+        <div className={`type-stat-label flex items-center gap-2 ${s.labelText}`}>
           {icon}
           <span>{label}</span>
         </div>
@@ -112,11 +112,11 @@ const StatCard: FunctionComponent<StatCardProps> = ({
 
       {/* Value */}
       <div className="flex items-baseline gap-2">
-        <span className={`text-[26px] md:text-[42px] font-bold tracking-tight leading-none ${s.valueText}`}>
+        <span className={`type-stat-value ${s.valueText}`}>
           {value}
         </span>
         {valueSubLabel && (
-          <span className={`text-sm font-medium ${s.footerText}`}>{valueSubLabel}</span>
+          <span className={`type-label ${s.footerText}`}>{valueSubLabel}</span>
         )}
       </div>
 
@@ -125,13 +125,13 @@ const StatCard: FunctionComponent<StatCardProps> = ({
         <div className="flex items-center gap-2 mt-auto">
           {badge && (
             <div
-              className={`flex items-center gap-1 text-[12px] font-bold px-2 py-1 rounded-[6px] ${s.badgeBg} ${s.badgeText}`}
+              className={`type-label flex items-center gap-1 px-2 py-1 rounded-[6px] ${s.badgeBg} ${s.badgeText}`}
             >
               {badge}
             </div>
           )}
           {badgeLabel && (
-            <span className={`text-[12px] md:text-sm font-medium ${s.footerText}`}>{badgeLabel}</span>
+            <span className={`type-label ${s.footerText}`}>{badgeLabel}</span>
           )}
         </div>
       )}

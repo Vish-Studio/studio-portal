@@ -99,7 +99,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
           >
             <MaterialIcon name="menu" size={24} />
           </button>
-          <h2 className="text-xl sm:text-2xl font-bold text-(--color-ink)">{title}</h2>
+          <h2 className="type-page-title text-(--color-ink)">{title}</h2>
         </div>
 
         {/* Desktop search or custom actions */}

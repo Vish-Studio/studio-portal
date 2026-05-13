@@ -13,6 +13,9 @@ body {
   background-color: var(--background);
   color: var(--color-body-text);
   font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -220,6 +223,98 @@ body {
 
   button {
     cursor: pointer;
+  }
+}
+
+@layer components {
+  .type-page-title {
+    @apply text-2xl md:text-3xl font-bold leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-section-title {
+    @apply text-xl font-bold leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-panel-title,
+  .type-card-title {
+    @apply text-sm font-bold leading-snug;
+    letter-spacing: 0;
+  }
+
+  .type-body {
+    @apply text-xs font-medium leading-relaxed;
+    letter-spacing: 0;
+  }
+
+  .type-muted {
+    @apply text-xs font-medium leading-normal;
+    letter-spacing: 0;
+  }
+
+  .type-label {
+    @apply text-xs font-semibold leading-snug;
+    letter-spacing: 0;
+  }
+
+  .type-meta {
+    @apply text-xs font-medium leading-snug;
+    letter-spacing: 0;
+  }
+
+  .type-eyebrow {
+    @apply text-xs font-bold uppercase leading-tight tracking-wide;
+  }
+
+  .type-tab {
+    @apply text-xs font-medium leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-count {
+    @apply text-xs font-bold leading-none;
+    letter-spacing: 0;
+  }
+
+  .type-badge {
+    @apply text-xs font-medium capitalize leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-control {
+    @apply text-xs font-semibold leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-stat-label {
+    @apply text-xs md:text-sm font-medium leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-stat-value {
+    @apply text-3xl md:text-5xl font-bold leading-none;
+    letter-spacing: 0;
+  }
+
+  .type-sidebar-label {
+    @apply text-sm font-medium leading-tight;
+    letter-spacing: 0;
+  }
+
+  .type-sidebar-brand {
+    @apply text-lg font-bold leading-none;
+    letter-spacing: 0;
+  }
+
+  .type-sidebar-badge {
+    @apply text-xs font-bold leading-none;
+    letter-spacing: 0;
+  }
+
+  .type-sidebar-tooltip {
+    @apply text-xs font-semibold leading-tight;
+    letter-spacing: 0;
   }
 }
 

@@ -37,74 +37,74 @@ export default function ChatThread({
   return (
     <section
       className={cn(
-        'min-h-[640px] flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white',
+        'min-h-[calc(100svh-190px)] flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
         isVisible ? 'flex' : 'hidden lg:flex',
       )}
     >
       {participant ? (
         <>
-          <div className="border-b border-gray-100 bg-white px-4 py-4 md:px-6">
+          <div className="border-b border-gray-100 bg-white px-4 py-4 md:px-5">
             <div className="flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 {mode === 'admin' && (
                   <button
                     type="button"
                     onClick={onBack}
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-600 transition-colors hover:bg-gray-200 lg:hidden"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-(--color-surface-alt) text-gray-600 transition-colors hover:bg-gray-200 lg:hidden"
                     aria-label="Back to chats"
                   >
                     <ArrowLeft size={17} />
                   </button>
                 )}
-                <Avatar name={mode === 'admin' ? participant.name : ADMIN_NAME} id={participant.id} size="md" />
+                <Avatar name={mode === 'admin' ? participant.name : ADMIN_NAME} id={participant.id} size="lg" />
                 <div className="min-w-0">
-                  <h2 className="truncate text-md font-bold text-(--color-ink)">
+                  <h2 className="type-card-title truncate text-(--color-ink)">
                     {mode === 'admin' ? participant.name : ADMIN_NAME}
                   </h2>
-                  <p className="truncate text-xs font-semibold text-gray-400">
+                  <p className="type-muted truncate text-gray-400">
                     {mode === 'admin' ? participant.meta : 'Direct support for your project work'}
                   </p>
                 </div>
               </div>
-              <div className="hidden rounded-2xl bg-(--color-surface-alt) px-3 py-2 text-xs font-bold text-gray-500 sm:flex sm:items-center sm:gap-2">
+              <div className="type-label hidden rounded-full bg-(--color-surface-alt) px-3 py-2 text-gray-500 sm:flex sm:items-center sm:gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 Active thread
               </div>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto bg-(--color-surface-alt) px-4 py-5 md:px-6">
+          <div className="chat-scrollbar flex-1 overflow-y-auto bg-[linear-gradient(180deg,var(--color-surface-alt)_0%,#fff_100%)] px-4 py-5 md:px-6">
             {messages.length === 0 ? (
-              <div className="flex h-full min-h-80 flex-col items-center justify-center rounded-[18px] border border-dashed border-gray-200 bg-white p-8 text-center">
+              <div className="flex h-full min-h-80 flex-col items-center justify-center rounded-[18px] border border-dashed border-gray-200 bg-white/85 p-8 text-center">
                 <MessageCircle size={34} className="text-gray-300" />
-                <p className="mt-3 text-sm font-bold text-(--color-ink)">Start the conversation</p>
-                <p className="mt-1 max-w-sm text-xs font-medium leading-5 text-gray-400">
+                <p className="type-card-title mt-3 text-(--color-ink)">Start the conversation</p>
+                <p className="type-muted mt-1 max-w-sm text-gray-400">
                   Use this thread for quick approvals, project questions, files to review, and follow-ups.
                 </p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="mx-auto flex max-w-4xl flex-col gap-4">
                 {messages.map(message => {
                   const isOwn = message.senderRole === senderRole;
                   return (
                     <div key={message.id} className={cn('flex gap-3', isOwn ? 'justify-end' : 'justify-start')}>
                       {!isOwn && (
-                        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-gray-500 shadow-sm">
+                        <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm">
                           {message.senderRole === 'admin' ? <MaterialIcon name="support_agent" size={16} /> : <UserRound size={15} />}
                         </div>
                       )}
-                      <div className={cn('max-w-[78%] md:max-w-[62%]', isOwn && 'items-end')}>
+                      <div className={cn('max-w-[84%] md:max-w-[64%]', isOwn && 'items-end')}>
                         <div
                           className={cn(
-                            'rounded-[20px] px-4 py-3 text-sm font-medium leading-6 shadow-sm',
+                            'type-body rounded-[18px] px-4 py-3 shadow-sm',
                             isOwn
-                              ? 'rounded-br-md bg-(--color-ink) text-white shadow-[0_12px_30px_rgba(17,17,20,0.16)]'
-                              : 'rounded-bl-md border border-gray-100 bg-white text-gray-700 shadow-[0_10px_28px_rgba(15,23,42,0.06)]',
+                              ? 'rounded-br-md bg-(--color-ink) text-white shadow-[0_12px_30px_rgba(17,17,20,0.14)]'
+                              : 'rounded-bl-md border border-gray-100 bg-white text-gray-700 shadow-[0_10px_28px_rgba(15,23,42,0.05)]',
                           )}
                         >
                           {message.body}
                         </div>
-                        <p className={cn('mt-1 text-[11px] font-semibold text-gray-400', isOwn ? 'text-right' : 'text-left')}>
+                        <p className={cn('type-meta mt-1 text-gray-400', isOwn ? 'text-right' : 'text-left')}>
                           {message.senderName} · {formatChatTime(message.createdAt)}
                         </p>
                       </div>
@@ -115,14 +115,14 @@ export default function ChatThread({
             )}
           </div>
 
-          <form onSubmit={onSubmit} className="border-t border-gray-100 bg-white p-4 md:p-5">
-            <div className="flex items-end gap-3 rounded-[18px] border border-gray-200 bg-white p-2 shadow-[0_12px_34px_rgba(15,23,42,0.06)]">
+          <form onSubmit={onSubmit} className="border-t border-gray-100 bg-white p-3 md:p-4">
+            <div className="flex items-end gap-2 rounded-[18px] bg-(--color-surface-alt) p-2">
               <textarea
                 value={draft}
                 onChange={event => onDraftChange(event.target.value)}
                 rows={1}
                 placeholder={mode === 'admin' ? `Message ${participant.name}...` : 'Message the studio...'}
-                className="max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-transparent bg-(--color-surface) px-4 py-3 text-base font-medium text-gray-900 outline-none placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100 md:text-sm"
+                className="type-body max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-transparent bg-white px-4 py-3 text-gray-900 outline-none placeholder:text-gray-300 focus:border-gray-200 focus:ring-4 focus:ring-gray-100"
               />
               <Button type="submit" disabled={!draft.trim()} className="h-11 shrink-0 rounded-xl px-4" iconLeft={<Send size={15} />}>
                 <span className="hidden sm:inline">Send</span>
@@ -131,12 +131,12 @@ export default function ChatThread({
           </form>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center p-10 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-(--color-surface-alt)">
+        <div className="flex flex-1 flex-col items-center justify-center bg-[linear-gradient(180deg,#fff_0%,var(--color-surface-alt)_100%)] p-10 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-white shadow-[0_14px_36px_rgba(15,23,42,0.08)]">
             <MessageCircle size={30} className="text-gray-300" />
           </div>
-          <p className="mt-4 text-base font-bold text-(--color-ink)">Select a conversation</p>
-          <p className="mt-1 max-w-xs text-sm font-medium leading-6 text-gray-400">
+          <p className="type-section-title mt-4 text-(--color-ink)">Select a conversation</p>
+          <p className="type-body mt-1 max-w-xs text-gray-400">
             Choose a client or team member to view messages, reply, and keep communication in one place.
           </p>
           {mode === 'admin' && (

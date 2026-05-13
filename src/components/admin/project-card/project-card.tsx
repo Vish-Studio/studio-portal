@@ -63,26 +63,26 @@ const ProjectCard = ({
     >
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2 flex-1 min-w-0">{project.name}</h3>
+          <h3 className="type-card-title line-clamp-2 min-w-0 flex-1 text-gray-900">{project.name}</h3>
           <div className="flex items-center gap-1 shrink-0 mt-0.5" onClick={e => e.stopPropagation()}>
             <ProjectStatusBadge status={project.status} />
             {actions && <RowActionsMenu actions={actions} />}
           </div>
         </div>
 
-        <p className="text-[11px] text-gray-400 truncate">
+        <p className="type-muted truncate text-gray-400">
           {accent.label}{client ? ` · ${client.displayName}` : ''}
         </p>
 
         <div className="mt-3.5">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] text-gray-400">
+            <span className="type-meta text-gray-400">
               {completedCount}/{project.phases.length} phases
               {activePhase && project.status === 'active' && (
                 <span className="text-gray-300"> · {activePhase.title}</span>
               )}
             </span>
-            <span className="text-[11px] font-bold text-gray-600 tabular-nums">{progress}%</span>
+            <span className="type-meta font-bold text-gray-600 tabular-nums">{progress}%</span>
           </div>
           <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
             <div className="h-full bg-gray-700 rounded-full transition-all" style={{ width: `${progress}%` }} />
@@ -94,13 +94,13 @@ const ProjectCard = ({
         <div className="mx-4 mb-3 flex items-center gap-3 rounded-[12px] border border-violet-200 bg-violet-50 px-3 py-2.5" onClick={e => e.stopPropagation()}>
           <MaterialIcon name="person" size={14} className="shrink-0 text-violet-500" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-[11px] font-semibold text-violet-900">{clientAction.label}</p>
-            {clientAction.description && <p className="text-[10px] text-violet-500">{clientAction.description}</p>}
+            <p className="type-meta truncate font-semibold text-violet-900">{clientAction.label}</p>
+            {clientAction.description && <p className="type-meta text-violet-500">{clientAction.description}</p>}
           </div>
           <button
             type="button"
             onClick={clientAction.onClick}
-            className="shrink-0 rounded-[8px] bg-violet-600 px-2.5 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-violet-700"
+            className="type-count shrink-0 rounded-[8px] bg-violet-600 px-2.5 py-1.5 text-white transition-colors hover:bg-violet-700"
           >
             Done
           </button>
@@ -108,7 +108,7 @@ const ProjectCard = ({
       )}
 
       <div className="px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 flex-wrap">
+        <div className="type-muted flex flex-wrap items-center gap-2 text-gray-400">
           <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>
           <span className="text-gray-200">·</span>
           <span>{project.timeline}</span>
@@ -155,9 +155,9 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <MaterialIcon name={accent.icon} size={15} className="text-gray-400 shrink-0" />
-            <p className="truncate text-sm font-semibold leading-tight text-gray-900">{project.name}</p>
+            <p className="type-card-title truncate text-gray-900">{project.name}</p>
           </div>
-          <p className="mt-1 truncate pl-6 text-[11px] text-gray-400">
+          <p className="type-muted mt-1 truncate pl-6 text-gray-400">
             {accent.label}{client ? ` · ${client.displayName}` : ''}
           </p>
         </div>
@@ -166,14 +166,14 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
           <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 md:w-16">
             <div className="h-full rounded-full bg-gray-600" style={{ width: `${progress}%` }} />
           </div>
-          <span className="w-8 text-right text-[11px] text-gray-400 tabular-nums">{progress}%</span>
+          <span className="type-meta w-8 text-right text-gray-400 tabular-nums">{progress}%</span>
         </div>
 
-        <p className="hidden text-right text-sm font-semibold text-gray-700 tabular-nums md:block">
+        <p className="type-card-title hidden text-right text-gray-700 tabular-nums md:block">
           ${(project.agreedPayment / 1000).toFixed(0)}k
         </p>
 
-        <p className={`hidden text-right text-sm font-semibold tabular-nums md:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
+        <p className={`type-card-title hidden text-right tabular-nums md:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
           {remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'}
         </p>
 
@@ -182,7 +182,7 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
             <button
               type="button"
               onClick={clientAction.onClick}
-              className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[10px] font-bold text-violet-700 transition-colors hover:bg-violet-100"
+              className="type-count flex items-center gap-1.5 whitespace-nowrap rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-violet-700 transition-colors hover:bg-violet-100"
             >
               <MaterialIcon name="person" size={10} />
               {clientAction.label}

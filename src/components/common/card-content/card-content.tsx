@@ -91,7 +91,7 @@ const CardContent: FunctionComponent<CardContentProps> = ({
     >
       {/* ── Header ── */}
       <div className="card-header bg-gray-100 px-4 md:px-6 py-4 md:py-5 flex items-center justify-between gap-4 shrink-0">
-        <div className={`flex items-center gap-2 text-sm font-semibold ${variantStyles.headerText}`}>
+        <div className={`type-panel-title flex items-center gap-2 ${variantStyles.headerText}`}>
           <MaterialIcon name={iconName} size={16} />
           <span>{title}</span>
         </div>

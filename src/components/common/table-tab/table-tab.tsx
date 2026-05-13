@@ -122,7 +122,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
               <button
                 type="button"
                 onClick={() => setIsSortOpen(open => !open)}
-                className="flex h-10 items-center gap-2 rounded-xl bg-gray-100 px-3 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                className="type-control flex h-10 items-center gap-2 rounded-xl bg-gray-100 px-3 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
                 aria-label="Sort"
                 aria-haspopup="listbox"
                 aria-expanded={isSortOpen}
@@ -144,7 +144,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
                           key={direction}
                           type="button"
                           onClick={() => onSortDirectionChange(direction)}
-                          className={`rounded-lg px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                          className={`type-meta rounded-lg px-3 py-1.5 transition-colors ${
                             currentDirection === direction
                               ? 'bg-white text-gray-900 shadow-sm'
                               : 'text-gray-400 hover:text-gray-700'
@@ -169,7 +169,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
                           onSortChange?.(option.key);
                           setIsSortOpen(false);
                         }}
-                        className={`flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition-colors ${
+                        className={`type-label flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-colors ${
                           isSelected
                             ? 'bg-gray-100 text-gray-900'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -194,7 +194,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
         <button
           type="button"
           onClick={onAction}
-          className="ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-gray-800 sm:flex"
+          className="type-control ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 sm:flex"
         >
           <MaterialIcon name='add' size={20} />
           {actionLabel}

@@ -62,7 +62,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         <div className="flex items-center justify-between gap-2 mb-2.5">
           <div className="flex items-center gap-1.5 min-w-0">
             <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_DOT[task.priority]}`} />
-            <span className="text-[11px] text-gray-400 font-medium truncate">
+            <span className="type-meta truncate text-gray-400">
               {project?.name ?? 'No project'}
             </span>
           </div>
@@ -74,13 +74,13 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className="text-sm font-bold text-gray-900 leading-snug line-clamp-2">
+        <h3 className="type-card-title line-clamp-2 text-gray-900">
           {task.title}
         </h3>
 
         {/* Description */}
         {task.description && (
-          <p className="text-xs text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">
+          <p className="type-muted mt-1.5 line-clamp-2 text-gray-400">
             {task.description}
           </p>
         )}
@@ -91,7 +91,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         <div className="flex items-center gap-2 min-w-0">
           {showStatus && <TaskStatusBadge status={task.status} />}
           {clientAssignee && (
-            <span className="hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 sm:flex">
+            <span className="type-count hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-gray-500 sm:flex">
               <MaterialIcon name="person" size={11} />
               Client
             </span>
@@ -102,7 +102,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         </div>
 
         {due && (
-          <span className={`text-[10px] font-semibold flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
+          <span className={`type-count flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
             }`}>
             {overdue && <MaterialIcon name="warning" size={10} />}
             {format(due, 'MMM d')}

@@ -59,15 +59,15 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
 
       {/* Title + project */}
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-gray-900 truncate leading-tight">{task.title}</p>
+        <p className="type-card-title truncate text-gray-900">{task.title}</p>
         {showProject && (
-          <p className="text-[10px] text-gray-400 truncate">{project?.name ?? 'No project'}</p>
+          <p className="type-meta truncate text-gray-400">{project?.name ?? 'No project'}</p>
         )}
       </div>
 
       {/* Due date */}
       {due && (
-        <span className={`hidden md:flex items-center gap-0.5 text-[11px] font-semibold shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
+        <span className={`type-meta hidden md:flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
           }`}>
           {overdue && <MaterialIcon name="warning" size={10} />}
           {format(due, 'MMM d')}
@@ -82,7 +82,7 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
       )}
 
       {clientAssignee && (
-        <span className="hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-500 lg:flex">
+        <span className="type-count hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-gray-500 lg:flex">
           <MaterialIcon name="person" size={11} />
           Client
         </span>

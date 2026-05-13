@@ -71,7 +71,7 @@ export default function Tabs({
               aria-selected={isActive}
               onClick={() => onChange?.(item.key)}
               className={cn(
-                'flex shrink-0 items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-[12px] font-medium transition-colors',
+                'type-tab flex shrink-0 items-center justify-center gap-2 rounded-lg px-3.5 py-2 transition-colors',
                 equalWidth && 'min-w-0 flex-1',
                 isActive
                   ? 'bg-black text-white shadow-sm'
@@ -83,7 +83,7 @@ export default function Tabs({
               {item.count !== undefined && (
                 <span
                   className={cn(
-                    'hidden rounded-md px-1.5 py-0.5 text-[10px] font-bold leading-none md:block',
+                    'type-count hidden rounded-md px-1.5 py-0.5 md:block',
                     isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-500',
                   )}
                 >

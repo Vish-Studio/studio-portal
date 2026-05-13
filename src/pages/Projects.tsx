@@ -158,7 +158,7 @@ const Projects = () => {
               className="min-w-0 flex-1"
             />
           </div>
-          <button type="button" onClick={openAdd} className="hidden sm:flex items-center gap-2 bg-black text-white text-xs font-semibold px-4 py-2.5 rounded-lg hover:bg-gray-800 transition-colors shrink-0 ml-auto">
+          <button type="button" onClick={openAdd} className="type-control ml-auto hidden shrink-0 items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 sm:flex">
             <MaterialIcon name="add" size={20} />
             Add Project
           </button>
@@ -169,8 +169,8 @@ const Projects = () => {
             <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
               <Briefcase size={20} className="text-gray-300" />
             </div>
-            <p className="text-sm font-semibold text-gray-500">No projects found</p>
-            {searchQuery && <p className="text-xs text-gray-400">No results for &ldquo;{searchQuery}&rdquo;</p>}
+            <p className="type-card-title text-gray-500">No projects found</p>
+            {searchQuery && <p className="type-muted text-gray-400">No results for &ldquo;{searchQuery}&rdquo;</p>}
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -183,7 +183,7 @@ const Projects = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px] items-center gap-3 px-4 text-gray-400 md:grid">
               <span>Project</span><span className="text-right">Progress</span><span className="text-right">Budget</span><span className="text-right">Remaining</span><span /><span className="text-right">Status</span><span />
             </div>
             {filtered.map(p => (

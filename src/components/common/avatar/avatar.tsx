@@ -5,10 +5,10 @@ import { FunctionComponent } from 'react';
 export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
 const SIZE: Record<AvatarSize, { box: string; text: string; border: string }> = {
-  xs: { box: 'w-6 h-6',  text: 'text-[10px]', border: 'border-[1.5px]' },
-  sm: { box: 'w-7 h-7',  text: 'text-[11px]', border: 'border-2'       },
-  md: { box: 'w-9 h-9',  text: 'text-[13px]', border: 'border-2'       },
-  lg: { box: 'w-11 h-11', text: 'text-[16px]', border: 'border-2'      },
+  xs: { box: 'w-6 h-6',  text: 'text-[9px]',  border: 'border-[1.5px]' },
+  sm: { box: 'w-7 h-7',  text: 'text-[10px]', border: 'border-2'       },
+  md: { box: 'w-9 h-9',  text: 'text-[12px]', border: 'border-2'       },
+  lg: { box: 'w-11 h-11', text: 'text-[14px]', border: 'border-2'      },
 };
 
 // ─── Deterministic colour from any string seed ────────────────────────────────

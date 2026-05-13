@@ -20,8 +20,8 @@ const variantClasses: Record<ButtonVariant, string> = {
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-8 px-3 text-xs rounded-lg',
-  md: 'h-10 px-4 text-sm rounded-xl',
+  sm: 'h-8 px-3 rounded-lg',
+  md: 'h-10 px-4 rounded-xl',
 };
 
 export default function Button({
@@ -41,7 +41,7 @@ export default function Button({
     <button
       type="button"
       disabled={isDisabled}
-      className={`inline-flex items-center justify-center gap-2 font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`type-control inline-flex items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {loading ? <Loader2 size={14} className="animate-spin" /> : iconLeft}

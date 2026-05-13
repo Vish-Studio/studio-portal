@@ -63,8 +63,8 @@ function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) 
             >
               <Briefcase size={14} className={isSelected ? 'text-white/50 shrink-0' : 'text-gray-400 shrink-0'} />
               <div className="min-w-0 flex-1">
-                <p className={`font-semibold text-sm truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>{project.name}</p>
-                <p className={`text-xs truncate mt-0.5 ${isSelected ? 'text-white/50' : 'text-gray-400'}`}>
+                <p className={`type-card-title truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>{project.name}</p>
+                <p className={`type-muted mt-0.5 truncate ${isSelected ? 'text-white/50' : 'text-gray-400'}`}>
                   {project.client}{project.status === 'paused' && <span className="ml-1.5">· Paused</span>}
                 </p>
               </div>
@@ -188,13 +188,13 @@ export default function Team() {
 
         {tableData.length === 0 ? (
           <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
-            <p className="text-sm font-semibold text-gray-500">
+            <p className="type-card-title text-gray-500">
               {searchQuery ? `No members match "${searchQuery}".` : 'No team members yet.'}
             </p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="hidden grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] items-center gap-3 px-4 text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:grid">
+            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] items-center gap-3 px-4 text-gray-400 md:grid">
               <span>Member</span>
               <span>Role</span>
               <span>Assignment</span>
@@ -214,24 +214,24 @@ export default function Team() {
                   className="grid cursor-pointer gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] md:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-sm font-bold text-white`}>
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-xs font-bold text-white`}>
                       {member.name.charAt(0)}
                     </div>
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-bold text-(--color-ink)">{member.name}</p>
-                      <p className="truncate text-xs font-medium text-gray-400">{member.email || 'No email'}</p>
+                      <p className="type-card-title truncate text-(--color-ink)">{member.name}</p>
+                      <p className="type-muted truncate text-gray-400">{member.email || 'No email'}</p>
                     </div>
                   </div>
 
-                  <p className="truncate text-sm font-semibold text-gray-600">{member.role}</p>
+                  <p className="type-label truncate text-gray-600">{member.role}</p>
 
                   <div className="flex min-w-0 items-center gap-2">
                     <StatusIcon status={member.assignedProjectId ? 'active' : 'inactive'} />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-gray-800">
+                      <p className="type-card-title truncate text-gray-800">
                         {member.project?.name ?? 'Unassigned'}
                       </p>
-                      <p className="truncate text-xs font-medium text-gray-400">
+                      <p className="type-muted truncate text-gray-400">
                         {member.project?.client ?? 'Available for a project'}
                       </p>
                     </div>

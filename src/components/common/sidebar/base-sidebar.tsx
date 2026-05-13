@@ -61,14 +61,14 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
         <div className="relative shrink-0 flex items-center justify-center">
           {item.icon}
           {showIconBadge && (
-            <span className="absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-[9px] font-bold text-(--color-ink)">
+            <span className="type-sidebar-badge absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-(--color-ink)">
               {formatBadge(item.badge ?? 0)}
             </span>
           )}
         </div>
-        {isExpanded && <span className="ml-4 font-medium text-[15px] whitespace-nowrap">{item.label}</span>}
+        {isExpanded && <span className="type-sidebar-label ml-4 whitespace-nowrap">{item.label}</span>}
         {showRowBadge && (
-          <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-[10px] font-bold text-(--color-ink)">
+          <span className="type-sidebar-badge ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-(--color-ink)">
             {formatBadge(item.badge ?? 0, false)}
           </span>
         )}
@@ -88,7 +88,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
         <Link to={item.path} className={btnClass}>
           {content}
         </Link>
-        <div className="absolute left-full top-1/2 -translate-y-1/2 ml-4 hidden group-hover:block bg-(--color-sidebar-active) text-white rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap z-100 shadow-md border border-gray-700/50">
+        <div className="type-sidebar-tooltip absolute left-full top-1/2 z-100 ml-4 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-gray-700/50 bg-(--color-sidebar-active) px-3 py-1.5 text-white shadow-md group-hover:block">
           {item.label}
         </div>
       </div>
@@ -127,7 +127,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
               ) : (
                 <img src="/assets/logo-white-trans.png" alt="Logo" width={32} height={32} />
               )}
-              {isExpanded && <span className="font-bold text-lg whitespace-nowrap text-white">studio <span className="font-normal">portal</span></span>}
+              {isExpanded && <span className="type-sidebar-brand whitespace-nowrap text-white">studio <span className="font-normal">portal</span></span>}
             </div>
 
             {isExpanded && (

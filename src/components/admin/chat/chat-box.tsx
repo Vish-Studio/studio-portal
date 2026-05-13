@@ -44,92 +44,117 @@ export default function ChatBox({
     <section
       aria-label="Chat conversations"
       className={cn(
-        'flex min-w-0 flex-col rounded-[18px] border border-gray-200 bg-white p-4 lg:min-h-0 lg:overflow-hidden',
+        'relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
         mode === 'client' && 'hidden lg:block',
         !isVisible && 'hidden lg:block',
       )}
     >
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="mt-1 text-xl font-bold text-(--color-ink)">Messages</h2>
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-(--color-accent-lime) px-2.5 py-1 text-xs font-bold text-(--color-ink)">
-            {participants.length}
-          </span>
-          {mode === 'admin' && (
-            <ButtonIcon
-              iconName="add"
-              label="Start new chat"
-              className="h-9 w-9 rounded-lg"
-              clickHandler={onStartChat}
-            />
-          )}
+      <div className="border-b border-gray-100 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="type-section-title text-(--color-ink)">Messages</h2>
+            <p className="type-muted mt-0.5 text-gray-400">
+              Clients and team conversations
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="type-count rounded-full bg-(--color-accent-lime) px-2.5 py-1 text-(--color-ink)">
+              {participants.length}
+            </span>
+            {mode === 'admin' && (
+              <ButtonIcon
+                iconName="add"
+                label="Start new chat"
+                className="h-10 w-10 rounded-xl bg-(--color-ink) text-white hover:bg-black hover:text-white"
+                clickHandler={onStartChat}
+              />
+            )}
+          </div>
         </div>
       </div>
 
-      {mode === 'admin' && (
-        <Tabs
-          items={[
-            { key: 'client', label: 'Clients', count: clientCount },
-            { key: 'team', label: 'Team', count: teamCount },
-          ]}
-          value={activeSection}
-          onChange={(section) => onSectionChange(section as ChatConversationType)}
-          mobileMode="scroll"
-          className="mb-4"
-          listClassName="w-full"
-          equalWidth
-          ariaLabel="Chat sections"
-        />
-      )}
+      <div className="p-4 pb-0">
+        {mode === 'admin' && (
+          <Tabs
+            items={[
+              { key: 'client', label: 'Clients', count: clientCount },
+              { key: 'team', label: 'Team', count: teamCount },
+            ]}
+            value={activeSection}
+            onChange={(section) => onSectionChange(section as ChatConversationType)}
+            mobileMode="scroll"
+            className="mb-3"
+            listClassName="w-full"
+            equalWidth
+            ariaLabel="Chat sections"
+          />
+        )}
+      </div>
 
-      <div className="chat-scrollbar overflow-visible rounded-xl pr-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
-        {participants.map(participant => {
-          const conversation = getConversationFor(conversations, participant);
-          const last = conversation?.messages.at(-1);
-          const unread = getUnreadCount(conversation, senderRole);
-          const active = participant.id === activeParticipant?.id && participant.type === activeParticipant.type;
+      <div className="chat-scrollbar overflow-visible px-4 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+        {participants.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-(--color-surface-alt) p-6 text-center">
+            <p className="type-card-title text-(--color-ink)">No conversations found</p>
+            <p className="type-muted mt-1 text-gray-400">
+              Try another search or start a new chat.
+            </p>
+          </div>
+        )}
 
-          return (
-            <button
-              key={`${participant.type}-${participant.id}`}
-              type="button"
-              onClick={() => onSelectParticipant(participant)}
-              className={cn(
-                'flex w-full min-w-0 items-start gap-3 overflow-hidden border-b border-gray-100 p-3 text-left transition-colors last:border-b-0',
-                active
-                  ? 'my-1 rounded-lg border-b-transparent bg-(--color-ink) text-white'
-                  : 'bg-white hover:bg-gray-50',
-              )}
-            >
-              <Avatar name={participant.name} id={participant.id} size="md" />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className={cn('truncate text-sm font-bold', active ? 'text-white' : 'text-(--color-ink)')}>
-                    {participant.name}
-                  </p>
-                  {last && (
-                    <span className={cn('shrink-0 text-[10px] font-bold', active ? 'text-white/45' : 'text-gray-400')}>
-                      {formatChatDay(last.createdAt)}
-                    </span>
-                  )}
-                </div>
-                <p className={cn('mt-0.5 truncate text-xs font-semibold', active ? 'text-white/45' : 'text-gray-400')}>
-                  {participant.meta}
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <p className={cn('min-w-0 flex-1 truncate text-xs font-medium', active ? 'text-white/60' : 'text-gray-500')}>
-                    {getChatPreview(conversation)}
-                  </p>
+        <div className="divide-y divide-gray-100">
+          {participants.map(participant => {
+            const conversation = getConversationFor(conversations, participant);
+            const last = conversation?.messages.at(-1);
+            const unread = getUnreadCount(conversation, senderRole);
+            const active = participant.id === activeParticipant?.id && participant.type === activeParticipant.type;
+
+            return (
+              <button
+                key={`${participant.type}-${participant.id}`}
+                type="button"
+                onClick={() => onSelectParticipant(participant)}
+                className={cn(
+                  'group my-1 flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left transition-all',
+                  active
+                    ? 'bg-(--color-ink) text-white'
+                    : 'bg-white hover:bg-(--color-surface-alt)',
+                )}
+              >
+                <div className="relative shrink-0">
+                  <Avatar name={participant.name} id={participant.id} size="lg" />
                   {unread > 0 && (
-                    <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-[10px] font-bold text-(--color-ink)">
-                      {unread}
-                    </span>
+                    <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-(--color-accent-lime)" />
                   )}
                 </div>
-              </div>
-            </button>
-          );
-        })}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={cn('type-card-title truncate', active ? 'text-white' : 'text-(--color-ink)')}>
+                      {participant.name}
+                    </p>
+                    {last && (
+                      <span className={cn('type-meta shrink-0', active ? 'text-white/50' : 'text-gray-400')}>
+                        {formatChatDay(last.createdAt)}
+                      </span>
+                    )}
+                  </div>
+                  <p className={cn('type-muted mt-0.5 truncate', active ? 'text-white/55' : 'text-gray-400')}>
+                    {participant.meta}
+                  </p>
+                  <div className="mt-1.5 flex items-center gap-2">
+                    <p className={cn('type-muted min-w-0 flex-1 truncate', active ? 'text-white/70' : 'text-gray-500')}>
+                      {getChatPreview(conversation)}
+                    </p>
+                    {unread > 0 && (
+                      <span className="type-count flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-(--color-ink)">
+                        {unread}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
