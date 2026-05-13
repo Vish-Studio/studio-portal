@@ -29,7 +29,10 @@ service cloud.firestore {
                data.role in ['admin', 'client'] &&
                data.email is string && data.email.size() <= 255 &&
                (data.get('displayName', '') is string) && (data.get('displayName', '').size() <= 100) &&
-               (data.get('status', 'active') is string) && data.get('status', 'active') in ['prospect', 'agreed', 'lost', 'active'] &&
+               (data.get('companyName', '') is string) && (data.get('companyName', '').size() <= 160) &&
+               (data.get('phone', '') is string) && (data.get('phone', '').size() <= 40) &&
+               (data.get('status', 'active') is string) && data.get('status', 'active') in ['prospect', 'agreed', 'lost', 'active', 'inactive'] &&
+               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
                data.createdAt is timestamp;
       }
 

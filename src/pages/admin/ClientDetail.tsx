@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -41,12 +41,14 @@ const DISABLED_SELECT_CLS =
 
 const ClientDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { clients, updateClient } = useClientsStore();
+  const { clients, subscribeClients, updateClient } = useClientsStore();
   const { projects: allProjects } = useProjectsStore();
   const { members } = useTeamStore();
   const client = clients.find(c => c.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => subscribeClients(), [subscribeClients]);
 
   const {
     register,
@@ -65,9 +67,9 @@ const ClientDetail = () => {
       : undefined,
   });
 
-  const onSubmit = (data: ClientFormValues) => {
+  const onSubmit = async (data: ClientFormValues) => {
     if (!client) return;
-    updateClient(client.id, data);
+    await updateClient(client.id, data);
     reset(data);
     setIsEditing(false);
   };

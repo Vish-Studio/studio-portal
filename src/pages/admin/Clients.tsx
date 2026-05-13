@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
@@ -34,7 +34,15 @@ interface ClientFormValues {
 
 export default function Clients() {
   const navigate = useNavigate();
-  const { clients, addClient, updateClient, removeClient } = useClientsStore();
+  const {
+    clients,
+    loading,
+    error,
+    subscribeClients,
+    addClient,
+    updateClient,
+    removeClient,
+  } = useClientsStore();
   const { searchQuery } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
@@ -51,6 +59,8 @@ export default function Clients() {
   } = useForm<ClientFormValues>({
     defaultValues: { displayName: '', companyName: '', email: '', phone: '', status: 'active' },
   });
+
+  useEffect(() => subscribeClients(), [subscribeClients]);
 
   // ── Tab counts ──
   const tabCounts = useMemo(() => ({
@@ -82,7 +92,7 @@ export default function Clients() {
     }
     return [...list].sort((a, b) => {
       const result = sortKey === 'newest'
-        ? a.createdAt.toMillis() - b.createdAt.toMillis()
+        ? (a.createdAt?.toMillis() ?? 0) - (b.createdAt?.toMillis() ?? 0)
         : a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' });
 
       return sortDirection === 'asc' ? result : -result;
@@ -108,18 +118,17 @@ export default function Clients() {
     setSidebarOpen(true);
   };
 
-  const onSubmit = (data: ClientFormValues) => {
+  const onSubmit = async (data: ClientFormValues) => {
     if (editingClient) {
-      updateClient(editingClient.id, data);
+      await updateClient(editingClient.id, data);
     } else {
-      const now = { toMillis: () => Date.now(), toDate: () => new Date() };
-      addClient({ id: 'c_' + Date.now(), role: 'client', createdAt: now, ...data });
+      await addClient(data);
     }
     setSidebarOpen(false);
   };
 
-  const handleDelete = (client: Client) => {
-    if (confirm(`Remove ${client.displayName}?`)) removeClient(client.id);
+  const handleDelete = async (client: Client) => {
+    if (confirm(`Remove ${client.displayName}?`)) await removeClient(client.id);
   };
 
   return (
@@ -143,7 +152,17 @@ export default function Clients() {
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {error && (
+          <div className="clients-error rounded-[16px] border border-red-100 bg-red-50 px-4 py-3">
+            <p className="type-label text-red-600">{error}</p>
+          </div>
+        )}
+
+        {loading && filtered.length === 0 ? (
+          <div className="clients-loading rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+            <p className="type-card-title text-gray-500">Loading clients...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
             <p className="type-card-title text-gray-500">
               {searchQuery ? `No clients match "${searchQuery}".` : 'No clients yet.'}

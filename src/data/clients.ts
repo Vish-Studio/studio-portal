@@ -8,7 +8,7 @@ export interface Client {
   phone?: string;
   role: 'client';
   status: ClientStatus;
-  createdAt: { toMillis: () => number; toDate: () => Date };
+  createdAt?: { toMillis: () => number; toDate: () => Date };
 }
 
 // Demo data lives in seed.ts — re-exported here for Storybook compatibility
