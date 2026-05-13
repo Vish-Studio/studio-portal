@@ -18,8 +18,8 @@ const sections: Array<{ key: SettingsSection; icon: string; label: string; descr
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label className="block">
-      <span className="mb-2 block text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
+    <label className="account-settings-field block">
+      <span className="account-settings-field-label mb-2 block text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
       {children}
     </label>
   );
@@ -37,7 +37,7 @@ function PreferenceRow({
   onChange: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-t border-gray-100 py-4 first:border-t-0 first:pt-0 last:pb-0">
+    <div className="account-settings-preference flex items-center justify-between gap-4 border-t border-gray-100 py-4 first:border-t-0 first:pt-0 last:pb-0">
       <div className="min-w-0">
         <p className="text-sm font-bold text-(--color-ink)">{label}</p>
         <p className="mt-1 text-xs font-medium leading-5 text-gray-400">{description}</p>
@@ -121,9 +121,9 @@ export default function AccountSettings() {
   };
 
   return (
-    <div className="flex flex-col gap-4 pb-10">
-      <section className="rounded-[18px] bg-(--color-surface-alt) p-4 md:p-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className="account-settings flex flex-col gap-4 pb-10">
+      <section className="account-settings-hero rounded-[18px] bg-(--color-surface-alt) p-4 md:p-5">
+        <div className="account-settings-hero-content flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Account settings</p>
             <h2 className="mt-2 text-2xl font-bold text-(--color-ink)">Manage your account</h2>
@@ -144,8 +144,8 @@ export default function AccountSettings() {
         </div>
       </section>
 
-      <section className="rounded-[18px] border border-gray-100 bg-white">
-        <div className="flex flex-col gap-4 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-start sm:justify-between md:px-6">
+      <section className="account-settings-panel rounded-[18px] border border-gray-100 bg-white">
+        <div className="account-settings-panel-header flex flex-col gap-4 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-start sm:justify-between md:px-6">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <MaterialIcon name={activeSectionMeta.icon} size={20} className="text-gray-500" />
@@ -158,7 +158,7 @@ export default function AccountSettings() {
           </Button>
         </div>
 
-        <div className="p-4 md:p-6">
+        <div className="account-settings-panel-body p-4 md:p-6">
           {sectionContent[activeSection]}
         </div>
       </section>

@@ -58,17 +58,17 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
 
     const content = (
       <>
-        <div className="relative shrink-0 flex items-center justify-center">
+        <div className="sidebar-item-icon relative shrink-0 flex items-center justify-center">
           {item.icon}
           {showIconBadge && (
-            <span className="type-sidebar-badge absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-(--color-ink)">
+            <span className="sidebar-item-icon-badge type-sidebar-badge absolute -right-2 -top-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-(--color-accent-lime) px-1 text-(--color-ink)">
               {formatBadge(item.badge ?? 0)}
             </span>
           )}
         </div>
-        {isExpanded && <span className="type-sidebar-label ml-4 whitespace-nowrap">{item.label}</span>}
+        {isExpanded && <span className="sidebar-item-label type-sidebar-label ml-4 whitespace-nowrap">{item.label}</span>}
         {showRowBadge && (
-          <span className="type-sidebar-badge ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-(--color-ink)">
+          <span className="sidebar-item-badge type-sidebar-badge ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-(--color-ink)">
             {formatBadge(item.badge ?? 0, false)}
           </span>
         )}
@@ -77,18 +77,18 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
 
     if (isExpanded) {
       return (
-        <Link to={item.path} key={item.label} className={btnClass}>
+        <Link to={item.path} key={item.label} className={`sidebar-item ${btnClass}`}>
           {content}
         </Link>
       );
     }
 
     return (
-      <div key={item.label} className="group relative flex justify-center">
-        <Link to={item.path} className={btnClass}>
+      <div key={item.label} className="sidebar-item-wrap group relative flex justify-center">
+        <Link to={item.path} className={`sidebar-item ${btnClass}`}>
           {content}
         </Link>
-        <div className="type-sidebar-tooltip absolute left-full top-1/2 z-100 ml-4 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-gray-700/50 bg-(--color-sidebar-active) px-3 py-1.5 text-white shadow-md group-hover:block">
+        <div className="sidebar-tooltip type-sidebar-tooltip absolute left-full top-1/2 z-100 ml-4 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-gray-700/50 bg-(--color-sidebar-active) px-3 py-1.5 text-white shadow-md group-hover:block">
           {item.label}
         </div>
       </div>
@@ -99,7 +99,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
     <>
       {isMobileMenuOpen && (
         <div
-          className="sidebar-mobile fixed inset-0 bg-black/40 z-90 md:hidden"
+          className="sidebar-mobile-overlay fixed inset-0 bg-black/40 z-90 md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -112,34 +112,34 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
           }
         `}
       >
-        <div className={`flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-6'}`}>
-          <div className={`flex items-center mb-6 transition-all ${isExpanded ? 'justify-between px-2' : 'justify-center w-full'}`}>
+        <div className={`sidebar-main flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-6'}`}>
+          <div className={`sidebar-brand-row flex items-center mb-6 transition-all ${isExpanded ? 'justify-between px-2' : 'justify-center w-full'}`}>
             <div
-              className={`flex items-center text-white transition-all ${isExpanded ? 'gap-3' : 'justify-center border border-(--color-sidebar-border-dark) rounded-[18px] w-13 h-13 cursor-pointer hover:bg-white/5'}`}
+              className={`sidebar-brand flex items-center text-white transition-all ${isExpanded ? 'gap-3' : 'justify-center border border-(--color-sidebar-border-dark) rounded-[18px] w-13 h-13 cursor-pointer hover:bg-white/5'}`}
               onClick={() => {
                 if (!isExpanded) setIsSidebarOpen(true);
               }}
             >
               {isExpanded ? (
-                <div className="border border-(--color-sidebar-border-dark) rounded-[18px] flex items-center justify-center w-10 h-10 shrink-0">
+                <div className="sidebar-logo border border-(--color-sidebar-border-dark) rounded-[18px] flex items-center justify-center w-10 h-10 shrink-0">
                   <img src="/assets/logo-white-trans.png" alt="Logo" width={32} height={32} />
                 </div>
               ) : (
                 <img src="/assets/logo-white-trans.png" alt="Logo" width={32} height={32} />
               )}
-              {isExpanded && <span className="type-sidebar-brand whitespace-nowrap text-white">studio <span className="font-normal">portal</span></span>}
+              {isExpanded && <span className="sidebar-brand-text type-sidebar-brand whitespace-nowrap text-white">studio <span className="font-normal">portal</span></span>}
             </div>
 
             {isExpanded && (
               <>
                 <button
-                  className="w-8 h-8 flex items-center justify-center shrink-0 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors md:hidden"
+                  className="sidebar-close w-8 h-8 flex items-center justify-center shrink-0 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors md:hidden"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <X size={20} />
                 </button>
                 <button
-                  className="hidden md:flex w-8 h-8 items-center justify-center shrink-0 rounded-full text-gray-400 hover:text-white hover:bg-(--color-sidebar-border-dark) transition-colors"
+                  className="sidebar-collapse hidden md:flex w-8 h-8 items-center justify-center shrink-0 rounded-full text-gray-400 hover:text-white hover:bg-(--color-sidebar-border-dark) transition-colors"
                   onClick={() => setIsSidebarOpen(false)}
                 >
                   <PanelLeftClose size={18} />
@@ -148,12 +148,12 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
             )}
           </div>
 
-          <div className="flex flex-col gap-2 text-(--color-sidebar-text)">
+          <div className="sidebar-nav flex flex-col gap-2 text-(--color-sidebar-text)">
             {navItems.map(renderNavLink)}
           </div>
         </div>
 
-        <div className={`flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-4'}`}>
+        <div className={`sidebar-footer flex flex-col ${isExpanded ? 'items-stretch gap-2' : 'items-center gap-4'}`}>
           {renderNavLink({ icon: <Settings size={18} />, label: 'Settings', path: settingsPath })}
         </div>
       </header>

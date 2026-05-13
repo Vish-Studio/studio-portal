@@ -55,11 +55,11 @@ const Avatar: FunctionComponent<AvatarProps> = ({
   return (
     <div
       title={name}
-      className={`${box} ${bg} rounded-full flex items-center justify-center shrink-0 text-white font-bold ${
+      className={`avatar ${box} ${bg} rounded-full flex items-center justify-center shrink-0 text-white font-bold ${
         bordered ? `${border} border-white` : ''
       } ${className}`}
     >
-      <span className={text}>{getInitials(name)}</span>
+      <span className={`avatar-initials ${text}`}>{getInitials(name)}</span>
     </div>
   );
 };
@@ -87,15 +87,15 @@ export const AvatarStack: FunctionComponent<AvatarStackProps> = ({
   const { box, text, border } = SIZE[size];
 
   return (
-    <div className="flex -space-x-1.5">
+    <div className="avatar-stack flex -space-x-1.5">
       {visible.map((m, i) => (
         <Avatar key={m.id ?? i} name={m.name} id={m.id} size={size} bordered />
       ))}
       {overflow > 0 && (
         <div
-          className={`${box} rounded-full bg-gray-100 flex items-center justify-center ${border} border-white shrink-0`}
+          className={`avatar-stack-overflow ${box} rounded-full bg-gray-100 flex items-center justify-center ${border} border-white shrink-0`}
         >
-          <span className={`${text} font-bold text-gray-500`}>+{overflow}</span>
+          <span className={`avatar-stack-count ${text} font-bold text-gray-500`}>+{overflow}</span>
         </div>
       )}
     </div>

@@ -65,14 +65,14 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
       {/* ── Backdrop ── */}
       <div
         onClick={onClose}
-        className={`fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`form-sidebar-overlay fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         aria-hidden="true"
       />
 
       {/* ── Panel ── */}
       <aside
-        className={`fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-2xl
+        className={`form-sidebar fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-2xl
           ${WIDTH[width]}
           transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -81,7 +81,7 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
         aria-label={title}
       >
         {/* Header */}
-        <div className="flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
+        <div className="form-sidebar-header flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
           <div className="min-w-0">
             <h2 className="text-xl font-bold text-gray-900">{title}</h2>
             {description && (
@@ -100,7 +100,7 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
         </div>
 
         {/* Body — caller owns scroll + footer */}
-        <div className="flex flex-col flex-1 min-h-0">
+        <div className="form-sidebar-body flex flex-col flex-1 min-h-0">
           {children}
         </div>
       </aside>
@@ -114,7 +114,7 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
 */
 export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="shrink-0 border-t border-gray-100 px-6 py-4 bg-white flex gap-3">
+    <div className="form-sidebar-footer shrink-0 border-t border-gray-100 px-6 py-4 bg-white flex gap-3">
       {children}
     </div>
   );

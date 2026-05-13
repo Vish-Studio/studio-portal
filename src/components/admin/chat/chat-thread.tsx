@@ -37,14 +37,14 @@ export default function ChatThread({
   return (
     <section
       className={cn(
-        'min-h-[calc(100svh-190px)] flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
+        'chat-thread min-h-[calc(100svh-190px)] flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
         isVisible ? 'flex' : 'hidden lg:flex',
       )}
     >
       {participant ? (
         <>
-          <div className="border-b border-gray-100 bg-white px-4 py-4 md:px-5">
-            <div className="flex items-center justify-between gap-4">
+          <div className="chat-thread-header border-b border-gray-100 bg-white px-4 py-4 md:px-5">
+            <div className="chat-thread-header-row flex items-center justify-between gap-4">
               <div className="flex min-w-0 items-center gap-3">
                 {mode === 'admin' && (
                   <button
@@ -73,9 +73,9 @@ export default function ChatThread({
             </div>
           </div>
 
-          <div className="chat-scrollbar flex-1 overflow-y-auto bg-[linear-gradient(180deg,var(--color-surface-alt)_0%,#fff_100%)] px-4 py-5 md:px-6">
+          <div className="chat-thread-body chat-scrollbar flex-1 overflow-y-auto bg-[linear-gradient(180deg,var(--color-surface-alt)_0%,#fff_100%)] px-4 py-5 md:px-6">
             {messages.length === 0 ? (
-              <div className="flex h-full min-h-80 flex-col items-center justify-center rounded-[18px] border border-dashed border-gray-200 bg-white/85 p-8 text-center">
+              <div className="chat-thread-empty flex h-full min-h-80 flex-col items-center justify-center rounded-[18px] border border-dashed border-gray-200 bg-white/85 p-8 text-center">
                 <MessageCircle size={34} className="text-gray-300" />
                 <p className="type-card-title mt-3 text-(--color-ink)">Start the conversation</p>
                 <p className="type-muted mt-1 max-w-sm text-gray-400">
@@ -83,11 +83,11 @@ export default function ChatThread({
                 </p>
               </div>
             ) : (
-              <div className="mx-auto flex max-w-4xl flex-col gap-4">
+              <div className="chat-thread-messages mx-auto flex max-w-4xl flex-col gap-4">
                 {messages.map(message => {
                   const isOwn = message.senderRole === senderRole;
                   return (
-                    <div key={message.id} className={cn('flex gap-3', isOwn ? 'justify-end' : 'justify-start')}>
+                    <div key={message.id} className={cn('chat-thread-message flex gap-3', isOwn ? 'justify-end' : 'justify-start')}>
                       {!isOwn && (
                         <div className="mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-gray-500 shadow-sm">
                           {message.senderRole === 'admin' ? <MaterialIcon name="support_agent" size={16} /> : <UserRound size={15} />}
@@ -115,8 +115,8 @@ export default function ChatThread({
             )}
           </div>
 
-          <form onSubmit={onSubmit} className="border-t border-gray-100 bg-white p-3 md:p-4">
-            <div className="flex items-end gap-2 rounded-[18px] bg-(--color-surface-alt) p-2">
+          <form onSubmit={onSubmit} className="chat-thread-composer border-t border-gray-100 bg-white p-3 md:p-4">
+            <div className="chat-thread-composer-inner flex items-end gap-2 rounded-[18px] bg-(--color-surface-alt) p-2">
               <textarea
                 value={draft}
                 onChange={event => onDraftChange(event.target.value)}
@@ -131,7 +131,7 @@ export default function ChatThread({
           </form>
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center bg-[linear-gradient(180deg,#fff_0%,var(--color-surface-alt)_100%)] p-10 text-center">
+        <div className="chat-thread-placeholder flex flex-1 flex-col items-center justify-center bg-[linear-gradient(180deg,#fff_0%,var(--color-surface-alt)_100%)] p-10 text-center">
           <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-white shadow-[0_14px_36px_rgba(15,23,42,0.08)]">
             <MessageCircle size={30} className="text-gray-300" />
           </div>

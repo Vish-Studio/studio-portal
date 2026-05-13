@@ -28,7 +28,7 @@ export default function ConfirmDialog({
   const isDanger = variant === 'danger';
 
   const icon = (
-    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${isDanger ? 'bg-red-50' : 'bg-gray-100'}`}>
+    <div className={`confirm-dialog-icon w-11 h-11 rounded-2xl flex items-center justify-center ${isDanger ? 'bg-red-50' : 'bg-gray-100'}`}>
       {isDanger
         ? <Trash2 size={20} className="text-red-500" />
         : <AlertTriangle size={20} className="text-gray-500" />
@@ -44,18 +44,18 @@ export default function ConfirmDialog({
       title={title}
       description={typeof message === 'string' ? message : undefined}
       footer={
-        <div className="flex gap-3">
+        <div className="confirm-dialog-actions flex gap-3">
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+            className="confirm-dialog-cancel flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             type="button"
             onClick={onConfirm}
-            className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
+            className={`confirm-dialog-confirm flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
               isDanger
                 ? 'bg-red-500 hover:bg-red-600 text-white'
                 : 'bg-black hover:bg-gray-800 text-white'
@@ -67,7 +67,7 @@ export default function ConfirmDialog({
       }
     >
       {typeof message !== 'string' && (
-        <div className="px-6 py-4 text-sm text-gray-500 font-medium">{message}</div>
+        <div className="confirm-dialog-message px-6 py-4 text-sm text-gray-500 font-medium">{message}</div>
       )}
     </Modal>
   );

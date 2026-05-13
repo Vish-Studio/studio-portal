@@ -22,7 +22,7 @@ const ButtonFab: FunctionComponent<FabProps> = ({
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
-      className={`btn-fab sm:hidden fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-black text-white shadow-xl
+      className={`button-fab btn-fab sm:hidden fixed bottom-6 right-6 z-30 w-14 h-14 rounded-full bg-black text-white shadow-xl
         hover:bg-gray-800 active:scale-95 transition-all duration-150 flex items-center justify-center ${className}`}
     >
       <Plus size={22} strokeWidth={2.5} />

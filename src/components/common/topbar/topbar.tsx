@@ -90,21 +90,21 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
   return (
     <div className="topbar border-none">
       {/* Main row */}
-      <div className="flex items-center justify-between gap-4">
+      <div className="topbar-main flex items-center justify-between gap-4">
         {/* Left: mobile menu + page title */}
-        <div className="flex items-center gap-4">
+        <div className="topbar-left flex items-center gap-4">
           <button
-            className="md:hidden text-gray-700 hover:text-black shrink-0 flex items-center justify-center rounded-md transition-colors"
+            className="topbar-menu-button md:hidden text-gray-700 hover:text-black shrink-0 flex items-center justify-center rounded-md transition-colors"
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <MaterialIcon name="menu" size={24} />
           </button>
-          <h2 className="type-page-title text-(--color-ink)">{title}</h2>
+          <h2 className="topbar-title type-page-title text-(--color-ink)">{title}</h2>
         </div>
 
         {/* Desktop search or custom actions */}
         {actions ? (
-          <div className="flex-1 flex justify-center">{actions}</div>
+          <div className="topbar-actions flex-1 flex justify-center">{actions}</div>
         ) : !hideSearch ? (
           <SearchBar
             className="hidden sm:block"
@@ -112,10 +112,10 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
             value={searchQuery}
             onChange={setSearchQuery}
           />
-        ) : <div className="flex-1" />}
+        ) : <div className="topbar-spacer flex-1" />}
 
         {/* Right icons */}
-        <div className="flex items-center gap-2 sm:gap-4 justify-end">
+        <div className="topbar-icons flex items-center gap-2 sm:gap-4 justify-end">
           {/* Mobile search toggle */}
           {!hideSearch && !actions && (
             <ButtonIcon
@@ -130,13 +130,13 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
           )}
 
           {/* Notifications */}
-          <div className="relative" ref={notifRef}>
+          <div className="topbar-notifications relative" ref={notifRef}>
             <ButtonIcon
               iconName="notifications"
               aria-label="Notifications"
               clickHandler={() => { setIsNotifOpen(v => !v); setIsUserOpen(false); }}
             >
-              <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-(--color-surface)" />
+              <div className="topbar-notification-dot absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-(--color-surface)" />
             </ButtonIcon>
 
             {isNotifOpen && (
@@ -145,7 +145,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
           </div>
 
           {/* User */}
-          <div className="relative" ref={userRef}>
+          <div className="topbar-user relative" ref={userRef}>
             <ButtonIcon
               iconName="person"
               aria-label="User menu"
@@ -161,7 +161,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
 
       {/* Mobile search bar — slides in below the main row */}
       {isMobileSearchOpen && !hideSearch && !actions && (
-        <div className="sm:hidden mt-3 animate-in slide-in-from-top-1 fade-in duration-150">
+        <div className="topbar-mobile-search sm:hidden mt-3 animate-in slide-in-from-top-1 fade-in duration-150">
           <SearchBar
             className="w-full!"
             placeholder="Search here..."

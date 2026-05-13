@@ -33,9 +33,9 @@ const StatusBadge: FunctionComponent<StatusBadgeProps> = ({ label, variant, clas
   const s = VARIANT_STYLES[variant];
   return (
     <span
-      className={`type-badge inline-flex items-center gap-1 rounded-[6px] px-1.5 py-0.5 ${s.badge} ${className}`}
+      className={`status-badge type-badge inline-flex items-center gap-1 rounded-[6px] px-1.5 py-0.5 ${s.badge} ${className}`}
     >
-      <span className={`h-1 w-1 shrink-0 rounded-full ${s.dot}`} />
+      <span className={`status-badge-dot h-1 w-1 shrink-0 rounded-full ${s.dot}`} />
       {label}
     </span>
   );

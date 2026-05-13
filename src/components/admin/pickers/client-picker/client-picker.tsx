@@ -33,9 +33,9 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
   }, []);
 
   return (
-    <div ref={ref} className="flex flex-col gap-1.5">
+    <div ref={ref} className="client-picker flex flex-col gap-1.5">
       {selected ? (
-        <div className="flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
+        <div className="client-picker-selected flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
           <Avatar name={selected.displayName} id={selected.id} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">{selected.displayName}</p>
@@ -53,7 +53,7 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
           </button>
         </div>
       ) : (
-        <div className="relative">
+        <div className="client-picker-search relative">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
             type="text"
@@ -63,13 +63,13 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
             className={`${inputCls(false)} pl-8`}
           />
           {query && filtered.length > 0 && (
-            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-44 overflow-y-auto">
+            <div className="client-picker-menu absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-44 overflow-y-auto">
               {filtered.map(c => (
                 <button
                   key={c.id}
                   type="button"
                   onClick={() => { onSelect(c.id); setQuery(''); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                  className="client-picker-option w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
                 >
                   <Avatar name={c.displayName} id={c.id} size="sm" />
                   <div className="min-w-0">
@@ -81,7 +81,7 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
             </div>
           )}
           {query && filtered.length === 0 && (
-            <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
+            <div className="client-picker-empty absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
               <p className="text-sm text-gray-400">No clients match &ldquo;{query}&rdquo;</p>
             </div>
           )}

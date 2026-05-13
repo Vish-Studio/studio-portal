@@ -55,10 +55,10 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
       className={`task-row flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-[14px] hover:bg-gray-50/80 hover:border-gray-200 transition-all duration-150 ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* Priority indicator */}
-      <span className={`w-1.5 h-1.5 rounded-xs shrink-0 ${PRIORITY_DOT[task.priority]}`} />
+      <span className={`task-row-priority w-1.5 h-1.5 rounded-xs shrink-0 ${PRIORITY_DOT[task.priority]}`} />
 
       {/* Title + project */}
-      <div className="min-w-0 flex-1">
+      <div className="task-row-meta min-w-0 flex-1">
         <p className="type-card-title truncate text-gray-900">{task.title}</p>
         {showProject && (
           <p className="type-meta truncate text-gray-400">{project?.name ?? 'No project'}</p>
@@ -76,7 +76,7 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
 
       {/* Assignees */}
       {assignees.length > 0 && (
-        <div className="hidden sm:block shrink-0">
+        <div className="task-row-assignees hidden sm:block shrink-0">
           <AvatarStack members={assignees} size="xs" limit={3} />
         </div>
       )}
@@ -90,14 +90,14 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
 
       {/* Status badge */}
       {showStatus && (
-        <div className="shrink-0">
+        <div className="task-row-status shrink-0">
           <TaskStatusBadge status={task.status} />
         </div>
       )}
 
       {/* Actions */}
       {menuActions.length > 0 && (
-        <div className="shrink-0" onClick={e => e.stopPropagation()}>
+        <div className="task-row-actions shrink-0" onClick={e => e.stopPropagation()}>
           <RowActionsMenu actions={menuActions} />
         </div>
       )}

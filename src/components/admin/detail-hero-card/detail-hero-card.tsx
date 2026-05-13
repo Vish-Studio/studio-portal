@@ -12,14 +12,14 @@ const ICON_BG  = { background:  'rgba(255,255,255,0.07)' } as const;
 const Root: FunctionComponent<{ children: React.ReactNode; className?: string }> = ({
   children, className = '',
 }) => (
-  <div className={`bg-(--color-ink) rounded-[28px] overflow-hidden ${className}`}>
+  <div className={`detail-hero-card bg-(--color-ink) rounded-[28px] overflow-hidden ${className}`}>
     {children}
   </div>
 );
 
 /** Padded hero area — place avatar/icon, name, badges, and date here. */
 const Hero: FunctionComponent<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="relative px-6 pt-7 pb-6 overflow-hidden">
+  <div className="detail-hero-card-hero relative px-6 pt-7 pb-6 overflow-hidden">
     {children}
   </div>
 );
@@ -28,7 +28,7 @@ const Hero: FunctionComponent<{ children: React.ReactNode }> = ({ children }) =>
 const Glow: FunctionComponent<{ className?: string }> = ({ className = '' }) => (
   <div
     aria-hidden="true"
-    className={`absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 pointer-events-none ${className}`}
+    className={`detail-hero-card-glow absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-10 pointer-events-none ${className}`}
     style={{ background: 'var(--color-accent-lime)' }}
   />
 );
@@ -37,7 +37,7 @@ const Glow: FunctionComponent<{ className?: string }> = ({ className = '' }) => 
 const Section: FunctionComponent<{ children: React.ReactNode; className?: string }> = ({
   children, className = '',
 }) => (
-  <div className={`border-t px-6 py-4 ${className}`} style={DIVIDER}>
+  <div className={`detail-hero-card-section border-t px-6 py-4 ${className}`} style={DIVIDER}>
     {children}
   </div>
 );
@@ -46,9 +46,9 @@ const Section: FunctionComponent<{ children: React.ReactNode; className?: string
 const IconRow: FunctionComponent<{ icon: React.ReactNode; children: React.ReactNode }> = ({
   icon, children,
 }) => (
-  <div className="flex items-center gap-3">
+  <div className="detail-hero-card-icon-row flex items-center gap-3">
     <div
-      className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+      className="detail-hero-card-icon w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
       style={ICON_BG}
     >
       {icon}
@@ -59,7 +59,7 @@ const IconRow: FunctionComponent<{ icon: React.ReactNode; children: React.ReactN
 
 /** 2-column stats grid section. */
 const Stats: FunctionComponent<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="border-t px-6 py-4 grid grid-cols-2 gap-3" style={DIVIDER}>
+  <div className="detail-hero-card-stats border-t px-6 py-4 grid grid-cols-2 gap-3" style={DIVIDER}>
     {children}
   </div>
 );
@@ -73,8 +73,8 @@ const Stat: FunctionComponent<{
   valueClassName?: string;
   valueStyle?: React.CSSProperties;
 }> = ({ label, icon, value, sub, valueClassName = 'text-white', valueStyle }) => (
-  <div className="rounded-[16px] p-3.5" style={STAT_BG}>
-    <div className="flex items-center gap-1.5 mb-1.5">
+  <div className="detail-hero-card-stat rounded-[16px] p-3.5" style={STAT_BG}>
+    <div className="detail-hero-card-stat-header flex items-center gap-1.5 mb-1.5">
       {icon && <span className="text-gray-500">{icon}</span>}
       <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">{label}</p>
     </div>
@@ -90,7 +90,7 @@ const Footer: FunctionComponent<{
   label: React.ReactNode;
   value: React.ReactNode;
 }> = ({ label, value }) => (
-  <div className="border-t px-6 py-3.5 flex items-center justify-between" style={DIVIDER}>
+  <div className="detail-hero-card-footer border-t px-6 py-3.5 flex items-center justify-between" style={DIVIDER}>
     <span className="text-xs text-gray-500">{label}</span>
     {value}
   </div>

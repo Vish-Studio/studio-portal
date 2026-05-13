@@ -87,13 +87,13 @@ const TableTab: FunctionComponent<TableTabProps> = ({
       )}
 
       {hasControls && (
-        <div className="flex shrink-0 items-center gap-2 md:mr-auto">
+        <div className="table-tab-controls flex shrink-0 items-center gap-2 md:mr-auto">
           {showViewToggle && (
-            <div className="hidden items-center gap-0.5 rounded-xl bg-gray-100 p-1 sm:flex">
+            <div className="table-tab-view-toggle hidden items-center gap-0.5 rounded-xl bg-gray-100 p-1 sm:flex">
               <button
                 type="button"
                 onClick={() => onViewModeChange('grid')}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                className={`table-tab-view-button flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-white text-gray-800 shadow-sm'
                     : 'text-gray-400 hover:bg-white/70 hover:text-gray-700'
@@ -105,7 +105,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
               <button
                 type="button"
                 onClick={() => onViewModeChange('list')}
-                className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
+                className={`table-tab-view-button flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${
                   viewMode === 'list'
                     ? 'bg-white text-gray-800 shadow-sm'
                     : 'text-gray-400 hover:bg-white/70 hover:text-gray-700'
@@ -118,11 +118,11 @@ const TableTab: FunctionComponent<TableTabProps> = ({
           )}
 
           {showSort && (
-            <div ref={sortRef} className="relative">
+            <div ref={sortRef} className="table-tab-sort relative">
               <button
                 type="button"
                 onClick={() => setIsSortOpen(open => !open)}
-                className="type-control flex h-10 items-center gap-2 rounded-xl bg-gray-100 px-3 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                className="table-tab-sort-trigger type-control flex h-10 items-center gap-2 rounded-xl bg-gray-100 px-3 text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
                 aria-label="Sort"
                 aria-haspopup="listbox"
                 aria-expanded={isSortOpen}
@@ -135,16 +135,16 @@ const TableTab: FunctionComponent<TableTabProps> = ({
               {isSortOpen && (
                 <div
                   role="listbox"
-                  className="absolute right-0 top-[calc(100%+6px)] z-50 min-w-52 rounded-2xl border border-gray-200 bg-white p-2 shadow-[0_18px_50px_rgba(15,23,42,0.16)]"
+                  className="table-tab-sort-menu absolute right-0 top-[calc(100%+6px)] z-50 min-w-52 rounded-2xl border border-gray-200 bg-white p-2 shadow-[0_18px_50px_rgba(15,23,42,0.16)]"
                 >
                   {onSortDirectionChange && (
-                    <div className="mb-2 grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
+                    <div className="table-tab-sort-direction mb-2 grid grid-cols-2 gap-1 rounded-xl bg-gray-100 p-1">
                       {(['asc', 'desc'] as const).map(direction => (
                         <button
                           key={direction}
                           type="button"
                           onClick={() => onSortDirectionChange(direction)}
-                          className={`type-meta rounded-lg px-3 py-1.5 transition-colors ${
+                          className={`table-tab-sort-direction-button type-meta rounded-lg px-3 py-1.5 transition-colors ${
                             currentDirection === direction
                               ? 'bg-white text-gray-900 shadow-sm'
                               : 'text-gray-400 hover:text-gray-700'
@@ -169,7 +169,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
                           onSortChange?.(option.key);
                           setIsSortOpen(false);
                         }}
-                        className={`type-label flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-colors ${
+                        className={`table-tab-sort-option type-label flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-left transition-colors ${
                           isSelected
                             ? 'bg-gray-100 text-gray-900'
                             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
@@ -194,7 +194,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
         <button
           type="button"
           onClick={onAction}
-          className="type-control ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 sm:flex"
+          className="table-tab-action type-control ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 sm:flex"
         >
           <MaterialIcon name='add' size={20} />
           {actionLabel}

@@ -21,14 +21,14 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) 
   const totalRemaining = totalAgreed - totalPaid;
 
   return (
-    <DetailHeroCard className={className}>
+    <DetailHeroCard className={`client-detail-card ${className}`}>
       {/* ── Hero ── */}
       <DetailHeroCard.Hero>
         <DetailHeroCard.Glow />
 
         {/* Letter avatar */}
         <div
-          className={`w-14 h-14 rounded-2xl ${avatarBg} flex items-center justify-center text-2xl font-black text-white mb-4 shadow-lg`}
+          className={`client-detail-card-avatar w-14 h-14 rounded-2xl ${avatarBg} flex items-center justify-center text-2xl font-black text-white mb-4 shadow-lg`}
         >
           {client.displayName.charAt(0).toUpperCase()}
         </div>

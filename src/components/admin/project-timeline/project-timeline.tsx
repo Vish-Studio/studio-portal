@@ -53,8 +53,9 @@ export default function ProjectTimeline({
     <CardContent
       iconName="route"
       title="Timeline"
+      className="project-timeline"
       action={
-        <div className="flex flex-wrap items-center justify-end gap-1.5">
+        <div className="project-timeline-actions flex flex-wrap items-center justify-end gap-1.5">
           <span className="hidden sm:inline text-[11px] font-semibold text-gray-400">
             {doneCount}/{project.phases.length} done · {progress}%
           </span>
@@ -68,8 +69,8 @@ export default function ProjectTimeline({
       }
       bodyClassName="px-4 md:px-6 py-4 md:py-5"
     >
-      <div className="space-y-5">
-        <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 sm:hidden">
+      <div className="project-timeline-body space-y-5">
+        <div className="project-timeline-mobile-actions flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 sm:hidden">
           <span className="text-[11px] font-semibold text-gray-400">{doneCount}/{project.phases.length} done · {progress}%</span>
           <Button type="button" variant="secondary" size="sm" iconLeft={<Plus size={13} />} onClick={() => onAddPhase(project.phases.length - 1)}>
             Add phase
@@ -77,8 +78,8 @@ export default function ProjectTimeline({
         </div>
 
         {project.phases.length > 0 && (
-          <div className="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
-            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+          <div className="project-timeline-strip rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4">
+            <div className="project-timeline-strip-list flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {project.phases.map((phase, i) => {
                 const isDone = phase.status === 'done';
                 const isActive = phase.status === 'active';
@@ -88,7 +89,7 @@ export default function ProjectTimeline({
                     key={phase.id}
                     type="button"
                     onClick={() => onEditPhase(phase)}
-                    className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-bold transition-colors ${
+                    className={`project-timeline-chip flex shrink-0 items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-bold transition-colors ${
                       isDone
                         ? 'bg-(--color-ink) text-white'
                         : isActive
@@ -106,13 +107,13 @@ export default function ProjectTimeline({
           </div>
         )}
 
-        <div className="hidden grid-cols-[minmax(260px,1fr)_minmax(220px,340px)_170px] items-center gap-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-300 lg:grid">
+        <div className="project-timeline-head hidden grid-cols-[minmax(260px,1fr)_minmax(220px,340px)_170px] items-center gap-3 px-2 text-[10px] font-bold uppercase tracking-widest text-gray-300 lg:grid">
           <span>Phase</span>
           <span>Document</span>
           <span className="text-right">Action</span>
         </div>
 
-        <div className="grid gap-2.5">
+        <div className="project-timeline-list grid gap-2.5">
           {project.phases.map((phase, i) => {
             const assignment = getPhaseAssignment(project.id, phase.id);
             const tplMeta = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
@@ -122,12 +123,12 @@ export default function ProjectTimeline({
             return (
               <div
                 key={phase.id}
-                className={`group rounded-[14px] border bg-white transition-colors ${
+                className={`project-timeline-item group rounded-[14px] border bg-white transition-colors ${
                   isActive ? 'border-amber-300 bg-amber-50/30 shadow-[0_0_0_1px_rgba(251,191,36,0.18)]' : 'border-gray-100 hover:border-gray-200'
                 }`}
               >
-                <div className="grid gap-3 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(260px,1fr)_minmax(220px,340px)_170px] lg:items-center">
-                  <button type="button" onClick={() => onEditPhase(phase)} className="flex min-w-0 items-center gap-3 text-left">
+                <div className="project-timeline-item-grid grid gap-3 px-3 py-3 sm:px-4 lg:grid-cols-[minmax(260px,1fr)_minmax(220px,340px)_170px] lg:items-center">
+                  <button type="button" onClick={() => onEditPhase(phase)} className="project-timeline-phase flex min-w-0 items-center gap-3 text-left">
                     <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                       isDone ? 'bg-(--color-ink) text-white' :
                       isActive ? 'bg-amber-50 text-amber-600' :
@@ -170,7 +171,7 @@ export default function ProjectTimeline({
                     </button>
                   )}
 
-                  <div className="flex items-center justify-end gap-1.5">
+                  <div className="project-timeline-item-actions flex items-center justify-end gap-1.5">
                     {isActive && !isDone && (
                       <Button type="button" size="sm" onClick={() => onCompletePhase(phase.id)}>
                         Complete & advance
@@ -205,7 +206,7 @@ export default function ProjectTimeline({
           })}
 
           {project.phases.length === 0 && (
-            <div className="py-8 flex flex-col items-center gap-3 text-center">
+            <div className="project-timeline-empty py-8 flex flex-col items-center gap-3 text-center">
               <MaterialIcon name="checklist" size={24} className="text-gray-200" />
               <p className="text-xs font-semibold text-gray-400">No phases yet. Add a phase or start with a default timeline.</p>
               <Button type="button" size="sm" onClick={() => onAddPhase(-1)}>Add phase</Button>

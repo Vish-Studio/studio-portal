@@ -76,14 +76,14 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
   const selectedLabel = TIMELINE_ICONS.find(i => i.name === value)?.label ?? value;
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref} className="icon-picker relative">
       {/* Trigger */}
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-2 w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
+        className="icon-picker-trigger flex items-center gap-2 w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 hover:border-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
       >
-        <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+        <div className="icon-picker-preview w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
           <MaterialIcon name={value || 'flag'} size={16} className="text-gray-600" />
         </div>
         <span className="text-sm text-gray-700 font-medium flex-1 text-left">{selectedLabel}</span>
@@ -92,18 +92,18 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
 
       {/* Dropdown grid */}
       {open && (
-        <div className="absolute top-full mt-2 left-0 z-50 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 w-72">
+        <div className="icon-picker-menu absolute top-full mt-2 left-0 z-50 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 w-72">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5 px-1">
             Choose icon
           </p>
-          <div className="grid grid-cols-6 gap-1 max-h-52 overflow-y-auto">
+          <div className="icon-picker-grid grid grid-cols-6 gap-1 max-h-52 overflow-y-auto">
             {TIMELINE_ICONS.map(opt => (
               <button
                 key={opt.name}
                 type="button"
                 title={opt.label}
                 onClick={() => { onChange(opt.name); setOpen(false); }}
-                className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
+                className={`icon-picker-option flex flex-col items-center gap-1 p-2 rounded-xl transition-all ${
                   value === opt.name
                     ? 'bg-gray-900 text-white'
                     : 'hover:bg-gray-100 text-gray-600'

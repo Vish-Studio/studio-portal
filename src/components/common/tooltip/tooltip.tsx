@@ -18,13 +18,13 @@ const SIDE_CLASSES: Record<TooltipSide, string> = {
 
 export default function Tooltip({ content, children, side = 'top', className = '' }: TooltipProps) {
   return (
-    <div className={`group/tooltip relative inline-flex ${className}`}>
+    <div className={`tooltip group/tooltip relative inline-flex ${className}`}>
       {children}
       <div
-        className={`pointer-events-none absolute z-50 ${SIDE_CLASSES[side]}
+        className={`tooltip-content pointer-events-none absolute z-50 ${SIDE_CLASSES[side]}
           opacity-0 group-hover/tooltip:opacity-100 transition-opacity duration-150`}
       >
-        <span className="block bg-(--color-ink) text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
+        <span className="tooltip-label block bg-(--color-ink) text-white text-[11px] font-semibold px-2.5 py-1.5 rounded-lg whitespace-nowrap shadow-lg">
           {content}
         </span>
       </div>

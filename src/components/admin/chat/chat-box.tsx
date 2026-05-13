@@ -44,13 +44,13 @@ export default function ChatBox({
     <section
       aria-label="Chat conversations"
       className={cn(
-        'relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
+        'chat-box relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
         mode === 'client' && 'hidden lg:block',
         !isVisible && 'hidden lg:block',
       )}
     >
-      <div className="border-b border-gray-100 p-4">
-        <div className="flex items-center justify-between gap-3">
+      <div className="chat-box-header border-b border-gray-100 p-4">
+        <div className="chat-box-header-row flex items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="type-section-title text-(--color-ink)">Messages</h2>
             <p className="type-muted mt-0.5 text-gray-400">
@@ -73,7 +73,7 @@ export default function ChatBox({
         </div>
       </div>
 
-      <div className="p-4 pb-0">
+      <div className="chat-box-tabs p-4 pb-0">
         {mode === 'admin' && (
           <Tabs
             items={[
@@ -91,9 +91,9 @@ export default function ChatBox({
         )}
       </div>
 
-      <div className="chat-scrollbar overflow-visible px-4 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+      <div className="chat-box-list chat-scrollbar overflow-visible px-4 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {participants.length === 0 && (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-(--color-surface-alt) p-6 text-center">
+          <div className="chat-box-empty rounded-2xl border border-dashed border-gray-200 bg-(--color-surface-alt) p-6 text-center">
             <p className="type-card-title text-(--color-ink)">No conversations found</p>
             <p className="type-muted mt-1 text-gray-400">
               Try another search or start a new chat.
@@ -101,7 +101,7 @@ export default function ChatBox({
           </div>
         )}
 
-        <div className="divide-y divide-gray-100">
+        <div className="chat-box-items divide-y divide-gray-100">
           {participants.map(participant => {
             const conversation = getConversationFor(conversations, participant);
             const last = conversation?.messages.at(-1);
@@ -114,7 +114,7 @@ export default function ChatBox({
                 type="button"
                 onClick={() => onSelectParticipant(participant)}
                 className={cn(
-                  'group my-1 flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left transition-all',
+                  'chat-box-item group my-1 flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left transition-all',
                   active
                     ? 'bg-(--color-ink) text-white'
                     : 'bg-white hover:bg-(--color-surface-alt)',

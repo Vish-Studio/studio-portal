@@ -61,10 +61,10 @@ const ProjectCard = ({
       onClick={() => navigate(resolveDetailPath(detailPath, project))}
       className={`project-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-300 hover:bg-gray-50 hover:cursor-pointer transition-all duration-150 flex flex-col ${className}`}
     >
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-start justify-between gap-2 mb-1">
+      <div className="project-card-body px-4 pt-4 pb-3">
+        <div className="project-card-header flex items-start justify-between gap-2 mb-1">
           <h3 className="type-card-title line-clamp-2 min-w-0 flex-1 text-gray-900">{project.name}</h3>
-          <div className="flex items-center gap-1 shrink-0 mt-0.5" onClick={e => e.stopPropagation()}>
+          <div className="project-card-actions flex items-center gap-1 shrink-0 mt-0.5" onClick={e => e.stopPropagation()}>
             <ProjectStatusBadge status={project.status} />
             {actions && <RowActionsMenu actions={actions} />}
           </div>
@@ -74,8 +74,8 @@ const ProjectCard = ({
           {accent.label}{client ? ` · ${client.displayName}` : ''}
         </p>
 
-        <div className="mt-3.5">
-          <div className="flex items-center justify-between mb-1.5">
+        <div className="project-card-progress mt-3.5">
+          <div className="project-card-progress-meta flex items-center justify-between mb-1.5">
             <span className="type-meta text-gray-400">
               {completedCount}/{project.phases.length} phases
               {activePhase && project.status === 'active' && (
@@ -91,7 +91,7 @@ const ProjectCard = ({
       </div>
 
       {clientAction && (
-        <div className="mx-4 mb-3 flex items-center gap-3 rounded-[12px] border border-violet-200 bg-violet-50 px-3 py-2.5" onClick={e => e.stopPropagation()}>
+        <div className="project-card-client-action mx-4 mb-3 flex items-center gap-3 rounded-[12px] border border-violet-200 bg-violet-50 px-3 py-2.5" onClick={e => e.stopPropagation()}>
           <MaterialIcon name="person" size={14} className="shrink-0 text-violet-500" />
           <div className="min-w-0 flex-1">
             <p className="type-meta truncate font-semibold text-violet-900">{clientAction.label}</p>
@@ -107,8 +107,8 @@ const ProjectCard = ({
         </div>
       )}
 
-      <div className="px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
-        <div className="type-muted flex flex-wrap items-center gap-2 text-gray-400">
+      <div className="project-card-footer px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
+        <div className="project-card-footer-meta type-muted flex flex-wrap items-center gap-2 text-gray-400">
           <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>
           <span className="text-gray-200">·</span>
           <span>{project.timeline}</span>
@@ -116,7 +116,7 @@ const ProjectCard = ({
             <><span className="text-gray-200">·</span><span className="font-semibold text-green-500">Settled</span></>
           )}
         </div>
-        <div className="flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
+        <div className="project-card-team flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
           {projectMembers.length > 0 && <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />}
         </div>
       </div>
@@ -151,8 +151,8 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
       onClick={() => navigate(resolveDetailPath(detailPath, project))}
       className="project-card-mini relative bg-white border border-gray-200 rounded-[12px] px-3 py-3 hover:bg-gray-50 hover:border-gray-300 hover:cursor-pointer transition-all duration-150 md:px-4"
     >
-      <div className="grid items-center gap-3 md:grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px]">
-        <div className="min-w-0">
+      <div className="project-card-mini-grid grid items-center gap-3 md:grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px]">
+        <div className="project-card-mini-meta min-w-0">
           <div className="flex items-center gap-2">
             <MaterialIcon name={accent.icon} size={15} className="text-gray-400 shrink-0" />
             <p className="type-card-title truncate text-gray-900">{project.name}</p>
@@ -162,7 +162,7 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
           </p>
         </div>
 
-        <div className="flex items-center gap-2 md:justify-end">
+        <div className="project-card-mini-progress flex items-center gap-2 md:justify-end">
           <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 md:w-16">
             <div className="h-full rounded-full bg-gray-600" style={{ width: `${progress}%` }} />
           </div>
@@ -177,7 +177,7 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
           {remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'}
         </p>
 
-        <div className="hidden md:flex justify-end" onClick={e => e.stopPropagation()}>
+        <div className="project-card-mini-client-action hidden md:flex justify-end" onClick={e => e.stopPropagation()}>
           {clientAction ? (
             <button
               type="button"
@@ -190,12 +190,12 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
           ) : <span />}
         </div>
 
-        <div className="flex justify-start md:justify-end">
+        <div className="project-card-mini-status flex justify-start md:justify-end">
           <ProjectStatusBadge status={project.status} />
         </div>
 
         {actions && (
-          <div className="absolute right-3 top-3 md:static md:flex md:justify-end" onClick={e => e.stopPropagation()}>
+          <div className="project-card-mini-actions absolute right-3 top-3 md:static md:flex md:justify-end" onClick={e => e.stopPropagation()}>
             <RowActionsMenu actions={actions} />
           </div>
         )}

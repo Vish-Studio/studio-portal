@@ -89,15 +89,15 @@ const Calendar: FunctionComponent<CalendarProps> = ({
 
   return (
     <section
-      className={`rounded-[18px] bg-(--color-ink) text-white ${compact ? 'p-4 sm:p-5' : 'w-full p-4 md:p-6'
+      className={`calendar rounded-[18px] bg-(--color-ink) text-white ${compact ? 'p-4 sm:p-5' : 'w-full p-4 md:p-6'
         } ${className}`}
     >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
+      <div className="calendar-header flex items-center justify-between gap-3">
+        <div className="calendar-title min-w-0">
           <button
             type="button"
             onClick={() => setPickerOpen(open => !open)}
-            className="text-left"
+            className="calendar-title-trigger text-left"
             aria-expanded={pickerOpen}
           >
             <h2 className={`${compact ? 'text-sm lg:text-[24px]' : 'text-[28px] md:text-[32px]'} font-bold leading-none text-white`}>
@@ -106,11 +106,11 @@ const Calendar: FunctionComponent<CalendarProps> = ({
           </button>
         </div>
 
-        <div className={`flex items-center ${compact ? 'gap-1' : 'gap-4'}`}>
+        <div className={`calendar-nav flex items-center ${compact ? 'gap-1' : 'gap-4'}`}>
           <button
             type="button"
             onClick={() => moveMonth(-1)}
-            className={`${compact ? 'h-7 w-7 rounded-lg' : 'h-9 w-9 rounded-xl'} flex items-center justify-center text-gray-400 transition-colors hover:bg-white/10 hover:text-white`}
+            className={`calendar-nav-button ${compact ? 'h-7 w-7 rounded-lg' : 'h-9 w-9 rounded-xl'} flex items-center justify-center text-gray-400 transition-colors hover:bg-white/10 hover:text-white`}
             aria-label="Previous month"
           >
             <ChevronLeft size={compact ? 18 : 22} />
@@ -118,7 +118,7 @@ const Calendar: FunctionComponent<CalendarProps> = ({
           <button
             type="button"
             onClick={() => moveMonth(1)}
-            className={`${compact ? 'h-7 w-7 rounded-lg' : 'h-9 w-9 rounded-xl'} flex items-center justify-center text-gray-400 transition-colors hover:bg-white/10 hover:text-white`}
+            className={`calendar-nav-button ${compact ? 'h-7 w-7 rounded-lg' : 'h-9 w-9 rounded-xl'} flex items-center justify-center text-gray-400 transition-colors hover:bg-white/10 hover:text-white`}
             aria-label="Next month"
           >
             <ChevronRight size={compact ? 18 : 22} />
@@ -127,7 +127,7 @@ const Calendar: FunctionComponent<CalendarProps> = ({
       </div>
 
       {pickerOpen && (
-        <div className={`${compact ? 'mt-3' : 'mt-5'} grid gap-2 sm:grid-cols-2`}>
+        <div className={`calendar-picker ${compact ? 'mt-3' : 'mt-5'} grid gap-2 sm:grid-cols-2`}>
           <Select
             value={String(visibleMonth.getMonth())}
             onChange={(event) => setCalendarMonth(visibleMonth.getFullYear(), Number(event.target.value))}
@@ -151,11 +151,11 @@ const Calendar: FunctionComponent<CalendarProps> = ({
         </div>
       )}
 
-      <div className={`${compact ? 'mt-6' : 'mt-8'} grid grid-cols-7 ${compact ? 'gap-x-1.5 gap-y-3' : 'gap-x-2 gap-y-4'}`}>
+      <div className={`calendar-grid ${compact ? 'mt-6' : 'mt-8'} grid grid-cols-7 ${compact ? 'gap-x-1.5 gap-y-3' : 'gap-x-2 gap-y-4'}`}>
         {weekDays.map(day => (
           <span
             key={day}
-            className={`text-center font-bold uppercase text-gray-400 ${compact ? 'text-[9px]' : 'text-[11px] tracking-widest'}`}
+            className={`calendar-weekday text-center font-bold uppercase text-gray-400 ${compact ? 'text-[9px]' : 'text-[11px] tracking-widest'}`}
           >
             {day.slice(0, 2)}
           </span>
@@ -171,7 +171,7 @@ const Calendar: FunctionComponent<CalendarProps> = ({
               key={date.toISOString()}
               type="button"
               onClick={() => selectDate(date)}
-              className={`flex items-center justify-center rounded-full font-bold transition-colors ${compact ? 'h-8 text-xs' : 'h-10 text-sm'
+              className={`calendar-day flex items-center justify-center rounded-full font-bold transition-colors ${compact ? 'h-8 text-xs' : 'h-10 text-sm'
                 } ${selected
                   ? 'bg-(--color-accent-lime) text-(--color-ink)'
                   : 'text-gray-300 hover:bg-white/10 hover:text-white'

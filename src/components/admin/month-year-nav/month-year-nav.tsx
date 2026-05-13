@@ -19,14 +19,14 @@ export default function MonthYearNav({ value, onChange }: MonthYearNavProps) {
   const years = Array.from({ length: 21 }, (_, i) => year - 10 + i);
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="month-year-nav flex flex-wrap items-center justify-end gap-2">
       <Button type="button" variant="ghost" size="sm" onClick={goToToday} className="hidden sm:inline-flex">
         Today
       </Button>
 
       <ButtonIcon iconName="chevron_left" clickHandler={prevMonth} aria-label="Previous month" />
 
-      <div className="flex items-center gap-1 rounded-xl bg-gray-100 p-1">
+      <div className="month-year-nav-picker flex items-center gap-1 rounded-xl bg-gray-100 p-1">
         <Select
           value={month}
           onChange={(e) => onChange(new Date(year, Number(e.target.value), 1))}

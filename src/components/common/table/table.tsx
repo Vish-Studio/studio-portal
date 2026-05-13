@@ -59,10 +59,10 @@ export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
   }, [open]);
 
   return (
-    <div ref={ref} className="relative inline-flex">
+    <div ref={ref} className="row-actions-menu relative inline-flex">
       <button
         onClick={e => { e.stopPropagation(); setOpen(v => !v); }}
-        className={`w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 transition-colors
+        className={`row-actions-menu-trigger w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 transition-colors
           ${open ? 'bg-gray-100 text-gray-700' : 'hover:bg-gray-100 hover:text-gray-700'}`}
         aria-label="Row actions"
       >
@@ -71,14 +71,14 @@ export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
 
       {open && (
         <div
-          className="absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden min-w-40"
+          className="row-actions-menu-dropdown absolute right-0 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden min-w-40"
           onClick={e => e.stopPropagation()}
         >
           {actions.map((action, i) => (
             <button
               key={i}
               onClick={() => { action.onClick(); setOpen(false); }}
-              className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors text-left
+              className={`row-actions-menu-item w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm font-medium transition-colors text-left
                 ${action.variant === 'danger' ? 'text-red-600 hover:bg-red-50' : 'text-gray-700 hover:bg-gray-50'}`}
             >
               {action.icon && <span className="shrink-0 opacity-70">{action.icon}</span>}
@@ -98,16 +98,16 @@ export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
 
 export const RowActions = ({ actions }: { actions: RowAction[] }) => (
   <div
-    className="flex items-center justify-end"
+    className="row-actions flex items-center justify-end"
     onClick={e => e.stopPropagation()}
   >
     {/* Mobile / tablet — compact dropdown */}
-    <div className="md:hidden">
+    <div className="row-actions-mobile md:hidden">
       <RowActionsMenu actions={actions} />
     </div>
 
     {/* Desktop — inline icon buttons shown in a row */}
-    <div className="hidden md:flex items-center gap-0.5">
+    <div className="row-actions-desktop hidden md:flex items-center gap-0.5">
       {actions.map((action, i) => (
         <button
           key={i}
@@ -115,7 +115,7 @@ export const RowActions = ({ actions }: { actions: RowAction[] }) => (
           onClick={action.onClick}
           title={action.label}
           aria-label={action.label}
-          className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors shrink-0 ${
+          className={`row-actions-button w-8 h-8 flex items-center justify-center rounded-lg transition-colors shrink-0 ${
             action.variant === 'danger'
               ? 'text-gray-300 hover:text-red-600 hover:bg-red-50'
               : 'text-gray-300 hover:text-gray-700 hover:bg-gray-100'
@@ -191,10 +191,10 @@ const TableData = <T extends { id: string }>({
   return (
     <div className={`table-data w-full max-w-full bg-white border border-gray-200 rounded-[18px] overflow-hidden flex flex-col h-full ${className}`}>
 
-      <div className="overflow-auto flex-1 min-h-0">
-        <table className="min-w-[720px] border-separate border-spacing-0 sm:min-w-full">
+      <div className="table-data-scroll overflow-auto flex-1 min-h-0">
+        <table className="table-data-table min-w-[720px] border-separate border-spacing-0 sm:min-w-full">
 
-          <thead className="sticky top-0 z-10">
+          <thead className="table-data-head sticky top-0 z-10">
             <tr className="bg-gray-50">
               {columns.map(col => {
                 const sortable = isSortable(col);
@@ -234,7 +234,7 @@ const TableData = <T extends { id: string }>({
             </tr>
           </thead>
 
-          <tbody>
+          <tbody className="table-data-body">
             {loading ? (
               Array.from({ length: loadingRows }).map((_, i) => (
                 <tr key={`sk-${i}`} className="border-b border-gray-100 last:border-0">
@@ -248,7 +248,7 @@ const TableData = <T extends { id: string }>({
                       ].filter(Boolean).join(' ')}
                     >
                       <div
-                        className="h-3.5 rounded-full bg-gray-100 animate-pulse"
+                        className="table-data-skeleton h-3.5 rounded-full bg-gray-100 animate-pulse"
                         style={{ width: `${55 + ((i * 13 + col.key.length * 7) % 35)}%` }}
                       />
                     </td>
@@ -297,7 +297,7 @@ const TableData = <T extends { id: string }>({
       </div>
 
       {!loading && sortedData.length > 0 && (
-        <div className="px-4 py-2.5 border-t border-gray-100 bg-gray-50/40 shrink-0">
+        <div className="table-data-footer px-4 py-2.5 border-t border-gray-100 bg-gray-50/40 shrink-0">
           <span className="text-xs text-gray-400 font-medium">
             {sortedData.length} record{sortedData.length !== 1 ? 's' : ''}
             {sortKey && (

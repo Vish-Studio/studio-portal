@@ -56,18 +56,18 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
       className={`task-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-200 hover:bg-gray-50 transition-all duration-150 flex flex-col ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* ── Body ── */}
-      <div className="px-4 pt-4 pb-3 flex-1">
+      <div className="task-card-body px-4 pt-4 pb-3 flex-1">
 
         {/* Meta row: priority dot + project name + actions */}
-        <div className="flex items-center justify-between gap-2 mb-2.5">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_DOT[task.priority]}`} />
+        <div className="task-card-meta flex items-center justify-between gap-2 mb-2.5">
+          <div className="task-card-project flex items-center gap-1.5 min-w-0">
+            <span className={`task-card-priority w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_DOT[task.priority]}`} />
             <span className="type-meta truncate text-gray-400">
               {project?.name ?? 'No project'}
             </span>
           </div>
           {menuActions.length > 0 && (
-            <div className="shrink-0" onClick={e => e.stopPropagation()}>
+            <div className="task-card-actions shrink-0" onClick={e => e.stopPropagation()}>
               <RowActionsMenu actions={menuActions} />
             </div>
           )}
@@ -87,8 +87,8 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
       </div>
 
       {/* ── Footer ── */}
-      <div className="px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
-        <div className="flex items-center gap-2 min-w-0">
+      <div className="task-card-footer px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
+        <div className="task-card-footer-meta flex items-center gap-2 min-w-0">
           {showStatus && <TaskStatusBadge status={task.status} />}
           {clientAssignee && (
             <span className="type-count hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-gray-500 sm:flex">

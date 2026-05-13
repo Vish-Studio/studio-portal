@@ -36,9 +36,9 @@ function InfoBlock({
   tone?: 'default' | 'danger';
 }) {
   return (
-    <div className="rounded-2xl bg-(--color-surface) p-4">
-      <div className="flex items-start gap-3">
-        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tone === 'danger' ? 'bg-red-50 text-red-500' : 'bg-white text-gray-500'}`}>
+    <div className="task-detail-info-block rounded-2xl bg-(--color-surface) p-4">
+      <div className="task-detail-info-block-row flex items-start gap-3">
+        <div className={`task-detail-info-block-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${tone === 'danger' ? 'bg-red-50 text-red-500' : 'bg-white text-gray-500'}`}>
           <MaterialIcon name={icon} size={17} />
         </div>
         <div className="min-w-0 flex-1">
@@ -70,12 +70,12 @@ export default function TaskDetailModal({ task, onClose, onEdit, onDelete }: Tas
       description={project?.name ?? 'No linked project'}
       width="md"
     >
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          <div className="mb-5 rounded-[18px] border border-gray-100 bg-white p-4 shadow-sm">
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[task.priority]}`} />
-              <div className="min-w-0 flex-1">
+      <div className="task-detail flex min-h-0 flex-1 flex-col">
+        <div className="task-detail-body flex-1 overflow-y-auto px-6 py-5">
+          <div className="task-detail-summary mb-5 rounded-[18px] border border-gray-100 bg-white p-4 shadow-sm">
+            <div className="task-detail-summary-header mb-4 flex items-start justify-between gap-3">
+              <span className={`task-detail-priority mt-1 h-2 w-2 shrink-0 rounded-full ${PRIORITY_DOT[task.priority]}`} />
+              <div className="task-detail-title min-w-0 flex-1">
                 <h2 className="text-xl font-bold leading-tight text-(--color-ink)">{task.title}</h2>
                 <p className="mt-2 text-xs font-semibold text-gray-400">
                   Updated {formatDistanceToNow(task.updatedAt, { addSuffix: true })}
@@ -95,7 +95,7 @@ export default function TaskDetailModal({ task, onClose, onEdit, onDelete }: Tas
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
+          <div className="task-detail-grid grid grid-cols-1 gap-3">
             <InfoBlock icon="flag" label="Priority">
               <div className="flex items-center gap-2">
                 <span className={`h-2 w-2 rounded-full ${PRIORITY_DOT[task.priority]}`} />

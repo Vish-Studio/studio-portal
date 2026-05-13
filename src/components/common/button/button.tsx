@@ -41,7 +41,7 @@ export default function Button({
     <button
       type="button"
       disabled={isDisabled}
-      className={`type-control inline-flex items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`button type-control inline-flex items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >
       {loading ? <Loader2 size={14} className="animate-spin" /> : iconLeft}

@@ -38,10 +38,10 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
       description={config.label}
       width="md"
     >
-      <div className="flex flex-col flex-1 min-h-0">
-        <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
-          <div className={`flex items-center gap-3 rounded-2xl ${config.iconBgClass} px-4 py-3`}>
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${config.textClass} bg-white/60`}>
+      <div className="event-details flex flex-col flex-1 min-h-0">
+        <div className="event-details-body flex-1 overflow-y-auto px-6 py-5 flex flex-col gap-5">
+          <div className={`event-details-summary flex items-center gap-3 rounded-2xl ${config.iconBgClass} px-4 py-3`}>
+            <div className={`event-details-summary-icon w-10 h-10 rounded-xl flex items-center justify-center ${config.textClass} bg-white/60`}>
               <MaterialIcon name={config.icon} size={20} fill />
             </div>
             <div className="min-w-0">
@@ -51,9 +51,9 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
           </div>
 
           {/* Time */}
-          <div>
+          <div className="event-details-section">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Time</p>
-            <div className="flex items-center gap-2">
+            <div className="event-details-time flex items-center gap-2">
               <MaterialIcon name="schedule" size={16} className="text-gray-500" />
               <p className="text-sm font-medium text-gray-700">{event.time}</p>
             </div>
@@ -61,11 +61,11 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
 
           {/* Call Link */}
           {event.callLink && (
-            <div>
+            <div className="event-details-section">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Call Link</p>
               <button
                 onClick={openCallLink}
-                className="w-full flex items-center gap-3 p-3 bg-(--color-surface) border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors group"
+                className="event-details-call-link w-full flex items-center gap-3 p-3 bg-(--color-surface) border border-gray-100 rounded-2xl hover:bg-gray-50 transition-colors group"
               >
                 <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600 group-hover:bg-blue-200 transition-colors">
                   <Phone size={16} />
@@ -80,16 +80,16 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
           )}
 
           {event.description && (
-            <div>
+            <div className="event-details-section">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Notes</p>
               <p className="text-sm font-medium text-gray-700 rounded-2xl bg-(--color-surface) border border-gray-100 p-4">{event.description}</p>
             </div>
           )}
 
           {(project || phase || client || assignedMembers.length > 0) && (
-            <div>
+            <div className="event-details-section">
               <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5">Linked work</p>
-              <div className="rounded-2xl bg-(--color-surface) border border-gray-100 p-4 space-y-3">
+              <div className="event-details-linked rounded-2xl bg-(--color-surface) border border-gray-100 p-4 space-y-3">
                 {project && (
                   <div className="flex items-center gap-2">
                     <MaterialIcon name="work" size={15} className="text-gray-400" />
@@ -121,8 +121,8 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
           )}
 
           {/* Event Details */}
-          <div className="bg-(--color-surface) rounded-2xl p-4 border border-gray-100">
-            <div className="flex items-start gap-3">
+          <div className="event-details-meta bg-(--color-surface) rounded-2xl p-4 border border-gray-100">
+            <div className="event-details-meta-row flex items-start gap-3">
               <div className={`w-2 h-2 rounded-full ${config.dotClass} mt-2 shrink-0`} />
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Event Details</p>

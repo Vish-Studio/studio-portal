@@ -74,21 +74,21 @@ export default function Modal({
       onClick={onClose}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
+      <div className="modal-overlay absolute inset-0 bg-black/30 backdrop-blur-sm" />
 
       {/* Panel */}
       <div
-        className={`relative w-full ${SIZE_CLASS[size]} bg-white ${containerShape} overflow-hidden shadow-2xl flex flex-col`}
+        className={`modal-panel relative w-full ${SIZE_CLASS[size]} bg-white ${containerShape} overflow-hidden shadow-2xl flex flex-col`}
         onClick={e => e.stopPropagation()}
       >
         {/* ── Header ── */}
-        <div className={`${resolvedHeaderClass} px-6 pt-6 pb-5 shrink-0`}>
+        <div className={`modal-header ${resolvedHeaderClass} px-6 pt-6 pb-5 shrink-0`}>
           {headerIcon ? (
             <>
               {/* Row 1: icon left, close right */}
               <div className="flex items-start justify-between mb-4">
                 <div className="shrink-0">{headerIcon}</div>
-                <button onClick={onClose} className={closeBtnClass}>
+                <button onClick={onClose} className={`modal-close ${closeBtnClass}`}>
                   <X size={15} strokeWidth={2.5} />
                 </button>
               </div>
@@ -126,7 +126,7 @@ export default function Modal({
         </div>
 
         {/* ── Body ── */}
-        <div className={`flex-1 overflow-y-auto ${bodyClassName ?? ''}`}>
+        <div className={`modal-body flex-1 overflow-y-auto ${bodyClassName ?? ''}`}>
           {children}
         </div>
 

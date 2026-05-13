@@ -134,7 +134,7 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
   };
 
   return (
-    <div className="grid w-full gap-4 lg:h-full lg:min-h-[560px] lg:overflow-hidden lg:grid-cols-[380px_minmax(0,1fr)]">
+    <div className="chat-workspace grid w-full gap-4 lg:h-full lg:min-h-[560px] lg:overflow-hidden lg:grid-cols-[380px_minmax(0,1fr)]">
       <ChatBox
         mode={mode}
         isVisible={showInbox}

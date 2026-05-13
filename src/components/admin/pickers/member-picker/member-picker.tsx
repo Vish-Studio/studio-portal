@@ -35,12 +35,12 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
   }, []);
 
   return (
-    <div ref={ref} className="flex flex-col gap-2">
+    <div ref={ref} className="member-picker flex flex-col gap-2">
       {/* Selected chips */}
       {selected.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
+        <div className="member-picker-selected flex flex-wrap gap-1.5">
           {selected.map(m => (
-            <div key={m.id} className="flex items-center gap-1.5 bg-gray-100 rounded-full pl-1 pr-2 py-1">
+            <div key={m.id} className="member-picker-chip flex items-center gap-1.5 bg-gray-100 rounded-full pl-1 pr-2 py-1">
               <Avatar name={m.name} id={m.id} size="xs" />
               <span className="text-xs font-medium text-gray-700 leading-none">
                 {m.name.split(' ')[0]}
@@ -59,7 +59,7 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
       )}
 
       {/* Search input */}
-      <div className="relative">
+      <div className="member-picker-search relative">
         <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
         <input
           type="text"
@@ -69,13 +69,13 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
           className={`${inputCls(false)} pl-8`}
         />
         {query && filtered.length > 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-48 overflow-y-auto">
+          <div className="member-picker-menu absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-48 overflow-y-auto">
             {filtered.map(m => (
               <button
                 key={m.id}
                 type="button"
                 onClick={() => { onToggle(m.id); setQuery(''); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
+                className="member-picker-option w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
               >
                 <Avatar name={m.name} id={m.id} size="sm" />
                 <div className="min-w-0">
@@ -87,7 +87,7 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
           </div>
         )}
         {query && filtered.length === 0 && (
-          <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
+          <div className="member-picker-empty absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
             <p className="text-sm text-gray-400">No members match &ldquo;{query}&rdquo;</p>
           </div>
         )}

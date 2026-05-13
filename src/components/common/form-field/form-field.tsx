@@ -17,14 +17,14 @@ export interface FormFieldProps {
  */
 export default function FormField({ label, required, error, hint, children }: FormFieldProps) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
+    <div className="form-field flex flex-col gap-1.5">
+      <label className="form-field-label text-[10px] font-bold text-gray-500 uppercase tracking-widest">
         {label}
         {required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       {children}
-      {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
-      {hint && !error && <p className="text-xs text-gray-400">{hint}</p>}
+      {error && <p className="form-field-error text-xs text-red-500 font-medium">{error}</p>}
+      {hint && !error && <p className="form-field-hint text-xs text-gray-400">{hint}</p>}
     </div>
   );
 }

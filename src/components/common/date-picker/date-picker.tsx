@@ -129,7 +129,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     };
 
     return (
-      <div ref={rootRef} className={cn('relative', wrapperClassName)}>
+      <div ref={rootRef} className={cn('date-picker relative', wrapperClassName)}>
         <input
           ref={setRefs}
           id={id}
@@ -156,7 +156,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             }
           }}
           className={cn(
-            'flex w-full items-center justify-between gap-3 rounded-xl border bg-gray-50 px-4 py-3 text-left text-base text-gray-900 transition-all sm:text-sm',
+            'date-picker-trigger flex w-full items-center justify-between gap-3 rounded-xl border bg-gray-50 px-4 py-3 text-left text-base text-gray-900 transition-all sm:text-sm',
             'focus:outline-none focus:bg-white focus:ring-4 focus:ring-gray-100',
             disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-white',
             hasError ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-gray-400',
@@ -170,8 +170,8 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         </button>
 
         {isOpen && !disabled && (
-          <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-full min-w-[18rem] max-w-[calc(100vw-2rem)] rounded-[18px] border border-gray-200 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,0.16)] sm:min-w-[20rem]">
-            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="date-picker-popover absolute left-0 top-[calc(100%+8px)] z-50 w-full min-w-[18rem] max-w-[calc(100vw-2rem)] rounded-[18px] border border-gray-200 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,0.16)] sm:min-w-[20rem]">
+            <div className="date-picker-controls mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_5.75rem] gap-2">
                 <Select
                   value={visibleMonth.getMonth()}
@@ -208,7 +208,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
               </div>
             </div>
 
-            <div className="grid grid-cols-7 gap-1 text-center">
+            <div className="date-picker-grid grid grid-cols-7 gap-1 text-center">
               {DAY_NAMES.map(day => (
                 <span key={day} className="py-1 text-[10px] font-bold uppercase text-gray-400">
                   {day}
@@ -226,7 +226,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                     type="button"
                     onClick={() => selectDate(date)}
                     className={cn(
-                      'flex h-9 items-center justify-center rounded-xl text-xs font-bold transition-colors',
+                      'date-picker-day flex h-9 items-center justify-center rounded-xl text-xs font-bold transition-colors',
                       selected
                         ? 'bg-(--color-ink) text-white'
                         : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',

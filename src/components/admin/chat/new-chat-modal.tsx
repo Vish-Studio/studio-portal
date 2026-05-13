@@ -27,7 +27,7 @@ export default function NewChatModal({
       description="Choose a client or team member to open a conversation."
       size="md"
       onClose={onClose}
-      bodyClassName="p-4"
+      bodyClassName="new-chat-modal p-4"
     >
       <Tabs
         items={[
@@ -43,7 +43,7 @@ export default function NewChatModal({
         ariaLabel="New chat sections"
       />
 
-      <div className="chat-scrollbar max-h-[55vh] space-y-2 overflow-y-auto pr-1">
+      <div className="new-chat-modal-list chat-scrollbar max-h-[55vh] space-y-2 overflow-y-auto pr-1">
         {participants.map(participant => {
           const conversation = getConversationFor(conversations, participant);
           const hasMessages = Boolean(conversation?.messages.length);
@@ -53,7 +53,7 @@ export default function NewChatModal({
               key={`new-${participant.type}-${participant.id}`}
               type="button"
               onClick={() => onSelectParticipant(participant)}
-              className="flex w-full min-w-0 items-center gap-3 rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
+              className="new-chat-modal-item flex w-full min-w-0 items-center gap-3 rounded-lg bg-gray-50 p-3 text-left transition-colors hover:bg-gray-100"
             >
               <Avatar name={participant.name} id={participant.id} size="md" />
               <div className="min-w-0 flex-1">

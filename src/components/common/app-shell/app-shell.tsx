@@ -43,7 +43,7 @@ export default function AppShell({
   }, []);
 
   return (
-    <div className="w-full h-screen flex overflow-hidden font-sans">
+    <div className="app-shell w-full h-screen flex overflow-hidden font-sans">
       {sidebar({
         isSidebarOpen,
         setIsSidebarOpen,
@@ -52,8 +52,8 @@ export default function AppShell({
         isMobile,
       })}
 
-      <div className="flex-1 flex flex-col w-full overflow-hidden relative bg-white">
-        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8">
+      <div className="app-shell-main flex-1 flex flex-col w-full overflow-hidden relative bg-white">
+        <div className="app-shell-topbar sticky top-0 z-40 bg-white/80 backdrop-blur-md pt-4 sm:pt-6 pb-4 sm:pb-6 px-4 sm:px-6 lg:px-8">
           <Topbar
             setIsMobileMenuOpen={setIsMobileMenuOpen}
             title={title}
@@ -63,15 +63,15 @@ export default function AppShell({
         </div>
 
         {fixedFromLarge ? (
-          <div className={`flex-1 overflow-y-auto lg:overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pb-10 lg:pb-0 pt-0 ${contentClassName}`}>
+          <div className={`app-shell-content flex-1 overflow-y-auto lg:overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pb-10 lg:pb-0 pt-0 ${contentClassName}`}>
             {children}
           </div>
         ) : fullHeight ? (
-          <div className={`flex-1 overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pt-0 ${contentClassName}`}>
+          <div className={`app-shell-content flex-1 overflow-hidden flex flex-col px-4 sm:px-6 lg:px-8 pt-0 ${contentClassName}`}>
             {children}
           </div>
         ) : (
-          <div className={`flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 pt-0 ${contentClassName}`}>
+          <div className={`app-shell-content flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 pt-0 ${contentClassName}`}>
             {children}
           </div>
         )}

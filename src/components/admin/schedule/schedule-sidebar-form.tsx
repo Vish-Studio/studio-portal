@@ -168,11 +168,11 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
       description={format(selectedDate, 'EEEE, MMMM d, yyyy')}
       width="md"
     >
-      <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-        <div className="flex-1 overflow-y-auto bg-gradient-to-b from-gray-50/90 to-white px-6 py-5">
-          <div className="mb-5 overflow-hidden rounded-[22px] bg-(--color-ink) text-white">
-            <div className="flex items-start gap-3 p-5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+      <form onSubmit={handleSubmit} className="schedule-sidebar-form flex min-h-0 flex-1 flex-col">
+        <div className="schedule-sidebar-form-body flex-1 overflow-y-auto bg-gradient-to-b from-gray-50/90 to-white px-6 py-5">
+          <div className="schedule-sidebar-form-summary mb-5 overflow-hidden rounded-[22px] bg-(--color-ink) text-white">
+            <div className="schedule-sidebar-form-summary-main flex items-start gap-3 p-5">
+              <div className="schedule-sidebar-form-summary-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
                 <MaterialIcon name={categoryConfig.icon} size={20} fill />
               </div>
               <div className="min-w-0">
@@ -183,7 +183,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-3 border-t border-white/10">
+            <div className="schedule-sidebar-form-categories grid grid-cols-3 border-t border-white/10">
               {scheduleCategories.map(category => {
                 const categoryItem = SCHEDULE_CATEGORY_CONFIG[category];
                 const active = selectedCategory === category;
@@ -194,7 +194,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                     type="button"
                     onClick={() => handleCategoryChange(category)}
                     className={cn(
-                      'flex items-center justify-center gap-2 px-3 py-3 text-xs font-bold transition-colors',
+                      'schedule-sidebar-form-category flex items-center justify-center gap-2 px-3 py-3 text-xs font-bold transition-colors',
                       active ? 'bg-(--color-accent-lime) text-(--color-ink)' : 'text-white/55 hover:bg-white/5 hover:text-white',
                     )}
                   >
@@ -206,8 +206,8 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+          <div className="schedule-sidebar-form-sections space-y-4">
+            <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Title</p>
               <input
                 type="text"
@@ -218,7 +218,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
               />
             </div>
 
-            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+            <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <div className="mb-3 flex items-start gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-(--color-surface-alt) text-(--color-ink)">
                   <MaterialIcon name={categoryConfig.icon} size={17} fill />
@@ -242,7 +242,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
               </Select>
             </div>
 
-            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+            <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Date and time</p>
               <div className="rounded-2xl bg-gray-50 p-3">
                 <DatePicker
@@ -275,12 +275,12 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
               </div>
             </div>
 
-            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+            <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <div className="mb-2 flex items-center justify-between gap-3">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Call link</p>
                 <span className="rounded-full bg-gray-100 px-2 py-1 text-[10px] font-bold text-gray-400">Optional</span>
               </div>
-              <div className="relative">
+              <div className="schedule-sidebar-form-call-link relative">
                 <MaterialIcon name="link" size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input
                   type="url"
@@ -293,7 +293,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
             </div>
 
             {(showProject || showClient || showTeam) && (
-              <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+              <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
                 <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Assignments</p>
                 <div className="space-y-3 rounded-2xl bg-gray-50 p-3">
                   {showProject && (
@@ -340,7 +340,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                   )}
 
                   {showTeam && (
-                    <div className="flex flex-wrap gap-2">
+                    <div className="schedule-sidebar-form-members flex flex-wrap gap-2">
                       {members.map(member => {
                         const active = linkedMemberIds.includes(member.id);
 
@@ -349,7 +349,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                             key={member.id}
                             type="button"
                             onClick={() => toggleMember(member.id)}
-                            className={`flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
+                            className={`schedule-sidebar-form-member flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
                               active
                                 ? 'border-(--color-ink) bg-(--color-ink) text-white'
                                 : 'border-transparent bg-white text-gray-600 hover:border-gray-200'
@@ -366,7 +366,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
               </div>
             )}
 
-            <div className="rounded-[20px] border border-gray-100 bg-white p-4">
+            <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</p>
               <textarea
                 value={description}

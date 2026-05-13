@@ -15,7 +15,7 @@ export default function Toggle({ checked, onChange, className = '', disabled, ..
       disabled={disabled}
       onClick={() => onChange(!checked)}
       className={cn(
-        'relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40',
+        'toggle relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-40',
         checked ? 'bg-(--color-ink)' : 'bg-gray-300',
         className,
       )}
@@ -23,7 +23,7 @@ export default function Toggle({ checked, onChange, className = '', disabled, ..
     >
       <span
         className={cn(
-          'absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform',
+          'toggle-thumb absolute left-1 top-1 h-4 w-4 rounded-full bg-white shadow-sm transition-transform',
           checked ? 'translate-x-5' : 'translate-x-0',
         )}
       />

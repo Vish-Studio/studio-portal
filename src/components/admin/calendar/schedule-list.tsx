@@ -73,8 +73,8 @@ export default function ScheduleList({ date }: ScheduleListProps) {
 
   return (
     <>
-      <section className="h-full rounded-[18px] bg-(--color-surface-alt) p-4 md:p-6">
-        <div className="mb-5 flex items-start justify-between gap-4">
+      <section className="schedule-list h-full rounded-[18px] bg-(--color-surface-alt) p-4 md:p-6">
+        <div className="schedule-list-header mb-5 flex items-start justify-between gap-4">
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
               <CalendarDays size={16} />
@@ -86,7 +86,7 @@ export default function ScheduleList({ date }: ScheduleListProps) {
             <p className="mt-2 text-sm font-medium text-gray-500">{formatDate(date)}</p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <span className="rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-600">
+            <span className="schedule-list-count rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-600">
               {events.length} item{events.length === 1 ? '' : 's'}
             </span>
             <Button
@@ -103,7 +103,7 @@ export default function ScheduleList({ date }: ScheduleListProps) {
           <button
             type="button"
             onClick={openAddForm}
-            className="w-full rounded-2xl border border-dashed border-gray-200 bg-white/60 px-4 py-8 text-center transition-colors hover:border-gray-300 hover:bg-white"
+            className="schedule-list-empty w-full rounded-2xl border border-dashed border-gray-200 bg-white/60 px-4 py-8 text-center transition-colors hover:border-gray-300 hover:bg-white"
           >
             <MaterialIcon name="event_available" size={26} className="mx-auto text-gray-300" />
             <p className="mt-2 text-sm font-bold text-gray-600">No items planned</p>
@@ -112,7 +112,7 @@ export default function ScheduleList({ date }: ScheduleListProps) {
             </p>
           </button>
         ) : (
-          <div className="max-h-80 overflow-y-auto rounded-2xl bg-white">
+          <div className="schedule-list-items max-h-80 overflow-y-auto rounded-2xl bg-white">
             {events.map(event => {
               const config = EVENT_TYPE_CONFIG[event.type];
 
@@ -121,13 +121,13 @@ export default function ScheduleList({ date }: ScheduleListProps) {
                   key={event.id}
                   type="button"
                   onClick={() => setViewingEvent(event)}
-                  className="flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors hover:bg-gray-50 last:border-b-0"
+                  className="schedule-list-item flex w-full items-start gap-3 border-b border-gray-100 px-4 py-3 text-left transition-colors hover:bg-gray-50 last:border-b-0"
                 >
-                  <span className={`mt-1 h-9 w-1 shrink-0 rounded-full ${config.dotClass}`} />
+                  <span className={`schedule-list-marker mt-1 h-9 w-1 shrink-0 rounded-full ${config.dotClass}`} />
                   <div className="min-w-0 flex-1">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <p className="truncate text-sm font-bold text-(--color-ink)">{event.title}</p>
-                      <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${config.bgClass} ${config.textClass}`}>
+                      <span className={`schedule-list-type rounded-md px-1.5 py-0.5 text-[10px] font-bold ${config.bgClass} ${config.textClass}`}>
                         {config.shortLabel}
                       </span>
                     </div>
