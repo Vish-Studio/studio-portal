@@ -18,6 +18,7 @@ import Team from './pages/Team';
 import Dashboard from './pages/admin/Dashboard';
 import Payments from './pages/admin/Payments';
 import Chat from './pages/admin/Chat';
+import TeamDetail from './pages/admin/TeamDetail';
 import ProjectDetail from './pages/admin/ProjectDetail';
 import TemplateEditor from './pages/admin/TemplateEditor';
 import SignIn from './pages/SignIn';
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/admin/clients" element={<AuthGate role="admin"><Clients /></AuthGate>} />
           <Route path="/admin/clients/:id" element={<AuthGate role="admin"><ClientDetail /></AuthGate>} />
           <Route path="/admin/team" element={<AuthGate role="admin"><Team /></AuthGate>} />
+          <Route path="/admin/team/:id" element={<AuthGate role="admin"><TeamDetail /></AuthGate>} />
           <Route path="/admin/expenses" element={<AuthGate role="admin"><Expenses /></AuthGate>} />
           <Route path="/admin/payments" element={<AuthGate role="admin"><Payments /></AuthGate>} />
           <Route path="/admin/chat" element={<AuthGate role="admin"><Chat /></AuthGate>} />

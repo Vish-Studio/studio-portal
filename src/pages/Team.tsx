@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
 import Layout from '../components/common/layout/layout';
@@ -7,12 +8,14 @@ import { RowActionsMenu } from '../components/common/table/table';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
+import Select from '../components/common/select/select';
+import Option from '../components/common/select/option';
 import Fab from '../components/common/button-fab/button-fab';
 import Button from '../components/common/button/button';
 import { useTeamStore } from '../store/team';
 import { useUIStore } from '../store/ui';
 import { getMemberColors } from '../data/team';
-import type { TeamMember, TeamProject } from '../data/team';
+import type { TeamAccessRole, TeamMember, TeamProject } from '../data/team';
 import StatusIcon from '../components/common/status-icon/status-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,6 +27,7 @@ type SortKey = 'name' | 'role';
 interface MemberFormValues {
   name: string;
   role: string;
+  accessRole: TeamAccessRole;
   email: string;
 }
 
@@ -33,7 +37,7 @@ interface AssignModalProps {
   member: TeamMember;
   projects: TeamProject[];
   onClose: () => void;
-  onAssign: (memberId: string, projectId: string | null) => void;
+  onAssign: (memberId: string, projectId: string | null) => Promise<void>;
 }
 
 function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) {
@@ -87,7 +91,18 @@ function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) 
 // ─── Team Page ────────────────────────────────────────────────────────────────
 
 export default function Team() {
-  const { members, projects, addMember, updateMember, removeMember, assignMember } = useTeamStore();
+  const navigate = useNavigate();
+  const {
+    members,
+    projects,
+    loading,
+    error,
+    subscribeMembers,
+    addMember,
+    updateMember,
+    removeMember,
+    assignMember,
+  } = useTeamStore();
   const { searchQuery } = useUIStore();
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
@@ -103,8 +118,10 @@ export default function Team() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<MemberFormValues>({
-    defaultValues: { name: '', role: '', email: '' },
+    defaultValues: { name: '', role: '', accessRole: 'freelancer', email: '' },
   });
+
+  useEffect(() => subscribeMembers(), [subscribeMembers]);
 
   const tabCounts = useMemo(() => ({
     all: members.length,
@@ -142,27 +159,32 @@ export default function Team() {
 
   const openAdd = () => {
     setEditingMember(null);
-    reset({ name: '', role: '', email: '' });
+    reset({ name: '', role: '', accessRole: 'freelancer', email: '' });
     setSidebarOpen(true);
   };
 
   const openEdit = (member: TeamMember) => {
     setEditingMember(member);
-    reset({ name: member.name, role: member.role, email: member.email });
+    reset({
+      name: member.name,
+      role: member.role,
+      accessRole: member.accessRole ?? 'freelancer',
+      email: member.email,
+    });
     setSidebarOpen(true);
   };
 
-  const onSubmit = (data: MemberFormValues) => {
+  const onSubmit = async (data: MemberFormValues) => {
     if (editingMember) {
-      updateMember(editingMember.id, data);
+      await updateMember(editingMember.id, data);
     } else {
-      addMember({ id: 'm_' + Date.now(), assignedProjectId: null, ...data });
+      await addMember({ assignedProjectId: null, ...data });
     }
     setSidebarOpen(false);
   };
 
-  const handleDelete = (member: TeamMember) => {
-    if (confirm(`Remove ${member.name} from the team?`)) removeMember(member.id);
+  const handleDelete = async (member: TeamMember) => {
+    if (confirm(`Remove ${member.name} from the team?`)) await removeMember(member.id);
   };
 
   return (
@@ -186,7 +208,17 @@ export default function Team() {
           />
         </div>
 
-        {tableData.length === 0 ? (
+        {error && (
+          <div className="team-error rounded-[16px] border border-red-100 bg-red-50 px-4 py-3">
+            <p className="type-label text-red-600">{error}</p>
+          </div>
+        )}
+
+        {loading && tableData.length === 0 ? (
+          <div className="team-loading rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+            <p className="type-card-title text-gray-500">Loading team members...</p>
+          </div>
+        ) : tableData.length === 0 ? (
           <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
             <p className="type-card-title text-gray-500">
               {searchQuery ? `No members match "${searchQuery}".` : 'No team members yet.'}
@@ -209,8 +241,8 @@ export default function Team() {
                   key={member.id}
                   role="button"
                   tabIndex={0}
-                  onClick={() => openEdit(member)}
-                  onKeyDown={event => { if (event.key === 'Enter') openEdit(member); }}
+                  onClick={() => navigate(`/admin/team/${member.id}`)}
+                  onKeyDown={event => { if (event.key === 'Enter') navigate(`/admin/team/${member.id}`); }}
                   className="grid cursor-pointer gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] md:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
@@ -269,7 +301,6 @@ export default function Team() {
             <FormField label="Full Name" required error={errors.name?.message}>
               <input
                 {...register('name', { required: 'Name is required' })}
-                autoFocus
                 placeholder="e.g. Jordan Clarke"
                 className={inputCls(!!errors.name)}
               />
@@ -280,6 +311,16 @@ export default function Team() {
                 placeholder="e.g. Frontend Developer"
                 className={inputCls(!!errors.role)}
               />
+            </FormField>
+            <FormField label="Access Role" required error={errors.accessRole?.message}>
+              <Select
+                {...register('accessRole', { required: 'Access role is required' })}
+                hasError={!!errors.accessRole}
+              >
+                <Option value="freelancer">Freelancer</Option>
+                <Option value="admin">Admin</Option>
+                <Option value="superadmin">Super Admin</Option>
+              </Select>
             </FormField>
             <FormField label="Email" error={errors.email?.message}>
               <input

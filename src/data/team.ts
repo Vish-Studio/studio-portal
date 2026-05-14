@@ -1,9 +1,14 @@
+export type TeamAccessRole = 'superadmin' | 'admin' | 'freelancer';
+
 export interface TeamMember {
   id: string;
   name: string;
   role: string;
+  accessRole?: TeamAccessRole;
   email: string;
   assignedProjectId: string | null;
+  createdAt?: { toMillis: () => number; toDate: () => Date };
+  updatedAt?: { toMillis: () => number; toDate: () => Date };
 }
 
 export interface TeamProject {

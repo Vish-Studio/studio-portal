@@ -21,6 +21,13 @@ service cloud.firestore {
     function isValidId(id) { 
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
     }
+    function accessPath(email) {
+      return /databases/$(database)/documents/signInAccess/$(email);
+    }
+    function hasActiveAccess(email) {
+      return exists(accessPath(email)) &&
+             get(accessPath(email)).data.status == 'active';
+    }
 
     // 1. users Collection
     match /users/{userId} {
@@ -29,6 +36,9 @@ service cloud.firestore {
                data.role in ['admin', 'client'] &&
                data.email is string && data.email.size() <= 255 &&
                (data.get('displayName', '') is string) && (data.get('displayName', '').size() <= 100) &&
+               (data.get('staffRole', 'admin') is string) && data.get('staffRole', 'admin') in ['superadmin', 'admin', 'freelancer'] &&
+               (data.get('teamMemberId', '') is string) && (data.get('teamMemberId', '').size() <= 128) &&
+               (data.get('clientId', '') is string) && (data.get('clientId', '').size() <= 128) &&
                (data.get('companyName', '') is string) && (data.get('companyName', '').size() <= 160) &&
                (data.get('phone', '') is string) && (data.get('phone', '').size() <= 40) &&
                (data.get('status', 'active') is string) && data.get('status', 'active') in ['prospect', 'agreed', 'lost', 'active', 'inactive'] &&
@@ -43,7 +53,16 @@ service cloud.firestore {
                        (request.auth.uid == userId || isAdmin()) &&
                        isValidUser(incoming()) &&
                        incoming().createdAt == request.time &&
-                       (incoming().role == 'client' || isAdmin());
+                       (
+                         incoming().role == 'client' ||
+                         isAdmin() ||
+                         (
+                           incoming().role == 'admin' &&
+                           incoming().email == request.auth.token.email &&
+                           hasActiveAccess(request.auth.token.email) &&
+                           get(accessPath(request.auth.token.email)).data.profileRole == 'admin'
+                         )
+                       );
 
       allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) &&
                        incoming().createdAt == existing().createdAt &&
@@ -167,7 +186,52 @@ service cloud.firestore {
        allow read, write: if isAdmin();
     }
 
-    // 7. settings Collection
+    // 7. team members Collection
+    match /teamMembers/{memberId} {
+      function isValidTeamMember(data) {
+        return data.keys().hasAll(['name', 'role', 'accessRole', 'email', 'assignedProjectId', 'createdAt']) &&
+               data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
+               data.role is string && data.role.size() > 0 && data.role.size() <= 120 &&
+               data.accessRole in ['superadmin', 'admin', 'freelancer'] &&
+               data.email is string && data.email.size() <= 255 &&
+               (data.assignedProjectId == null || (data.assignedProjectId is string && data.assignedProjectId.size() <= 128)) &&
+               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+               data.createdAt is timestamp;
+      }
+
+      allow read: if isAdmin();
+      allow create: if isAdmin() && isValidTeamMember(incoming()) &&
+                      incoming().createdAt == request.time &&
+                      incoming().updatedAt == request.time;
+      allow update: if isAdmin() && isValidTeamMember(incoming()) &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().updatedAt == request.time;
+      allow delete: if isAdmin();
+    }
+
+    // 8. sign-in access records
+    match /signInAccess/{emailId} {
+      function isValidAccess(data) {
+        return data.keys().hasAll(['email', 'profileRole', 'displayName', 'status']) &&
+               data.email == emailId &&
+               data.email is string && data.email.size() <= 255 &&
+               data.profileRole in ['admin', 'client'] &&
+               (data.get('staffRole', 'admin') is string) && data.get('staffRole', 'admin') in ['superadmin', 'admin', 'freelancer'] &&
+               (data.get('teamMemberId', '') is string) && data.get('teamMemberId', '').size() <= 128 &&
+               (data.get('clientId', '') is string) && data.get('clientId', '').size() <= 128 &&
+               data.displayName is string && data.displayName.size() <= 120 &&
+               data.status in ['active', 'inactive'] &&
+               (!('createdAt' in data) || data.createdAt is timestamp) &&
+               (!('updatedAt' in data) || data.updatedAt is timestamp);
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isAdmin() && isValidAccess(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 9. settings Collection
     match /settings/{settingId} {
        allow read: if isSignedIn();
        allow write: if isAdmin();

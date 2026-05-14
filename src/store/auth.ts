@@ -41,7 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      const credential = await authService.signIn(email, password);
+      const credential = await authService.signInOrCreateAllowedUser(email, password);
       const profile = await authService.upsertProfile(credential.user);
       set({ user: credential.user, profile, loading: false, ready: true });
       return profile;

@@ -1,5 +1,6 @@
 import {
   confirmPasswordReset as firebaseConfirmPasswordReset,
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -15,6 +16,7 @@ import {
   type Timestamp,
 } from 'firebase/firestore';
 import { requireFirebase } from './firebase-service';
+import { accessService } from './access-service';
 import type { AuthProfile, AuthRole } from '@/src/types/auth';
 
 const fallbackAdminEmails = ['vishstudio.ltd@gmail.com', 'vishseenarain@gmail.com'];
@@ -63,6 +65,38 @@ export const authService = {
     return signInWithEmailAndPassword(auth, email, password);
   },
 
+  async signInOrCreateAllowedUser(email: string, password: string) {
+    const { auth } = requireFirebase();
+    const normalizedEmail = normalizeEmail(email);
+
+    try {
+      return await signInWithEmailAndPassword(auth, normalizedEmail, password);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : '';
+      const canTryCreate =
+        message.includes('auth/user-not-found') ||
+        message.includes('auth/invalid-credential') ||
+        message.includes('auth/wrong-password');
+
+      if (!canTryCreate) throw error;
+
+      const access = await accessService.getAccess(normalizedEmail);
+      if (!access || access.status !== 'active') {
+        throw new Error('No active account invitation exists for this email.');
+      }
+
+      try {
+        return await createUserWithEmailAndPassword(auth, normalizedEmail, password);
+      } catch (createError) {
+        const createMessage = createError instanceof Error ? createError.message : '';
+        if (createMessage.includes('auth/email-already-in-use')) {
+          throw new Error('Invalid email or password.');
+        }
+        throw createError;
+      }
+    }
+  },
+
   async signOut() {
     const { auth } = requireFirebase();
     await signOut(auth);
@@ -104,14 +138,17 @@ export const authService = {
       return profile;
     }
 
-    const role = inferRole(email);
+    const access = await accessService.getAccess(email);
+    const role = access?.profileRole ?? inferRole(email);
     const profile: AuthProfile = {
       uid: user.uid,
       email,
-      displayName: user.displayName ?? displayNameFromEmail(email),
+      displayName: user.displayName ?? access?.displayName ?? displayNameFromEmail(email),
       role,
+      staffRole: access?.staffRole,
+      teamMemberId: access?.teamMemberId,
+      clientId: access?.clientId ?? (role === 'client' ? user.uid : undefined),
       status: 'active',
-      clientId: role === 'client' ? user.uid : undefined,
     };
 
     await setDoc(ref, removeUndefined({
