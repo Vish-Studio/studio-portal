@@ -1,28 +1,27 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import Button from '../button/button';
-import Checkbox from '../checkbox/checkbox';
+import FormField, { inputCls } from '../form-field/form-field';
 import MaterialIcon from '../material-icon/material-icon';
 import Toggle from '../toggle/toggle';
-import { useSettingsStore, type SettingsSection } from '@/src/store/settings';
+import { useAuthStore } from '@/src/store/auth';
+import { useUIStore } from '@/src/store/ui';
+import type { AuthProfileUpdateInput, NewsletterPreferences } from '@/src/types/auth';
 
-const inputClassName =
-  'w-full rounded-2xl border border-transparent bg-(--color-surface) px-4 py-3 text-base font-medium text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-200 focus:bg-white focus:ring-4 focus:ring-gray-100 md:text-sm';
+type SettingsSection = 'profile' | 'email' | 'password' | 'newsletters';
+
+const defaultNewsletterPreferences: NewsletterPreferences = {
+  marketingEmails: false,
+  productUpdates: true,
+  weeklyDigest: true,
+  securityAlerts: true,
+};
 
 const sections: Array<{ key: SettingsSection; icon: string; label: string; description: string }> = [
   { key: 'profile', icon: 'person', label: 'Profile details', description: 'Name, role and phone number' },
   { key: 'email', icon: 'mail', label: 'Email', description: 'Primary and recovery email' },
-  { key: 'password', icon: 'lock', label: 'Password', description: 'Update account password' },
+  { key: 'password', icon: 'lock', label: 'Password', description: 'Reset your account password' },
   { key: 'newsletters', icon: 'mark_email_read', label: 'Newsletters', description: 'Email preferences' },
 ];
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="account-settings-field block">
-      <span className="account-settings-field-label mb-2 block text-[10px] font-bold uppercase tracking-widest text-gray-400">{label}</span>
-      {children}
-    </label>
-  );
-}
 
 function PreferenceRow({
   label,
@@ -33,13 +32,13 @@ function PreferenceRow({
   label: string;
   description: string;
   checked: boolean;
-  onChange: () => void;
+  onChange: (checked: boolean) => void;
 }) {
   return (
     <div className="account-settings-preference flex items-center justify-between gap-4 border-t border-gray-100 py-4 first:border-t-0 first:pt-0 last:pb-0">
-      <div className="min-w-0">
-        <p className="text-sm font-bold text-(--color-ink)">{label}</p>
-        <p className="mt-1 text-xs font-medium leading-5 text-gray-400">{description}</p>
+      <div className="account-settings-preference-copy min-w-0">
+        <p className="type-card-title text-(--color-ink)">{label}</p>
+        <p className="type-muted mt-1 text-gray-400">{description}</p>
       </div>
       <Toggle checked={checked} onChange={onChange} />
     </div>
@@ -47,77 +46,159 @@ function PreferenceRow({
 }
 
 export default function AccountSettings() {
-  const settings = useSettingsStore((state) => state.settings);
-  const activeSection = useSettingsStore((state) => state.activeSection);
-  const isDirty = useSettingsStore((state) => state.isDirty);
-  const setActiveSection = useSettingsStore((state) => state.setActiveSection);
-  const updateSetting = useSettingsStore((state) => state.updateSetting);
-  const markSaved = useSettingsStore((state) => state.markSaved);
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
-    signOutSessions: true,
+  const profile = useAuthStore(state => state.profile);
+  const loading = useAuthStore(state => state.loading);
+  const updateProfile = useAuthStore(state => state.updateProfile);
+  const sendPasswordReset = useAuthStore(state => state.sendPasswordReset);
+  const showToast = useUIStore(state => state.showToast);
+  const [activeSection, setActiveSection] = useState<SettingsSection>('profile');
+  const [isDirty, setIsDirty] = useState(false);
+  const [resettingPassword, setResettingPassword] = useState(false);
+  const [form, setForm] = useState<AuthProfileUpdateInput>({
+    email: '',
+    fullName: '',
+    phone: '',
+    jobTitle: '',
+    company: '',
+    recoveryEmail: '',
+    newsletterPreferences: defaultNewsletterPreferences,
   });
 
+  useEffect(() => {
+    if (!profile) return;
+
+    setForm({
+      email: profile.email ?? '',
+      fullName: profile.fullName ?? '',
+      phone: profile.phone ?? '',
+      jobTitle: profile.jobTitle ?? '',
+      company: profile.company ?? '',
+      recoveryEmail: profile.recoveryEmail ?? '',
+      newsletterPreferences: {
+        ...defaultNewsletterPreferences,
+        ...profile.newsletterPreferences,
+      },
+    });
+    setIsDirty(false);
+  }, [profile]);
+
   const activeSectionMeta = sections.find(section => section.key === activeSection) ?? sections[0];
+  const newsletterPreferences = useMemo(
+    () => ({ ...defaultNewsletterPreferences, ...form.newsletterPreferences }),
+    [form.newsletterPreferences],
+  );
+
+  const updateForm = <Key extends keyof AuthProfileUpdateInput>(key: Key, value: AuthProfileUpdateInput[Key]) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+    setIsDirty(true);
+  };
+
+  const updateNewsletterPreference = (key: keyof NewsletterPreferences, value: boolean) => {
+    updateForm('newsletterPreferences', {
+      ...newsletterPreferences,
+      [key]: value,
+    });
+  };
+
+  const handleSave = async () => {
+    await updateProfile({
+      ...form,
+      email: form.email?.trim().toLowerCase(),
+      fullName: form.fullName?.trim(),
+      phone: form.phone?.trim(),
+      jobTitle: form.jobTitle?.trim(),
+      company: form.company?.trim(),
+      recoveryEmail: form.recoveryEmail?.trim().toLowerCase(),
+      newsletterPreferences,
+    });
+    setIsDirty(false);
+  };
+
+  const handlePasswordReset = async () => {
+    const email = form.email || profile?.email;
+    if (!email) return;
+
+    setResettingPassword(true);
+    try {
+      await sendPasswordReset(email);
+      showToast({
+        status: 'success',
+        title: 'Reset email sent',
+        message: `We sent password reset instructions to ${email}.`,
+      });
+    } catch (error) {
+      showToast({
+        status: 'error',
+        title: 'Unable to send reset email',
+        message: error instanceof Error ? error.message : 'Try again in a moment.',
+      });
+    } finally {
+      setResettingPassword(false);
+    }
+  };
 
   const sectionContent: Record<SettingsSection, ReactNode> = {
     profile: (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Field label="Full name">
-          <input value={settings.fullName} onChange={event => updateSetting('fullName', event.target.value)} className={inputClassName} />
-        </Field>
-        <Field label="Job title">
-          <input value={settings.jobTitle} onChange={event => updateSetting('jobTitle', event.target.value)} className={inputClassName} />
-        </Field>
-        <Field label="Phone number">
-          <input value={settings.phone} onChange={event => updateSetting('phone', event.target.value)} className={inputClassName} />
-        </Field>
+      <div className="account-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
+        <FormField label="Full name">
+          <input value={form.fullName ?? ''} onChange={event => updateForm('fullName', event.target.value)} className={inputCls()} />
+        </FormField>
+        <FormField label="Role or title">
+          <input value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} className={inputCls()} />
+        </FormField>
+        <FormField label="Phone number">
+          <input value={form.phone ?? ''} onChange={event => updateForm('phone', event.target.value)} className={inputCls()} />
+        </FormField>
+        <FormField label="Company">
+          <input value={form.company ?? ''} onChange={event => updateForm('company', event.target.value)} className={inputCls()} />
+        </FormField>
       </div>
     ),
     email: (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Field label="Primary email">
-          <input type="email" value={settings.email} onChange={event => updateSetting('email', event.target.value)} className={inputClassName} />
-        </Field>
-        <Field label="Recovery email">
-          <input type="email" value={settings.recoveryEmail} onChange={event => updateSetting('recoveryEmail', event.target.value)} className={inputClassName} />
-        </Field>
+      <div className="account-settings-email grid grid-cols-1 gap-4 md:grid-cols-2">
+        <FormField label="Primary email" hint="Changing email may ask Firebase for a recent sign-in.">
+          <input type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} className={inputCls()} />
+        </FormField>
+        <FormField label="Recovery email">
+          <input type="email" value={form.recoveryEmail ?? ''} onChange={event => updateForm('recoveryEmail', event.target.value)} className={inputCls()} />
+        </FormField>
       </div>
     ),
     password: (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Field label="Current password">
-          <input type="password" value={passwordForm.currentPassword} onChange={event => setPasswordForm(prev => ({ ...prev, currentPassword: event.target.value }))} className={inputClassName} />
-        </Field>
-        <div className="hidden md:block" />
-        <Field label="New password">
-          <input type="password" value={passwordForm.newPassword} onChange={event => setPasswordForm(prev => ({ ...prev, newPassword: event.target.value }))} className={inputClassName} />
-        </Field>
-        <Field label="Confirm password">
-          <input type="password" value={passwordForm.confirmPassword} onChange={event => setPasswordForm(prev => ({ ...prev, confirmPassword: event.target.value }))} className={inputClassName} />
-        </Field>
-        <div className="md:col-span-2">
-          <Checkbox
-            checked={passwordForm.signOutSessions}
-            onChange={event => setPasswordForm(prev => ({ ...prev, signOutSessions: event.target.checked }))}
-            label="Sign out from other sessions"
-            description="Recommended after changing your password."
-            className="rounded-2xl bg-(--color-surface) p-4"
-          />
+      <div className="account-settings-security rounded-2xl bg-(--color-surface-alt) p-4">
+        <div className="account-settings-security-card rounded-2xl bg-white p-4">
+          <div className="account-settings-security-row flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="account-settings-security-copy min-w-0">
+              <p className="type-card-title text-(--color-ink)">Password reset</p>
+              <p className="type-muted mt-1 max-w-xl text-gray-400">
+                We will send Firebase password reset instructions to your primary email.
+              </p>
+            </div>
+            <Button variant="secondary" loading={resettingPassword} onClick={handlePasswordReset}>
+              Send reset email
+            </Button>
+          </div>
         </div>
       </div>
     ),
     newsletters: (
-      <div className="rounded-2xl bg-(--color-surface) p-4">
-        <PreferenceRow label="Marketing emails" description="Receive occasional offers and studio portal news." checked={settings.marketingEmails} onChange={() => updateSetting('marketingEmails', !settings.marketingEmails)} />
-        <PreferenceRow label="Product updates" description="Receive updates when new features are available." checked={settings.productUpdates} onChange={() => updateSetting('productUpdates', !settings.productUpdates)} />
-        <PreferenceRow label="Weekly digest" description="Receive a weekly summary of projects, tasks and scheduled items." checked={settings.weeklyDigest} onChange={() => updateSetting('weeklyDigest', !settings.weeklyDigest)} />
-        <PreferenceRow label="Security alerts" description="Receive important account and sign-in alerts." checked={settings.securityAlerts} onChange={() => updateSetting('securityAlerts', !settings.securityAlerts)} />
+      <div className="account-settings-newsletters rounded-2xl bg-(--color-surface) p-4">
+        <PreferenceRow label="Marketing emails" description="Receive occasional offers and studio portal news." checked={newsletterPreferences.marketingEmails} onChange={checked => updateNewsletterPreference('marketingEmails', checked)} />
+        <PreferenceRow label="Product updates" description="Receive updates when new features are available." checked={newsletterPreferences.productUpdates} onChange={checked => updateNewsletterPreference('productUpdates', checked)} />
+        <PreferenceRow label="Weekly digest" description="Receive a weekly summary of projects, tasks and scheduled items." checked={newsletterPreferences.weeklyDigest} onChange={checked => updateNewsletterPreference('weeklyDigest', checked)} />
+        <PreferenceRow label="Security alerts" description="Receive important account and sign-in alerts." checked={newsletterPreferences.securityAlerts} onChange={checked => updateNewsletterPreference('securityAlerts', checked)} />
       </div>
     ),
   };
+
+  if (!profile) {
+    return (
+      <section className="account-settings rounded-[18px] border border-gray-100 bg-white p-6">
+        <p className="type-card-title text-(--color-ink)">Profile unavailable</p>
+        <p className="type-muted mt-1 text-gray-400">Your account profile could not be loaded.</p>
+      </section>
+    );
+  }
 
   return (
     <div className="account-settings flex flex-col gap-5 pb-10">
@@ -127,12 +208,12 @@ export default function AccountSettings() {
             <p className="type-eyebrow text-gray-400">Admin settings</p>
             <h2 className="type-page-title mt-1 text-(--color-ink)">Manage your account</h2>
             <p className="type-muted mt-1 text-gray-400">
-              {isDirty ? 'Unsaved changes' : 'Profile, login, and email preferences'}
+              {isDirty ? 'Unsaved changes' : profile.email}
             </p>
           </div>
           <div className="account-settings-title-status rounded-2xl bg-white px-4 py-3">
-            <p className="type-label text-gray-400">Save status</p>
-            <p className="type-card-title mt-1 text-(--color-ink)">{isDirty ? 'Changes pending' : 'Up to date'}</p>
+            <p className="type-label text-gray-400">Role access</p>
+            <p className="type-card-title mt-1 capitalize text-(--color-ink)">{profile.role}</p>
           </div>
         </div>
       </section>
@@ -180,7 +261,7 @@ export default function AccountSettings() {
               </div>
               <p className="type-muted mt-2 text-gray-400">{activeSectionMeta.description}</p>
             </div>
-            <Button onClick={markSaved} disabled={!isDirty}>
+            <Button onClick={handleSave} loading={loading} disabled={!isDirty}>
               Save changes
             </Button>
           </div>

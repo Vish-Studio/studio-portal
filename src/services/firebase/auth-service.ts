@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updateEmail,
   updateProfile as firebaseUpdateProfile,
   verifyPasswordResetCode as firebaseVerifyPasswordResetCode,
   type User,
@@ -127,6 +128,7 @@ const syncLinkedProfile = async (
       clientRef,
       removeUndefined({
         fullName: profile.fullName,
+        email: profile.email,
         phone: profile.phone,
         updatedAt: serverTimestamp(),
       }),
@@ -332,6 +334,7 @@ export const authService = {
 
     const normalizedInput = removeUndefined({
       ...input,
+      email: input.email?.trim().toLowerCase(),
       fullName: input.fullName?.trim(),
       phone: input.phone?.trim(),
       jobTitle: input.jobTitle?.trim(),
@@ -342,6 +345,14 @@ export const authService = {
 
     if (typeof normalizedInput.fullName === "string" && normalizedInput.fullName) {
       await firebaseUpdateProfile(user, { displayName: normalizedInput.fullName });
+    }
+
+    if (
+      typeof normalizedInput.email === "string" &&
+      normalizedInput.email &&
+      normalizedInput.email !== normalizeEmail(user.email)
+    ) {
+      await updateEmail(user, normalizedInput.email);
     }
 
     const ref = doc(db, "users", user.uid);

@@ -260,6 +260,7 @@ service cloud.firestore {
                         ) ||
                         (existing().userId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly([
                           'fullName',
+                          'email',
                           'phone',
                           'recoveryEmail',
                           'newsletterPreferences',

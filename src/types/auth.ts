@@ -30,6 +30,7 @@ export interface AuthProfile {
 }
 
 export interface AuthProfileUpdateInput {
+  email?: string;
   fullName?: string;
   phone?: string;
   jobTitle?: string;

@@ -73,6 +73,7 @@ export default function UserProfileSettings() {
   const showToast = useUIStore(state => state.showToast);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [form, setForm] = useState<AuthProfileUpdateInput>({
+    email: '',
     fullName: '',
     phone: '',
     jobTitle: '',
@@ -88,6 +89,7 @@ export default function UserProfileSettings() {
 
     setForm({
       fullName: profile.fullName ?? '',
+      email: profile.email ?? '',
       phone: profile.phone ?? '',
       jobTitle: profile.jobTitle ?? '',
       company: profile.company ?? '',
@@ -121,6 +123,7 @@ export default function UserProfileSettings() {
   const handleSave = async () => {
     await updateProfile({
       ...form,
+      email: form.email?.trim().toLowerCase(),
       fullName: form.fullName?.trim(),
       phone: form.phone?.trim(),
       jobTitle: form.jobTitle?.trim(),
@@ -235,7 +238,7 @@ export default function UserProfileSettings() {
                   <input value={form.fullName ?? ''} onChange={event => updateForm('fullName', event.target.value)} className={inputCls()} />
                 </FormField>
                 <FormField label="Primary email" hint="Email sign-in is managed by Firebase Authentication.">
-                  <input value={profile.email} readOnly className={`${inputCls()} cursor-not-allowed text-gray-400`} />
+                  <input type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} className={inputCls()} />
                 </FormField>
                 <FormField label="Phone number">
                   <input value={form.phone ?? ''} onChange={event => updateForm('phone', event.target.value)} className={inputCls()} placeholder="+230 5 000 0000" />

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../search-bar/search-bar';
 import MaterialIcon from '../material-icon/material-icon';
 import { useUIStore } from '@/src/store/ui';
@@ -33,19 +33,34 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
   const { canInstall, installed, installApp } = usePwaInstall();
   const profile = useAuthStore(state => state.profile);
   const signOutUser = useAuthStore(state => state.signOutUser);
+  const navigate = useNavigate();
 
   const notifRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
 
   const location = useLocation();
   const { searchQuery, setSearchQuery, clearSearch } = useUIStore();
+  const settingsPath = profile?.role === 'client' ? '/user/settings' : '/admin/settings';
 
   const userMenuSections: DropdownMenuSectionType[] = [
     {
       header: profile?.fullName ?? 'Studio Portal',
       items: [
-        { label: 'Profile', onClick: () => { setIsUserOpen(false); } },
-        { label: 'Settings', onClick: () => { setIsUserOpen(false); } },
+        {
+          label: 'Profile',
+          description: profile?.email,
+          onClick: () => {
+            setIsUserOpen(false);
+            navigate(settingsPath);
+          },
+        },
+        {
+          label: 'Settings',
+          onClick: () => {
+            setIsUserOpen(false);
+            navigate(settingsPath);
+          },
+        },
         {
           label: installed ? 'App installed' : 'Install app',
           description: canInstall ? 'Add Studio Portal to this device.' : 'Available from supported browsers.',

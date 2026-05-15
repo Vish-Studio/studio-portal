@@ -29,6 +29,8 @@ const firebaseErrorMessage = (error: unknown) => {
   if (error.message.includes('auth/wrong-password')) return 'Invalid email or password.';
   if (error.message.includes('auth/too-many-requests')) return 'Too many attempts. Try again later.';
   if (error.message.includes('auth/invalid-email')) return 'Enter a valid email address.';
+  if (error.message.includes('auth/requires-recent-login')) return 'Please sign out and sign in again before changing your email.';
+  if (error.message.includes('auth/email-already-in-use')) return 'This email is already used by another account.';
   return error.message;
 };
 
