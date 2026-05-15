@@ -25,7 +25,7 @@ export interface TeamMemberInput {
   assignedProjectId?: string | null;
 }
 
-const teamCollection = () => collection(requireFirebase().db, 'teamMembers');
+const teamCollection = () => collection(requireFirebase().db, 'team');
 
 const cleanTeamMemberInput = (input: TeamMemberInput) => ({
   name: input.name.trim(),
@@ -54,6 +54,7 @@ const teamMemberFromSnapshot = (
 
   return {
     id: snapshot.id,
+    userId: data.userId ?? null,
     name: data.name ?? 'Unnamed member',
     role: data.role ?? 'Team member',
     accessRole: data.accessRole ?? 'freelancer',
@@ -80,15 +81,16 @@ export const teamService = {
     const payload = cleanTeamMemberInput(input);
     const ref = await addDoc(teamCollection(), {
       ...payload,
+      userId: null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
 
     await accessService.upsertAccess({
       email: payload.email,
-      profileRole: 'admin',
+      profileRole: payload.accessRole,
       staffRole: payload.accessRole,
-      teamMemberId: ref.id,
+      teamId: ref.id,
       displayName: payload.name,
       status: 'active',
     });
@@ -97,7 +99,7 @@ export const teamService = {
   },
 
   async updateMember(id: string, input: Partial<TeamMemberInput>) {
-    const ref = doc(requireFirebase().db, 'teamMembers', id);
+    const ref = doc(requireFirebase().db, 'team', id);
     const snapshot = await getDoc(ref);
     const previousEmail = snapshot.exists()
       ? normalizeAccessEmail(String(snapshot.data().email ?? ''))
@@ -118,9 +120,9 @@ export const teamService = {
     if (nextEmail) {
       await accessService.upsertAccess({
         email: nextEmail,
-        profileRole: 'admin',
+        profileRole: payload.accessRole ?? previous?.accessRole ?? 'freelancer',
         staffRole: payload.accessRole ?? previous?.accessRole ?? 'freelancer',
-        teamMemberId: id,
+        teamId: id,
         displayName: payload.name ?? previous?.name ?? nextEmail,
         status: 'active',
       });
@@ -128,7 +130,7 @@ export const teamService = {
   },
 
   async deleteMember(id: string) {
-    const ref = doc(requireFirebase().db, 'teamMembers', id);
+    const ref = doc(requireFirebase().db, 'team', id);
     const snapshot = await getDoc(ref);
     const email = snapshot.exists() ? String(snapshot.data().email ?? '') : '';
     await deleteDoc(ref);

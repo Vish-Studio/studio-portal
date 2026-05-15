@@ -1,0 +1,7 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global safety net. Collection files below opt into access explicitly.
+    match /{document=**} {
+      allow read, write: if false;
+    }

@@ -1,0 +1,24 @@
+    // tasks: admin-assigned and client-visible tasks.
+    match /tasks/{taskId} {
+      function isValidTask(data) {
+        return data.keys().hasAll(['clientId', 'title', 'completed', 'createdAt']) &&
+               data.clientId is string && data.clientId.size() <= 128 &&
+               data.title is string && data.title.size() <= 200 &&
+               data.completed is bool &&
+               data.createdAt is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+
+      allow create: if isAdmin() && isValidId(taskId) && isValidTask(incoming()) &&
+                      exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
+                      incoming().createdAt == request.time;
+
+      allow update: if isSignedIn() && isValidId(taskId) && isValidTask(incoming()) &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().clientId == existing().clientId &&
+                      (isAdmin() || (currentClientId() == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['completed'])));
+
+      allow delete: if isAdmin();
+    }

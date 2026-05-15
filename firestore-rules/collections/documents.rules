@@ -1,0 +1,28 @@
+    // documents: client files and signed assets.
+    match /documents/{documentId} {
+      function isValidDocument(data) {
+        return data.keys().hasAll(['clientId', 'type', 'title', 'url', 'createdAt']) &&
+               data.clientId is string && data.clientId.size() <= 128 &&
+               (data.get('projectId', '') is string) && (data.get('projectId', '').size() <= 128) &&
+               data.type in ['quotation', 'proposal', 'invoice', 'onboarding', 'contract', 'discovery', 'satisfaction', 'other'] &&
+               data.title is string && data.title.size() <= 250 &&
+               data.url is string && data.url.size() <= 2048 &&
+               (data.get('signatureData', {}) is map || data.get('signatureData', '') is string) &&
+               (data.get('isSigned', false) is bool) &&
+               data.createdAt is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId() || existing().clientId == 'global');
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId() || resource.data.clientId == 'global');
+
+      allow create: if isAdmin() && isValidId(documentId) && isValidDocument(incoming()) &&
+                      (incoming().clientId == 'global' || exists(/databases/$(database)/documents/clients/$(incoming().clientId))) &&
+                      incoming().createdAt == request.time;
+
+      allow update: if isSignedIn() && isValidId(documentId) && isValidDocument(incoming()) &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().clientId == existing().clientId &&
+                      (isAdmin() || (request.auth.uid == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['isSigned', 'signatureData'])));
+
+      allow delete: if isAdmin();
+    }

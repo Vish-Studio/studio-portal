@@ -1,0 +1,22 @@
+    // signInAccess: invitation/first-login bridge by normalized email.
+    match /signInAccess/{emailId} {
+      function isValidAccess(data) {
+        return data.keys().hasAll(['email', 'profileRole', 'displayName', 'status']) &&
+               data.email == emailId &&
+               data.email is string && data.email.size() <= 255 &&
+               data.profileRole in ['superadmin', 'admin', 'freelancer', 'user'] &&
+               (data.get('staffRole', 'admin') is string) && data.get('staffRole', 'admin') in ['superadmin', 'admin', 'freelancer'] &&
+               (data.get('teamMemberId', '') is string) && data.get('teamMemberId', '').size() <= 128 &&
+               (data.get('teamId', '') is string) && data.get('teamId', '').size() <= 128 &&
+               (data.get('clientId', '') is string) && data.get('clientId', '').size() <= 128 &&
+               data.displayName is string && data.displayName.size() <= 120 &&
+               data.status in ['active', 'inactive'] &&
+               (!('createdAt' in data) || data.createdAt is timestamp) &&
+               (!('updatedAt' in data) || data.updatedAt is timestamp);
+      }
+
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isAdmin() && isValidAccess(incoming());
+      allow delete: if isAdmin();
+    }

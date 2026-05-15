@@ -10,8 +10,10 @@
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "firebase:login": "npx firebase-tools login",
-    "deploy:rules": "npx firebase-tools deploy --only firestore:rules --project studio-portal-b03fe",
+    "build:firestore-rules": "node scripts/build-firestore-rules.mjs",
+    "deploy:rules": "npm run build:firestore-rules && npx firebase-tools deploy --only firestore:rules --project studio-portal-b03fe",
     "deploy:hosting": "npm run build && npx firebase-tools deploy --only hosting --project studio-portal-b03fe",
+    "firebase:purge:team-members": "npx firebase-tools firestore:delete teamMembers --recursive --yes --project studio-portal-b03fe",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

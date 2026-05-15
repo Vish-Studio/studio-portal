@@ -5,6 +5,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updateProfile as firebaseUpdateProfile,
   verifyPasswordResetCode as firebaseVerifyPasswordResetCode,
   type User,
 } from 'firebase/auth';
@@ -17,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { requireFirebase } from './firebase-service';
 import { accessService } from './access-service';
-import type { AuthProfile, AuthRole } from '@/src/types/auth';
+import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
 
 const fallbackAdminEmails = ['vishstudio.ltd@gmail.com', 'vishseenarain@gmail.com'];
 const envAdminEmails = String(import.meta.env.VITE_FIREBASE_ADMIN_EMAILS ?? '')
@@ -36,8 +37,18 @@ const displayNameFromEmail = (email: string) =>
     .map(part => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(' ') || 'User';
 
-const inferRole = (email: string): AuthRole =>
-  adminEmails.has(normalizeEmail(email)) ? 'admin' : 'client';
+const inferRole = (email: string): AuthRole => {
+  const normalizedEmail = normalizeEmail(email);
+  if (normalizedEmail === 'vishstudio.ltd@gmail.com') return 'superadmin';
+  if (adminEmails.has(normalizedEmail)) return 'admin';
+  return 'user';
+};
+
+const normalizeRole = (role: unknown, email: string): AuthRole => {
+  if (role === 'client') return 'user';
+  if (role === 'superadmin' || role === 'admin' || role === 'freelancer' || role === 'user') return role;
+  return inferRole(email);
+};
 
 const removeUndefined = <T extends Record<string, unknown>>(value: T) =>
   Object.fromEntries(
@@ -52,8 +63,17 @@ const profileFromUserDocument = (user: User, data: Partial<AuthProfile>): AuthPr
     uid: user.uid,
     email: data.email ?? email,
     displayName: data.displayName ?? user.displayName ?? displayNameFromEmail(email),
-    role: data.role ?? inferRole(email),
+    role: normalizeRole(data.role, email),
     status: data.status ?? 'active',
+    staffRole: data.staffRole,
+    teamMemberId: data.teamMemberId,
+    teamId: data.teamId ?? data.teamMemberId,
+    clientId: data.clientId,
+    phone: data.phone,
+    jobTitle: data.jobTitle,
+    company: data.company,
+    recoveryEmail: data.recoveryEmail,
+    newsletterPreferences: data.newsletterPreferences,
     createdAt: data.createdAt as Timestamp | undefined,
     updatedAt: data.updatedAt as Timestamp | undefined,
   };
@@ -145,9 +165,10 @@ export const authService = {
       email,
       displayName: user.displayName ?? access?.displayName ?? displayNameFromEmail(email),
       role,
-      staffRole: access?.staffRole,
+      staffRole: role === 'user' ? undefined : (access?.staffRole ?? role),
+      teamId: access?.teamId ?? access?.teamMemberId,
       teamMemberId: access?.teamMemberId,
-      clientId: access?.clientId ?? (role === 'client' ? user.uid : undefined),
+      clientId: access?.clientId,
       status: 'active',
     };
 
@@ -157,6 +178,43 @@ export const authService = {
       updatedAt: serverTimestamp(),
     }));
 
+    if (profile.clientId) {
+      await setDoc(doc(db, 'clients', profile.clientId), {
+        userId: user.uid,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+    }
+
+    if (profile.teamId) {
+      await setDoc(doc(db, 'team', profile.teamId), {
+        userId: user.uid,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+    }
+
     return profile;
+  },
+
+  async updateCurrentProfile(input: AuthProfileUpdateInput): Promise<AuthProfile> {
+    const { auth, db } = requireFirebase();
+    const user = auth.currentUser;
+
+    if (!user) {
+      throw new Error('You need to be signed in to update your profile.');
+    }
+
+    if (typeof input.displayName === 'string' && input.displayName.trim()) {
+      await firebaseUpdateProfile(user, { displayName: input.displayName.trim() });
+    }
+
+    const ref = doc(db, 'users', user.uid);
+    await setDoc(ref, removeUndefined({
+      ...input,
+      displayName: input.displayName?.trim(),
+      updatedAt: serverTimestamp(),
+    }), { merge: true });
+
+    const snapshot = await getDoc(ref);
+    return profileFromUserDocument(user, snapshot.data() as Partial<AuthProfile>);
   },
 };

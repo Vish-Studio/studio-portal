@@ -2,6 +2,7 @@ export type TeamAccessRole = 'superadmin' | 'admin' | 'freelancer';
 
 export interface TeamMember {
   id: string;
+  userId?: string | null;
   name: string;
   role: string;
   accessRole?: TeamAccessRole;

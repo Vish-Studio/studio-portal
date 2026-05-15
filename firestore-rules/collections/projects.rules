@@ -1,0 +1,29 @@
+    // projects: client work and process state.
+    match /projects/{projectId} {
+      function isValidProject(data) {
+        return data.keys().hasAll(['clientId', 'name', 'phase', 'createdAt', 'updatedAt']) &&
+               data.clientId is string && data.clientId.size() <= 128 &&
+               data.name is string && data.name.size() <= 200 &&
+               data.phase is string && data.phase.size() <= 100 &&
+               (data.get('timeline', '') is string) && (data.get('timeline', '').size() <= 500) &&
+               (data.get('agreedPayment', 0) is number) &&
+               (data.get('remainingPayment', 0) is number) &&
+               data.createdAt is timestamp &&
+               data.updatedAt is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+
+      allow create: if isAdmin() && isValidId(projectId) && isValidProject(incoming()) &&
+                      exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
+                      incoming().createdAt == request.time &&
+                      incoming().updatedAt == request.time;
+
+      allow update: if isAdmin() && isValidId(projectId) && isValidProject(incoming()) &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().clientId == existing().clientId &&
+                      incoming().updatedAt == request.time;
+
+      allow delete: if isAdmin();
+    }

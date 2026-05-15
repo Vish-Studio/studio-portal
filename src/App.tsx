@@ -47,14 +47,14 @@ export default function App() {
             <Route path="/" element={<AuthLanding />} />
 
           {/* User / client routes */}
-          <Route path="/user" element={<AuthGate role="client"><UserDashboard /></AuthGate>} />
-          <Route path="/user/projects" element={<AuthGate role="client"><UserProjects /></AuthGate>} />
-          <Route path="/user/calendar" element={<AuthGate role="client"><UserCalendar /></AuthGate>} />
-          <Route path="/user/tasks" element={<AuthGate role="client"><UserTasks /></AuthGate>} />
-          <Route path="/user/payments" element={<AuthGate role="client"><UserPayments /></AuthGate>} />
-          <Route path="/user/documents" element={<AuthGate role="client"><UserDocuments /></AuthGate>} />
-          <Route path="/user/chat" element={<AuthGate role="client"><UserChat /></AuthGate>} />
-          <Route path="/user/settings" element={<AuthGate role="client"><UserSettings /></AuthGate>} />
+          <Route path="/user" element={<AuthGate role="user"><UserDashboard /></AuthGate>} />
+          <Route path="/user/projects" element={<AuthGate role="user"><UserProjects /></AuthGate>} />
+          <Route path="/user/calendar" element={<AuthGate role="user"><UserCalendar /></AuthGate>} />
+          <Route path="/user/tasks" element={<AuthGate role="user"><UserTasks /></AuthGate>} />
+          <Route path="/user/payments" element={<AuthGate role="user"><UserPayments /></AuthGate>} />
+          <Route path="/user/documents" element={<AuthGate role="user"><UserDocuments /></AuthGate>} />
+          <Route path="/user/chat" element={<AuthGate role="user"><UserChat /></AuthGate>} />
+          <Route path="/user/settings" element={<AuthGate role="user"><UserSettings /></AuthGate>} />
 
           {/* Admin routes */}
           <Route path="/admin" element={<AuthGate role="admin"><Dashboard /></AuthGate>} />

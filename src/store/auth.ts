@@ -3,7 +3,8 @@ import type { User } from 'firebase/auth';
 import { isFirebaseConfigured } from '@/src/lib/firebase';
 import { authService } from '@/src/services/firebase/auth-service';
 export type { AuthProfile, AuthRole } from '@/src/types/auth';
-import type { AuthProfile, AuthRole } from '@/src/types/auth';
+import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
+import { runOperationWithFeedback } from '../lib/operation-feedback';
 
 interface AuthState {
   user: User | null;
@@ -15,6 +16,7 @@ interface AuthState {
   sendPasswordReset: (email: string) => Promise<void>;
   verifyPasswordReset: (code: string) => Promise<string>;
   confirmPasswordReset: (code: string, password: string) => Promise<void>;
+  updateProfile: (updates: AuthProfileUpdateInput) => Promise<AuthProfile>;
   signOutUser: () => Promise<void>;
   initAuthListener: () => () => void;
 }
@@ -81,6 +83,25 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.confirmPasswordReset(code, password);
       set({ loading: false });
+    } catch (error) {
+      const message = firebaseErrorMessage(error);
+      set({ loading: false, error: message });
+      throw new Error(message);
+    }
+  },
+
+  updateProfile: async (updates) => {
+    set({ loading: true, error: null });
+
+    try {
+      const profile = await runOperationWithFeedback({
+        loadingLabel: 'Updating profile',
+        successTitle: 'Profile updated',
+        errorTitle: 'Unable to update profile',
+        action: () => authService.updateCurrentProfile(updates),
+      });
+      set({ profile, loading: false });
+      return profile;
     } catch (error) {
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });

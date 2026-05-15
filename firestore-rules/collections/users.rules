@@ -1,0 +1,41 @@
+    // users: Firebase auth profile source.
+    match /users/{userId} {
+      function isValidUser(data) {
+        return data.keys().hasAll(['role', 'email', 'createdAt']) &&
+               data.role in ['superadmin', 'admin', 'freelancer', 'user'] &&
+               data.email is string && data.email.size() <= 255 &&
+               (data.get('displayName', '') is string) && (data.get('displayName', '').size() <= 100) &&
+               (data.get('staffRole', 'admin') is string) && data.get('staffRole', 'admin') in ['superadmin', 'admin', 'freelancer'] &&
+               (data.get('teamMemberId', '') is string) && (data.get('teamMemberId', '').size() <= 128) &&
+               (data.get('teamId', '') is string) && (data.get('teamId', '').size() <= 128) &&
+               (data.get('clientId', '') is string) && (data.get('clientId', '').size() <= 128) &&
+               (data.get('companyName', '') is string) && (data.get('companyName', '').size() <= 160) &&
+               (data.get('phone', '') is string) && (data.get('phone', '').size() <= 40) &&
+               (data.get('status', 'active') is string) && data.get('status', 'active') in ['prospect', 'agreed', 'lost', 'active', 'inactive'] &&
+               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
+               data.createdAt is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
+      allow list: if isAdmin();
+
+      allow create: if isSignedIn() && isValidId(userId) &&
+                       (request.auth.uid == userId || isAdmin()) &&
+                       isValidUser(incoming()) &&
+                       incoming().createdAt == request.time &&
+                       (
+                         isAdmin() ||
+                         (
+                           incoming().role in ['superadmin', 'admin', 'freelancer', 'user'] &&
+                           incoming().email == request.auth.token.email &&
+                           hasActiveAccess(request.auth.token.email) &&
+                           get(accessPath(request.auth.token.email)).data.profileRole == incoming().role
+                         )
+                       );
+
+      allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) &&
+                       incoming().createdAt == existing().createdAt &&
+                       (isAdmin() || (request.auth.uid == userId && incoming().role == existing().role && incoming().status == existing().status));
+
+      allow delete: if isAdmin();
+    }

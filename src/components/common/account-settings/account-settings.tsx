@@ -2,7 +2,6 @@ import { type ReactNode, useState } from 'react';
 import Button from '../button/button';
 import Checkbox from '../checkbox/checkbox';
 import MaterialIcon from '../material-icon/material-icon';
-import Tabs from '../tabs/tabs';
 import Toggle from '../toggle/toggle';
 import { useSettingsStore, type SettingsSection } from '@/src/store/settings';
 
@@ -121,47 +120,76 @@ export default function AccountSettings() {
   };
 
   return (
-    <div className="account-settings flex flex-col gap-4 pb-10">
-      <section className="account-settings-hero rounded-[18px] bg-(--color-surface-alt) p-4 md:p-5">
-        <div className="account-settings-hero-content flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Account settings</p>
-            <h2 className="mt-2 text-2xl font-bold text-(--color-ink)">Manage your account</h2>
-            <p className="mt-1 text-sm font-medium text-gray-500">{isDirty ? 'Unsaved changes' : 'All changes saved'}</p>
+    <div className="account-settings flex flex-col gap-5 pb-10">
+      <section className="account-settings-title-card rounded-[18px] bg-(--color-surface-alt) p-5 md:p-6">
+        <div className="account-settings-title-content flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="account-settings-title-copy min-w-0">
+            <p className="type-eyebrow text-gray-400">Admin settings</p>
+            <h2 className="type-page-title mt-1 text-(--color-ink)">Manage your account</h2>
+            <p className="type-muted mt-1 text-gray-400">
+              {isDirty ? 'Unsaved changes' : 'Profile, login, and email preferences'}
+            </p>
           </div>
-          <Tabs
-            items={sections.map(section => ({
-              key: section.key,
-              label: section.label,
-              icon: <MaterialIcon name={section.icon} size={16} />,
-            }))}
-            value={activeSection}
-            onChange={setActiveSection}
-            className="lg:justify-end"
-            mobileMode="scroll"
-            ariaLabel="Settings sections"
-          />
+          <div className="account-settings-title-status rounded-2xl bg-white px-4 py-3">
+            <p className="type-label text-gray-400">Save status</p>
+            <p className="type-card-title mt-1 text-(--color-ink)">{isDirty ? 'Changes pending' : 'Up to date'}</p>
+          </div>
         </div>
       </section>
 
-      <section className="account-settings-panel rounded-[18px] border border-gray-100 bg-white">
-        <div className="account-settings-panel-header flex flex-col gap-4 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-start sm:justify-between md:px-6">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <MaterialIcon name={activeSectionMeta.icon} size={20} className="text-gray-500" />
-              <h2 className="text-xl font-bold text-(--color-ink)">{activeSectionMeta.label}</h2>
+      <div className="account-settings-workspace grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="account-settings-tabs rounded-[18px] border border-gray-100 bg-white p-3">
+          <div className="account-settings-tabs-header px-2 py-3">
+            <p className="type-label text-gray-400">Settings</p>
+            <p className="type-muted mt-1 text-gray-400">Choose the section you want to edit.</p>
+          </div>
+          <div className="account-settings-tab-list mt-2 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+            {sections.map(section => {
+              const isActive = activeSection === section.key;
+
+              return (
+                <button
+                  key={section.key}
+                  type="button"
+                  onClick={() => setActiveSection(section.key)}
+                  className={`account-settings-tab min-w-[210px] rounded-2xl px-4 py-3 text-left transition lg:min-w-0 ${
+                    isActive ? 'bg-(--color-ink) text-white' : 'bg-(--color-surface-alt) text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  <span className="account-settings-tab-row flex items-start gap-3">
+                    <span className={`account-settings-tab-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${isActive ? 'bg-white/10' : 'bg-white'}`}>
+                      <MaterialIcon name={section.icon} size={18} />
+                    </span>
+                    <span className="account-settings-tab-copy min-w-0">
+                      <span className={`type-card-title block ${isActive ? 'text-white' : 'text-(--color-ink)'}`}>{section.label}</span>
+                      <span className={`type-muted mt-1 block ${isActive ? 'text-white/45' : 'text-gray-400'}`}>{section.description}</span>
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </aside>
+
+        <section className="account-settings-panel rounded-[18px] border border-gray-100 bg-white">
+          <div className="account-settings-panel-header flex flex-col gap-4 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-start sm:justify-between md:px-6">
+            <div className="account-settings-panel-title min-w-0">
+              <div className="account-settings-panel-heading flex items-center gap-2">
+                <MaterialIcon name={activeSectionMeta.icon} size={20} className="text-gray-500" />
+                <h2 className="type-section-title text-(--color-ink)">{activeSectionMeta.label}</h2>
+              </div>
+              <p className="type-muted mt-2 text-gray-400">{activeSectionMeta.description}</p>
             </div>
-            <p className="mt-2 text-sm font-medium text-gray-400">{activeSectionMeta.description}</p>
+            <Button onClick={markSaved} disabled={!isDirty}>
+              Save changes
+            </Button>
           </div>
-          <Button onClick={markSaved} disabled={!isDirty}>
-            Save changes
-          </Button>
-        </div>
 
-        <div className="account-settings-panel-body p-4 md:p-6">
-          {sectionContent[activeSection]}
-        </div>
-      </section>
+          <div className="account-settings-panel-body p-4 md:p-6">
+            {sectionContent[activeSection]}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

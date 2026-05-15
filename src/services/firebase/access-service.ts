@@ -10,9 +10,10 @@ import type { StaffRole } from '@/src/types/auth';
 
 export interface SignInAccessRecord {
   email: string;
-  profileRole: 'admin' | 'client';
+  profileRole: StaffRole | 'user';
   staffRole?: StaffRole;
   teamMemberId?: string;
+  teamId?: string;
   clientId?: string;
   displayName: string;
   status: 'active' | 'inactive';

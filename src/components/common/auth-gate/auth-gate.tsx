@@ -6,8 +6,13 @@ import { AppLoader } from '../app-loader/app-loader';
 
 interface AuthGateProps {
   children: React.ReactNode;
-  role?: AuthRole;
+  role?: 'admin' | 'user';
 }
+
+const isAdminRole = (role?: AuthRole | null) =>
+  role === 'superadmin' || role === 'admin' || role === 'freelancer';
+
+const routeForRole = (role?: AuthRole | null) => role === 'user' ? '/user' : '/admin';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initAuthListener = useAuthStore(state => state.initAuthListener);
@@ -63,8 +68,12 @@ export function AuthGate({ children, role }: AuthGateProps) {
     );
   }
 
-  if (role && profile?.role !== role) {
-    return <Navigate to={profile.role === 'client' ? '/user' : '/admin'} replace />;
+  if (role === 'user' && profile.role !== 'user') {
+    return <Navigate to={routeForRole(profile.role)} replace />;
+  }
+
+  if (role === 'admin' && !isAdminRole(profile.role)) {
+    return <Navigate to={routeForRole(profile.role)} replace />;
   }
 
   return <>{children}</>;
@@ -79,5 +88,5 @@ export function AuthLanding() {
     return <Navigate to="/sign-in" replace />;
   }
 
-  return <Navigate to={profile?.role === 'client' ? '/user' : '/admin'} replace />;
+  return <Navigate to={routeForRole(profile?.role)} replace />;
 }

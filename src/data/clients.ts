@@ -2,11 +2,12 @@ export type ClientStatus = 'active' | 'inactive' | 'lost';
 
 export interface Client {
   id: string;
+  userId?: string | null;
   displayName: string;
   companyName?: string;
   email: string;
   phone?: string;
-  role: 'client';
+  role: 'user';
   status: ClientStatus;
   createdAt?: { toMillis: () => number; toDate: () => Date };
 }

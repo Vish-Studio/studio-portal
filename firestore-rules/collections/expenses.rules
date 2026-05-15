@@ -1,0 +1,11 @@
+    // expenses: internal admin-only accounting data.
+    match /expenses/{expenseId} {
+      function isValidExpense(data) {
+        return data.keys().hasAll(['amount', 'description', 'createdAt']) &&
+               data.amount is number &&
+               data.description is string && data.description.size() <= 500 &&
+               data.createdAt is timestamp;
+      }
+
+      allow read, write: if isAdmin();
+    }

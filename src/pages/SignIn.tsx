@@ -15,6 +15,7 @@ import Button from '../components/common/button/button';
 import Checkbox from '../components/common/checkbox/checkbox';
 import { isFirebaseConfigured } from '../lib/firebase';
 import { useAuthStore } from '../store/auth';
+import type { AuthRole } from '../types/auth';
 
 interface SignInFormValues {
   email: string;
@@ -27,6 +28,8 @@ const highlights = [
   { icon: Calendar, label: 'Schedule', value: '08', meta: 'this week' },
   { icon: CreditCard, label: 'Payments', value: '$56k', meta: 'collected' },
 ];
+
+const isUserRole = (role: AuthRole) => role === 'user';
 
 const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -50,11 +53,11 @@ const SignIn = () => {
     setSubmitError(null);
     try {
       const nextProfile = await signIn(values.email, values.password);
-      const fallbackPath = nextProfile.role === 'client' ? '/user' : '/admin';
+      const fallbackPath = isUserRole(nextProfile.role) ? '/user' : '/admin';
       const requestedPath = typeof location.state === 'object' && location.state && 'from' in location.state
         ? String(location.state.from)
         : fallbackPath;
-      navigate(requestedPath.startsWith(`/${nextProfile.role === 'client' ? 'user' : 'admin'}`) ? requestedPath : fallbackPath, {
+      navigate(requestedPath.startsWith(`/${isUserRole(nextProfile.role) ? 'user' : 'admin'}`) ? requestedPath : fallbackPath, {
         replace: true,
       });
     } catch (error) {
@@ -63,7 +66,7 @@ const SignIn = () => {
   };
 
   if (user && profile) {
-    return <Navigate to={profile.role === 'client' ? '/user' : '/admin'} replace />;
+    return <Navigate to={isUserRole(profile.role) ? '/user' : '/admin'} replace />;
   }
 
   return (

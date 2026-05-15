@@ -3,17 +3,18 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
-  query,
   serverTimestamp,
   updateDoc,
-  where,
   type DocumentData,
+  type DocumentSnapshot,
   type FirestoreError,
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { requireFirebase } from './firebase-service';
+import { accessService, normalizeAccessEmail } from './access-service';
 import type { Client, ClientStatus } from '@/src/data/clients';
 
 export interface ClientInput {
@@ -24,7 +25,7 @@ export interface ClientInput {
   status: ClientStatus;
 }
 
-const clientsCollection = () => collection(requireFirebase().db, 'users');
+const clientsCollection = () => collection(requireFirebase().db, 'clients');
 
 const cleanClientInput = (input: ClientInput) => ({
   displayName: input.displayName.trim(),
@@ -46,16 +47,19 @@ const cleanClientUpdate = (input: Partial<ClientInput>) => {
   return payload;
 };
 
-const clientFromSnapshot = (snapshot: QueryDocumentSnapshot<DocumentData>): Client => {
+const clientFromSnapshot = (
+  snapshot: QueryDocumentSnapshot<DocumentData> | DocumentSnapshot<DocumentData>,
+): Client => {
   const data = snapshot.data();
 
   return {
     id: snapshot.id,
+    userId: data.userId ?? null,
     displayName: data.displayName ?? 'Unnamed client',
     companyName: data.companyName ?? '',
     email: data.email ?? '',
     phone: data.phone ?? '',
-    role: 'client',
+    role: 'user',
     status: data.status ?? 'active',
     createdAt: data.createdAt,
   };
@@ -66,13 +70,8 @@ export const clientsService = {
     onClients: (clients: Client[]) => void,
     onError: (error: FirestoreError) => void,
   ): Unsubscribe {
-    const clientsQuery = query(
-      clientsCollection(),
-      where('role', '==', 'client'),
-    );
-
     return onSnapshot(
-      clientsQuery,
+      clientsCollection(),
       snapshot => onClients(snapshot.docs.map(clientFromSnapshot)),
       onError,
     );
@@ -83,26 +82,59 @@ export const clientsService = {
 
     const ref = await addDoc(clientsCollection(), {
       ...payload,
-      role: 'client',
+      userId: null,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
+    });
+
+    await accessService.upsertAccess({
+      email: payload.email,
+      profileRole: 'user',
+      clientId: ref.id,
+      displayName: payload.displayName,
+      status: payload.status === 'inactive' || payload.status === 'lost' ? 'inactive' : 'active',
     });
 
     return ref.id;
   },
 
   async updateClient(id: string, input: Partial<ClientInput>) {
-    const ref = doc(requireFirebase().db, 'users', id);
+    const ref = doc(requireFirebase().db, 'clients', id);
+    const snapshot = await getDoc(ref);
+    const previousEmail = snapshot.exists()
+      ? normalizeAccessEmail(String(snapshot.data().email ?? ''))
+      : '';
+    const previous = snapshot.exists() ? clientFromSnapshot(snapshot) : null;
     const payload = cleanClientUpdate(input);
 
     await updateDoc(ref, {
       ...payload,
       updatedAt: serverTimestamp(),
     });
+
+    const nextEmail = normalizeAccessEmail(payload.email ?? previous?.email ?? '');
+    if (previousEmail && nextEmail && previousEmail !== nextEmail) {
+      await accessService.removeAccess(previousEmail);
+    }
+
+    if (nextEmail) {
+      await accessService.upsertAccess({
+        email: nextEmail,
+        profileRole: 'user',
+        clientId: id,
+        displayName: payload.displayName ?? previous?.displayName ?? nextEmail,
+        status: (payload.status ?? previous?.status) === 'inactive' || (payload.status ?? previous?.status) === 'lost'
+          ? 'inactive'
+          : 'active',
+      });
+    }
   },
 
   async deleteClient(id: string) {
-    const ref = doc(requireFirebase().db, 'users', id);
+    const ref = doc(requireFirebase().db, 'clients', id);
+    const snapshot = await getDoc(ref);
+    const email = snapshot.exists() ? String(snapshot.data().email ?? '') : '';
     await deleteDoc(ref);
+    if (email) await accessService.removeAccess(email);
   },
 };
