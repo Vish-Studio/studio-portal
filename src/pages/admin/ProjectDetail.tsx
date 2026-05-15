@@ -241,9 +241,9 @@ const ProjectDetail = () => {
                   <div className="py-1">
                     {selectedClient ? (
                       <div className="flex items-center gap-2">
-                        <Avatar name={selectedClient.displayName} id={selectedClient.id} size="sm" />
+                        <Avatar name={selectedClient.fullName} id={selectedClient.id} size="sm" />
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{selectedClient.displayName}</p>
+                          <p className="text-sm font-semibold text-gray-900 truncate">{selectedClient.fullName}</p>
                           {selectedClient.companyName && <p className="text-xs text-gray-400">{selectedClient.companyName}</p>}
                         </div>
                       </div>

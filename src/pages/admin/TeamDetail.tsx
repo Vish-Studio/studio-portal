@@ -16,6 +16,7 @@ import { TaskStatusBadge } from '@/src/components/common/status-badge/status-bad
 import { useProjectsStore } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
 import { useTeamStore } from '@/src/store/team';
+import { useAuthStore } from '@/src/store/auth';
 import type { TeamAccessRole } from '@/src/data/team';
 
 interface TeamMemberFormValues {
@@ -32,9 +33,11 @@ const fieldCls = (hasError: boolean) =>
 export default function TeamDetail() {
   const { id } = useParams<{ id: string }>();
   const { members, loading, subscribeMembers, updateMember } = useTeamStore();
+  const profile = useAuthStore(state => state.profile);
   const { projects } = useProjectsStore();
   const { tasks } = useTasksStore();
   const [isEditing, setIsEditing] = useState(false);
+  const isSuperAdmin = profile?.role === 'superadmin';
 
   useEffect(() => subscribeMembers(), [subscribeMembers]);
 
@@ -143,7 +146,7 @@ export default function TeamDetail() {
                   </button>
                 </div>
               ) : (
-                <ButtonIcon iconName="edit" clickHandler={() => setIsEditing(true)} />
+                isSuperAdmin ? <ButtonIcon iconName="edit" clickHandler={() => setIsEditing(true)} /> : null
               )
             }
           >
@@ -171,7 +174,7 @@ export default function TeamDetail() {
               <FormField label="Access Role" required={isEditing} error={errors.accessRole?.message}>
                 <Select
                   {...register('accessRole', { required: isEditing ? 'Access role is required' : false })}
-                  disabled={!isEditing}
+                  disabled={!isEditing || !isSuperAdmin}
                   hasError={!!errors.accessRole}
                   className="disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0"
                 >

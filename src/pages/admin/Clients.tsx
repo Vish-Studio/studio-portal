@@ -24,7 +24,7 @@ type FilterKey = 'all' | 'active' | 'inactive' | 'lost';
 type SortKey = 'name' | 'newest';
 
 interface ClientFormValues {
-  displayName: string;
+  fullName: string;
   companyName: string;
   email: string;
   phone: string;
@@ -58,7 +58,7 @@ export default function Clients() {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<ClientFormValues>({
-    defaultValues: { displayName: '', companyName: '', email: '', phone: '', status: 'active' },
+    defaultValues: { fullName: '', companyName: '', email: '', phone: '', status: 'active' },
   });
 
   useEffect(() => subscribeClients(), [subscribeClients]);
@@ -85,7 +85,7 @@ export default function Clients() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       list = list.filter(c =>
-        c.displayName.toLowerCase().includes(q) ||
+        c.fullName.toLowerCase().includes(q) ||
         c.email.toLowerCase().includes(q) ||
         (c.companyName ?? '').toLowerCase().includes(q) ||
         (c.phone ?? '').includes(q),
@@ -94,7 +94,7 @@ export default function Clients() {
     return [...list].sort((a, b) => {
       const result = sortKey === 'newest'
         ? (a.createdAt?.toMillis() ?? 0) - (b.createdAt?.toMillis() ?? 0)
-        : a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' });
+        : a.fullName.localeCompare(b.fullName, undefined, { sensitivity: 'base' });
 
       return sortDirection === 'asc' ? result : -result;
     });
@@ -103,14 +103,14 @@ export default function Clients() {
   // ── Sidebar helpers ──
   const openAdd = () => {
     setEditingClient(null);
-    reset({ displayName: '', companyName: '', email: '', phone: '', status: 'active' });
+    reset({ fullName: '', companyName: '', email: '', phone: '', status: 'active' });
     setSidebarOpen(true);
   };
 
   const openEdit = (client: Client) => {
     setEditingClient(client);
     reset({
-      displayName: client.displayName,
+      fullName: client.fullName,
       companyName: client.companyName ?? '',
       email: client.email,
       phone: client.phone ?? '',
@@ -129,7 +129,7 @@ export default function Clients() {
   };
 
   const handleDelete = async (client: Client) => {
-    if (confirm(`Remove ${client.displayName}?`)) await removeClient(client.id);
+    if (confirm(`Remove ${client.fullName}?`)) await removeClient(client.id);
   };
 
   return (
@@ -231,10 +231,10 @@ export default function Clients() {
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${circleBg[client.status]} text-xs font-bold text-white`}>
-                      {client.displayName.charAt(0).toUpperCase()}
+                      {client.fullName.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0">
-                      <p className="type-card-title truncate text-(--color-ink)">{client.displayName}</p>
+                      <p className="type-card-title truncate text-(--color-ink)">{client.fullName}</p>
                       <p className="type-muted truncate text-gray-400">{client.companyName || 'No company'}</p>
                     </div>
                   </div>
@@ -276,18 +276,18 @@ export default function Clients() {
         title={editingClient ? 'Edit Client' : 'New Client'}
         description={
           editingClient
-            ? `Editing ${editingClient.displayName}`
+            ? `Editing ${editingClient.fullName}`
             : 'Fill in the details below to add a new client.'
         }
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
 
-            <FormField label="Full Name" required error={errors.displayName?.message}>
+            <FormField label="Full Name" required error={errors.fullName?.message}>
               <input
-                {...register('displayName', { required: 'Name is required' })}
+                {...register('fullName', { required: 'Name is required' })}
                 placeholder="e.g. Sarah Mitchell"
-                className={inputCls(!!errors.displayName)}
+                className={inputCls(!!errors.fullName)}
               />
             </FormField>
 

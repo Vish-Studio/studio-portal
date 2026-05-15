@@ -105,7 +105,7 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
                 {client && (
                   <div className="flex items-center gap-2">
                     <MaterialIcon name="person" size={15} className="text-gray-400" />
-                    <p className="text-sm font-medium text-gray-700">{client.displayName}</p>
+                    <p className="text-sm font-medium text-gray-700">{client.fullName}</p>
                   </div>
                 )}
                 {assignedMembers.length > 0 && (

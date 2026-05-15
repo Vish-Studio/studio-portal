@@ -156,7 +156,7 @@ export default function TaskDetailModal({ task, onClose, onEdit, onDelete }: Tas
             <InfoBlock icon="person" label="Client visibility">
               {clientAssignee ? (
                 <div className="flex flex-col gap-1">
-                  <span>{clientAssignee.displayName}</span>
+                  <span>{clientAssignee.fullName}</span>
                   <span className="text-xs font-medium text-gray-400">
                     Visible in the client dashboard and task list
                   </span>

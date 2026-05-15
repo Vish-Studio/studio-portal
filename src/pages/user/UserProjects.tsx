@@ -215,7 +215,7 @@ export default function UserProjects() {
         )}
       </div>
 
-      <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : `Adding a project for ${currentClient?.displayName ?? 'client'}`} width="md">
+      <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : `Adding a project for ${currentClient?.fullName ?? 'client'}`} width="md">
         <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <FormField label="Project Name" required error={errors.name?.message}>

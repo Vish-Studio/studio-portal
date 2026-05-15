@@ -10,6 +10,14 @@
       );
     }
 
+    function isSuperAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')
+      );
+    }
+
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
 

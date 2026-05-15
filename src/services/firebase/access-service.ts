@@ -4,25 +4,26 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
-} from 'firebase/firestore';
-import { requireFirebase } from './firebase-service';
-import type { StaffRole } from '@/src/types/auth';
+} from "firebase/firestore";
+import { requireFirebase } from "./firebase-service";
+import type { StaffRole } from "@/src/types/auth";
 
 export interface SignInAccessRecord {
   email: string;
-  profileRole: StaffRole | 'user';
+  profileRole: StaffRole | "client";
   staffRole?: StaffRole;
   teamMemberId?: string;
   teamId?: string;
   clientId?: string;
-  displayName: string;
-  status: 'active' | 'inactive';
+  fullName: string;
+  status: "active" | "inactive";
 }
 
-export const normalizeAccessEmail = (email: string) => email.trim().toLowerCase();
+export const normalizeAccessEmail = (email: string) =>
+  email.trim().toLowerCase();
 
 const accessDoc = (email: string) =>
-  doc(requireFirebase().db, 'signInAccess', normalizeAccessEmail(email));
+  doc(requireFirebase().db, "signInAccess", normalizeAccessEmail(email));
 
 export const accessService = {
   async getAccess(email: string): Promise<SignInAccessRecord | null> {
@@ -32,12 +33,16 @@ export const accessService = {
   },
 
   async upsertAccess(record: SignInAccessRecord) {
-    await setDoc(accessDoc(record.email), {
-      ...record,
-      email: normalizeAccessEmail(record.email),
-      updatedAt: serverTimestamp(),
-      createdAt: serverTimestamp(),
-    }, { merge: true });
+    await setDoc(
+      accessDoc(record.email),
+      {
+        ...record,
+        email: normalizeAccessEmail(record.email),
+        updatedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
   },
 
   async removeAccess(email: string) {

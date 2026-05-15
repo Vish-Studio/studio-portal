@@ -333,7 +333,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                       <Option value="">No client</Option>
                       {clients.map(client => (
                         <Option key={client.id} value={client.id}>
-                          {client.displayName}{client.companyName ? ` - ${client.companyName}` : ''}
+                          {client.fullName}{client.companyName ? ` - ${client.companyName}` : ''}
                         </Option>
                       ))}
                     </Select>

@@ -42,7 +42,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
 
   const userMenuSections: DropdownMenuSectionType[] = [
     {
-      header: profile?.displayName ?? 'Studio Portal',
+      header: profile?.fullName ?? 'Studio Portal',
       items: [
         { label: 'Profile', onClick: () => { setIsUserOpen(false); } },
         { label: 'Settings', onClick: () => { setIsUserOpen(false); } },

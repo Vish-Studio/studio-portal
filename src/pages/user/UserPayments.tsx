@@ -114,10 +114,10 @@ const UserPayments = () => {
         {currentClient && (
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-[14px] bg-(--color-accent-lime) flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-gray-800">{currentClient.displayName.charAt(0)}</span>
+              <span className="text-sm font-bold text-gray-800">{currentClient.fullName.charAt(0)}</span>
             </div>
             <div>
-              <p className="text-sm font-bold text-(--color-ink)">{currentClient.displayName}</p>
+              <p className="text-sm font-bold text-(--color-ink)">{currentClient.fullName}</p>
               <p className="text-[11px] text-gray-400">{currentClient.companyName}</p>
             </div>
           </div>

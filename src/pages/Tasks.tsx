@@ -342,10 +342,10 @@ const Tasks = () => {
                 checked={assignToClient}
                 disabled={!selectedClient}
                 onChange={event => setAssignToClient(event.target.checked)}
-                label={selectedClient ? `Assign to ${selectedClient.displayName}` : 'Select a project first'}
+                label={selectedClient ? `Assign to ${selectedClient.fullName}` : 'Select a project first'}
                 description={
                   selectedClient
-                    ? `This task will appear in ${selectedClient.displayName}'s client dashboard and task list.`
+                    ? `This task will appear in ${selectedClient.fullName}'s client dashboard and task list.`
                     : 'Client tasks are linked through the selected project.'
                 }
                 className="rounded-2xl border border-gray-100 bg-(--color-surface) p-4"

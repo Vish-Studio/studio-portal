@@ -21,7 +21,7 @@ import ButtonIcon from '@/src/components/common/button-icon/button-icon';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ClientFormValues {
-  displayName: string;
+  fullName: string;
   companyName: string;
   email: string;
   phone: string;
@@ -58,7 +58,7 @@ const ClientDetail = () => {
   } = useForm<ClientFormValues>({
     values: client
       ? {
-        displayName: client.displayName,
+        fullName: client.fullName,
         companyName: client.companyName ?? '',
         email: client.email,
         phone: client.phone ?? '',
@@ -108,7 +108,7 @@ const ClientDetail = () => {
         <Breadcrumb
           previousLink="/admin/clients"
           previousPageName="Clients"
-          currentPageName={client.displayName} />
+          currentPageName={client.fullName} />
 
         {/* Client detail */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 ">
@@ -147,11 +147,11 @@ const ClientDetail = () => {
               onSubmit={handleSubmit(onSubmit)}
               className="px-4 md:px-6 py-4 md:py-5 space-y-4"
             >
-              <FormField label="Full Name" required={isEditing} error={errors.displayName?.message}>
+              <FormField label="Full Name" required={isEditing} error={errors.fullName?.message}>
                 <input
-                  {...register('displayName', { required: isEditing ? 'Name is required' : false })}
+                  {...register('fullName', { required: isEditing ? 'Name is required' : false })}
                   disabled={!isEditing}
-                  className={fieldCls(!!errors.displayName)}
+                  className={fieldCls(!!errors.fullName)}
                 />
               </FormField>
 
@@ -247,7 +247,7 @@ const ClientDetail = () => {
                 </div>
                 <p className="text-sm font-semibold text-gray-500">No projects yet</p>
                 <p className="text-xs text-gray-400">
-                  Projects for {client.displayName} will appear here.
+                  Projects for {client.fullName} will appear here.
                 </p>
               </div>
             ) : (

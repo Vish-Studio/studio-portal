@@ -45,7 +45,7 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
     () => clients.map(client => ({
       id: client.id,
       type: 'client',
-      name: client.displayName,
+      name: client.fullName,
       meta: client.companyName || client.email,
       email: client.email,
     })),
@@ -72,7 +72,7 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
         id: project.id,
         type: 'project',
         name: project.name,
-        meta: `${accent.label}${client ? ` · ${client.displayName}` : ''}`,
+        meta: `${accent.label}${client ? ` · ${client.fullName}` : ''}`,
       };
     }),
     [clients, projects],

@@ -48,9 +48,9 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
       {(client || project.timeline) && (
         <DetailHeroCard.Section className="space-y-3">
           {client && (
-            <DetailHeroCard.IconRow icon={<Avatar name={client.displayName} id={client.id} size="xs" />}>
+            <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
               <div className="min-w-0">
-                <p className="text-sm text-gray-300 truncate">{client.displayName}</p>
+                <p className="text-sm text-gray-300 truncate">{client.fullName}</p>
                 {client.companyName && <p className="text-[11px] text-gray-500 truncate">{client.companyName}</p>}
               </div>
             </DetailHeroCard.IconRow>

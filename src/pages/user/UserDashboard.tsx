@@ -49,7 +49,7 @@ const UserDashboard = () => {
         {/* Greeting */}
         <div>
           <p className="text-sm text-gray-500 font-medium">{greeting}</p>
-          <h1 className="text-2xl font-bold text-(--color-ink)">{currentClient?.displayName}</h1>
+          <h1 className="text-2xl font-bold text-(--color-ink)">{currentClient?.fullName}</h1>
           {currentClient?.companyName && (
             <p className="text-sm text-gray-400 mt-0.5">{currentClient.companyName}</p>
           )}

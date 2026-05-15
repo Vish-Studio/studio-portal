@@ -12,6 +12,7 @@ import Select from '../components/common/select/select';
 import Option from '../components/common/select/option';
 import Fab from '../components/common/button-fab/button-fab';
 import Button from '../components/common/button/button';
+import { useAuthStore } from '../store/auth';
 import { useTeamStore } from '../store/team';
 import { useUIStore } from '../store/ui';
 import { getMemberColors } from '../data/team';
@@ -104,6 +105,8 @@ export default function Team() {
     assignMember,
   } = useTeamStore();
   const { searchQuery } = useUIStore();
+  const profile = useAuthStore(state => state.profile);
+  const isSuperAdmin = profile?.role === 'superadmin';
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
@@ -204,7 +207,7 @@ export default function Team() {
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
             actionLabel="Add Member"
-            onAction={openAdd}
+            onAction={isSuperAdmin ? openAdd : undefined}
           />
         </div>
 
@@ -272,9 +275,13 @@ export default function Team() {
                   <div className="flex justify-end" onClick={event => event.stopPropagation()}>
                     <RowActionsMenu
                       actions={[
-                        { label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(member) },
+                        ...(isSuperAdmin
+                          ? [{ label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(member) }]
+                          : []),
                         { label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(member) },
-                        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(member), variant: 'danger' },
+                        ...(isSuperAdmin
+                          ? [{ label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(member), variant: 'danger' as const }]
+                          : []),
                       ]}
                     />
                   </div>
@@ -287,7 +294,7 @@ export default function Team() {
       </div>
 
       {/* Mobile FAB */}
-      <Fab onClick={openAdd} ariaLabel="Add team member" />
+      {isSuperAdmin && <Fab onClick={openAdd} ariaLabel="Add team member" />}
 
       {/* Member Form Sidebar */}
       <FormSidebar
@@ -315,6 +322,7 @@ export default function Team() {
             <FormField label="Access Role" required error={errors.accessRole?.message}>
               <Select
                 {...register('accessRole', { required: 'Access role is required' })}
+                disabled={!isSuperAdmin}
                 hasError={!!errors.accessRole}
               >
                 <Option value="freelancer">Freelancer</Option>

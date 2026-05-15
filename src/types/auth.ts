@@ -1,7 +1,7 @@
-import type { Timestamp } from 'firebase/firestore';
+import type { Timestamp } from "firebase/firestore";
 
-export type AuthRole = 'superadmin' | 'admin' | 'freelancer' | 'user';
-export type StaffRole = Exclude<AuthRole, 'user'>;
+export type AuthRole = "client" | "superadmin" | "admin" | "freelancer";
+export type StaffRole = Exclude<AuthRole, "client">;
 
 export interface NewsletterPreferences {
   marketingEmails: boolean;
@@ -13,10 +13,10 @@ export interface NewsletterPreferences {
 export interface AuthProfile {
   uid: string;
   email: string;
-  displayName: string;
+  fullName: string;
   role: AuthRole;
   staffRole?: StaffRole;
-  status: 'active' | 'inactive' | 'prospect' | 'agreed' | 'lost';
+  status: "active" | "inactive" | "prospect" | "agreed" | "lost";
   teamMemberId?: string;
   teamId?: string;
   clientId?: string;
@@ -30,7 +30,7 @@ export interface AuthProfile {
 }
 
 export interface AuthProfileUpdateInput {
-  displayName?: string;
+  fullName?: string;
   phone?: string;
   jobTitle?: string;
   company?: string;

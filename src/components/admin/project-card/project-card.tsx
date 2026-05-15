@@ -71,7 +71,7 @@ const ProjectCard = ({
         </div>
 
         <p className="type-muted truncate text-gray-400">
-          {accent.label}{client ? ` · ${client.displayName}` : ''}
+          {accent.label}{client ? ` · ${client.fullName}` : ''}
         </p>
 
         <div className="project-card-progress mt-3.5">
@@ -158,7 +158,7 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
             <p className="type-card-title truncate text-gray-900">{project.name}</p>
           </div>
           <p className="type-muted mt-1 truncate pl-6 text-gray-400">
-            {accent.label}{client ? ` · ${client.displayName}` : ''}
+            {accent.label}{client ? ` · ${client.fullName}` : ''}
           </p>
         </div>
 

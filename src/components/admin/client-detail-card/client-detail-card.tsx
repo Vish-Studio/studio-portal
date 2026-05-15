@@ -13,7 +13,7 @@ interface Props {
 }
 
 const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) => {
-  const avatarBg     = avatarColor(client.id ?? client.displayName);
+  const avatarBg     = avatarColor(client.id ?? client.fullName);
   const projects     = DEMO_PROJECTS.filter(p => p.clientId === client.id);
   const activeCount  = projects.filter(p => p.status === 'active').length;
   const totalAgreed  = projects.reduce((s, p) => s + p.agreedPayment, 0);
@@ -30,10 +30,10 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) 
         <div
           className={`client-detail-card-avatar w-14 h-14 rounded-2xl ${avatarBg} flex items-center justify-center text-2xl font-black text-white mb-4 shadow-lg`}
         >
-          {client.displayName.charAt(0).toUpperCase()}
+          {client.fullName.charAt(0).toUpperCase()}
         </div>
 
-        <h2 className="text-xl font-bold text-white leading-tight">{client.displayName}</h2>
+        <h2 className="text-xl font-bold text-white leading-tight">{client.fullName}</h2>
         {client.companyName && (
           <p className="text-sm text-gray-400 mt-0.5">{client.companyName}</p>
         )}

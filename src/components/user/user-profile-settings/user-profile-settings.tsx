@@ -73,7 +73,7 @@ export default function UserProfileSettings() {
   const showToast = useUIStore(state => state.showToast);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [form, setForm] = useState<AuthProfileUpdateInput>({
-    displayName: '',
+    fullName: '',
     phone: '',
     jobTitle: '',
     company: '',
@@ -87,7 +87,7 @@ export default function UserProfileSettings() {
     if (!profile) return;
 
     setForm({
-      displayName: profile.displayName ?? '',
+      fullName: profile.fullName ?? '',
       phone: profile.phone ?? '',
       jobTitle: profile.jobTitle ?? '',
       company: profile.company ?? '',
@@ -121,7 +121,7 @@ export default function UserProfileSettings() {
   const handleSave = async () => {
     await updateProfile({
       ...form,
-      displayName: form.displayName?.trim(),
+      fullName: form.fullName?.trim(),
       phone: form.phone?.trim(),
       jobTitle: form.jobTitle?.trim(),
       company: form.company?.trim(),
@@ -167,7 +167,7 @@ export default function UserProfileSettings() {
       <section className="user-profile-settings-title-card rounded-[18px] bg-(--color-surface-alt) p-5 md:p-6">
         <div className="user-profile-settings-title-content flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="user-profile-settings-title-left flex items-center gap-4">
-            <Avatar name={profile.displayName || profile.email} id={profile.uid} size="lg" />
+            <Avatar name={profile.fullName || profile.email} id={profile.uid} size="lg" />
             <div className="user-profile-settings-title-copy min-w-0">
               <p className="type-eyebrow text-gray-400">Account profile</p>
               <h2 className="type-page-title mt-1 text-(--color-ink)">Manage your profile</h2>
@@ -232,7 +232,7 @@ export default function UserProfileSettings() {
             {activeTab === 'profile' ? (
               <div className="user-profile-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField label="Full name">
-                  <input value={form.displayName ?? ''} onChange={event => updateForm('displayName', event.target.value)} className={inputCls()} />
+                  <input value={form.fullName ?? ''} onChange={event => updateForm('fullName', event.target.value)} className={inputCls()} />
                 </FormField>
                 <FormField label="Primary email" hint="Email sign-in is managed by Firebase Authentication.">
                   <input value={profile.email} readOnly className={`${inputCls()} cursor-not-allowed text-gray-400`} />

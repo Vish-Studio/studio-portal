@@ -305,7 +305,7 @@ export default function TemplateEditor() {
             blocks={blocks}
             selectedBlockId={editingId}
             onSelectBlock={setEditingId}
-            clientName={client?.displayName ?? 'Client Name'}
+            clientName={client?.fullName ?? 'Client Name'}
             clientEmail={client?.email ?? 'client@email.com'}
           />
         </div>
