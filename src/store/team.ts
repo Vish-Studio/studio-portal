@@ -2,6 +2,7 @@ import { create } from 'zustand';
 export type { TeamMember, TeamProject } from '../data/team';
 import type { TeamMember, TeamProject } from '../data/team';
 import { teamService, type TeamMemberInput } from '../services/firebase/team-service';
+import { runOperationWithFeedback } from '../lib/operation-feedback';
 
 interface TeamState {
   members: TeamMember[];
@@ -61,7 +62,12 @@ export const useTeamStore = create<TeamState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      const id = await teamService.createMember(member);
+      const id = await runOperationWithFeedback({
+        loadingLabel: 'Adding team member',
+        successTitle: 'Team member added',
+        errorTitle: 'Unable to add team member',
+        action: () => teamService.createMember(member),
+      });
       set({ loading: false });
       return id;
     } catch (error) {
@@ -75,7 +81,12 @@ export const useTeamStore = create<TeamState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      await teamService.updateMember(id, updates);
+      await runOperationWithFeedback({
+        loadingLabel: 'Updating team member',
+        successTitle: 'Team member updated',
+        errorTitle: 'Unable to update team member',
+        action: () => teamService.updateMember(id, updates),
+      });
       set({ loading: false });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to update team member.';
@@ -88,7 +99,12 @@ export const useTeamStore = create<TeamState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      await teamService.deleteMember(id);
+      await runOperationWithFeedback({
+        loadingLabel: 'Deleting team member',
+        successTitle: 'Team member deleted',
+        errorTitle: 'Unable to delete team member',
+        action: () => teamService.deleteMember(id),
+      });
       set({ loading: false });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to delete team member.';
@@ -101,7 +117,12 @@ export const useTeamStore = create<TeamState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      await teamService.updateMember(memberId, { assignedProjectId: projectId });
+      await runOperationWithFeedback({
+        loadingLabel: 'Assigning project',
+        successTitle: 'Project assignment updated',
+        errorTitle: 'Unable to assign project',
+        action: () => teamService.updateMember(memberId, { assignedProjectId: projectId }),
+      });
       set({ loading: false });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to assign project.';

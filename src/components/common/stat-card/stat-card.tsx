@@ -59,6 +59,7 @@ const VARIANT_STYLES: Record<CardVariant, VariantStyle> = {
 
 export interface StatCardProps {
   variant?: CardVariant;
+  size?: 'sm' | 'md';
   /** Lucide or custom icon node shown beside the label */
   icon: React.ReactNode;
   /** Small label text above the value */
@@ -78,6 +79,7 @@ export interface StatCardProps {
 
 const StatCard: FunctionComponent<StatCardProps> = ({
   variant = 'white',
+  size = 'md',
   icon,
   label,
   value,
@@ -88,7 +90,11 @@ const StatCard: FunctionComponent<StatCardProps> = ({
   className = '',
 }) => {
   const s = VARIANT_STYLES[variant];
-  const baseClassName = `stat-card ${s.container} rounded-[18px] p-4 md:p-6 flex flex-col items-start gap-4 transition-all duration-200 ${className}`;
+  const sizeClassName = size === 'sm'
+    ? 'min-h-[116px] rounded-[16px] p-4 gap-3'
+    : 'rounded-[18px] p-4 md:p-6 gap-4';
+  const valueClassName = size === 'sm' ? 'text-3xl' : '';
+  const baseClassName = `stat-card ${s.container} ${sizeClassName} flex flex-col items-start transition-all duration-200 ${className}`;
   const clickableClassName = onAction
     ? `group w-full text-left cursor-pointer focus:outline-none focus:ring-4 focus:ring-gray-100 ${s.hoverContainer}`
     : '';
@@ -112,7 +118,7 @@ const StatCard: FunctionComponent<StatCardProps> = ({
 
       {/* Value */}
       <div className="flex items-baseline gap-2">
-        <span className={`type-stat-value ${s.valueText}`}>
+        <span className={`type-stat-value ${valueClassName} ${s.valueText}`}>
           {value}
         </span>
         {valueSubLabel && (

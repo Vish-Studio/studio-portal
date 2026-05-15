@@ -50,6 +50,23 @@ body {
   .chat-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--color-sidebar-active);
   }
+
+  .app-loader-progress[data-indeterminate="true"],
+  .global-operation-loader-bar {
+    animation: app-progress-slide 1.25s ease-in-out infinite;
+  }
+}
+
+@keyframes app-progress-slide {
+  0% {
+    transform: translateX(-115%);
+  }
+  55% {
+    transform: translateX(60%);
+  }
+  100% {
+    transform: translateX(230%);
+  }
 }
 
 @theme inline {

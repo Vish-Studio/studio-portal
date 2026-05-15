@@ -33,14 +33,18 @@ import UserDocuments from './pages/user/UserDocuments';
 import UserChat from './pages/user/UserChat';
 import UserSettings from './pages/user/UserSettings';
 import { AuthGate, AuthLanding, AuthProvider } from './components/common/auth-gate/auth-gate';
+import { AppLoadingGate } from './components/common/app-loading-gate/app-loading-gate';
+import { GlobalOperationLoader } from './components/common/global-operation-loader/global-operation-loader';
+import { ToastViewport } from './components/common/toast/toast-viewport';
 
 export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          {/* Redirect root based on auth role */}
-          <Route path="/" element={<AuthLanding />} />
+        <AppLoadingGate>
+          <Routes>
+            {/* Redirect root based on auth role */}
+            <Route path="/" element={<AuthLanding />} />
 
           {/* User / client routes */}
           <Route path="/user" element={<AuthGate role="client"><UserDashboard /></AuthGate>} />
@@ -81,8 +85,11 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </AppLoadingGate>
+        <GlobalOperationLoader />
+        <ToastViewport />
       </AuthProvider>
     </BrowserRouter>
   );

@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, UserCheck, UserMinus, UserRoundX, Users } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import { RowActionsMenu } from '../../components/common/table/table';
 import TableTab, { type TabItem } from '../../components/common/table-tab/table-tab';
@@ -12,6 +12,7 @@ import Select from '../../components/common/select/select';
 import Option from '../../components/common/select/option';
 import Fab from '../../components/common/button-fab/button-fab';
 import Button from '../../components/common/button/button';
+import StatCard from '../../components/common/stat-card/stat-card';
 import { ClientStatusBadge } from '../../components/common/status-badge/status-badge';
 import { useClientsStore } from '../../store/clients';
 import { useUIStore } from '../../store/ui';
@@ -134,6 +135,45 @@ export default function Clients() {
   return (
     <Layout title="Clients">
       <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
+        <div className="clients-stats grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            size="sm"
+            variant="lime"
+            icon={<Users size={17} />}
+            label="Total Clients"
+            value={tabCounts.all}
+            badge={`${tabCounts.active} active`}
+            badgeLabel="in CRM"
+          />
+          <StatCard
+            size="sm"
+            variant="surface"
+            icon={<UserCheck size={17} />}
+            label="Active"
+            value={tabCounts.active}
+            badge="Active"
+            badgeLabel="current clients"
+          />
+          <StatCard
+            size="sm"
+            variant="white"
+            icon={<UserMinus size={17} />}
+            label="Inactive"
+            value={tabCounts.inactive}
+            badge="Inactive"
+            badgeLabel="on pause"
+          />
+          <StatCard
+            size="sm"
+            variant="dark"
+            icon={<UserRoundX size={17} />}
+            label="Lost"
+            value={tabCounts.lost}
+            badge="Lost"
+            badgeLabel="closed leads"
+          />
+        </div>
+
         <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <TableTab
             tabs={tabs}
@@ -175,11 +215,10 @@ export default function Clients() {
               <span>Contact</span>
               <span>Created</span>
               <span className="text-right">Status</span>
-              <span />
             </div>
 
             {filtered.map(client => {
-              const circleBg: Record<ClientStatus, string> = { active: 'bg-green-500', inactive: 'bg-amber-400', lost: 'bg-red-400' };
+              const circleBg: Record<ClientStatus, string> = { active: 'bg-green', inactive: 'bg-amber-400', lost: 'bg-red-400' };
 
               return (
                 <div

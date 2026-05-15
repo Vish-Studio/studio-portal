@@ -2,6 +2,7 @@ import { create } from 'zustand';
 export type { Client, ClientStatus } from '../data/clients';
 import type { Client } from '../data/clients';
 import { clientsService, type ClientInput } from '../services/firebase/clients-service';
+import { runOperationWithFeedback } from '../lib/operation-feedback';
 
 interface ClientsState {
   clients: Client[];
@@ -51,7 +52,12 @@ export const useClientsStore = create<ClientsState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      const id = await clientsService.createClient(client);
+      const id = await runOperationWithFeedback({
+        loadingLabel: 'Adding client',
+        successTitle: 'Client added',
+        errorTitle: 'Unable to add client',
+        action: () => clientsService.createClient(client),
+      });
       set({ loading: false });
       return id;
     } catch (error) {
@@ -65,7 +71,12 @@ export const useClientsStore = create<ClientsState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      await clientsService.updateClient(id, updates);
+      await runOperationWithFeedback({
+        loadingLabel: 'Updating client',
+        successTitle: 'Client updated',
+        errorTitle: 'Unable to update client',
+        action: () => clientsService.updateClient(id, updates),
+      });
       set({ loading: false });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to update client.';
@@ -78,7 +89,12 @@ export const useClientsStore = create<ClientsState>((set) => ({
     set({ loading: true, error: null });
 
     try {
-      await clientsService.deleteClient(id);
+      await runOperationWithFeedback({
+        loadingLabel: 'Deleting client',
+        successTitle: 'Client deleted',
+        errorTitle: 'Unable to delete client',
+        action: () => clientsService.deleteClient(id),
+      });
       set({ loading: false });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unable to delete client.';

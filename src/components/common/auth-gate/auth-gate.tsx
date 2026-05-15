@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, type AuthRole } from '@/src/store/auth';
 import { isFirebaseConfigured } from '@/src/lib/firebase';
+import { AppLoader } from '../app-loader/app-loader';
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -30,12 +31,11 @@ export function AuthGate({ children, role }: AuthGateProps) {
 
   if (!ready) {
     return (
-      <main className="auth-gate flex min-h-screen items-center justify-center bg-white p-6">
-        <div className="auth-gate-card rounded-[18px] bg-(--color-surface-alt) px-6 py-5 text-center">
-          <p className="type-card-title text-(--color-ink)">Checking session</p>
-          <p className="type-muted mt-1 text-gray-400">Please wait...</p>
-        </div>
-      </main>
+      <AppLoader
+        title="Checking session"
+        description="Preparing your dashboard..."
+        eyebrow="Session status"
+      />
     );
   }
 
