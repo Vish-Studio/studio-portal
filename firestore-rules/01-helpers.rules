@@ -13,6 +13,7 @@
     function isSuperAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
+        request.auth.token.email == 'vishseenarain@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')
       );
@@ -29,13 +30,4 @@
 
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function accessPath(email) {
-      return /databases/$(database)/documents/signInAccess/$(email);
-    }
-
-    function hasActiveAccess(email) {
-      return exists(accessPath(email)) &&
-             get(accessPath(email)).data.status == 'active';
     }

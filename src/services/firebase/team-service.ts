@@ -6,6 +6,7 @@ import {
   getDoc,
   onSnapshot,
   serverTimestamp,
+  setDoc,
   updateDoc,
   type DocumentData,
   type DocumentSnapshot,
@@ -14,7 +15,6 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { requireFirebase } from "./firebase-service";
-import { accessService, normalizeAccessEmail } from "./access-service";
 import type { TeamAccessRole, TeamMember } from "@/src/data/team";
 
 export interface TeamMemberInput {
@@ -26,6 +26,33 @@ export interface TeamMemberInput {
 }
 
 const teamCollection = () => collection(requireFirebase().db, "team");
+const userProfileRef = (email: string) => doc(requireFirebase().db, "users", email.trim().toLowerCase());
+
+const upsertTeamUserProfile = async (
+  profileId: string,
+  payload: {
+    email: string;
+    role: TeamAccessRole;
+    staffRole: TeamAccessRole;
+    teamId: string;
+    teamMemberId: string;
+    fullName: string;
+    jobTitle: string;
+    status: "active";
+  },
+) => {
+  const ref = doc(requireFirebase().db, "users", profileId);
+  const snapshot = await getDoc(ref);
+  await setDoc(
+    ref,
+    {
+      ...payload,
+      ...(snapshot.exists() ? {} : { createdAt: serverTimestamp() }),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+};
 
 const cleanTeamMemberInput = (input: TeamMemberInput) => ({
   name: input.name.trim(),
@@ -90,12 +117,14 @@ export const teamService = {
       updatedAt: serverTimestamp(),
     });
 
-    await accessService.upsertAccess({
+    await upsertTeamUserProfile(payload.email, {
       email: payload.email,
-      profileRole: payload.accessRole,
+      role: payload.accessRole,
       staffRole: payload.accessRole,
       teamId: ref.id,
+      teamMemberId: ref.id,
       fullName: payload.name,
+      jobTitle: payload.role,
       status: "active",
     });
 
@@ -106,7 +135,7 @@ export const teamService = {
     const ref = doc(requireFirebase().db, "team", id);
     const snapshot = await getDoc(ref);
     const previousEmail = snapshot.exists()
-      ? normalizeAccessEmail(String(snapshot.data().email ?? ""))
+      ? String(snapshot.data().email ?? "").trim().toLowerCase()
       : "";
     const previous = snapshot.exists()
       ? teamMemberFromSnapshot(snapshot)
@@ -125,21 +154,26 @@ export const teamService = {
 
     if (!shouldSyncAccess) return;
 
-    const nextEmail = normalizeAccessEmail(
-      payload.email ?? previous?.email ?? "",
-    );
+    const nextEmail = (payload.email ?? previous?.email ?? "").trim().toLowerCase();
     if (previousEmail && nextEmail && previousEmail !== nextEmail) {
-      await accessService.removeAccess(previousEmail);
+      await deleteDoc(userProfileRef(previousEmail));
     }
     if (nextEmail) {
-      await accessService.upsertAccess({
+      const role = payload.accessRole ?? previous?.accessRole ?? "freelancer";
+      const userProfilePayload = {
         email: nextEmail,
-        profileRole: payload.accessRole ?? previous?.accessRole ?? "freelancer",
-        staffRole: payload.accessRole ?? previous?.accessRole ?? "freelancer",
+        role,
+        staffRole: role,
         teamId: id,
+        teamMemberId: id,
         fullName: payload.name ?? previous?.name ?? nextEmail,
+        jobTitle: payload.role ?? previous?.role ?? role,
         status: "active",
-      });
+      } as const;
+      await upsertTeamUserProfile(nextEmail, userProfilePayload);
+      if (previous?.userId) {
+        await upsertTeamUserProfile(previous.userId, userProfilePayload);
+      }
     }
   },
 
@@ -148,6 +182,6 @@ export const teamService = {
     const snapshot = await getDoc(ref);
     const email = snapshot.exists() ? String(snapshot.data().email ?? "") : "";
     await deleteDoc(ref);
-    if (email) await accessService.removeAccess(email);
+    if (email) await deleteDoc(userProfileRef(email));
   },
 };

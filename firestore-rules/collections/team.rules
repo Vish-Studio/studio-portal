@@ -18,25 +18,14 @@
                       incoming().updatedAt == request.time &&
                       (
                         isSuperAdmin() ||
-                        (
-                          isSignedIn() &&
-                          incoming().userId == request.auth.uid &&
-                          incoming().email == request.auth.token.email &&
-                          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['superadmin', 'admin', 'freelancer'] &&
-                          incoming().accessRole == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
-                        )
+                        (isAdmin() && incoming().accessRole in ['admin', 'freelancer'])
                       );
       allow update: if isValidTeamMember(incoming()) &&
                       incoming().createdAt == existing().createdAt &&
                       incoming().updatedAt == request.time &&
                       (
                         isSuperAdmin() ||
-                        (
-                          isAdmin() &&
-                          incoming().accessRole == existing().accessRole &&
-                          incoming().email == existing().email &&
-                          incoming().diff(existing()).affectedKeys().hasOnly(['assignedProjectId', 'userId', 'updatedAt'])
-                        )
+                        (isAdmin() && existing().accessRole != 'superadmin' && incoming().accessRole in ['admin', 'freelancer'])
                       );
       allow delete: if isSuperAdmin();
     }

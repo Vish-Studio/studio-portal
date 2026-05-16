@@ -1,6 +1,5 @@
 import {
   confirmPasswordReset as firebaseConfirmPasswordReset,
-  createUserWithEmailAndPassword,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -11,6 +10,7 @@ import {
   type User,
 } from "firebase/auth";
 import {
+  deleteDoc,
   doc,
   getDoc,
   serverTimestamp,
@@ -18,7 +18,6 @@ import {
   updateDoc,
   type Timestamp,
 } from "firebase/firestore";
-import { accessService } from "./access-service";
 import { requireFirebase } from "./firebase-service";
 import type {
   AuthProfile,
@@ -27,7 +26,7 @@ import type {
   StaffRole,
 } from "@/src/types/auth";
 
-const fallbackAdminEmails = [
+const fallbackSuperAdminEmails = [
   "vishstudio.ltd@gmail.com",
   "vishseenarain@gmail.com",
 ];
@@ -37,7 +36,8 @@ const envAdminEmails = String(import.meta.env.VITE_FIREBASE_ADMIN_EMAILS ?? "")
   .map((email) => email.trim().toLowerCase())
   .filter(Boolean);
 
-const adminEmails = new Set([...fallbackAdminEmails, ...envAdminEmails]);
+const superAdminEmails = new Set(fallbackSuperAdminEmails);
+const adminEmails = new Set([...envAdminEmails]);
 
 const normalizeEmail = (email?: string | null) => (email ?? "").trim().toLowerCase();
 
@@ -49,14 +49,15 @@ const fullNameFromEmail = (email: string) =>
     .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(" ") || "User";
 
-const inferRole = (email: string): AuthRole => {
+const inferRole = (email: string): AuthRole | null => {
   const normalizedEmail = normalizeEmail(email);
-  if (normalizedEmail === "vishstudio.ltd@gmail.com") return "superadmin";
+  if (superAdminEmails.has(normalizedEmail)) return "superadmin";
   if (adminEmails.has(normalizedEmail)) return "admin";
-  return "client";
+  return null;
 };
 
 const normalizeRole = (role: unknown, email: string): AuthRole => {
+  if (superAdminEmails.has(normalizeEmail(email))) return "superadmin";
   if (role === "user") return "client";
   if (
     role === "client" ||
@@ -67,7 +68,7 @@ const normalizeRole = (role: unknown, email: string): AuthRole => {
     return role;
   }
 
-  return inferRole(email);
+  return inferRole(email) ?? "client";
 };
 
 const isStaffRole = (role: AuthRole): role is StaffRole => role !== "client";
@@ -93,7 +94,11 @@ const profileFromUserDocument = (
       user.displayName ??
       fullNameFromEmail(email),
     role,
-    staffRole: isStaffRole(role) ? data.staffRole ?? role : undefined,
+    staffRole: isStaffRole(role)
+      ? role === "superadmin"
+        ? "superadmin"
+        : data.staffRole ?? role
+      : undefined,
     status: data.status ?? "active",
     teamMemberId: data.teamMemberId,
     teamId: data.teamId ?? data.teamMemberId,
@@ -205,38 +210,7 @@ export const authService = {
   async signInOrCreateAllowedUser(email: string, password: string) {
     const { auth } = requireFirebase();
     const normalizedEmail = normalizeEmail(email);
-
-    try {
-      return await signInWithEmailAndPassword(auth, normalizedEmail, password);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      const canTryCreate =
-        message.includes("auth/user-not-found") ||
-        message.includes("auth/invalid-credential") ||
-        message.includes("auth/wrong-password");
-
-      if (!canTryCreate) throw error;
-
-      const access = await accessService.getAccess(normalizedEmail);
-      if (!access || access.status !== "active") {
-        throw new Error("No active account invitation exists for this email.");
-      }
-
-      try {
-        return await createUserWithEmailAndPassword(
-          auth,
-          normalizedEmail,
-          password,
-        );
-      } catch (createError) {
-        const createMessage =
-          createError instanceof Error ? createError.message : "";
-        if (createMessage.includes("auth/email-already-in-use")) {
-          throw new Error("Invalid email or password.");
-        }
-        throw createError;
-      }
-    }
+    return signInWithEmailAndPassword(auth, normalizedEmail, password);
   },
 
   async signOut() {
@@ -297,19 +271,32 @@ export const authService = {
       return syncLinkedProfile(user, profile);
     }
 
-    const access = await accessService.getAccess(email);
-    const role = normalizeRole(access?.profileRole, email);
-    const fullName = user.displayName ?? access?.fullName ?? fullNameFromEmail(email);
+    const stagedRef = doc(db, "users", email);
+    const stagedSnapshot = await getDoc(stagedRef);
+    const fallbackRole = inferRole(email);
+
+    if (!stagedSnapshot.exists() && !fallbackRole) {
+      throw new Error("No app profile exists for this email. Ask an admin to create the user first.");
+    }
+
+    const stagedData = stagedSnapshot.exists()
+      ? stagedSnapshot.data() as Partial<AuthProfile>
+      : {};
+    const role = normalizeRole(stagedData.role, email);
+    const fullName = user.displayName ?? stagedData.fullName ?? fullNameFromEmail(email);
     const profile: AuthProfile = {
       uid: user.uid,
       email,
       fullName,
       role,
-      staffRole: isStaffRole(role) ? access?.staffRole ?? role : undefined,
-      teamId: access?.teamId ?? access?.teamMemberId,
-      teamMemberId: access?.teamMemberId,
-      clientId: access?.clientId,
-      status: "active",
+      staffRole: isStaffRole(role) ? stagedData.staffRole ?? role : undefined,
+      teamId: stagedData.teamId ?? stagedData.teamMemberId,
+      teamMemberId: stagedData.teamMemberId,
+      clientId: stagedData.clientId,
+      phone: stagedData.phone,
+      jobTitle: stagedData.jobTitle,
+      company: stagedData.company,
+      status: stagedData.status ?? "active",
     };
 
     await setDoc(
@@ -320,6 +307,10 @@ export const authService = {
         updatedAt: serverTimestamp(),
       }),
     );
+
+    if (stagedSnapshot.exists()) {
+      await deleteDoc(stagedRef);
+    }
 
     return syncLinkedProfile(user, profile);
   },

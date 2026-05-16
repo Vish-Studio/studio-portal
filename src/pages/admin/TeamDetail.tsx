@@ -1,14 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckSquare, Clock3, Mail } from 'lucide-react';
+import { Briefcase, CheckSquare, Clock3, Mail, Pencil } from 'lucide-react';
 import Layout from '@/src/components/common/layout/layout';
 import Breadcrumb from '@/src/components/common/breadcrumb/breadcrumb';
 import CardContent from '@/src/components/common/card-content/card-content';
+import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '@/src/components/common/form-field/form-field';
 import Select from '@/src/components/common/select/select';
 import Option from '@/src/components/common/select/option';
 import ButtonIcon from '@/src/components/common/button-icon/button-icon';
+import Button from '@/src/components/common/button/button';
+import Fab from '@/src/components/common/button-fab/button-fab';
 import ProjectCard from '@/src/components/admin/project-card/project-card';
 import TeamDetailCard from '@/src/components/admin/team-detail-card/team-detail-card';
 import StatCard from '@/src/components/common/stat-card/stat-card';
@@ -37,7 +40,9 @@ export default function TeamDetail() {
   const { projects } = useProjectsStore();
   const { tasks } = useTasksStore();
   const [isEditing, setIsEditing] = useState(false);
+  const [editSidebarOpen, setEditSidebarOpen] = useState(false);
   const isSuperAdmin = profile?.role === 'superadmin';
+  const canManageTeam = profile?.role === 'superadmin' || profile?.role === 'admin';
 
   useEffect(() => subscribeMembers(), [subscribeMembers]);
 
@@ -61,6 +66,11 @@ export default function TeamDetail() {
       .sort((a, b) => b.updatedAt - a.updatedAt);
   }, [member, tasks]);
 
+  const canEditMember = !!member && canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin');
+  const roleOptions = isSuperAdmin
+    ? (['freelancer', 'admin', 'superadmin'] as TeamAccessRole[])
+    : (['freelancer', 'admin'] as TeamAccessRole[]);
+
   const openTasks = assignedTasks.filter(task => task.status !== 'completed');
   const completedTasks = assignedTasks.filter(task => task.status === 'completed');
 
@@ -81,15 +91,32 @@ export default function TeamDetail() {
   });
 
   const onSubmit = async (data: TeamMemberFormValues) => {
-    if (!member) return;
+    if (!member || !canEditMember) return;
+    if (!isSuperAdmin && data.accessRole === 'superadmin') {
+      throw new Error('Only a superadmin can assign the superadmin role.');
+    }
     await updateMember(member.id, data);
     reset(data);
     setIsEditing(false);
+    setEditSidebarOpen(false);
   };
 
   const handleCancel = () => {
     reset();
     setIsEditing(false);
+    setEditSidebarOpen(false);
+  };
+
+  const openMobileEdit = () => {
+    if (!member || !canEditMember) return;
+    reset({
+      name: member.name,
+      role: member.role,
+      accessRole: member.accessRole ?? 'freelancer',
+      email: member.email,
+    });
+    setIsEditing(true);
+    setEditSidebarOpen(true);
   };
 
   if (!member) {
@@ -126,6 +153,7 @@ export default function TeamDetail() {
             iconName="badge"
             title="Team Details"
             variant="white"
+            className="hidden md:flex"
             action={
               isEditing ? (
                 <div className="team-detail-actions flex items-center gap-2">
@@ -146,7 +174,7 @@ export default function TeamDetail() {
                   </button>
                 </div>
               ) : (
-                isSuperAdmin ? <ButtonIcon iconName="edit" clickHandler={() => setIsEditing(true)} /> : null
+                canEditMember ? <ButtonIcon iconName="edit" clickHandler={() => setIsEditing(true)} /> : null
               )
             }
           >
@@ -174,13 +202,15 @@ export default function TeamDetail() {
               <FormField label="Access Role" required={isEditing} error={errors.accessRole?.message}>
                 <Select
                   {...register('accessRole', { required: isEditing ? 'Access role is required' : false })}
-                  disabled={!isEditing || !isSuperAdmin}
+                  disabled={!isEditing}
                   hasError={!!errors.accessRole}
                   className="disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0"
                 >
-                  <Option value="freelancer">Freelancer</Option>
-                  <Option value="admin">Admin</Option>
-                  <Option value="superadmin">Super Admin</Option>
+                  {roleOptions.map(role => (
+                    <Option key={role} value={role}>
+                      {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Freelancer'}
+                    </Option>
+                  ))}
                 </Select>
               </FormField>
 
@@ -313,6 +343,73 @@ export default function TeamDetail() {
           )}
         </section>
       </div>
+
+      {canEditMember && (
+        <Fab
+          icon={Pencil}
+          ariaLabel="Edit team member"
+          onClick={openMobileEdit}
+          className="md:hidden"
+        />
+      )}
+
+      <FormSidebar
+        isOpen={editSidebarOpen}
+        onClose={handleCancel}
+        title="Edit Team Member"
+        description={member.name}
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="team-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+          <div className="team-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormField label="Full Name" required error={errors.name?.message}>
+              <input
+                {...register('name', { required: 'Name is required' })}
+                className={inputCls(!!errors.name)}
+              />
+            </FormField>
+
+            <FormField label="Role" required error={errors.role?.message}>
+              <input
+                {...register('role', { required: 'Role is required' })}
+                className={inputCls(!!errors.role)}
+              />
+            </FormField>
+
+            <FormField label="Access Role" required error={errors.accessRole?.message}>
+              <Select
+                {...register('accessRole', { required: 'Access role is required' })}
+                hasError={!!errors.accessRole}
+              >
+                {roleOptions.map(role => (
+                  <Option key={role} value={role}>
+                    {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Freelancer'}
+                  </Option>
+                ))}
+              </Select>
+            </FormField>
+
+            <FormField label="Email" required error={errors.email?.message}>
+              <input
+                type="email"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
+                })}
+                className={inputCls(!!errors.email)}
+              />
+            </FormField>
+          </div>
+
+          <FormSidebarFooter>
+            <Button type="button" variant="secondary" onClick={handleCancel} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
+              Save
+            </Button>
+          </FormSidebarFooter>
+        </form>
+      </FormSidebar>
     </Layout>
   );
 }

@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { ArrowLeft, Briefcase } from 'lucide-react';
+import { Briefcase, Pencil } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
+import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
 import Select from '../../components/common/select/select';
 import Option from '../../components/common/select/option';
-import MaterialIcon from '../../components/common/material-icon/material-icon';
 import ProjectCard from '../../components/admin/project-card/project-card';
 import ClientDetailCard from '../../components/admin/client-detail-card/client-detail-card';
 import { useClientsStore } from '../../store/clients';
@@ -17,6 +17,8 @@ import { useTeamStore } from '../../store/team';
 import { useProjectsStore } from '../../store/projects';
 import Breadcrumb from '@/src/components/common/breadcrumb/breadcrumb';
 import ButtonIcon from '@/src/components/common/button-icon/button-icon';
+import Button from '@/src/components/common/button/button';
+import Fab from '@/src/components/common/button-fab/button-fab';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -47,6 +49,7 @@ const ClientDetail = () => {
   const client = clients.find(c => c.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
+  const [editSidebarOpen, setEditSidebarOpen] = useState(false);
 
   useEffect(() => subscribeClients(), [subscribeClients]);
 
@@ -72,11 +75,25 @@ const ClientDetail = () => {
     await updateClient(client.id, data);
     reset(data);
     setIsEditing(false);
+    setEditSidebarOpen(false);
   };
 
   const handleCancel = () => {
     reset();
     setIsEditing(false);
+    setEditSidebarOpen(false);
+  };
+
+  const openMobileEdit = () => {
+    reset({
+      fullName: client?.fullName ?? '',
+      companyName: client?.companyName ?? '',
+      email: client?.email ?? '',
+      phone: client?.phone ?? '',
+      status: client?.status ?? 'active',
+    });
+    setIsEditing(true);
+    setEditSidebarOpen(true);
   };
 
   // ── Not found ──
@@ -118,6 +135,7 @@ const ClientDetail = () => {
             iconName="manage_accounts"
             title="Client Details"
             variant="white"
+            className="hidden md:flex"
             action={
               isEditing ? (
                 <div className="flex items-center gap-2">
@@ -260,6 +278,73 @@ const ClientDetail = () => {
           </div>
         </div>
       </div>
+
+      <Fab
+        icon={Pencil}
+        ariaLabel="Edit client"
+        onClick={openMobileEdit}
+        className="md:hidden"
+      />
+
+      <FormSidebar
+        isOpen={editSidebarOpen}
+        onClose={handleCancel}
+        title="Edit Client"
+        description={client.fullName}
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+          <div className="client-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormField label="Full Name" required error={errors.fullName?.message}>
+              <input
+                {...register('fullName', { required: 'Name is required' })}
+                className={inputCls(!!errors.fullName)}
+              />
+            </FormField>
+
+            <FormField label="Company Name" error={errors.companyName?.message}>
+              <input {...register('companyName')} className={inputCls(!!errors.companyName)} />
+            </FormField>
+
+            <FormField label="Email Address" required error={errors.email?.message}>
+              <input
+                type="email"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
+                })}
+                className={inputCls(!!errors.email)}
+              />
+            </FormField>
+
+            <FormField label="Phone Number" error={errors.phone?.message}>
+              <input
+                type="tel"
+                {...register('phone', {
+                  pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
+                })}
+                className={inputCls(!!errors.phone)}
+              />
+            </FormField>
+
+            <FormField label="Status" required error={errors.status?.message}>
+              <Select {...register('status', { required: true })} hasError={!!errors.status}>
+                <Option value="active">Active</Option>
+                <Option value="inactive">Inactive</Option>
+                <Option value="lost">Lost</Option>
+              </Select>
+            </FormField>
+          </div>
+
+          <FormSidebarFooter>
+            <Button type="button" variant="secondary" onClick={handleCancel} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
+              Save
+            </Button>
+          </FormSidebarFooter>
+        </form>
+      </FormSidebar>
     </Layout>
   );
 };

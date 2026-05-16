@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Briefcase, Check, Trash2 } from 'lucide-react';
+import { Briefcase, Check, Pencil, Trash2 } from 'lucide-react';
 import Layout from '../../components/common/layout/layout';
 import CardContent from '../../components/common/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
@@ -13,6 +13,8 @@ import ButtonIcon from '../../components/common/button-icon/button-icon';
 import Button from '../../components/common/button/button';
 import IconPicker from '../../components/common/icon-picker/icon-picker';
 import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
+import Breadcrumb from '../../components/common/breadcrumb/breadcrumb';
+import Fab from '../../components/common/button-fab/button-fab';
 import ProjectHeroCard from '../../components/admin/project-hero-card/project-hero-card';
 import ProjectTimeline from '../../components/admin/project-timeline/project-timeline';
 import { AvatarStack } from '../../components/common/avatar/avatar';
@@ -57,6 +59,7 @@ const ProjectDetail = () => {
   const project = projects.find(p => p.id === id);
 
   const [isEditing, setIsEditing]               = useState(false);
+  const [editSidebarOpen, setEditSidebarOpen]   = useState(false);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [taskFilter, setTaskFilter]             = useState<TaskFilter>('all');
@@ -116,6 +119,17 @@ const ProjectDetail = () => {
     setIsEditing(true);
   };
 
+  const openMobileEdit = () => {
+    openEdit();
+    setEditSidebarOpen(true);
+  };
+
+  const cancelEdit = () => {
+    reset();
+    setIsEditing(false);
+    setEditSidebarOpen(false);
+  };
+
   const onSubmit = (data: ProjectFormValues) => {
     updateProject(project.id, {
       name:              data.name,
@@ -127,6 +141,7 @@ const ProjectDetail = () => {
       assignedMemberIds: selectedMemberIds,
     });
     setIsEditing(false);
+    setEditSidebarOpen(false);
   };
 
   const openPhaseEdit = (phase: Phase) => {
@@ -177,25 +192,17 @@ const ProjectDetail = () => {
     <Layout title={project.name}>
       <div className="flex flex-col gap-4 pb-12">
 
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-3">
-          <Link to="/admin/projects" className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-400 hover:text-gray-800 hover:border-gray-400 transition-colors shrink-0">
-            <ArrowLeft size={15} />
-          </Link>
-          <span className="text-sm text-gray-400 font-medium">Projects</span>
-          <span className="text-gray-200">/</span>
-          <span className="text-sm font-semibold text-gray-700 truncate">{project.name}</span>
-        </div>
+        <Breadcrumb previousLink="/admin/projects" previousPageName="Projects" currentPageName={project.name} />
 
         {/* Hero + Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ProjectHeroCard project={project} />
 
-          <CardContent iconName="edit_note" title="Project Details"
+          <CardContent iconName="edit_note" title="Project Details" className="hidden md:flex"
             action={
               isEditing ? (
                 <div className="flex items-center gap-2">
-                  <Button type="button" variant="ghost" size="sm" onClick={() => { reset(); setIsEditing(false); }}>Cancel</Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
                   <Button form="project-edit-form" type="submit" size="sm" disabled={isSubmitting || !isDirty} loading={isSubmitting}>
                     {isSubmitting ? 'Saving…' : 'Save'}
                   </Button>
@@ -356,6 +363,81 @@ const ProjectDetail = () => {
       {detailTask && (
         <TaskDetailModal task={detailTask} onClose={() => setDetailTask(null)} onDelete={() => { setDetailTask(null); setConfirmTask(detailTask); }} />
       )}
+
+      <Fab
+        icon={Pencil}
+        ariaLabel="Edit project"
+        onClick={openMobileEdit}
+        className="md:hidden"
+      />
+
+      <FormSidebar
+        isOpen={editSidebarOpen}
+        onClose={cancelEdit}
+        title="Edit Project"
+        description={project.name}
+        width="md"
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="project-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+          <div className="project-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormField label="Project Name" required error={errors.name?.message}>
+              <input {...register('name', { required: 'Required' })} className={inputCls(!!errors.name)} />
+            </FormField>
+
+            <FormField label="Service" required>
+              <Select {...register('service', { required: true })}>
+                {(Object.entries(SERVICE_META) as [ServiceType, typeof SERVICE_META[ServiceType]][]).map(([key, meta]) => (
+                  <Option key={key} value={key}>{meta.label}</Option>
+                ))}
+              </Select>
+            </FormField>
+
+            {hasPackages && (
+              <FormField label="Package">
+                <Select {...register('package')}>
+                  <Option value="">— None —</Option>
+                  <Option value="essentials">Essentials</Option>
+                  <Option value="growth">Growth</Option>
+                  <Option value="premium">Premium</Option>
+                </Select>
+              </FormField>
+            )}
+
+            <FormField label="Status" required>
+              <Select {...register('status', { required: true })}>
+                <Option value="active">Active</Option>
+                <Option value="paused">Paused</Option>
+                <Option value="completed">Completed</Option>
+              </Select>
+            </FormField>
+
+            <FormField label="Timeline">
+              <input {...register('timeline')} className={inputCls(false)} />
+            </FormField>
+
+            <FormField label="Client">
+              <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />
+            </FormField>
+
+            <FormField label="Assigned Team">
+              <MemberPicker
+                members={members}
+                selectedIds={selectedMemberIds}
+                onToggle={mid => setSelectedMemberIds(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid])}
+              />
+            </FormField>
+          </div>
+
+          <FormSidebarFooter>
+            <Button type="button" variant="secondary" onClick={cancelEdit} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
+              Save
+            </Button>
+          </FormSidebarFooter>
+        </form>
+      </FormSidebar>
 
       <FormSidebar
         isOpen={!!editingPhase || insertAfterIdx !== null}

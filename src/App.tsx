@@ -62,7 +62,7 @@ export default function App() {
           <Route path="/admin/clients/:id" element={<AuthGate role="admin"><ClientDetail /></AuthGate>} />
           <Route path="/admin/team" element={<AuthGate role="admin"><Team /></AuthGate>} />
           <Route path="/admin/team/:id" element={<AuthGate role="admin"><TeamDetail /></AuthGate>} />
-          <Route path="/admin/expenses" element={<AuthGate role="admin"><Expenses /></AuthGate>} />
+          <Route path="/admin/expenses" element={<AuthGate role="superadmin"><Expenses /></AuthGate>} />
           <Route path="/admin/payments" element={<AuthGate role="admin"><Payments /></AuthGate>} />
           <Route path="/admin/chat" element={<AuthGate role="admin"><Chat /></AuthGate>} />
           <Route path="/admin/projects" element={<AuthGate role="admin"><Projects /></AuthGate>} />

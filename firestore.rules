@@ -23,6 +23,7 @@ service cloud.firestore {
     function isSuperAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
+        request.auth.token.email == 'vishseenarain@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')
       );
@@ -39,15 +40,6 @@ service cloud.firestore {
 
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
-
-    function accessPath(email) {
-      return /databases/$(database)/documents/signInAccess/$(email);
-    }
-
-    function hasActiveAccess(email) {
-      return exists(accessPath(email)) &&
-             get(accessPath(email)).data.status == 'active';
     }
 
     // users: Firebase auth profile source.
@@ -68,34 +60,54 @@ service cloud.firestore {
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
-      allow list: if isAdmin();
+      function isOwnUserProfile() {
+        return request.auth.uid == userId || existing().email == request.auth.token.email;
+      }
 
-      allow create: if isSignedIn() && isValidId(userId) &&
-                       (request.auth.uid == userId || isAdmin()) &&
+      function canWriteUserRole(data) {
+        return isSuperAdmin() || (isAdmin() && data.role != 'superadmin');
+      }
+
+      function isValidUserProfileId(id) {
+        return isValidId(id) || id == incoming().email || id == existing().email;
+      }
+
+      function hasStagedUserProfile() {
+        return exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
+               get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.email == request.auth.token.email &&
+               get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == incoming().role;
+      }
+
+      allow get: if isSignedIn() && (isAdmin() || isOwnUserProfile());
+      allow list: if isAdmin() || (isSignedIn() && existing().email == request.auth.token.email);
+
+      allow create: if isSignedIn() && isValidUserProfileId(userId) &&
                        isValidUser(incoming()) &&
                        incoming().createdAt == request.time &&
                        (
-                         isAdmin() ||
+                         canWriteUserRole(incoming()) ||
                          (
-                           incoming().role in ['client', 'superadmin', 'admin', 'freelancer'] &&
+                           request.auth.uid == userId &&
                            incoming().email == request.auth.token.email &&
-                           hasActiveAccess(request.auth.token.email) &&
                            (
-                             get(accessPath(request.auth.token.email)).data.profileRole == incoming().role ||
-                             (
-                               get(accessPath(request.auth.token.email)).data.profileRole == 'user' &&
-                               incoming().role == 'client'
-                             )
+                             request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
+                             request.auth.token.email == 'vishseenarain@gmail.com' ||
+                             hasStagedUserProfile()
                            )
                          )
                        );
 
-      allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) &&
+      allow update: if isSignedIn() && isValidUserProfileId(userId) && isValidUser(incoming()) &&
                        incoming().createdAt == existing().createdAt &&
-                       (isAdmin() || (request.auth.uid == userId && incoming().role == existing().role && incoming().status == existing().status));
+                       (
+                         isSuperAdmin() ||
+                         (isAdmin() && existing().role != 'superadmin' && incoming().role != 'superadmin') ||
+                         (request.auth.uid == userId && incoming().role == existing().role && incoming().status == existing().status)
+                       );
 
-      allow delete: if isAdmin();
+      allow delete: if isSuperAdmin() ||
+                      (isAdmin() && existing().role != 'superadmin') ||
+                      (isSignedIn() && userId == request.auth.token.email && existing().email == request.auth.token.email);
     }
 
     // projects: client work and process state.
@@ -208,14 +220,7 @@ service cloud.firestore {
 
     // expenses: internal admin-only accounting data.
     match /expenses/{expenseId} {
-      function isValidExpense(data) {
-        return data.keys().hasAll(['amount', 'description', 'createdAt']) &&
-               data.amount is number &&
-               data.description is string && data.description.size() <= 500 &&
-               data.createdAt is timestamp;
-      }
-
-      allow read, write: if isAdmin();
+      allow read, write: if isSuperAdmin();
     }
 
     // clients: client business data linked to users/{uid} by userId.
@@ -291,25 +296,14 @@ service cloud.firestore {
                       incoming().updatedAt == request.time &&
                       (
                         isSuperAdmin() ||
-                        (
-                          isSignedIn() &&
-                          incoming().userId == request.auth.uid &&
-                          incoming().email == request.auth.token.email &&
-                          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['superadmin', 'admin', 'freelancer'] &&
-                          incoming().accessRole == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
-                        )
+                        (isAdmin() && incoming().accessRole in ['admin', 'freelancer'])
                       );
       allow update: if isValidTeamMember(incoming()) &&
                       incoming().createdAt == existing().createdAt &&
                       incoming().updatedAt == request.time &&
                       (
                         isSuperAdmin() ||
-                        (
-                          isAdmin() &&
-                          incoming().accessRole == existing().accessRole &&
-                          incoming().email == existing().email &&
-                          incoming().diff(existing()).affectedKeys().hasOnly(['assignedProjectId', 'userId', 'updatedAt'])
-                        )
+                        (isAdmin() && existing().accessRole != 'superadmin' && incoming().accessRole in ['admin', 'freelancer'])
                       );
       allow delete: if isSuperAdmin();
     }
@@ -317,37 +311,6 @@ service cloud.firestore {
     // Legacy teamMembers collection has been replaced by /team.
     match /teamMembers/{memberId} {
       allow read, write: if false;
-    }
-
-    // signInAccess: invitation/first-login bridge by normalized email.
-    match /signInAccess/{emailId} {
-      function isValidAccess(data) {
-        return data.keys().hasAll(['email', 'profileRole', 'fullName', 'status']) &&
-               data.email == emailId &&
-               data.email is string && data.email.size() <= 255 &&
-               data.profileRole in ['client', 'superadmin', 'admin', 'freelancer'] &&
-               (data.get('staffRole', 'admin') is string) && data.get('staffRole', 'admin') in ['superadmin', 'admin', 'freelancer'] &&
-               (data.get('teamMemberId', '') is string) && data.get('teamMemberId', '').size() <= 128 &&
-               (data.get('teamId', '') is string) && data.get('teamId', '').size() <= 128 &&
-               (data.get('clientId', '') is string) && data.get('clientId', '').size() <= 128 &&
-               data.fullName is string && data.fullName.size() <= 120 &&
-               data.status in ['active', 'inactive'] &&
-               (!('createdAt' in data) || data.createdAt is timestamp) &&
-               (!('updatedAt' in data) || data.updatedAt is timestamp);
-      }
-
-      function canManageClientAccess(data) {
-        return isSignedIn() &&
-               exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-               get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['superadmin', 'admin'] &&
-               data.profileRole == 'client';
-      }
-
-      allow get: if true;
-      allow list: if false;
-      allow create, update: if isValidAccess(incoming()) &&
-                              (isSuperAdmin() || canManageClientAccess(incoming()));
-      allow delete: if isSuperAdmin();
     }
 
     // settings: app-level configuration.

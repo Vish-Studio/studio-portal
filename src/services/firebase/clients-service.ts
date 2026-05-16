@@ -6,6 +6,7 @@ import {
   getDoc,
   onSnapshot,
   serverTimestamp,
+  setDoc,
   updateDoc,
   type DocumentData,
   type DocumentSnapshot,
@@ -14,7 +15,6 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { requireFirebase } from "./firebase-service";
-import { accessService, normalizeAccessEmail } from "./access-service";
 import type { Client, ClientStatus } from "@/src/data/clients";
 
 export interface ClientInput {
@@ -26,6 +26,32 @@ export interface ClientInput {
 }
 
 const clientsCollection = () => collection(requireFirebase().db, "clients");
+const userProfileRef = (email: string) => doc(requireFirebase().db, "users", email.trim().toLowerCase());
+
+const upsertClientUserProfile = async (
+  profileId: string,
+  payload: {
+    email: string;
+    role: "client";
+    clientId: string;
+    fullName: string;
+    company: string;
+    phone: string;
+    status: "active" | "inactive";
+  },
+) => {
+  const ref = doc(requireFirebase().db, "users", profileId);
+  const snapshot = await getDoc(ref);
+  await setDoc(
+    ref,
+    {
+      ...payload,
+      ...(snapshot.exists() ? {} : { createdAt: serverTimestamp() }),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+};
 
 const cleanClientInput = (input: ClientInput) => ({
   fullName: input.fullName.trim(),
@@ -91,11 +117,13 @@ export const clientsService = {
       updatedAt: serverTimestamp(),
     });
 
-    await accessService.upsertAccess({
+    await upsertClientUserProfile(payload.email, {
       email: payload.email,
-      profileRole: "client",
+      role: "client",
       clientId: ref.id,
       fullName: payload.fullName,
+      company: payload.companyName,
+      phone: payload.phone,
       status:
         payload.status === "inactive" || payload.status === "lost"
           ? "inactive"
@@ -109,7 +137,7 @@ export const clientsService = {
     const ref = doc(requireFirebase().db, "clients", id);
     const snapshot = await getDoc(ref);
     const previousEmail = snapshot.exists()
-      ? normalizeAccessEmail(String(snapshot.data().email ?? ""))
+      ? String(snapshot.data().email ?? "").trim().toLowerCase()
       : "";
     const previous = snapshot.exists() ? clientFromSnapshot(snapshot) : null;
     const payload = cleanClientUpdate(input);
@@ -119,25 +147,30 @@ export const clientsService = {
       updatedAt: serverTimestamp(),
     });
 
-    const nextEmail = normalizeAccessEmail(
-      payload.email ?? previous?.email ?? "",
-    );
+    const nextEmail = (payload.email ?? previous?.email ?? "").trim().toLowerCase();
     if (previousEmail && nextEmail && previousEmail !== nextEmail) {
-      await accessService.removeAccess(previousEmail);
+      await deleteDoc(userProfileRef(previousEmail));
     }
 
     if (nextEmail) {
-      await accessService.upsertAccess({
+      const profileStatus: "active" | "inactive" =
+        (payload.status ?? previous?.status) === "inactive" ||
+        (payload.status ?? previous?.status) === "lost"
+          ? "inactive"
+          : "active";
+      const userProfilePayload = {
         email: nextEmail,
-        profileRole: "client",
+        role: "client" as const,
         clientId: id,
         fullName: payload.fullName ?? previous?.fullName ?? nextEmail,
-        status:
-          (payload.status ?? previous?.status) === "inactive" ||
-          (payload.status ?? previous?.status) === "lost"
-            ? "inactive"
-            : "active",
-      });
+        company: payload.companyName ?? previous?.companyName ?? "",
+        phone: payload.phone ?? previous?.phone ?? "",
+        status: profileStatus,
+      };
+      await upsertClientUserProfile(nextEmail, userProfilePayload);
+      if (previous?.userId) {
+        await upsertClientUserProfile(previous.userId, userProfilePayload);
+      }
     }
   },
 
@@ -146,6 +179,6 @@ export const clientsService = {
     const snapshot = await getDoc(ref);
     const email = snapshot.exists() ? String(snapshot.data().email ?? "") : "";
     await deleteDoc(ref);
-    if (email) await accessService.removeAccess(email);
+    if (email) await deleteDoc(userProfileRef(email));
   },
 };

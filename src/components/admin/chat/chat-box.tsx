@@ -46,12 +46,12 @@ export default function ChatBox({
     <section
       aria-label="Chat conversations"
       className={cn(
-        'chat-box relative flex min-w-0 flex-col overflow-hidden rounded-[18px] border border-gray-200 bg-white lg:min-h-0',
+        'chat-box relative flex min-w-0 flex-col overflow-hidden rounded-[18px] md:border md:border-gray-200 md:bg-white lg:min-h-0',
         mode === 'client' && 'hidden lg:block',
         !isVisible && 'hidden lg:block',
       )}
     >
-      <div className="chat-box-header border-b border-gray-100 p-4">
+      <div className="chat-box-header hidden md:block border-b border-gray-100 p-4">
         <div className="chat-box-header-row flex items-center justify-between gap-3">
           <div className="min-w-0">
             <h2 className="type-section-title text-(--color-ink)">Messages</h2>
@@ -75,7 +75,7 @@ export default function ChatBox({
         </div>
       </div>
 
-      <div className="chat-box-tabs p-4 pb-0">
+      <div className="chat-box-tabs md:p-4 py-4">
         {mode === 'admin' && (
           <Tabs
             items={[
@@ -94,7 +94,7 @@ export default function ChatBox({
         )}
       </div>
 
-      <div className="chat-box-list chat-scrollbar overflow-visible px-4 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
+      <div className="chat-box-list chat-scrollbar overflow-visible md:px-4 pb-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
         {participants.length === 0 && (
           <div className="chat-box-empty rounded-2xl border border-dashed border-gray-200 bg-(--color-surface-alt) p-6 text-center">
             <p className="type-card-title text-(--color-ink)">No conversations found</p>

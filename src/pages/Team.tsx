@@ -15,6 +15,7 @@ import Button from '../components/common/button/button';
 import { useAuthStore } from '../store/auth';
 import { useTeamStore } from '../store/team';
 import { useUIStore } from '../store/ui';
+import { withoutCurrentTeamMember } from '../lib/team-member-visibility';
 import { getMemberColors } from '../data/team';
 import type { TeamAccessRole, TeamMember, TeamProject } from '../data/team';
 import StatusIcon from '../components/common/status-icon/status-icon';
@@ -107,6 +108,10 @@ export default function Team() {
   const { searchQuery } = useUIStore();
   const profile = useAuthStore(state => state.profile);
   const isSuperAdmin = profile?.role === 'superadmin';
+  const canManageTeam = profile?.role === 'superadmin' || profile?.role === 'admin';
+  const roleOptions = isSuperAdmin
+    ? (['freelancer', 'admin', 'superadmin'] as TeamAccessRole[])
+    : (['freelancer', 'admin'] as TeamAccessRole[]);
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
@@ -114,6 +119,10 @@ export default function Team() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
+  const visibleMembers = useMemo(
+    () => withoutCurrentTeamMember(members, profile),
+    [members, profile],
+  );
 
   const {
     register,
@@ -127,10 +136,10 @@ export default function Team() {
   useEffect(() => subscribeMembers(), [subscribeMembers]);
 
   const tabCounts = useMemo(() => ({
-    all: members.length,
-    assigned: members.filter(m => m.assignedProjectId !== null).length,
-    unassigned: members.filter(m => m.assignedProjectId === null).length,
-  }), [members]);
+    all: visibleMembers.length,
+    assigned: visibleMembers.filter(m => m.assignedProjectId !== null).length,
+    unassigned: visibleMembers.filter(m => m.assignedProjectId === null).length,
+  }), [visibleMembers]);
 
   const tabs: TabItem[] = [
     { key: 'all', label: 'All', count: tabCounts.all },
@@ -139,7 +148,7 @@ export default function Team() {
   ];
 
   const tableData: MemberRow[] = useMemo(() => {
-    let list = members;
+    let list = visibleMembers;
     if (activeTab === 'assigned') list = list.filter(m => m.assignedProjectId !== null);
     if (activeTab === 'unassigned') list = list.filter(m => m.assignedProjectId === null);
     if (searchQuery.trim()) {
@@ -158,15 +167,17 @@ export default function Team() {
         const result = aVal.localeCompare(bVal, undefined, { sensitivity: 'base' });
         return sortDirection === 'asc' ? result : -result;
       });
-  }, [members, projects, activeTab, searchQuery, sortKey, sortDirection]);
+  }, [visibleMembers, projects, activeTab, searchQuery, sortKey, sortDirection]);
 
   const openAdd = () => {
+    if (!canManageTeam) return;
     setEditingMember(null);
     reset({ name: '', role: '', accessRole: 'freelancer', email: '' });
     setSidebarOpen(true);
   };
 
   const openEdit = (member: TeamMember) => {
+    if (!canManageTeam || (!isSuperAdmin && member.accessRole === 'superadmin')) return;
     setEditingMember(member);
     reset({
       name: member.name,
@@ -178,6 +189,11 @@ export default function Team() {
   };
 
   const onSubmit = async (data: MemberFormValues) => {
+    if (!canManageTeam) return;
+    if (!isSuperAdmin && data.accessRole === 'superadmin') {
+      throw new Error('Only a superadmin can assign the superadmin role.');
+    }
+
     if (editingMember) {
       await updateMember(editingMember.id, data);
     } else {
@@ -207,7 +223,7 @@ export default function Team() {
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
             actionLabel="Add Member"
-            onAction={isSuperAdmin ? openAdd : undefined}
+            onAction={canManageTeam ? openAdd : undefined}
           />
         </div>
 
@@ -238,6 +254,8 @@ export default function Team() {
 
             {tableData.map(member => {
               const colors = getMemberColors(member.id);
+              const canEditMember = canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin');
+              const canAssignMember = isSuperAdmin || member.accessRole !== 'superadmin';
 
               return (
                 <div
@@ -275,10 +293,12 @@ export default function Team() {
                   <div className="flex justify-end" onClick={event => event.stopPropagation()}>
                     <RowActionsMenu
                       actions={[
-                        ...(isSuperAdmin
+                        ...(canEditMember
                           ? [{ label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(member) }]
                           : []),
-                        { label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(member) },
+                        ...(canAssignMember
+                          ? [{ label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(member) }]
+                          : []),
                         ...(isSuperAdmin
                           ? [{ label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(member), variant: 'danger' as const }]
                           : []),
@@ -294,7 +314,7 @@ export default function Team() {
       </div>
 
       {/* Mobile FAB */}
-      {isSuperAdmin && <Fab onClick={openAdd} ariaLabel="Add team member" />}
+      {canManageTeam && <Fab onClick={openAdd} ariaLabel="Add team member" />}
 
       {/* Member Form Sidebar */}
       <FormSidebar
@@ -322,12 +342,13 @@ export default function Team() {
             <FormField label="Access Role" required error={errors.accessRole?.message}>
               <Select
                 {...register('accessRole', { required: 'Access role is required' })}
-                disabled={!isSuperAdmin}
                 hasError={!!errors.accessRole}
               >
-                <Option value="freelancer">Freelancer</Option>
-                <Option value="admin">Admin</Option>
-                <Option value="superadmin">Super Admin</Option>
+                {roleOptions.map(role => (
+                  <Option key={role} value={role}>
+                    {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Freelancer'}
+                  </Option>
+                ))}
               </Select>
             </FormField>
             <FormField label="Email" error={errors.email?.message}>

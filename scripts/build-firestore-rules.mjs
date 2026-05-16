@@ -16,7 +16,6 @@ const ruleFiles = [
   'firestore-rules/collections/clients.rules',
   'firestore-rules/collections/team.rules',
   'firestore-rules/collections/team-members-legacy.rules',
-  'firestore-rules/collections/sign-in-access.rules',
   'firestore-rules/collections/settings.rules',
   'firestore-rules/99-footer.rules',
 ];

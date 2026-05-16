@@ -16,32 +16,52 @@
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || request.auth.uid == userId);
-      allow list: if isAdmin();
+      function isOwnUserProfile() {
+        return request.auth.uid == userId || existing().email == request.auth.token.email;
+      }
 
-      allow create: if isSignedIn() && isValidId(userId) &&
-                       (request.auth.uid == userId || isAdmin()) &&
+      function canWriteUserRole(data) {
+        return isSuperAdmin() || (isAdmin() && data.role != 'superadmin');
+      }
+
+      function isValidUserProfileId(id) {
+        return isValidId(id) || id == incoming().email || id == existing().email;
+      }
+
+      function hasStagedUserProfile() {
+        return exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
+               get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.email == request.auth.token.email &&
+               get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == incoming().role;
+      }
+
+      allow get: if isSignedIn() && (isAdmin() || isOwnUserProfile());
+      allow list: if isAdmin() || (isSignedIn() && existing().email == request.auth.token.email);
+
+      allow create: if isSignedIn() && isValidUserProfileId(userId) &&
                        isValidUser(incoming()) &&
                        incoming().createdAt == request.time &&
                        (
-                         isAdmin() ||
+                         canWriteUserRole(incoming()) ||
                          (
-                           incoming().role in ['client', 'superadmin', 'admin', 'freelancer'] &&
+                           request.auth.uid == userId &&
                            incoming().email == request.auth.token.email &&
-                           hasActiveAccess(request.auth.token.email) &&
                            (
-                             get(accessPath(request.auth.token.email)).data.profileRole == incoming().role ||
-                             (
-                               get(accessPath(request.auth.token.email)).data.profileRole == 'user' &&
-                               incoming().role == 'client'
-                             )
+                             request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
+                             request.auth.token.email == 'vishseenarain@gmail.com' ||
+                             hasStagedUserProfile()
                            )
                          )
                        );
 
-      allow update: if isSignedIn() && isValidId(userId) && isValidUser(incoming()) &&
+      allow update: if isSignedIn() && isValidUserProfileId(userId) && isValidUser(incoming()) &&
                        incoming().createdAt == existing().createdAt &&
-                       (isAdmin() || (request.auth.uid == userId && incoming().role == existing().role && incoming().status == existing().status));
+                       (
+                         isSuperAdmin() ||
+                         (isAdmin() && existing().role != 'superadmin' && incoming().role != 'superadmin') ||
+                         (request.auth.uid == userId && incoming().role == existing().role && incoming().status == existing().status)
+                       );
 
-      allow delete: if isAdmin();
+      allow delete: if isSuperAdmin() ||
+                      (isAdmin() && existing().role != 'superadmin') ||
+                      (isSignedIn() && userId == request.auth.token.email && existing().email == request.auth.token.email);
     }

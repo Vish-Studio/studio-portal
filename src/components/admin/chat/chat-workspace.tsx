@@ -9,6 +9,8 @@ import { useClientsStore } from '@/src/store/clients';
 import { useTeamStore } from '@/src/store/team';
 import { useUIStore } from '@/src/store/ui';
 import { useProjectsStore } from '@/src/store/projects';
+import { useAuthStore } from '@/src/store/auth';
+import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
 import { getProjectAccent } from '@/src/data/projects';
 import ChatBox from './chat-box';
 import ChatThread from './chat-thread';
@@ -25,6 +27,7 @@ const ADMIN_NAME = 'Studio Admin';
 export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWorkspaceProps) {
   const clients = useClientsStore(state => state.clients);
   const teamMembers = useTeamStore(state => state.members);
+  const profile = useAuthStore(state => state.profile);
   const projects = useProjectsStore(state => state.projects);
   const conversations = useChatStore(state => state.conversations);
   const sendConversationMessage = useChatStore(state => state.sendConversationMessage);
@@ -53,14 +56,14 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
   );
 
   const teamParticipants = useMemo<ChatParticipant[]>(
-    () => teamMembers.map(member => ({
+    () => withoutCurrentTeamMember(teamMembers, profile).map(member => ({
       id: member.id,
       type: 'team',
       name: member.name,
       meta: member.role,
       email: member.email,
     })),
-    [teamMembers],
+    [profile, teamMembers],
   );
 
   const projectParticipants = useMemo<ChatParticipant[]>(
