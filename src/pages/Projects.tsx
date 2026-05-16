@@ -130,7 +130,7 @@ const Projects = () => {
 
   return (
     <Layout title="Projects">
-      <div className="flex flex-col gap-5 py-10">
+      <div className="flex flex-col gap-5 pt-6 py-10">
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <StatCard variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={projects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />

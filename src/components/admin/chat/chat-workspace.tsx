@@ -24,9 +24,11 @@ interface ChatWorkspaceProps {
 
 const ADMIN_NAME = 'Studio Admin';
 
-export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWorkspaceProps) {
+export default function ChatWorkspace({ mode, currentClientId = '' }: ChatWorkspaceProps) {
   const clients = useClientsStore(state => state.clients);
+  const subscribeClients = useClientsStore(state => state.subscribeClients);
   const teamMembers = useTeamStore(state => state.members);
+  const subscribeMembers = useTeamStore(state => state.subscribeMembers);
   const profile = useAuthStore(state => state.profile);
   const projects = useProjectsStore(state => state.projects);
   const conversations = useChatStore(state => state.conversations);
@@ -39,10 +41,20 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
   const [isNewChatOpen, setIsNewChatOpen] = useState(false);
   const [newChatQuery, setNewChatQuery] = useState('');
   const [selectedParticipant, setSelectedParticipant] = useState<Pick<ChatParticipant, 'id' | 'type'> | null>(
-    mode === 'client' ? { id: currentClientId, type: 'client' } : null,
+    mode === 'client' && currentClientId ? { id: currentClientId, type: 'client' } : null,
   );
   const [isMobileThreadOpen, setIsMobileThreadOpen] = useState(mode === 'client');
   const [isCompact, setIsCompact] = useState(false);
+
+  useEffect(() => {
+    const unsubscribeClients = subscribeClients();
+    const unsubscribeMembers = subscribeMembers();
+
+    return () => {
+      unsubscribeClients();
+      unsubscribeMembers();
+    };
+  }, [subscribeClients, subscribeMembers]);
 
   const clientParticipants = useMemo<ChatParticipant[]>(
     () => clients.map(client => ({
@@ -117,8 +129,8 @@ export default function ChatWorkspace({ mode, currentClientId = 'c1' }: ChatWork
 
   useEffect(() => {
     if (mode === 'client') {
-      setSelectedParticipant({ id: currentClientId, type: 'client' });
-      setIsMobileThreadOpen(true);
+      setSelectedParticipant(currentClientId ? { id: currentClientId, type: 'client' } : null);
+      setIsMobileThreadOpen(!!currentClientId);
     }
   }, [currentClientId, mode]);
 

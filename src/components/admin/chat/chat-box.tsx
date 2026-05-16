@@ -67,7 +67,7 @@ export default function ChatBox({
               <ButtonIcon
                 iconName="add"
                 label="Start new chat"
-                className="h-10 w-10 rounded-xl bg-(--color-ink) text-white hover:bg-black hover:text-white"
+                className="h-10 w-10 rounded-full bg-(--color-ink) text-white hover:bg-black hover:text-white"
                 clickHandler={onStartChat}
               />
             )}
@@ -75,7 +75,7 @@ export default function ChatBox({
         </div>
       </div>
 
-      <div className="chat-box-tabs md:p-4 py-4">
+      <div className="chat-box-tabs sticky top-0 z-20 bg-white py-4 md:static md:p-4">
         {mode === 'admin' && (
           <Tabs
             items={[

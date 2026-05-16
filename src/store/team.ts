@@ -21,7 +21,7 @@ interface TeamState {
 }
 
 export const useTeamStore = create<TeamState>((set) => ({
-  members: [],  // hydrated on app start via initStores()
+  members: [],
   projects: [], // hydrated on app start via initStores()
   loading: false,
   ready: false,

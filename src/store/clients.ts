@@ -18,7 +18,7 @@ interface ClientsState {
 }
 
 export const useClientsStore = create<ClientsState>((set) => ({
-  clients: [], // hydrated on app start via initStores()
+  clients: [],
   loading: false,
   ready: false,
   error: null,

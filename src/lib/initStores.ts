@@ -1,13 +1,11 @@
 /**
- * Hydrates all Zustand stores with seed data before the React tree mounts.
- * Called synchronously in main.tsx so stores are populated on first render.
+ * Hydrates non-Firebase Zustand stores with local demo data before the React tree mounts.
+ * Firebase-backed stores such as clients and team subscribe from their pages/components.
  */
 import {
   DEMO_PROJECTS,
   DEMO_TASKS,
-  DEMO_CLIENTS,
   DEMO_RECENT_CLIENTS,
-  DEMO_MEMBERS,
   DEMO_TEAM_PROJECTS,
   DEMO_DOCUMENTS,
   DEMO_STATS,
@@ -16,22 +14,16 @@ import {
 
 import { useProjectsStore }  from '../store/projects';
 import { useTasksStore }     from '../store/tasks';
-import { useClientsStore }   from '../store/clients';
 import { useTeamStore }      from '../store/team';
 import { useDocumentsStore } from '../store/documents';
 import { useAdminStore }     from '../store/admin';
-import { useChatStore }      from '../store/chat';
-import { DEMO_CHAT_CONVERSATIONS } from '../data/chat';
 
 export function initStores(): void {
   useProjectsStore.getState().setProjects(DEMO_PROJECTS);
   useTasksStore.getState().setTasks(DEMO_TASKS);
-  useClientsStore.getState().setClients(DEMO_CLIENTS);
-  useTeamStore.getState().setMembers(DEMO_MEMBERS);
   useTeamStore.getState().setProjects(DEMO_TEAM_PROJECTS);
   useDocumentsStore.getState().setDocuments(DEMO_DOCUMENTS);
   useAdminStore.getState().setStats(DEMO_STATS);
   useAdminStore.getState().setRecentClients(DEMO_RECENT_CLIENTS);
   useAdminStore.getState().setExpenses(DEMO_EXPENSES);
-  useChatStore.getState().setConversations(DEMO_CHAT_CONVERSATIONS);
 }

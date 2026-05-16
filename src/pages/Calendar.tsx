@@ -52,8 +52,8 @@ const CalendarPage = () => {
 
   return (
     <Layout title="Calendar">
-      <div className="flex flex-col gap-4 md:gap-6 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="flex flex-col gap-4 md:gap-6 pt-6 pb-10">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
             variant="lime"
             icon={<CalendarCheck size={16} />}
