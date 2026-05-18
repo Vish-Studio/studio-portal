@@ -11,7 +11,7 @@ import TaskRow from '../components/admin/task-card/task-row';
 import TaskDetailModal from '../components/admin/task-detail-modal/task-detail-modal';
 import MemberPicker from '../components/admin/pickers/member-picker/member-picker';
 import { useTasksStore } from '../store/tasks';
-import { useProjectsStore } from '../store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { useUIStore } from '../store/ui';

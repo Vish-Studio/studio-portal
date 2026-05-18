@@ -12,12 +12,11 @@ import FormField, { inputCls } from '@/src/components/common/form-field/form-fie
 import Select from '@/src/components/common/select/select';
 import Option from '@/src/components/common/select/option';
 import ConfirmDialog from '@/src/components/common/confirm-dialog/confirm-dialog';
-import ProjectCard, { ProjectCardMini } from '@/src/components/admin/project-card/project-card';
-import { useProjectsStore, makeNewProject } from '@/src/store/projects';
+import { ProjectCard, ProjectCardMini } from '@/src/features/projects';
+import { makeNewProject, useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/store/tasks';
 import { useClientsStore } from '@/src/features/clients';
-import { SERVICE_META, getPhaseProgress } from '@/src/data/projects';
-import type { ClientProject, ServiceType, PackageType } from '@/src/data/projects';
+import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '@/src/features/projects';
 
 const CURRENT_CLIENT_ID = 'c1';
 

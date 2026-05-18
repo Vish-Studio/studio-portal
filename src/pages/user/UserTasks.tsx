@@ -15,7 +15,7 @@ import TaskCard from '@/src/components/admin/task-card/task-card';
 import TaskRow from '@/src/components/admin/task-card/task-row';
 import TaskDetailModal from '@/src/components/admin/task-detail-modal/task-detail-modal';
 import { useTasksStore } from '@/src/store/tasks';
-import { useProjectsStore } from '@/src/store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import type { Task, TaskStatus, TaskPriority } from '@/src/data/tasks';
 
 const CURRENT_CLIENT_ID = 'c1';

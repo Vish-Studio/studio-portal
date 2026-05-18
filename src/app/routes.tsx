@@ -2,7 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
 import Expenses from '@/src/pages/Expenses';
-import Projects from '@/src/pages/Projects';
+import { ProjectDetailPage, ProjectsPage } from '@/src/features/projects';
 import Tasks from '@/src/pages/Tasks';
 import Calendar from '@/src/pages/Calendar';
 import Documents from '@/src/pages/Documents';
@@ -17,7 +17,6 @@ import { TeamDetailPage, TeamPage } from '@/src/features/team';
 import Dashboard from '@/src/pages/admin/Dashboard';
 import Payments from '@/src/pages/admin/Payments';
 import Chat from '@/src/pages/admin/Chat';
-import ProjectDetail from '@/src/pages/admin/ProjectDetail';
 import TemplateEditor from '@/src/pages/admin/TemplateEditor';
 import SignIn from '@/src/pages/SignIn';
 import ForgotPassword from '@/src/pages/ForgotPassword';
@@ -66,8 +65,8 @@ export function AppRoutes() {
       <Route path="/admin/expenses" element={superadminRoute(<Expenses />)} />
       <Route path="/admin/payments" element={adminRoute(<Payments />)} />
       <Route path="/admin/chat" element={adminRoute(<Chat />)} />
-      <Route path="/admin/projects" element={adminRoute(<Projects />)} />
-      <Route path="/admin/projects/:id" element={adminRoute(<ProjectDetail />)} />
+      <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />
+      <Route path="/admin/projects/:id" element={adminRoute(<ProjectDetailPage />)} />
       <Route path="/admin/projects/:projectId/templates/:assignmentId" element={adminRoute(<TemplateEditor />)} />
       <Route path="/admin/tasks" element={adminRoute(<Tasks />)} />
       <Route path="/admin/calendar" element={adminRoute(<Calendar />)} />

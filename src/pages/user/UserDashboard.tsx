@@ -6,10 +6,10 @@ import CardContent from '@/src/components/common/card-content/card-content';
 import MaterialIcon from '@/src/components/common/material-icon/material-icon';
 import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-badge';
 import { TaskStatusBadge } from '@/src/components/common/status-badge/status-badge';
-import { useProjectsStore } from '@/src/store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/store/tasks';
 import { useClientsStore } from '@/src/features/clients';
-import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
+import { getPhaseProgress, getProjectAccent } from '@/src/features/projects';
 
 // Simulated logged-in client — would come from auth context in production
 const CURRENT_CLIENT_ID = 'c1';

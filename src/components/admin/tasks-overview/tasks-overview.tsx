@@ -5,8 +5,8 @@ import CardContent from '../../common/card-content/card-content';
 import ButtonIcon from '../../common/button-icon/button-icon';
 import MaterialIcon from '../../common/material-icon/material-icon';
 import { TaskStatusBadge } from '../../common/status-badge/status-badge';
-import { getProjectAccent } from '@/src/data/projects';
-import { useProjectsStore } from '@/src/store/projects';
+import { getProjectAccent } from '@/src/features/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import type { Task } from '@/src/data/tasks';
 
 interface TasksOverviewProps {

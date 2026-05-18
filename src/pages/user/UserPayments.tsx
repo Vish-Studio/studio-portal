@@ -5,9 +5,9 @@ import StatCard from '@/src/components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
 import MaterialIcon from '@/src/components/common/material-icon/material-icon';
-import { useProjectsStore } from '@/src/store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
-import { getProjectAccent } from '@/src/data/projects';
+import { getProjectAccent } from '@/src/features/projects';
 
 const CURRENT_CLIENT_ID = 'c1';
 

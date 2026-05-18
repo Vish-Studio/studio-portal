@@ -3,7 +3,7 @@ import { type ScheduleEvent, EVENT_TYPE_CONFIG } from './event-types';
 import MaterialIcon from '../../common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-sidebar';
 import Button from '../../common/button/button';
-import { useProjectsStore } from '@/src/store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
 

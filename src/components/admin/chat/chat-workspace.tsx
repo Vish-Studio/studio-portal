@@ -8,10 +8,10 @@ import {
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
 import { useUIStore } from '@/src/store/ui';
-import { useProjectsStore } from '@/src/store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useAuthStore } from '@/src/store/auth';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
-import { getProjectAccent } from '@/src/data/projects';
+import { getProjectAccent } from '@/src/features/projects';
 import ChatBox from './chat-box';
 import ChatThread from './chat-thread';
 import NewChatSidebar from './new-chat-sidebar';

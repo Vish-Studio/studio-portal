@@ -3,7 +3,7 @@ import { Briefcase, CheckSquare, Mail, UserRound } from 'lucide-react';
 import { format } from 'date-fns';
 import DetailHeroCard from '@/src/components/admin/detail-hero-card/detail-hero-card';
 import { getMemberColors, type TeamMember } from '../../types';
-import type { ClientProject } from '@/src/data/projects';
+import type { ClientProject } from '@/src/features/projects';
 import type { Task } from '@/src/data/tasks';
 
 interface TeamDetailCardProps {

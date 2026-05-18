@@ -18,7 +18,7 @@ import Avatar from '../../common/avatar/avatar';
 import Button from '../../common/button/button';
 import Toggle from '../../common/toggle/toggle';
 import DatePicker from '../../common/date-picker/date-picker';
-import { useProjectsStore } from '@/src/store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
 import { cn } from '@/src/lib/utils';

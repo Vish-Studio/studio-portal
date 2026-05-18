@@ -8,7 +8,7 @@ import TableTab, { type TabItem } from '../components/common/table-tab/table-tab
 import { MaterialIcon, StatusBadge } from '@/src/shared/components';
 import { useDocumentsStore } from '../store/documents';
 import { useTemplateAssignmentsStore } from '../store/template-assignments';
-import { useProjectsStore } from '../store/projects';
+import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { TEMPLATES } from '../data/templates';
 import type { StudioDocument, DocumentType } from '../store/documents';

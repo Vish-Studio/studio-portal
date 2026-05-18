@@ -12,7 +12,7 @@ import {
   DEMO_EXPENSES,
 } from '../data/seed';
 
-import { useProjectsStore }  from '../store/projects';
+import { useProjectsStore }  from '@/src/features/projects';
 import { useTasksStore }     from '../store/tasks';
 import { useTeamStore }      from '@/src/features/team';
 import { useDocumentsStore } from '../store/documents';
