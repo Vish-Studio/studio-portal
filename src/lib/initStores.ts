@@ -15,7 +15,7 @@ import {
 import { useProjectsStore }  from '@/src/features/projects';
 import { useTasksStore }     from '@/src/features/tasks';
 import { useTeamStore }      from '@/src/features/team';
-import { useDocumentsStore } from '../store/documents';
+import { useDocumentsStore } from '@/src/features/documents';
 import { useAdminStore }     from '../store/admin';
 
 export function initStores(): void {
