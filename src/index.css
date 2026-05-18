@@ -310,7 +310,7 @@ body {
   }
 
   .type-stat-value {
-    @apply text-3xl md:text-5xl font-bold leading-none;
+    @apply text-3xl lg:text-5xl font-bold leading-none;
     letter-spacing: 0;
   }
 

@@ -149,9 +149,9 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
   return (
     <div
       onClick={() => navigate(resolveDetailPath(detailPath, project))}
-      className="project-card-mini relative bg-white border border-gray-200 rounded-[12px] px-3 py-3 hover:bg-gray-50 hover:border-gray-300 hover:cursor-pointer transition-all duration-150 md:px-4"
+      className="project-card-mini relative bg-white border border-gray-200 rounded-[12px] px-3 py-3 hover:bg-gray-50 hover:border-gray-300 hover:cursor-pointer transition-all duration-150 lg:px-4"
     >
-      <div className="project-card-mini-grid grid items-center gap-3 md:grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px]">
+      <div className="project-card-mini-grid grid items-center gap-3 lg:grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px]">
         <div className="project-card-mini-meta min-w-0">
           <div className="flex items-center gap-2">
             <MaterialIcon name={accent.icon} size={15} className="text-gray-400 shrink-0" />
@@ -162,22 +162,22 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
           </p>
         </div>
 
-        <div className="project-card-mini-progress flex items-center gap-2 md:justify-end">
-          <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 md:w-16">
+        <div className="project-card-mini-progress flex items-center gap-2 lg:justify-end">
+          <div className="h-1 w-20 overflow-hidden rounded-full bg-gray-100 lg:w-16">
             <div className="h-full rounded-full bg-gray-600" style={{ width: `${progress}%` }} />
           </div>
           <span className="type-meta w-8 text-right text-gray-400 tabular-nums">{progress}%</span>
         </div>
 
-        <p className="type-card-title hidden text-right text-gray-700 tabular-nums md:block">
+        <p className="type-card-title hidden text-right text-gray-700 tabular-nums lg:block">
           ${(project.agreedPayment / 1000).toFixed(0)}k
         </p>
 
-        <p className={`type-card-title hidden text-right tabular-nums md:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
+        <p className={`type-card-title hidden text-right tabular-nums lg:block ${remaining > 0 ? 'text-gray-700' : 'text-green-600'}`}>
           {remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'}
         </p>
 
-        <div className="project-card-mini-client-action hidden md:flex justify-end" onClick={e => e.stopPropagation()}>
+        <div className="project-card-mini-client-action hidden lg:flex justify-end" onClick={e => e.stopPropagation()}>
           {clientAction ? (
             <button
               type="button"
@@ -190,12 +190,12 @@ export const ProjectCardMini = ({ project, actions, detailPath, clientAction }: 
           ) : <span />}
         </div>
 
-        <div className="project-card-mini-status flex justify-start md:justify-end">
+        <div className="project-card-mini-status flex justify-start lg:justify-end">
           <ProjectStatusBadge status={project.status} />
         </div>
 
         {actions && (
-          <div className="project-card-mini-actions absolute right-3 top-3 md:static md:flex md:justify-end" onClick={e => e.stopPropagation()}>
+          <div className="project-card-mini-actions absolute right-3 top-3 lg:static lg:flex lg:justify-end" onClick={e => e.stopPropagation()}>
             <RowActionsMenu actions={actions} />
           </div>
         )}

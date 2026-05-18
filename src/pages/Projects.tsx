@@ -158,7 +158,7 @@ const Projects = () => {
               className="min-w-0 flex-1"
             />
           </div>
-          <button type="button" onClick={openAdd} className="type-control ml-auto hidden shrink-0 items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 sm:flex">
+          <button type="button" onClick={openAdd} className="type-control ml-auto hidden shrink-0 items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 lg:flex">
             <MaterialIcon name="add" size={20} />
             Add Project
           </button>
@@ -173,7 +173,7 @@ const Projects = () => {
             {searchQuery && <p className="type-muted text-gray-400">No results for &ldquo;{searchQuery}&rdquo;</p>}
           </div>
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map(p => (
               <ProjectCard key={p.id} project={p} allMembers={members} variant="surface" actions={[
                 { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
@@ -183,7 +183,7 @@ const Projects = () => {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px] items-center gap-3 px-4 text-gray-400 md:grid">
+            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_120px_90px_110px_120px_120px_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
               <span>Project</span><span className="text-right">Progress</span><span className="text-right">Budget</span><span className="text-right">Remaining</span><span /><span className="text-right">Status</span><span />
             </div>
             {filtered.map(p => (

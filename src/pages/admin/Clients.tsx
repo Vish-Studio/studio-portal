@@ -210,7 +210,7 @@ export default function Clients() {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] items-center gap-3 px-4 text-gray-400 md:grid">
+            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
               <span>Client</span>
               <span>Contact</span>
               <span>Created</span>
@@ -227,7 +227,7 @@ export default function Clients() {
                   tabIndex={0}
                   onClick={() => navigate(`/admin/clients/${client.id}`)}
                   onKeyDown={event => { if (event.key === 'Enter') navigate(`/admin/clients/${client.id}`); }}
-                  className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 cursor-pointer md:grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] md:items-center"
+                  className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 cursor-pointer lg:grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] lg:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${circleBg[client.status]} text-xs font-bold text-white`}>
@@ -248,7 +248,7 @@ export default function Clients() {
                     {client.createdAt?.toDate ? format(client.createdAt.toDate(), 'MMM d, yyyy') : '—'}
                   </span>
 
-                  <div className="flex items-center justify-between gap-3 md:justify-end">
+                  <div className="flex items-center justify-between gap-3 lg:justify-end">
                     <ClientStatusBadge status={client.status} />
                     <div onClick={event => event.stopPropagation()}>
                       <RowActionsMenu

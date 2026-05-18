@@ -245,7 +245,7 @@ export default function Team() {
           </div>
         ) : (
           <div className="flex flex-col gap-2">
-            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] items-center gap-3 px-4 text-gray-400 md:grid">
+            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
               <span>Member</span>
               <span>Role</span>
               <span>Assignment</span>
@@ -264,7 +264,7 @@ export default function Team() {
                   tabIndex={0}
                   onClick={() => navigate(`/admin/team/${member.id}`)}
                   onKeyDown={event => { if (event.key === 'Enter') navigate(`/admin/team/${member.id}`); }}
-                  className="grid cursor-pointer gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] md:items-center"
+                  className="grid cursor-pointer gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] lg:items-center"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-xs font-bold text-white`}>

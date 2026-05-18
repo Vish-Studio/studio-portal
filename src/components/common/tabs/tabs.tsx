@@ -39,7 +39,7 @@ export default function Tabs({
         <Select
           value={value}
           onChange={event => onChange?.(event.target.value)}
-          wrapperClassName="tabs-mobile-select min-w-0 flex-1 md:hidden"
+          wrapperClassName="tabs-mobile-select min-w-0 flex-1 lg:hidden"
           className="py-2.5"
           aria-label={ariaLabel}
         >
@@ -56,7 +56,7 @@ export default function Tabs({
         aria-label={ariaLabel}
         className={cn(
           'tabs-list min-w-0 items-center gap-1 overflow-x-auto rounded-xl bg-gray-100 p-1.5 no-scrollbar',
-          mobileMode === 'select' ? 'hidden md:flex' : 'flex',
+          mobileMode === 'select' ? 'hidden lg:flex' : 'flex',
           listClassName,
         )}
       >
@@ -83,7 +83,7 @@ export default function Tabs({
               {item.count !== undefined && (
                 <span
                   className={cn(
-                    'tabs-count type-count hidden rounded-md px-1.5 py-0.5 md:block',
+                    'tabs-count type-count hidden rounded-md px-1.5 py-0.5 lg:block',
                     isActive ? 'bg-white/20 text-white' : 'bg-gray-200 text-gray-500',
                   )}
                 >

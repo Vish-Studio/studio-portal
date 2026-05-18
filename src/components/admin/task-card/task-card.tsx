@@ -91,7 +91,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         <div className="task-card-footer-meta flex items-center gap-2 min-w-0">
           {showStatus && <TaskStatusBadge status={task.status} />}
           {clientAssignee && (
-            <span className="type-count hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-gray-500 sm:flex">
+            <span className="type-count hidden items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-gray-500 lg:flex">
               <MaterialIcon name="person" size={11} />
               Client
             </span>

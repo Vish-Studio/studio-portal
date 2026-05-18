@@ -67,7 +67,7 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
 
       {/* Due date */}
       {due && (
-        <span className={`type-meta hidden md:flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
+        <span className={`type-meta hidden lg:flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
           }`}>
           {overdue && <MaterialIcon name="warning" size={10} />}
           {format(due, 'MMM d')}
@@ -76,7 +76,7 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
 
       {/* Assignees */}
       {assignees.length > 0 && (
-        <div className="task-row-assignees hidden sm:block shrink-0">
+        <div className="task-row-assignees hidden lg:block shrink-0">
           <AvatarStack members={assignees} size="xs" limit={3} />
         </div>
       )}

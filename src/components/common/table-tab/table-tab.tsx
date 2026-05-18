@@ -29,8 +29,8 @@ export interface TableTabProps {
   controls?: React.ReactNode;
   /**
    * Primary action label and handler.
-   * On ≥sm screens the button shows label + icon.
-   * On mobile the button is hidden — use the Fab component instead.
+   * On ≥lg screens the button shows label + icon.
+   * On mobile/tablet the button is hidden — use the Fab component instead.
    */
   actionLabel?: string;
   onAction?: () => void;
@@ -81,15 +81,15 @@ const TableTab: FunctionComponent<TableTabProps> = ({
           items={tabs}
           value={activeTab}
           onChange={onTabChange}
-          className="min-w-0 flex-1 md:flex-none"
+          className="min-w-0 flex-1 lg:flex-none"
           ariaLabel="Table filters"
         />
       )}
 
       {hasControls && (
-        <div className="table-tab-controls flex shrink-0 items-center gap-2 md:mr-auto">
+        <div className="table-tab-controls flex shrink-0 items-center gap-2 lg:mr-auto">
           {showViewToggle && (
-            <div className="table-tab-view-toggle hidden items-center gap-0.5 rounded-xl bg-gray-100 p-1 sm:flex">
+            <div className="table-tab-view-toggle hidden items-center gap-0.5 rounded-xl bg-gray-100 p-1 lg:flex">
               <button
                 type="button"
                 onClick={() => onViewModeChange('grid')}
@@ -128,7 +128,7 @@ const TableTab: FunctionComponent<TableTabProps> = ({
                 aria-expanded={isSortOpen}
               >
                 <MaterialIcon name="sort" size={17} />
-                <span className="hidden sm:inline">{selectedSort?.label ?? 'Sort'}</span>
+                <span className="hidden lg:inline">{selectedSort?.label ?? 'Sort'}</span>
                 <MaterialIcon name="expand_more" size={16} className={isSortOpen ? 'rotate-180 transition-transform' : 'transition-transform'} />
               </button>
 
@@ -189,12 +189,12 @@ const TableTab: FunctionComponent<TableTabProps> = ({
         </div>
       )}
 
-      {/* Right — action button (hidden on mobile; use Fab instead) */}
+      {/* Right — action button (hidden on mobile/tablet; use Fab instead) */}
       {actionLabel && onAction && (
         <button
           type="button"
           onClick={onAction}
-          className="table-tab-action type-control ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 sm:flex"
+          className="table-tab-action type-control ml-auto hidden shrink-0 items-center gap-2 rounded-xl bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 lg:flex"
         >
           <MaterialIcon name='add' size={20} />
           {actionLabel}
