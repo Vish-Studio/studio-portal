@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/common/layout/layout';
-import MaterialIcon from '../components/common/material-icon/material-icon';
+import { MaterialIcon } from '@/src/shared/components';
 import { TEMPLATES } from '../data/templates';
 
 export default function Templates() {
