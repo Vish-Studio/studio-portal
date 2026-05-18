@@ -5,6 +5,7 @@ import Expenses from '@/src/pages/Expenses';
 import { CalendarPage, UserCalendarPage } from '@/src/features/calendar';
 import { ChatPage, UserChatPage } from '@/src/features/chat';
 import { DocumentsPage, UserDocumentsPage } from '@/src/features/documents';
+import { PaymentsPage, UserPaymentsPage } from '@/src/features/payments';
 import { ProjectDetailPage, ProjectsPage } from '@/src/features/projects';
 import { TasksPage, UserTasksPage } from '@/src/features/tasks';
 import Templates from '@/src/pages/Templates';
@@ -16,14 +17,12 @@ import QuotationTemplate from '@/src/pages/templates/quotation';
 import Settings from '@/src/pages/Settings';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
 import Dashboard from '@/src/pages/admin/Dashboard';
-import Payments from '@/src/pages/admin/Payments';
 import TemplateEditor from '@/src/pages/admin/TemplateEditor';
 import SignIn from '@/src/pages/SignIn';
 import ForgotPassword from '@/src/pages/ForgotPassword';
 import ResetPassword from '@/src/pages/ResetPassword';
 import UserDashboard from '@/src/pages/user/UserDashboard';
 import UserProjects from '@/src/pages/user/UserProjects';
-import UserPayments from '@/src/pages/user/UserPayments';
 import UserSettings from '@/src/pages/user/UserSettings';
 import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
 
@@ -48,7 +47,7 @@ export function AppRoutes() {
       <Route path="/user/projects" element={clientRoute(<UserProjects />)} />
       <Route path="/user/calendar" element={clientRoute(<UserCalendarPage />)} />
       <Route path="/user/tasks" element={clientRoute(<UserTasksPage />)} />
-      <Route path="/user/payments" element={clientRoute(<UserPayments />)} />
+      <Route path="/user/payments" element={clientRoute(<UserPaymentsPage />)} />
       <Route path="/user/documents" element={clientRoute(<UserDocumentsPage />)} />
       <Route path="/user/chat" element={clientRoute(<UserChatPage />)} />
       <Route path="/user/settings" element={clientRoute(<UserSettings />)} />
@@ -59,7 +58,7 @@ export function AppRoutes() {
       <Route path="/admin/team" element={adminRoute(<TeamPage />)} />
       <Route path="/admin/team/:id" element={adminRoute(<TeamDetailPage />)} />
       <Route path="/admin/expenses" element={superadminRoute(<Expenses />)} />
-      <Route path="/admin/payments" element={adminRoute(<Payments />)} />
+      <Route path="/admin/payments" element={adminRoute(<PaymentsPage />)} />
       <Route path="/admin/chat" element={adminRoute(<ChatPage />)} />
       <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />
       <Route path="/admin/projects/:id" element={adminRoute(<ProjectDetailPage />)} />
