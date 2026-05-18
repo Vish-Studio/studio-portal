@@ -6,7 +6,6 @@ import Fab from '../components/common/button-fab/button-fab';
 import Button from '../components/common/button/button';
 import StatCard from '../components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
-import MaterialIcon from '../components/common/material-icon/material-icon';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Select from '../components/common/select/select';
@@ -139,29 +138,24 @@ const Projects = () => {
           <StatCard variant="white" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${projects.length} projects`} badgeLabel="tracked" />
         </div>
 
-        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:px-6 lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <TableTab
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              sortValue={sortKey}
-              sortOptions={[
-                { key: 'updated', label: 'Most recent' },
-                { key: 'name', label: 'Name' },
-              ]}
-              onSortChange={key => setSortKey(key as SortKey)}
-              sortDirection={sortDirection}
-              onSortDirectionChange={setSortDirection}
-              className="min-w-0 flex-1"
-            />
-          </div>
-          <button type="button" onClick={openAdd} className="type-control ml-auto hidden shrink-0 items-center gap-2 rounded-lg bg-black px-4 py-2.5 text-white transition-colors hover:bg-gray-800 lg:flex">
-            <MaterialIcon name="add" size={20} />
-            Add Project
-          </button>
+        <div className="sticky top-0 z-20 -mx-4 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <TableTab
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            sortValue={sortKey}
+            sortOptions={[
+              { key: 'updated', label: 'Most recent' },
+              { key: 'name', label: 'Name' },
+            ]}
+            onSortChange={key => setSortKey(key as SortKey)}
+            sortDirection={sortDirection}
+            onSortDirectionChange={setSortDirection}
+            actionLabel="Add Project"
+            onAction={openAdd}
+          />
         </div>
 
         {filtered.length === 0 ? (
