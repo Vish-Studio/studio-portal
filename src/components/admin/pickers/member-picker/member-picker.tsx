@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useEffect, FunctionComponent } from 'react';
 import { Search, X } from 'lucide-react';
 import Avatar from '../../../common/avatar/avatar';
 import { inputCls } from '../../../common/form-field/form-field';
-import type { TeamMember } from '@/src/data/team';
+import type { TeamMember } from '@/src/features/team';
 
 interface MemberPickerProps {
   members: TeamMember[];

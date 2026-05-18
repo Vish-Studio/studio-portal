@@ -10,7 +10,7 @@ import ProjectCard from '@/src/components/admin/project-card/project-card';
 import ClientDetailCard from '../components/client-detail-card/client-detail-card';
 import { useClientsStore } from '../stores/clientStore';
 import type { ClientStatus } from '../types';
-import { useTeamStore } from '@/src/store/team';
+import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/store/projects';
 import Fab from '@/src/components/common/button-fab/button-fab';
 import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select } from '@/src/shared/components';

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
 import { useDocumentsStore } from '@/src/store/documents';
-import { useTeamStore } from '@/src/store/team';
+import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
 import StatCard from '@/src/components/common/stat-card/stat-card';

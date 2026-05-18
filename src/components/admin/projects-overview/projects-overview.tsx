@@ -7,7 +7,7 @@ import { AvatarStack } from '../../common/avatar/avatar';
 import type { AvatarStackMember } from '../../common/avatar/avatar';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
-import type { TeamMember } from '@/src/data/team';
+import type { TeamMember } from '@/src/features/team';
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 

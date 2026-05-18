@@ -12,7 +12,7 @@ import TaskDetailModal from '../components/admin/task-detail-modal/task-detail-m
 import MemberPicker from '../components/admin/pickers/member-picker/member-picker';
 import { useTasksStore } from '../store/tasks';
 import { useProjectsStore } from '../store/projects';
-import { useTeamStore } from '../store/team';
+import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { useUIStore } from '../store/ui';
 import type { Task, TaskStatus, TaskPriority } from '../data/tasks';

@@ -25,7 +25,7 @@ import TaskRow from '../../components/admin/task-card/task-row';
 import TaskDetailModal from '../../components/admin/task-detail-modal/task-detail-modal';
 import AssignTemplateModal from '../../components/admin/template-editor/assign-template-modal';
 import { useProjectsStore } from '../../store/projects';
-import { useTeamStore } from '../../store/team';
+import { useTeamStore } from '@/src/features/team';
 import { useTasksStore } from '../../store/tasks';
 import { useTemplateAssignmentsStore } from '../../store/template-assignments';
 import { useClientsStore } from '@/src/features/clients';

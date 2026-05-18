@@ -11,7 +11,7 @@ import ProjectCard, { ProjectCardMini } from '../components/admin/project-card/p
 import { ClientPicker } from '@/src/features/clients';
 import MemberPicker from '../components/admin/pickers/member-picker/member-picker';
 import { useProjectsStore, makeNewProject } from '../store/projects';
-import { useTeamStore } from '../store/team';
+import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress } from '../data/projects';
 import type { ClientProject, ServiceType, PackageType } from '../data/projects';

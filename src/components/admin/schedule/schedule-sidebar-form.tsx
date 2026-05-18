@@ -20,7 +20,7 @@ import Toggle from '../../common/toggle/toggle';
 import DatePicker from '../../common/date-picker/date-picker';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/features/clients';
-import { useTeamStore } from '@/src/store/team';
+import { useTeamStore } from '@/src/features/team';
 import { cn } from '@/src/lib/utils';
 
 const toDisplayTime = (time: string) => {

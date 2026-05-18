@@ -13,11 +13,10 @@ import OverdueInvoiceTemplate from '@/src/pages/templates/overdue-invoice';
 import ProjectProposalTemplate from '@/src/pages/templates/project-proposal';
 import QuotationTemplate from '@/src/pages/templates/quotation';
 import Settings from '@/src/pages/Settings';
-import Team from '@/src/pages/Team';
+import { TeamDetailPage, TeamPage } from '@/src/features/team';
 import Dashboard from '@/src/pages/admin/Dashboard';
 import Payments from '@/src/pages/admin/Payments';
 import Chat from '@/src/pages/admin/Chat';
-import TeamDetail from '@/src/pages/admin/TeamDetail';
 import ProjectDetail from '@/src/pages/admin/ProjectDetail';
 import TemplateEditor from '@/src/pages/admin/TemplateEditor';
 import SignIn from '@/src/pages/SignIn';
@@ -62,8 +61,8 @@ export function AppRoutes() {
       <Route path="/admin" element={adminRoute(<Dashboard />)} />
       <Route path="/admin/clients" element={adminRoute(<ClientsPage />)} />
       <Route path="/admin/clients/:id" element={adminRoute(<ClientDetailPage />)} />
-      <Route path="/admin/team" element={adminRoute(<Team />)} />
-      <Route path="/admin/team/:id" element={adminRoute(<TeamDetail />)} />
+      <Route path="/admin/team" element={adminRoute(<TeamPage />)} />
+      <Route path="/admin/team/:id" element={adminRoute(<TeamDetailPage />)} />
       <Route path="/admin/expenses" element={superadminRoute(<Expenses />)} />
       <Route path="/admin/payments" element={adminRoute(<Payments />)} />
       <Route path="/admin/chat" element={adminRoute(<Chat />)} />

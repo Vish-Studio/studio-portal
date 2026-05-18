@@ -7,7 +7,7 @@ import { RowActionsMenu } from '../../common/table/table';
 import type { RowAction } from '../../common/table/table';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
-import type { TeamMember } from '@/src/data/team';
+import type { TeamMember } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 
 export const calcProgress = (project: ClientProject) => {

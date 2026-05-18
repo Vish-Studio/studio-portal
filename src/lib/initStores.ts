@@ -14,7 +14,7 @@ import {
 
 import { useProjectsStore }  from '../store/projects';
 import { useTasksStore }     from '../store/tasks';
-import { useTeamStore }      from '../store/team';
+import { useTeamStore }      from '@/src/features/team';
 import { useDocumentsStore } from '../store/documents';
 import { useAdminStore }     from '../store/admin';
 

@@ -5,7 +5,7 @@ import FormSidebar, { FormSidebarFooter } from '../../common/form-sidebar/form-s
 import Button from '../../common/button/button';
 import { useProjectsStore } from '@/src/store/projects';
 import { useClientsStore } from '@/src/features/clients';
-import { useTeamStore } from '@/src/store/team';
+import { useTeamStore } from '@/src/features/team';
 
 interface EventDetailsModalProps {
   event: ScheduleEvent;
