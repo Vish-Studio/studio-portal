@@ -6,7 +6,7 @@ import { CalendarPage, UserCalendarPage } from '@/src/features/calendar';
 import { ChatPage, UserChatPage } from '@/src/features/chat';
 import { DocumentsPage, UserDocumentsPage } from '@/src/features/documents';
 import { PaymentsPage, UserPaymentsPage } from '@/src/features/payments';
-import { ProjectDetailPage, ProjectsPage } from '@/src/features/projects';
+import { ProjectDetailPage, ProjectsPage, UserProjectsPage } from '@/src/features/projects';
 import { TasksPage, UserTasksPage } from '@/src/features/tasks';
 import Templates from '@/src/pages/Templates';
 import ContractTemplate from '@/src/pages/templates/contract';
@@ -22,7 +22,6 @@ import SignIn from '@/src/pages/SignIn';
 import ForgotPassword from '@/src/pages/ForgotPassword';
 import ResetPassword from '@/src/pages/ResetPassword';
 import UserDashboard from '@/src/pages/user/UserDashboard';
-import UserProjects from '@/src/pages/user/UserProjects';
 import UserSettings from '@/src/pages/user/UserSettings';
 import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
 
@@ -44,7 +43,7 @@ export function AppRoutes() {
       <Route path="/" element={<AuthLanding />} />
 
       <Route path="/user" element={clientRoute(<UserDashboard />)} />
-      <Route path="/user/projects" element={clientRoute(<UserProjects />)} />
+      <Route path="/user/projects" element={clientRoute(<UserProjectsPage />)} />
       <Route path="/user/calendar" element={clientRoute(<UserCalendarPage />)} />
       <Route path="/user/tasks" element={clientRoute(<UserTasksPage />)} />
       <Route path="/user/payments" element={clientRoute(<UserPaymentsPage />)} />

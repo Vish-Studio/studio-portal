@@ -4,6 +4,7 @@ export { default as ProjectTimeline } from './components/project-timeline/projec
 export { default as ProjectsOverview } from './components/projects-overview/projects-overview';
 export { default as ProjectDetailPage } from './pages/ProjectDetailPage';
 export { default as ProjectsPage } from './pages/ProjectsPage';
+export { default as UserProjectsPage } from './pages/UserProjectsPage';
 export {
   getPhaseIndex,
   makeNewProject,
@@ -23,4 +24,3 @@ export {
   type PhaseStatus,
   type ServiceType,
 } from './types';
-
