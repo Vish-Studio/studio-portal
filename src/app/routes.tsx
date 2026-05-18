@@ -8,6 +8,7 @@ import { AdminDashboardPage, UserDashboardPage } from '@/src/features/dashboard'
 import { DocumentsPage, UserDocumentsPage } from '@/src/features/documents';
 import { PaymentsPage, UserPaymentsPage } from '@/src/features/payments';
 import { ProjectDetailPage, ProjectsPage, UserProjectsPage } from '@/src/features/projects';
+import { SettingsPage, UserSettingsPage } from '@/src/features/settings';
 import { TasksPage, UserTasksPage } from '@/src/features/tasks';
 import Templates from '@/src/pages/Templates';
 import ContractTemplate from '@/src/pages/templates/contract';
@@ -15,13 +16,11 @@ import InvoiceTemplate from '@/src/pages/templates/invoice';
 import OverdueInvoiceTemplate from '@/src/pages/templates/overdue-invoice';
 import ProjectProposalTemplate from '@/src/pages/templates/project-proposal';
 import QuotationTemplate from '@/src/pages/templates/quotation';
-import Settings from '@/src/pages/Settings';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
 import TemplateEditor from '@/src/pages/admin/TemplateEditor';
 import SignIn from '@/src/pages/SignIn';
 import ForgotPassword from '@/src/pages/ForgotPassword';
 import ResetPassword from '@/src/pages/ResetPassword';
-import UserSettings from '@/src/pages/user/UserSettings';
 import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
 
 const adminRoute = (page: React.ReactNode) => (
@@ -48,7 +47,7 @@ export function AppRoutes() {
       <Route path="/user/payments" element={clientRoute(<UserPaymentsPage />)} />
       <Route path="/user/documents" element={clientRoute(<UserDocumentsPage />)} />
       <Route path="/user/chat" element={clientRoute(<UserChatPage />)} />
-      <Route path="/user/settings" element={clientRoute(<UserSettings />)} />
+      <Route path="/user/settings" element={clientRoute(<UserSettingsPage />)} />
 
       <Route path="/admin" element={adminRoute(<AdminDashboardPage />)} />
       <Route path="/admin/clients" element={adminRoute(<ClientsPage />)} />
@@ -70,7 +69,7 @@ export function AppRoutes() {
       <Route path="/admin/templates/overdue-invoice" element={adminRoute(<OverdueInvoiceTemplate />)} />
       <Route path="/admin/templates/project-proposal" element={adminRoute(<ProjectProposalTemplate />)} />
       <Route path="/admin/templates/quotation" element={adminRoute(<QuotationTemplate />)} />
-      <Route path="/admin/settings" element={adminRoute(<Settings />)} />
+      <Route path="/admin/settings" element={adminRoute(<SettingsPage />)} />
 
       <Route path="/sign-in" element={<SignIn />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
