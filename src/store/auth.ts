@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { User } from 'firebase/auth';
-import { isFirebaseConfigured } from '@/src/lib/firebase';
+import { isFirebaseConfigured } from '@/src/firebase/config';
 import { authService } from '@/src/services/firebase/auth-service';
 export type { AuthProfile, AuthRole } from '@/src/types/auth';
 import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';

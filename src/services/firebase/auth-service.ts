@@ -18,7 +18,7 @@ import {
   updateDoc,
   type Timestamp,
 } from "firebase/firestore";
-import { requireFirebase } from "./firebase-service";
+import { requireFirebase } from "@/src/firebase/requireFirebase";
 import type {
   AuthProfile,
   AuthProfileUpdateInput,

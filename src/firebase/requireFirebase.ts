@@ -1,4 +1,4 @@
-import { auth, db, isFirebaseConfigured } from '@/src/lib/firebase';
+import { auth, db, isFirebaseConfigured } from './config';
 
 export const requireFirebase = () => {
   if (!auth || !db || !isFirebaseConfigured) {
@@ -7,3 +7,4 @@ export const requireFirebase = () => {
 
   return { auth, db };
 };
+

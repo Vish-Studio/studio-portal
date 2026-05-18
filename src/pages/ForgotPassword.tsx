@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { ArrowLeft, MailCheck } from 'lucide-react';
 import Button from '../components/common/button/button';
 import FormField, { inputCls } from '../components/common/form-field/form-field';
-import { isFirebaseConfigured } from '../lib/firebase';
+import { isFirebaseConfigured } from '../firebase/config';
 import { useAuthStore } from '../store/auth';
 
 interface ForgotPasswordFormValues {

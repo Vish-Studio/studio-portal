@@ -13,7 +13,7 @@ import {
 import FormField, { inputCls } from '../components/common/form-field/form-field';
 import Button from '../components/common/button/button';
 import Checkbox from '../components/common/checkbox/checkbox';
-import { isFirebaseConfigured } from '../lib/firebase';
+import { isFirebaseConfigured } from '../firebase/config';
 import { useAuthStore } from '../store/auth';
 import type { AuthRole } from '../types/auth';
 

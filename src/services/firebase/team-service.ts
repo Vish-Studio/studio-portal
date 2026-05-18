@@ -14,7 +14,7 @@ import {
   type QueryDocumentSnapshot,
   type Unsubscribe,
 } from "firebase/firestore";
-import { requireFirebase } from "./firebase-service";
+import { requireFirebase } from "@/src/firebase/requireFirebase";
 import type { TeamAccessRole, TeamMember } from "@/src/data/team";
 
 export interface TeamMemberInput {

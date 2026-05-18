@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, type AuthRole } from '@/src/store/auth';
-import { isFirebaseConfigured } from '@/src/lib/firebase';
+import { isFirebaseConfigured } from '@/src/firebase/config';
 import { defaultRouteForRole, isStaffRole } from '@/src/auth/roleAccess';
 import { AppLoader } from '../app-loader/app-loader';
 
