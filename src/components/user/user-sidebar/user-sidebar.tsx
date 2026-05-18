@@ -8,7 +8,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { FunctionComponent } from 'react';
-import { useChatStore } from '@/src/store/chat';
+import { useChatStore } from '@/src/features/chat';
 import BaseSidebar, { type BaseSidebarProps, type SidebarNavItem } from '../../common/sidebar/base-sidebar';
 
 type UserSidebarProps = Omit<BaseSidebarProps, 'navItems' | 'settingsPath' | 'rootPath'>;

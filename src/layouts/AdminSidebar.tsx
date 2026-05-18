@@ -12,7 +12,7 @@ import {
   MessageCircle,
 } from 'lucide-react';
 import { FunctionComponent } from 'react';
-import { useChatStore } from '@/src/store/chat';
+import { useChatStore } from '@/src/features/chat';
 import { useAuthStore } from '@/src/store/auth';
 import BaseSidebar, { type BaseSidebarProps, type SidebarNavItem } from './BaseSidebar';
 
