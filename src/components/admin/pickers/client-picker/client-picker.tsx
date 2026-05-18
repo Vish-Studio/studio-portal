@@ -32,8 +32,10 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
+  const isOpen = Boolean(query);
+
   return (
-    <div ref={ref} className="client-picker flex flex-col gap-1.5">
+    <div ref={ref} className={`client-picker relative flex flex-col gap-1.5 ${isOpen ? 'z-[300]' : ''}`}>
       {selected ? (
         <div className="client-picker-selected flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
           <Avatar name={selected.fullName} id={selected.id} size="sm" />
@@ -63,7 +65,7 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
             className={`${inputCls(false)} pl-8`}
           />
           {query && filtered.length > 0 && (
-            <div className="client-picker-menu absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-44 overflow-y-auto">
+            <div className="client-picker-menu absolute left-0 right-0 top-full z-[400] mt-1 max-h-44 overflow-hidden overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
               {filtered.map(c => (
                 <button
                   key={c.id}
@@ -81,7 +83,7 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
             </div>
           )}
           {query && filtered.length === 0 && (
-            <div className="client-picker-empty absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
+            <div className="client-picker-empty absolute left-0 right-0 top-full z-[400] mt-1 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
               <p className="text-sm text-gray-400">No clients match &ldquo;{query}&rdquo;</p>
             </div>
           )}

@@ -79,9 +79,26 @@ const ClientDetail = () => {
   };
 
   const handleCancel = () => {
-    reset();
+    reset({
+      fullName: client?.fullName ?? '',
+      companyName: client?.companyName ?? '',
+      email: client?.email ?? '',
+      phone: client?.phone ?? '',
+      status: client?.status ?? 'active',
+    });
     setIsEditing(false);
     setEditSidebarOpen(false);
+  };
+
+  const openEdit = () => {
+    reset({
+      fullName: client.fullName,
+      companyName: client.companyName ?? '',
+      email: client.email,
+      phone: client.phone ?? '',
+      status: client.status,
+    });
+    setIsEditing(true);
   };
 
   const openMobileEdit = () => {
@@ -156,7 +173,7 @@ const ClientDetail = () => {
                   </button>
                 </div>
               ) : (
-                <ButtonIcon iconName="edit" clickHandler={() => setIsEditing(true)} />
+                <ButtonIcon iconName="edit" clickHandler={openEdit} />
               )
             }
           >

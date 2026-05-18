@@ -129,7 +129,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     };
 
     return (
-      <div ref={rootRef} className={cn('date-picker relative', wrapperClassName)}>
+      <div ref={rootRef} className={cn('date-picker relative', isOpen && 'z-[300]', wrapperClassName)}>
         <input
           ref={setRefs}
           id={id}
@@ -170,7 +170,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
         </button>
 
         {isOpen && !disabled && (
-          <div className="date-picker-popover absolute left-0 top-[calc(100%+8px)] z-50 w-full min-w-[18rem] max-w-[calc(100vw-2rem)] rounded-[18px] border border-gray-200 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,0.16)] sm:min-w-[20rem]">
+          <div className="date-picker-popover absolute left-0 top-[calc(100%+8px)] z-[400] w-full min-w-[18rem] max-w-[calc(100vw-2rem)] rounded-[18px] border border-gray-200 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,0.16)] sm:min-w-[20rem]">
             <div className="date-picker-controls mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_5.75rem] gap-2">
                 <Select

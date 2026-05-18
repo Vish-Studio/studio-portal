@@ -102,9 +102,25 @@ export default function TeamDetail() {
   };
 
   const handleCancel = () => {
-    reset();
+    reset({
+      name: member?.name ?? '',
+      role: member?.role ?? '',
+      accessRole: member?.accessRole ?? 'freelancer',
+      email: member?.email ?? '',
+    });
     setIsEditing(false);
     setEditSidebarOpen(false);
+  };
+
+  const openEdit = () => {
+    if (!member || !canEditMember) return;
+    reset({
+      name: member.name,
+      role: member.role,
+      accessRole: member.accessRole ?? 'freelancer',
+      email: member.email,
+    });
+    setIsEditing(true);
   };
 
   const openMobileEdit = () => {
@@ -174,7 +190,7 @@ export default function TeamDetail() {
                   </button>
                 </div>
               ) : (
-                canEditMember ? <ButtonIcon iconName="edit" clickHandler={() => setIsEditing(true)} /> : null
+                canEditMember ? <ButtonIcon iconName="edit" clickHandler={openEdit} /> : null
               )
             }
           >

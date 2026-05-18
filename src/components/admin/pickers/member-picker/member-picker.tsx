@@ -34,8 +34,10 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
     return () => document.removeEventListener('mousedown', handle);
   }, []);
 
+  const isOpen = Boolean(query);
+
   return (
-    <div ref={ref} className="member-picker flex flex-col gap-2">
+    <div ref={ref} className={`member-picker relative flex flex-col gap-2 ${isOpen ? 'z-[300]' : ''}`}>
       {/* Selected chips */}
       {selected.length > 0 && (
         <div className="member-picker-selected flex flex-wrap gap-1.5">
@@ -69,7 +71,7 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
           className={`${inputCls(false)} pl-8`}
         />
         {query && filtered.length > 0 && (
-          <div className="member-picker-menu absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg z-20 overflow-hidden max-h-48 overflow-y-auto">
+          <div className="member-picker-menu absolute left-0 right-0 top-full z-[400] mt-1 max-h-48 overflow-hidden overflow-y-auto rounded-xl border border-gray-200 bg-white shadow-lg">
             {filtered.map(m => (
               <button
                 key={m.id}
@@ -87,7 +89,7 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
           </div>
         )}
         {query && filtered.length === 0 && (
-          <div className="member-picker-empty absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-xl shadow-sm z-20 px-4 py-3">
+          <div className="member-picker-empty absolute left-0 right-0 top-full z-[400] mt-1 rounded-xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
             <p className="text-sm text-gray-400">No members match &ldquo;{query}&rdquo;</p>
           </div>
         )}

@@ -29,7 +29,7 @@ const DropdownMenu: FunctionComponent<DropdownMenuProps> = ({
 
   return (
     <div
-      className={`dropdown-menu absolute ${alignClass} top-full mt-2 ${width} bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 ${className}`}
+      className={`dropdown-menu absolute ${alignClass} top-full z-[400] mt-2 ${width} rounded-xl border border-gray-100 bg-white py-2 shadow-lg animate-in fade-in slide-in-from-top-2 duration-150 ${className}`}
     >
       {sections.map((section, sectionIndex) => (
         <div key={sectionIndex}>

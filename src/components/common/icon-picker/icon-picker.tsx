@@ -76,7 +76,7 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
   const selectedLabel = TIMELINE_ICONS.find(i => i.name === value)?.label ?? value;
 
   return (
-    <div ref={ref} className="icon-picker relative">
+    <div ref={ref} className={`icon-picker relative ${open ? 'z-[300]' : ''}`}>
       {/* Trigger */}
       <button
         type="button"
@@ -92,7 +92,7 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
 
       {/* Dropdown grid */}
       {open && (
-        <div className="icon-picker-menu absolute top-full mt-2 left-0 z-50 bg-white border border-gray-200 rounded-2xl shadow-xl p-3 w-72">
+        <div className="icon-picker-menu absolute left-0 top-full z-[400] mt-2 w-72 rounded-2xl border border-gray-200 bg-white p-3 shadow-xl">
           <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2.5 px-1">
             Choose icon
           </p>

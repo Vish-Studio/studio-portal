@@ -48,6 +48,10 @@ const TASK_FILTER_LABELS: Record<TaskFilter, string> = {
   all: 'All', todo: 'Todo', 'in-progress': 'In Progress', 'to-test': 'To Test', completed: 'Completed',
 };
 
+const sameStringSet = (left: string[] = [], right: string[] = []) => (
+  left.length === right.length && left.every(value => right.includes(value))
+);
+
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -102,6 +106,11 @@ const ProjectDetail = () => {
   const projectMembers = members.filter(m => project.assignedMemberIds?.includes(m.id));
   const remaining      = project.agreedPayment - project.paidPayment;
   const selectedClient = clients.find(c => c.id === (isEditing ? selectedClientId : project.clientId));
+  const hasPickerChanges = isEditing && (
+    selectedClientId !== project.clientId ||
+    !sameStringSet(selectedMemberIds, project.assignedMemberIds ?? [])
+  );
+  const hasProjectChanges = isDirty || hasPickerChanges;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const projectTasks = useMemo(() => {
@@ -125,9 +134,19 @@ const ProjectDetail = () => {
   };
 
   const cancelEdit = () => {
-    reset();
+    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
+    setSelectedClientId(project.clientId);
+    setSelectedMemberIds(project.assignedMemberIds ?? []);
     setIsEditing(false);
     setEditSidebarOpen(false);
+  };
+
+  const handleClientSelect = (clientId: string) => {
+    setSelectedClientId(clientId);
+  };
+
+  const handleMemberToggle = (memberId: string) => {
+    setSelectedMemberIds(prev => prev.includes(memberId) ? prev.filter(id => id !== memberId) : [...prev, memberId]);
   };
 
   const onSubmit = (data: ProjectFormValues) => {
@@ -198,12 +217,12 @@ const ProjectDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <ProjectHeroCard project={project} />
 
-          <CardContent iconName="edit_note" title="Project Details" className="hidden md:flex"
+          <CardContent iconName="edit_note" title="Project Details" className="hidden overflow-visible md:flex"
             action={
               isEditing ? (
                 <div className="flex items-center gap-2">
                   <Button type="button" variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
-                  <Button form="project-edit-form" type="submit" size="sm" disabled={isSubmitting || !isDirty} loading={isSubmitting}>
+                  <Button form="project-edit-form" type="submit" size="sm" disabled={isSubmitting || !hasProjectChanges} loading={isSubmitting}>
                     {isSubmitting ? 'Saving…' : 'Save'}
                   </Button>
                 </div>
@@ -243,7 +262,7 @@ const ProjectDetail = () => {
               </FormField>
               <FormField label="Client">
                 {isEditing ? (
-                  <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />
+                  <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={handleClientSelect} />
                 ) : (
                   <div className="py-1">
                     {selectedClient ? (
@@ -260,7 +279,7 @@ const ProjectDetail = () => {
               </FormField>
               <FormField label="Assigned Team">
                 {isEditing ? (
-                  <MemberPicker members={members} selectedIds={selectedMemberIds} onToggle={mid => setSelectedMemberIds(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid])} />
+                  <MemberPicker members={members} selectedIds={selectedMemberIds} onToggle={handleMemberToggle} />
                 ) : (
                   <div className="py-1">
                     {projectMembers.length > 0
@@ -416,14 +435,14 @@ const ProjectDetail = () => {
             </FormField>
 
             <FormField label="Client">
-              <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />
+              <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={handleClientSelect} />
             </FormField>
 
             <FormField label="Assigned Team">
               <MemberPicker
                 members={members}
                 selectedIds={selectedMemberIds}
-                onToggle={mid => setSelectedMemberIds(prev => prev.includes(mid) ? prev.filter(x => x !== mid) : [...prev, mid])}
+                onToggle={handleMemberToggle}
               />
             </FormField>
           </div>

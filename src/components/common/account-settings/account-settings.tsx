@@ -2,6 +2,7 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import Button from '../button/button';
 import FormField, { inputCls } from '../form-field/form-field';
 import MaterialIcon from '../material-icon/material-icon';
+import Tabs, { type TabItem } from '../tabs/tabs';
 import Toggle from '../toggle/toggle';
 import { useAuthStore } from '@/src/store/auth';
 import { useUIStore } from '@/src/store/ui';
@@ -83,6 +84,11 @@ export default function AccountSettings() {
   }, [profile]);
 
   const activeSectionMeta = sections.find(section => section.key === activeSection) ?? sections[0];
+  const sectionTabs: TabItem[] = sections.map(section => ({
+    key: section.key,
+    label: section.label,
+    icon: <MaterialIcon name={section.icon} size={16} />,
+  }));
   const newsletterPreferences = useMemo(
     () => ({ ...defaultNewsletterPreferences, ...form.newsletterPreferences }),
     [form.newsletterPreferences],
@@ -201,30 +207,50 @@ export default function AccountSettings() {
   }
 
   return (
-    <div className="account-settings flex flex-col gap-5 pb-10">
-      <section className="account-settings-title-card rounded-[18px] bg-(--color-surface-alt) p-5 md:p-6">
-        <div className="account-settings-title-content flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="account-settings flex flex-col gap-5 pb-10 lg:min-h-0">
+      <section className="account-settings-title-card overflow-hidden rounded-[24px] bg-(--color-ink) text-white">
+        <div className="account-settings-title-content flex min-h-[178px] flex-col justify-between gap-6 p-6 md:min-h-[190px] md:p-8 lg:flex-row lg:items-end lg:p-9">
           <div className="account-settings-title-copy min-w-0">
-            <p className="type-eyebrow text-gray-400">Admin settings</p>
-            <h2 className="type-page-title mt-1 text-(--color-ink)">Manage your account</h2>
-            <p className="type-muted mt-1 text-gray-400">
+            <div className="account-settings-title-kicker inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5">
+              <MaterialIcon name="admin_panel_settings" size={15} className="text-(--color-accent-lime)" />
+              <span className="type-eyebrow text-white/70">Admin settings</span>
+            </div>
+            <h2 className="type-page-title mt-4 max-w-2xl text-white">Manage your account</h2>
+            <p className="type-muted mt-2 text-white/50">
               {isDirty ? 'Unsaved changes' : profile.email}
             </p>
           </div>
-          <div className="account-settings-title-status rounded-2xl bg-white px-4 py-3">
-            <p className="type-label text-gray-400">Role access</p>
-            <p className="type-card-title mt-1 capitalize text-(--color-ink)">{profile.role}</p>
+
+          <div className="account-settings-title-meta grid grid-cols-2 gap-3 sm:flex sm:items-center">
+            <div className="account-settings-title-status rounded-[18px] bg-white px-4 py-3 text-(--color-ink)">
+              <p className="type-label text-gray-400">Role access</p>
+              <p className="type-card-title mt-1 capitalize text-(--color-ink)">{profile.role}</p>
+            </div>
+            <div className="account-settings-title-status rounded-[18px] border border-white/10 bg-white/5 px-4 py-3">
+              <p className="type-label text-white/45">Account</p>
+              <p className="type-card-title mt-1 text-white">Active</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="account-settings-workspace grid grid-cols-1 gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="account-settings-tabs rounded-[18px] border border-gray-100 bg-white p-3">
-          <div className="account-settings-tabs-header px-2 py-3">
-            <p className="type-label text-gray-400">Settings</p>
-            <p className="type-muted mt-1 text-gray-400">Choose the section you want to edit.</p>
-          </div>
-          <div className="account-settings-tab-list mt-2 flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
+      <div className="account-settings-mobile-tabs lg:hidden">
+        <Tabs
+          items={sectionTabs}
+          value={activeSection}
+          onChange={key => setActiveSection(key as SettingsSection)}
+          mobileMode="scroll"
+          equalWidth
+          listClassName="w-full"
+          ariaLabel="Settings sections"
+        />
+      </div>
+
+      <div className="account-settings-workspace grid grid-cols-1 gap-5 lg:h-[calc(100vh-22rem)] lg:min-h-[520px] lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="account-settings-tabs hidden rounded-[22px] border border-gray-200 bg-white p-3 lg:flex lg:h-full lg:flex-col">
+
+
+          <div className="account-settings-tab-list flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto pb-0">
             {sections.map(section => {
               const isActive = activeSection === section.key;
 
@@ -233,7 +259,7 @@ export default function AccountSettings() {
                   key={section.key}
                   type="button"
                   onClick={() => setActiveSection(section.key)}
-                  className={`account-settings-tab min-w-[210px] rounded-2xl px-4 py-3 text-left transition lg:min-w-0 ${
+                  className={`account-settings-tab min-w-0 rounded-[18px] px-4 py-3 text-left transition ${
                     isActive ? 'bg-(--color-ink) text-white' : 'bg-(--color-surface-alt) text-gray-500 hover:bg-gray-100'
                   }`}
                 >
@@ -252,8 +278,8 @@ export default function AccountSettings() {
           </div>
         </aside>
 
-        <section className="account-settings-panel rounded-[18px] border border-gray-100 bg-white">
-          <div className="account-settings-panel-header flex flex-col gap-4 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-start sm:justify-between md:px-6">
+        <section className="account-settings-panel flex min-h-0 flex-col rounded-[22px] border border-gray-200 bg-white lg:h-full">
+          <div className="account-settings-panel-header shrink-0 flex flex-col gap-4 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-start sm:justify-between md:px-6">
             <div className="account-settings-panel-title min-w-0">
               <div className="account-settings-panel-heading flex items-center gap-2">
                 <MaterialIcon name={activeSectionMeta.icon} size={20} className="text-gray-500" />
@@ -261,12 +287,12 @@ export default function AccountSettings() {
               </div>
               <p className="type-muted mt-2 text-gray-400">{activeSectionMeta.description}</p>
             </div>
-            <Button onClick={handleSave} loading={loading} disabled={!isDirty}>
+            <Button onClick={handleSave} loading={loading} disabled={!isDirty} className="w-full sm:w-auto">
               Save changes
             </Button>
           </div>
 
-          <div className="account-settings-panel-body p-4 md:p-6">
+          <div className="account-settings-panel-body min-h-0 flex-1 overflow-y-auto p-4 md:p-6">
             {sectionContent[activeSection]}
           </div>
         </section>

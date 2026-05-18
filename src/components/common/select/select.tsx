@@ -107,7 +107,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
     };
 
     return (
-      <div ref={rootRef} className={cn('select relative', wrapperClassName)}>
+      <div ref={rootRef} className={cn('select relative', isOpen && 'z-[300]', wrapperClassName)}>
         <select
           ref={setRefs}
           id={id}
@@ -168,7 +168,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {isOpen && !disabled && (
           <div
             role="listbox"
-            className="select-menu absolute left-0 right-0 top-[calc(100%+6px)] z-50 max-h-60 overflow-y-auto rounded-2xl border border-gray-200 bg-white p-1.5 shadow-[0_18px_50px_rgba(15,23,42,0.16)]"
+            className="select-menu absolute left-0 right-0 top-[calc(100%+6px)] z-[400] max-h-60 overflow-y-auto rounded-2xl border border-gray-200 bg-white p-1.5 shadow-[0_18px_50px_rgba(15,23,42,0.16)]"
           >
             {options.map(option => {
               const isSelected = option.value === selectedValue;
