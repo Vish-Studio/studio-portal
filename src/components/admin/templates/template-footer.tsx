@@ -11,7 +11,7 @@ const TemplateFooter: FunctionComponent<Props> = ({
   className = '',
   name = 'Vishroy Seenarain',
   email = 'hello@vish.studio',
-  phoneNumber = '+230-5936-8556',
+  phoneNumber = '+230-5709-9969',
 }) => {
   return (
     <footer className={`flex items-center justify-between ${className}`}>
