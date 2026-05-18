@@ -8,8 +8,7 @@ import { TasksOverview, useTasksStore } from '@/src/features/tasks';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import { ProjectsOverview } from '@/src/features/projects';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import Calendar from '@/src/components/admin/calendar/calendar';
-import ScheduleList from '@/src/components/admin/calendar/schedule-list';
+import { CalendarWidget, ScheduleList } from '@/src/features/calendar';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -57,7 +56,7 @@ const Dashboard = () => {
 
         {/* Calendar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-          <Calendar
+          <CalendarWidget
             variant="dashboard"
             selectedDate={selectedCalendarDate}
             onDateChange={setSelectedCalendarDate}
