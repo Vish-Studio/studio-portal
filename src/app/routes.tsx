@@ -4,6 +4,7 @@ import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
 import Expenses from '@/src/pages/Expenses';
 import { CalendarPage, UserCalendarPage } from '@/src/features/calendar';
 import { ChatPage, UserChatPage } from '@/src/features/chat';
+import { AdminDashboardPage, UserDashboardPage } from '@/src/features/dashboard';
 import { DocumentsPage, UserDocumentsPage } from '@/src/features/documents';
 import { PaymentsPage, UserPaymentsPage } from '@/src/features/payments';
 import { ProjectDetailPage, ProjectsPage, UserProjectsPage } from '@/src/features/projects';
@@ -16,12 +17,10 @@ import ProjectProposalTemplate from '@/src/pages/templates/project-proposal';
 import QuotationTemplate from '@/src/pages/templates/quotation';
 import Settings from '@/src/pages/Settings';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
-import Dashboard from '@/src/pages/admin/Dashboard';
 import TemplateEditor from '@/src/pages/admin/TemplateEditor';
 import SignIn from '@/src/pages/SignIn';
 import ForgotPassword from '@/src/pages/ForgotPassword';
 import ResetPassword from '@/src/pages/ResetPassword';
-import UserDashboard from '@/src/pages/user/UserDashboard';
 import UserSettings from '@/src/pages/user/UserSettings';
 import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
 
@@ -42,7 +41,7 @@ export function AppRoutes() {
     <Routes>
       <Route path="/" element={<AuthLanding />} />
 
-      <Route path="/user" element={clientRoute(<UserDashboard />)} />
+      <Route path="/user" element={clientRoute(<UserDashboardPage />)} />
       <Route path="/user/projects" element={clientRoute(<UserProjectsPage />)} />
       <Route path="/user/calendar" element={clientRoute(<UserCalendarPage />)} />
       <Route path="/user/tasks" element={clientRoute(<UserTasksPage />)} />
@@ -51,7 +50,7 @@ export function AppRoutes() {
       <Route path="/user/chat" element={clientRoute(<UserChatPage />)} />
       <Route path="/user/settings" element={clientRoute(<UserSettings />)} />
 
-      <Route path="/admin" element={adminRoute(<Dashboard />)} />
+      <Route path="/admin" element={adminRoute(<AdminDashboardPage />)} />
       <Route path="/admin/clients" element={adminRoute(<ClientsPage />)} />
       <Route path="/admin/clients/:id" element={adminRoute(<ClientDetailPage />)} />
       <Route path="/admin/team" element={adminRoute(<TeamPage />)} />
