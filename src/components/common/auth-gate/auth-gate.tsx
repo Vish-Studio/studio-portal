@@ -2,17 +2,13 @@ import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, type AuthRole } from '@/src/store/auth';
 import { isFirebaseConfigured } from '@/src/lib/firebase';
+import { defaultRouteForRole, isStaffRole } from '@/src/auth/roleAccess';
 import { AppLoader } from '../app-loader/app-loader';
 
 interface AuthGateProps {
   children: React.ReactNode;
   role?: 'admin' | 'client' | 'superadmin';
 }
-
-const isAdminRole = (role?: AuthRole | null) =>
-  role === 'superadmin' || role === 'admin' || role === 'freelancer';
-
-const routeForRole = (role?: AuthRole | null) => role === 'client' ? '/user' : '/admin';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initAuthListener = useAuthStore(state => state.initAuthListener);
@@ -69,15 +65,15 @@ export function AuthGate({ children, role }: AuthGateProps) {
   }
 
   if (role === 'client' && profile.role !== 'client') {
-    return <Navigate to={routeForRole(profile.role)} replace />;
+    return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
 
-  if (role === 'admin' && !isAdminRole(profile.role)) {
-    return <Navigate to={routeForRole(profile.role)} replace />;
+  if (role === 'admin' && !isStaffRole(profile.role)) {
+    return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
 
   if (role === 'superadmin' && profile.role !== 'superadmin') {
-    return <Navigate to={routeForRole(profile.role)} replace />;
+    return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
 
   return <>{children}</>;
@@ -92,5 +88,5 @@ export function AuthLanding() {
     return <Navigate to="/sign-in" replace />;
   }
 
-  return <Navigate to={routeForRole(profile?.role)} replace />;
+  return <Navigate to={defaultRouteForRole(profile?.role)} replace />;
 }
