@@ -10,9 +10,7 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import FormField, { inputCls } from '../components/common/form-field/form-field';
-import Button from '../components/common/button/button';
-import Checkbox from '../components/common/checkbox/checkbox';
+import { Button, Checkbox, FormField, inputCls } from '@/src/shared/components';
 import { isFirebaseConfigured } from '../firebase/config';
 import { useAuthStore } from '../store/auth';
 import type { AuthRole } from '../types/auth';

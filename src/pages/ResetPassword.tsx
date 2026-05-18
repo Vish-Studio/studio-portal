@@ -2,8 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Check, Eye, EyeOff, KeyRound, ShieldAlert } from 'lucide-react';
-import Button from '../components/common/button/button';
-import FormField, { inputCls } from '../components/common/form-field/form-field';
+import { Button, FormField, inputCls } from '@/src/shared/components';
 import { isFirebaseConfigured } from '../firebase/config';
 import { useAuthStore } from '../store/auth';
 
