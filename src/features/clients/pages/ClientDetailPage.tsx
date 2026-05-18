@@ -1,0 +1,364 @@
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { format } from 'date-fns';
+import { Briefcase, Pencil } from 'lucide-react';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
+import CardContent from '@/src/components/common/card-content/card-content';
+import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
+import ProjectCard from '@/src/components/admin/project-card/project-card';
+import ClientDetailCard from '../components/client-detail-card/client-detail-card';
+import { useClientsStore } from '../stores/clientStore';
+import type { ClientStatus } from '../types';
+import { useTeamStore } from '@/src/store/team';
+import { useProjectsStore } from '@/src/store/projects';
+import Fab from '@/src/components/common/button-fab/button-fab';
+import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select } from '@/src/shared/components';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ClientFormValues {
+  fullName: string;
+  companyName: string;
+  email: string;
+  phone: string;
+  status: ClientStatus;
+}
+
+// ─── Disabled-aware input class ───────────────────────────────────────────────
+
+const fieldCls = (hasError: boolean) =>
+  inputCls(hasError) +
+  ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:shadow-none disabled:focus:ring-0 disabled:focus:bg-transparent';
+
+const DISABLED_SELECT_CLS =
+  'disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0';
+
+// ─── Client Detail Page ───────────────────────────────────────────────────────
+
+const ClientDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const { clients, subscribeClients, updateClient } = useClientsStore();
+  const { projects: allProjects } = useProjectsStore();
+  const { members } = useTeamStore();
+  const client = clients.find(c => c.id === id);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editSidebarOpen, setEditSidebarOpen] = useState(false);
+
+  useEffect(() => subscribeClients(), [subscribeClients]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting, isDirty },
+    reset,
+  } = useForm<ClientFormValues>({
+    values: client
+      ? {
+        fullName: client.fullName,
+        companyName: client.companyName ?? '',
+        email: client.email,
+        phone: client.phone ?? '',
+        status: client.status,
+      }
+      : undefined,
+  });
+
+  const onSubmit = async (data: ClientFormValues) => {
+    if (!client) return;
+    await updateClient(client.id, data);
+    reset(data);
+    setIsEditing(false);
+    setEditSidebarOpen(false);
+  };
+
+  const handleCancel = () => {
+    reset({
+      fullName: client?.fullName ?? '',
+      companyName: client?.companyName ?? '',
+      email: client?.email ?? '',
+      phone: client?.phone ?? '',
+      status: client?.status ?? 'active',
+    });
+    setIsEditing(false);
+    setEditSidebarOpen(false);
+  };
+
+  const openEdit = () => {
+    reset({
+      fullName: client.fullName,
+      companyName: client.companyName ?? '',
+      email: client.email,
+      phone: client.phone ?? '',
+      status: client.status,
+    });
+    setIsEditing(true);
+  };
+
+  const openMobileEdit = () => {
+    reset({
+      fullName: client?.fullName ?? '',
+      companyName: client?.companyName ?? '',
+      email: client?.email ?? '',
+      phone: client?.phone ?? '',
+      status: client?.status ?? 'active',
+    });
+    setIsEditing(true);
+    setEditSidebarOpen(true);
+  };
+
+  // ── Not found ──
+  if (!client) {
+    return (
+      <DashboardLayout title="Client">
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
+            <Briefcase size={20} className="text-gray-400" />
+          </div>
+          <p className="text-gray-500 font-medium">Client not found.</p>
+          <Link to="/admin/clients" className="text-sm font-semibold text-gray-900 underline underline-offset-4">
+            Back to Clients
+          </Link>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  const projects = allProjects.filter(p => p.clientId === id);
+  const activeCount = projects.filter(p => p.status === 'active').length;
+  const totalAgreed = projects.reduce((s, p) => s + p.agreedPayment, 0);
+  const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
+  const totalRemaining = totalAgreed - totalPaid;
+
+  return (
+    <DashboardLayout>
+      <div className="flex-1 flex flex-col gap-4 md:gap-10">
+        <Breadcrumb
+          previousLink="/admin/clients"
+          previousPageName="Clients"
+          currentPageName={client.fullName} />
+
+        {/* Client detail */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 ">
+          <ClientDetailCard client={client} />
+
+          <CardContent
+            iconName="manage_accounts"
+            title="Client Details"
+            variant="white"
+            className="hidden md:flex"
+            action={
+              isEditing ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="text-[12px] font-semibold text-gray-500 hover:text-gray-800 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    form="client-edit-form"
+                    type="submit"
+                    disabled={isSubmitting || !isDirty}
+                    className="text-[12px] font-semibold text-white bg-(--color-ink) hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors"
+                  >
+                    {isSubmitting ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+              ) : (
+                <ButtonIcon iconName="edit" clickHandler={openEdit} />
+              )
+            }
+          >
+            <form
+              id="client-edit-form"
+              onSubmit={handleSubmit(onSubmit)}
+              className="px-4 md:px-6 py-4 md:py-5 space-y-4"
+            >
+              <FormField label="Full Name" required={isEditing} error={errors.fullName?.message}>
+                <input
+                  {...register('fullName', { required: isEditing ? 'Name is required' : false })}
+                  disabled={!isEditing}
+                  className={fieldCls(!!errors.fullName)}
+                />
+              </FormField>
+
+              <FormField label="Company Name" error={errors.companyName?.message}>
+                <input
+                  {...register('companyName')}
+                  disabled={!isEditing}
+                  className={fieldCls(!!errors.companyName)}
+                />
+              </FormField>
+
+              <FormField label="Email Address" required={isEditing} error={errors.email?.message}>
+                <input
+                  type="email"
+                  {...register('email', {
+                    required: isEditing ? 'Email is required' : false,
+                    pattern: isEditing
+                      ? { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' }
+                      : undefined,
+                  })}
+                  disabled={!isEditing}
+                  className={fieldCls(!!errors.email)}
+                />
+              </FormField>
+
+              <FormField label="Phone Number" error={errors.phone?.message}>
+                <input
+                  type="tel"
+                  {...register('phone', {
+                    pattern: isEditing
+                      ? { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' }
+                      : undefined,
+                  })}
+                  disabled={!isEditing}
+                  className={fieldCls(!!errors.phone)}
+                />
+              </FormField>
+
+              <FormField label="Status" required={isEditing} error={errors.status?.message}>
+                <Select
+                  {...register('status', { required: isEditing })}
+                  disabled={!isEditing}
+                  hasError={!!errors.status}
+                  className={DISABLED_SELECT_CLS}
+                >
+                  <Option value="active">Active</Option>
+                  <Option value="inactive">Inactive</Option>
+                  <Option value="lost">Lost</Option>
+                </Select>
+              </FormField>
+
+              {isEditing && (
+                <p className="text-[11px] text-gray-400">
+                  Member since{' '}
+                  {client.createdAt?.toDate
+                    ? format(client.createdAt.toDate(), 'MMM d, yyyy')
+                    : '—'}
+                </p>
+              )}
+            </form>
+          </CardContent>
+        </div>
+
+
+        {/* Projects detail*/}
+        <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 md:gap-6">
+          <div className="lg-col-span-2">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-(--color-ink)">Projects</h2>
+              <div className="flex flex-col items-end gap-1">
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {projects.length} project{projects.length !== 1 ? 's' : ''} &middot; {activeCount} active
+                </p>
+                {projects.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] font-semibold text-gray-400">
+                      ${totalPaid.toLocaleString()} collected
+                    </span>
+                    {totalRemaining > 0 && (
+                      <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                        ${totalRemaining.toLocaleString()} outstanding
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {projects.length === 0 ? (
+              <div className="bg-white border border-gray-100 rounded-[18px] p-14 flex flex-col items-center gap-3 text-center">
+                <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
+                  <Briefcase size={20} className="text-gray-300" />
+                </div>
+                <p className="text-sm font-semibold text-gray-500">No projects yet</p>
+                <p className="text-xs text-gray-400">
+                  Projects for {client.fullName} will appear here.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {projects.map(project => (
+                  <ProjectCard key={project.id} project={project} allMembers={members} variant="surface" />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <Fab
+        icon={Pencil}
+        ariaLabel="Edit client"
+        onClick={openMobileEdit}
+        className="md:hidden"
+      />
+
+      <FormSidebar
+        isOpen={editSidebarOpen}
+        onClose={handleCancel}
+        title="Edit Client"
+        description={client.fullName}
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+          <div className="client-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormField label="Full Name" required error={errors.fullName?.message}>
+              <input
+                {...register('fullName', { required: 'Name is required' })}
+                className={inputCls(!!errors.fullName)}
+              />
+            </FormField>
+
+            <FormField label="Company Name" error={errors.companyName?.message}>
+              <input {...register('companyName')} className={inputCls(!!errors.companyName)} />
+            </FormField>
+
+            <FormField label="Email Address" required error={errors.email?.message}>
+              <input
+                type="email"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
+                })}
+                className={inputCls(!!errors.email)}
+              />
+            </FormField>
+
+            <FormField label="Phone Number" error={errors.phone?.message}>
+              <input
+                type="tel"
+                {...register('phone', {
+                  pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
+                })}
+                className={inputCls(!!errors.phone)}
+              />
+            </FormField>
+
+            <FormField label="Status" required error={errors.status?.message}>
+              <Select {...register('status', { required: true })} hasError={!!errors.status}>
+                <Option value="active">Active</Option>
+                <Option value="inactive">Inactive</Option>
+                <Option value="lost">Lost</Option>
+              </Select>
+            </FormField>
+          </div>
+
+          <FormSidebarFooter>
+            <Button type="button" variant="secondary" onClick={handleCancel} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
+              Save
+            </Button>
+          </FormSidebarFooter>
+        </form>
+      </FormSidebar>
+    </DashboardLayout>
+  );
+};
+
+export default ClientDetail;

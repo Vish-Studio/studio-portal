@@ -45,7 +45,7 @@ export default StatusBadge;
 
 // ─── Client status helpers ────────────────────────────────────────────────────
 
-import type { ClientStatus } from '@/src/data/clients';
+import type { ClientStatus } from '@/src/features/clients';
 
 export const CLIENT_STATUS_VARIANT: Record<ClientStatus, StatusVariant> = {
   active: 'green',

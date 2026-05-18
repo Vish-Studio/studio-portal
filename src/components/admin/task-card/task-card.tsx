@@ -8,7 +8,7 @@ import type { RowAction } from '../../common/table/table';
 import { TaskStatusBadge } from '../../common/status-badge/status-badge';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTeamStore } from '@/src/store/team';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import type { Task, TaskPriority } from '@/src/data/tasks';
 
 // ─── Priority dot colour ──────────────────────────────────────────────────────

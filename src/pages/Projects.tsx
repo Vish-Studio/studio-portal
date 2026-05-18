@@ -8,11 +8,11 @@ import TableTab, { type TabItem } from '../components/common/table-tab/table-tab
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import { Button, ConfirmDialog, FormField, inputCls, Option, Select } from '@/src/shared/components';
 import ProjectCard, { ProjectCardMini } from '../components/admin/project-card/project-card';
-import ClientPicker from '../components/admin/pickers/client-picker/client-picker';
+import { ClientPicker } from '@/src/features/clients';
 import MemberPicker from '../components/admin/pickers/member-picker/member-picker';
 import { useProjectsStore, makeNewProject } from '../store/projects';
 import { useTeamStore } from '../store/team';
-import { useClientsStore } from '../store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress } from '../data/projects';
 import type { ClientProject, ServiceType, PackageType } from '../data/projects';
 import { useUIStore } from '../store/ui';

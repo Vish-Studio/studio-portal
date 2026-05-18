@@ -5,7 +5,7 @@ import {
   type ChatConversationType,
   type ChatSenderRole,
 } from '@/src/store/chat';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/store/team';
 import { useUIStore } from '@/src/store/ui';
 import { useProjectsStore } from '@/src/store/projects';

@@ -9,7 +9,7 @@ import { MaterialIcon, StatusBadge } from '@/src/shared/components';
 import { useDocumentsStore } from '../store/documents';
 import { useTemplateAssignmentsStore } from '../store/template-assignments';
 import { useProjectsStore } from '../store/projects';
-import { useClientsStore } from '../store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { TEMPLATES } from '../data/templates';
 import type { StudioDocument, DocumentType } from '../store/documents';
 import type { TemplateAssignment } from '../store/template-assignments';

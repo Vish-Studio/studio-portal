@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import Clients from '@/src/pages/admin/Clients';
-import ClientDetail from '@/src/pages/admin/ClientDetail';
+import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
 import Expenses from '@/src/pages/Expenses';
 import Projects from '@/src/pages/Projects';
 import Tasks from '@/src/pages/Tasks';
@@ -61,8 +60,8 @@ export function AppRoutes() {
       <Route path="/user/settings" element={clientRoute(<UserSettings />)} />
 
       <Route path="/admin" element={adminRoute(<Dashboard />)} />
-      <Route path="/admin/clients" element={adminRoute(<Clients />)} />
-      <Route path="/admin/clients/:id" element={adminRoute(<ClientDetail />)} />
+      <Route path="/admin/clients" element={adminRoute(<ClientsPage />)} />
+      <Route path="/admin/clients/:id" element={adminRoute(<ClientDetailPage />)} />
       <Route path="/admin/team" element={adminRoute(<Team />)} />
       <Route path="/admin/team/:id" element={adminRoute(<TeamDetail />)} />
       <Route path="/admin/expenses" element={superadminRoute(<Expenses />)} />
@@ -90,4 +89,3 @@ export function AppRoutes() {
     </Routes>
   );
 }
-

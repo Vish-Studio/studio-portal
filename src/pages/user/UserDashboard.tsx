@@ -8,7 +8,7 @@ import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-
 import { TaskStatusBadge } from '@/src/components/common/status-badge/status-badge';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTasksStore } from '@/src/store/tasks';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 
 // Simulated logged-in client — would come from auth context in production

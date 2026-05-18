@@ -8,7 +8,7 @@ import { getProjectAccent } from '@/src/data/projects';
 import { PRIORITY_DOT } from '../task-card/task-card';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTeamStore } from '@/src/store/team';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import type { Task } from '@/src/data/tasks';
 
 const PRIORITY_LABEL: Record<Task['priority'], string> = {

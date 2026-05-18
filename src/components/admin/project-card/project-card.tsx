@@ -8,7 +8,7 @@ import type { RowAction } from '../../common/table/table';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
 import type { TeamMember } from '@/src/data/team';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 
 export const calcProgress = (project: ClientProject) => {
   const done     = project.phases.filter(p => p.status === 'done').length;

@@ -7,7 +7,7 @@ import AddBlockMenu from '../../components/admin/template-editor/add-block-menu'
 import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
 import { useTemplateAssignmentsStore } from '../../store/template-assignments';
 import { useProjectsStore } from '../../store/projects';
-import { useClientsStore } from '../../store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { getDefaultBlocks } from '../../data/template-blocks';
 import { TEMPLATES } from '../../data/templates';
 import ProjectTemplateDocument from '../../components/admin/templates/project-template-document';

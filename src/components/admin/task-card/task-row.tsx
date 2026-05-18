@@ -8,7 +8,7 @@ import { TaskStatusBadge } from '../../common/status-badge/status-badge';
 import MaterialIcon from '../../common/material-icon/material-icon';
 import { useProjectsStore } from '@/src/store/projects';
 import { useTeamStore } from '@/src/store/team';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import type { Task } from '@/src/data/tasks';
 import { PRIORITY_DOT } from './task-card';
 

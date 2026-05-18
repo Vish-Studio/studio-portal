@@ -19,7 +19,7 @@ import Button from '../../common/button/button';
 import Toggle from '../../common/toggle/toggle';
 import DatePicker from '../../common/date-picker/date-picker';
 import { useProjectsStore } from '@/src/store/projects';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/store/team';
 import { cn } from '@/src/lib/utils';
 

@@ -19,7 +19,7 @@ import ProjectHeroCard from '../../components/admin/project-hero-card/project-he
 import ProjectTimeline from '../../components/admin/project-timeline/project-timeline';
 import { AvatarStack } from '../../components/common/avatar/avatar';
 import Avatar from '../../components/common/avatar/avatar';
-import ClientPicker from '../../components/admin/pickers/client-picker/client-picker';
+import { ClientPicker } from '@/src/features/clients';
 import MemberPicker from '../../components/admin/pickers/member-picker/member-picker';
 import TaskRow from '../../components/admin/task-card/task-row';
 import TaskDetailModal from '../../components/admin/task-detail-modal/task-detail-modal';
@@ -28,7 +28,7 @@ import { useProjectsStore } from '../../store/projects';
 import { useTeamStore } from '../../store/team';
 import { useTasksStore } from '../../store/tasks';
 import { useTemplateAssignmentsStore } from '../../store/template-assignments';
-import { useClientsStore } from '../../store/clients';
+import { useClientsStore } from '@/src/features/clients';
 import { getProjectAccent, SERVICE_META } from '../../data/projects';
 import { TEMPLATES } from '../../data/templates';
 import type { ServiceType, PackageType, Phase, PhaseStatus } from '../../data/projects';

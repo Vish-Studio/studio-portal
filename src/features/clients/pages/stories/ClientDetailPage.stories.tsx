@@ -1,26 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import ClientDetail from '../ClientDetail';
+import ClientDetailPage from '../ClientDetailPage';
 
 const meta = {
-  title: 'Pages/Admin/ClientDetail',
-  component: ClientDetail,
+  title: 'Features/Clients/Pages/ClientDetailPage',
+  component: ClientDetailPage,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: { story: { inline: false, iframeHeight: 900 } },
   },
-} satisfies Meta<typeof ClientDetail>;
+} satisfies Meta<typeof ClientDetailPage>;
 
 export default meta;
 
-// ClientDetail reads :id from the URL — wrap each story in a router
+// ClientDetailPage reads :id from the URL — wrap each story in a router
 // that seeds the correct client id.
 const withClient = (id: string) => ({
   render: () => (
     <MemoryRouter initialEntries={[`/admin/clients/${id}`]}>
       <Routes>
-        <Route path="/admin/clients/:id" element={<ClientDetail />} />
+        <Route path="/admin/clients/:id" element={<ClientDetailPage />} />
       </Routes>
     </MemoryRouter>
   ),

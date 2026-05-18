@@ -6,7 +6,7 @@ import MaterialIcon from '../../common/material-icon/material-icon';
 import Avatar from '../../common/avatar/avatar';
 import { getProjectAccent, getPhaseProgress } from '@/src/data/projects';
 import type { ClientProject } from '@/src/data/projects';
-import { useClientsStore } from '@/src/store/clients';
+import { useClientsStore } from '@/src/features/clients';
 
 interface Props { project: ClientProject; className?: string; }
 
