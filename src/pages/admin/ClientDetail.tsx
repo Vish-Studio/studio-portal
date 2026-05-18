@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Briefcase, Pencil } from 'lucide-react';
-import Layout from '../../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '../../components/common/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
@@ -116,7 +116,7 @@ const ClientDetail = () => {
   // ── Not found ──
   if (!client) {
     return (
-      <Layout title="Client">
+      <DashboardLayout title="Client">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
             <Briefcase size={20} className="text-gray-400" />
@@ -126,7 +126,7 @@ const ClientDetail = () => {
             Back to Clients
           </Link>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
@@ -137,7 +137,7 @@ const ClientDetail = () => {
   const totalRemaining = totalAgreed - totalPaid;
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="flex-1 flex flex-col gap-4 md:gap-10">
         <Breadcrumb
           previousLink="/admin/clients"
@@ -362,7 +362,7 @@ const ClientDetail = () => {
           </FormSidebarFooter>
         </form>
       </FormSidebar>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Pencil, Trash2, UserCheck, UserMinus, UserRoundX, Users } from 'lucide-react';
-import Layout from '../../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { RowActionsMenu } from '../../components/common/table/table';
 import TableTab, { type TabItem } from '../../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
@@ -133,7 +133,7 @@ export default function Clients() {
   };
 
   return (
-    <Layout title="Clients">
+    <DashboardLayout title="Clients">
       <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
         <div className="clients-stats grid gap-3 grid-cols-2 xl:grid-cols-4">
           <StatCard
@@ -354,6 +354,6 @@ export default function Clients() {
           </FormSidebarFooter>
         </form>
       </FormSidebar>
-    </Layout>
+    </DashboardLayout>
   );
 }

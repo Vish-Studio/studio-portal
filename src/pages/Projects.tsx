@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Briefcase, CheckCircle, TrendingUp, Layers, Pencil, Trash2 } from 'lucide-react';
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '../components/common/button-fab/button-fab';
 import StatCard from '../components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
@@ -124,7 +124,7 @@ const Projects = () => {
   };
 
   return (
-    <Layout title="Projects">
+    <DashboardLayout title="Projects">
       <div className="flex flex-col gap-5 pt-6 py-10">
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -241,7 +241,7 @@ const Projects = () => {
       />
 
       <Fab onClick={openAdd} ariaLabel="Add project" />
-    </Layout>
+    </DashboardLayout>
   );
 };
 

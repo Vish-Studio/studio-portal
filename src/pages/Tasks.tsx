@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckSquare } from 'lucide-react';
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import Fab from '../components/common/button-fab/button-fab';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
@@ -170,7 +170,7 @@ const Tasks = () => {
   };
 
   return (
-    <Layout title="Tasks">
+    <DashboardLayout title="Tasks">
       <div className="flex flex-col gap-4 pb-10">
 
         {/* ── Toolbar: tabs + optional page controls ── */}
@@ -367,7 +367,7 @@ const Tasks = () => {
           </FormSidebarFooter>
         </form>
       </FormSidebar>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

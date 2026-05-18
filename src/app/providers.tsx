@@ -1,8 +1,8 @@
 import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from '@/src/components/common/auth-gate/auth-gate';
-import { AppLoadingGate } from '@/src/components/common/app-loading-gate/app-loading-gate';
-import { GlobalOperationLoader } from '@/src/components/common/global-operation-loader/global-operation-loader';
-import { ToastViewport } from '@/src/components/common/toast/toast-viewport';
+import { ToastViewport } from '@/src/app/components/feedback/ToastViewport';
+import { AppLoadingGate } from '@/src/app/components/loading/AppLoadingGate';
+import { GlobalOperationLoader } from '@/src/app/components/loading/GlobalOperationLoader';
 
 interface AppProvidersProps {
   children: React.ReactNode;
@@ -19,4 +19,3 @@ export function AppProviders({ children }: AppProvidersProps) {
     </BrowserRouter>
   );
 }
-

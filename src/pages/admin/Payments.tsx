@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Trash2 } from 'lucide-react';
 import StatCard from '@/src/components/common/stat-card/stat-card';
-import Layout from '@/src/components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { RowActionsMenu } from '@/src/components/common/table/table';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import StatusBadge from '@/src/components/common/status-badge/status-badge';
@@ -122,7 +122,7 @@ const Payments = () => {
   const totalOverdue = PAYMENTS.filter(p => p.status === 'overdue').reduce((s, p) => s + p.amount, 0);
 
   return (
-    <Layout title="Payments">
+    <DashboardLayout title="Payments">
       <div className="flex flex-col gap-6 w-full mx-auto py-6 md:min-h-full md:gap-8 md:py-10">
 
         {/* Stats row */}
@@ -238,7 +238,7 @@ const Payments = () => {
           )}
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

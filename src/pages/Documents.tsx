@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '../components/common/card-content/card-content';
 import StatCard from '../components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
@@ -192,7 +192,7 @@ export default function Documents() {
   };
 
   return (
-    <Layout title="Documents">
+    <DashboardLayout title="Documents">
       <div className="flex flex-col gap-5 pb-10">
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
@@ -330,6 +330,6 @@ export default function Documents() {
         )}
 
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 }

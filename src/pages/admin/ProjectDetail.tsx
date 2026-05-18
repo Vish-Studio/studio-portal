@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Briefcase, Check, Pencil, Trash2 } from 'lucide-react';
-import Layout from '../../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '../../components/common/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '../../components/common/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '../../components/common/form-field/form-field';
@@ -90,7 +90,7 @@ const ProjectDetail = () => {
 
   if (!project) {
     return (
-      <Layout title="Project">
+      <DashboardLayout title="Project">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
             <Briefcase size={20} className="text-gray-400" />
@@ -98,7 +98,7 @@ const ProjectDetail = () => {
           <p className="text-gray-500 font-medium">Project not found.</p>
           <Link to="/admin/projects" className="text-sm font-semibold text-gray-900 underline underline-offset-4">Back to Projects</Link>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
@@ -208,7 +208,7 @@ const ProjectDetail = () => {
   const editingPhase = editingPhaseId ? project.phases.find(p => p.id === editingPhaseId) : null;
 
   return (
-    <Layout title={project.name}>
+    <DashboardLayout title={project.name}>
       <div className="flex flex-col gap-4 pb-12">
 
         <Breadcrumb previousLink="/admin/projects" previousPageName="Projects" currentPageName={project.name} />
@@ -595,7 +595,7 @@ const ProjectDetail = () => {
         onConfirm={() => { if (confirmTask) removeTask(confirmTask.id); setConfirmTask(null); }}
         onCancel={() => setConfirmTask(null)}
       />
-    </Layout>
+    </DashboardLayout>
   );
 };
 

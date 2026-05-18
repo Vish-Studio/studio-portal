@@ -9,7 +9,7 @@ import StatCard from '@/src/components/common/stat-card/stat-card';
 import ProjectsOverview from '@/src/components/admin/projects-overview/projects-overview';
 import DocumentOverview from '@/src/components/admin/document-overview/document-overview';
 import TasksOverview from '@/src/components/admin/tasks-overview/tasks-overview';
-import Layout from '@/src/components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Calendar from '@/src/components/admin/calendar/calendar';
 import ScheduleList from '@/src/components/admin/calendar/schedule-list';
 
@@ -22,7 +22,7 @@ const Dashboard = () => {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(new Date());
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="flex-1 flex flex-col gap-4 md:gap-6 py-10 pt-6">
 
         {/* Stats row */}
@@ -88,7 +88,7 @@ const Dashboard = () => {
         </div>
 
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CalendarWidget from '../components/admin/calendar/calendar';
 import StatCard from '../components/common/stat-card/stat-card';
 import { CalendarCheck, CalendarDays } from 'lucide-react';
@@ -51,7 +51,7 @@ const CalendarPage = () => {
   const selectedItems = customEvents[dateKey(selectedDate)]?.length ?? 0;
 
   return (
-    <Layout title="Calendar">
+    <DashboardLayout title="Calendar">
       <div className="flex flex-col gap-4 md:gap-6 pt-6 pb-10">
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
@@ -100,7 +100,7 @@ const CalendarPage = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 };
 

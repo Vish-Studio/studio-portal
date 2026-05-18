@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, Printer, Check } from 'lucide-react';
-import Layout from '../../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import BlockEditorPanel from '../../components/admin/template-editor/block-editor-panel';
 import AddBlockMenu from '../../components/admin/template-editor/add-block-menu';
 import ConfirmDialog from '../../components/common/confirm-dialog/confirm-dialog';
@@ -138,16 +138,16 @@ export default function TemplateEditor() {
 
   if (!project) {
     return (
-      <Layout title="Template Editor" hideSearch>
+      <DashboardLayout title="Template Editor" hideSearch>
         <div className="flex items-center justify-center py-24">
           <p className="text-gray-400 font-medium">Project not found.</p>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Layout title="" hideSearch topbarActions={topbarActions}>
+    <DashboardLayout title="" hideSearch topbarActions={topbarActions}>
 
       {/* ── Page toolbar ── */}
       <div className="flex items-center justify-between gap-4 mb-6 print:hidden">
@@ -321,6 +321,6 @@ export default function TemplateEditor() {
         onConfirm={() => { if (deleteId) removeBlock(deleteId); setDeleteId(null); }}
         onCancel={() => setDeleteId(null)}
       />
-    </Layout>
+    </DashboardLayout>
   );
 }

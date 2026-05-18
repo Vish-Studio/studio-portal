@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import Topbar from '../topbar';
+import Topbar from '../Topbar';
 
 const meta = {
-  title: 'Common/Topbar',
+  title: 'Layouts/Topbar',
   component: Topbar,
   tags: ['autodocs'],
   parameters: {

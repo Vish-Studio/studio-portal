@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '../components/common/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '../components/common/form-sidebar/form-sidebar';
 import Fab from '../components/common/button-fab/button-fab';
@@ -202,7 +202,7 @@ export default function Team() {
   };
 
   return (
-    <Layout title="Team">
+    <DashboardLayout title="Team">
       <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
         <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <TableTab
@@ -377,6 +377,6 @@ export default function Team() {
           onAssign={assignMember}
         />
       )}
-    </Layout>
+    </DashboardLayout>
   );
 }

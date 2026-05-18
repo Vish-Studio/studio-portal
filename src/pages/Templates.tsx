@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { MaterialIcon } from '@/src/shared/components';
 import { TEMPLATES } from '../data/templates';
 
@@ -7,7 +7,7 @@ export default function Templates() {
   const navigate = useNavigate();
 
   return (
-    <Layout title="Templates">
+    <DashboardLayout title="Templates">
       <div className="flex flex-col gap-6 pb-10">
 
         {/* ── Intro ── */}
@@ -45,6 +45,6 @@ export default function Templates() {
         </div>
 
       </div>
-    </Layout>
+    </DashboardLayout>
   );
 }

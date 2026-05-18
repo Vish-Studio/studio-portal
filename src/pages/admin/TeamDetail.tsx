@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Briefcase, CheckSquare, Clock3, Mail, Pencil } from 'lucide-react';
-import Layout from '@/src/components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Breadcrumb from '@/src/components/common/breadcrumb/breadcrumb';
 import CardContent from '@/src/components/common/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
@@ -137,7 +137,7 @@ export default function TeamDetail() {
 
   if (!member) {
     return (
-      <Layout title="Team">
+      <DashboardLayout title="Team">
         <div className="team-detail-empty flex flex-col items-center justify-center gap-4 py-24">
           <div className="team-detail-empty-icon flex h-12 w-12 items-center justify-center rounded-full bg-(--color-surface)">
             <Briefcase size={20} className="text-gray-400" />
@@ -149,12 +149,12 @@ export default function TeamDetail() {
             Back to Team
           </Link>
         </div>
-      </Layout>
+      </DashboardLayout>
     );
   }
 
   return (
-    <Layout>
+    <DashboardLayout>
       <div className="team-detail flex flex-1 flex-col gap-4 md:gap-10">
         <Breadcrumb
           previousLink="/admin/team"
@@ -426,6 +426,6 @@ export default function TeamDetail() {
           </FormSidebarFooter>
         </form>
       </FormSidebar>
-    </Layout>
+    </DashboardLayout>
   );
 }

@@ -1,10 +1,10 @@
-import Layout from '../components/common/layout/layout';
+import DashboardLayout from '@/src/layouts/DashboardLayout';
 import AccountSettings from '../components/common/account-settings/account-settings';
 
 export default function Settings() {
   return (
-    <Layout title="Settings">
+    <DashboardLayout title="Settings">
       <AccountSettings />
-    </Layout>
+    </DashboardLayout>
   );
 }
