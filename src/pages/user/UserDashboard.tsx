@@ -7,7 +7,7 @@ import MaterialIcon from '@/src/components/common/material-icon/material-icon';
 import { ProjectStatusBadge } from '@/src/components/common/status-badge/status-badge';
 import { TaskStatusBadge } from '@/src/components/common/status-badge/status-badge';
 import { useProjectsStore } from '@/src/features/projects';
-import { useTasksStore } from '@/src/store/tasks';
+import { useTasksStore } from '@/src/features/tasks';
 import { useClientsStore } from '@/src/features/clients';
 import { getPhaseProgress, getProjectAccent } from '@/src/features/projects';
 

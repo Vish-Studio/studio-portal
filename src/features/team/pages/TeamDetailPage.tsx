@@ -11,7 +11,7 @@ import TeamDetailCard from '../components/team-detail-card/team-detail-card';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TaskStatusBadge } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
-import { useTasksStore } from '@/src/store/tasks';
+import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/store/auth';
 import type { TeamAccessRole } from '../types';

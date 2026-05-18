@@ -13,7 +13,7 @@ import {
 } from '../data/seed';
 
 import { useProjectsStore }  from '@/src/features/projects';
-import { useTasksStore }     from '../store/tasks';
+import { useTasksStore }     from '@/src/features/tasks';
 import { useTeamStore }      from '@/src/features/team';
 import { useDocumentsStore } from '../store/documents';
 import { useAdminStore }     from '../store/admin';

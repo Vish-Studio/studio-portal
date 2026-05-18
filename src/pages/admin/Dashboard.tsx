@@ -4,11 +4,10 @@ import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-rea
 import { useDocumentsStore } from '@/src/store/documents';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
-import { useTasksStore } from '@/src/store/tasks';
+import { TasksOverview, useTasksStore } from '@/src/features/tasks';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import { ProjectsOverview } from '@/src/features/projects';
 import DocumentOverview from '@/src/components/admin/document-overview/document-overview';
-import TasksOverview from '@/src/components/admin/tasks-overview/tasks-overview';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Calendar from '@/src/components/admin/calendar/calendar';
 import ScheduleList from '@/src/components/admin/calendar/schedule-list';

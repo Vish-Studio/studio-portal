@@ -12,17 +12,14 @@ import ProjectTimeline from '../components/project-timeline/project-timeline';
 import { Avatar, AvatarStack, Breadcrumb, Button, ButtonIcon, ConfirmDialog, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
 import { ClientPicker } from '@/src/features/clients';
 import MemberPicker from '@/src/components/admin/pickers/member-picker/member-picker';
-import TaskRow from '@/src/components/admin/task-card/task-row';
-import TaskDetailModal from '@/src/components/admin/task-detail-modal/task-detail-modal';
+import { TaskDetailModal, TaskRow, useTasksStore, type Task, type TaskStatus } from '@/src/features/tasks';
 import AssignTemplateModal from '@/src/components/admin/template-editor/assign-template-modal';
 import { useProjectsStore } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
-import { useTasksStore } from '@/src/store/tasks';
 import { useTemplateAssignmentsStore } from '@/src/store/template-assignments';
 import { useClientsStore } from '@/src/features/clients';
 import { getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
 import { TEMPLATES } from '@/src/data/templates';
-import type { Task, TaskStatus } from '@/src/data/tasks';
 
 interface ProjectFormValues {
   name: string; service: ServiceType; package: PackageType | ''; status: 'active' | 'paused' | 'completed'; timeline: string;

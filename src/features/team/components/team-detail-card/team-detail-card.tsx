@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import DetailHeroCard from '@/src/components/admin/detail-hero-card/detail-hero-card';
 import { getMemberColors, type TeamMember } from '../../types';
 import type { ClientProject } from '@/src/features/projects';
-import type { Task } from '@/src/data/tasks';
+import type { Task } from '@/src/features/tasks';
 
 interface TeamDetailCardProps {
   className?: string;

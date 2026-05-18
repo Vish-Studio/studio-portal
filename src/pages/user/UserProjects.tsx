@@ -14,7 +14,7 @@ import Option from '@/src/components/common/select/option';
 import ConfirmDialog from '@/src/components/common/confirm-dialog/confirm-dialog';
 import { ProjectCard, ProjectCardMini } from '@/src/features/projects';
 import { makeNewProject, useProjectsStore } from '@/src/features/projects';
-import { useTasksStore } from '@/src/store/tasks';
+import { useTasksStore } from '@/src/features/tasks';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '@/src/features/projects';
 

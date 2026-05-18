@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
 import Expenses from '@/src/pages/Expenses';
 import { ProjectDetailPage, ProjectsPage } from '@/src/features/projects';
-import Tasks from '@/src/pages/Tasks';
+import { TasksPage, UserTasksPage } from '@/src/features/tasks';
 import Calendar from '@/src/pages/Calendar';
 import Documents from '@/src/pages/Documents';
 import Templates from '@/src/pages/Templates';
@@ -24,7 +24,6 @@ import ResetPassword from '@/src/pages/ResetPassword';
 import UserDashboard from '@/src/pages/user/UserDashboard';
 import UserProjects from '@/src/pages/user/UserProjects';
 import UserCalendar from '@/src/pages/user/UserCalendar';
-import UserTasks from '@/src/pages/user/UserTasks';
 import UserPayments from '@/src/pages/user/UserPayments';
 import UserDocuments from '@/src/pages/user/UserDocuments';
 import UserChat from '@/src/pages/user/UserChat';
@@ -51,7 +50,7 @@ export function AppRoutes() {
       <Route path="/user" element={clientRoute(<UserDashboard />)} />
       <Route path="/user/projects" element={clientRoute(<UserProjects />)} />
       <Route path="/user/calendar" element={clientRoute(<UserCalendar />)} />
-      <Route path="/user/tasks" element={clientRoute(<UserTasks />)} />
+      <Route path="/user/tasks" element={clientRoute(<UserTasksPage />)} />
       <Route path="/user/payments" element={clientRoute(<UserPayments />)} />
       <Route path="/user/documents" element={clientRoute(<UserDocuments />)} />
       <Route path="/user/chat" element={clientRoute(<UserChat />)} />
@@ -68,7 +67,7 @@ export function AppRoutes() {
       <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />
       <Route path="/admin/projects/:id" element={adminRoute(<ProjectDetailPage />)} />
       <Route path="/admin/projects/:projectId/templates/:assignmentId" element={adminRoute(<TemplateEditor />)} />
-      <Route path="/admin/tasks" element={adminRoute(<Tasks />)} />
+      <Route path="/admin/tasks" element={adminRoute(<TasksPage />)} />
       <Route path="/admin/calendar" element={adminRoute(<Calendar />)} />
       <Route path="/admin/documents" element={adminRoute(<Documents />)} />
       <Route path="/admin/templates" element={adminRoute(<Templates />)} />
