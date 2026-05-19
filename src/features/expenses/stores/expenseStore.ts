@@ -1,0 +1,53 @@
+import { create } from "zustand";
+export type { AdminStats, Expense } from "../types";
+import type { AdminStats, Expense } from "../types";
+
+interface RecentClient {
+  id: string;
+  fullName: string;
+  email: string;
+  status: string;
+}
+
+interface ExpenseState {
+  stats: AdminStats;
+  recentClients: RecentClient[];
+  expenses: Expense[];
+  isWorking: boolean;
+  setStats: (stats: AdminStats) => void;
+  setRecentClients: (clients: RecentClient[]) => void;
+  setExpenses: (expenses: Expense[]) => void;
+  addExpense: (expense: Expense) => void;
+  toggleWorking: () => void;
+  incrementExpenseTotal: (amount: number) => void;
+}
+
+const EMPTY_STATS: AdminStats = {
+  totalClients: 0,
+  activeProjects: 0,
+  totalRevenue: 0,
+  totalExpenses: 0,
+};
+
+export const useExpenseStore = create<ExpenseState>((set) => ({
+  stats: EMPTY_STATS, // hydrated on app start via initStores()
+  recentClients: [],
+  expenses: [],
+  isWorking: true,
+
+  setStats: (stats) => set({ stats }),
+  setRecentClients: (recentClients) => set({ recentClients }),
+  setExpenses: (expenses) => set({ expenses }),
+
+  addExpense: (expense) =>
+    set((s) => ({ expenses: [expense, ...s.expenses].slice(0, 5) })),
+
+  toggleWorking: () => set((s) => ({ isWorking: !s.isWorking })),
+
+  incrementExpenseTotal: (amount) =>
+    set((s) => ({
+      stats: { ...s.stats, totalExpenses: s.stats.totalExpenses + amount },
+    })),
+}));
+
+export const useAdminStore = useExpenseStore;

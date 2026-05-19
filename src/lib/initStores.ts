@@ -16,14 +16,14 @@ import { useProjectsStore }  from '@/src/features/projects';
 import { useTasksStore }     from '@/src/features/tasks';
 import { useTeamStore }      from '@/src/features/team';
 import { useDocumentsStore } from '@/src/features/documents';
-import { useAdminStore }     from '../store/admin';
+import { useExpenseStore }   from '@/src/features/expenses';
 
 export function initStores(): void {
   useProjectsStore.getState().setProjects(DEMO_PROJECTS);
   useTasksStore.getState().setTasks(DEMO_TASKS);
   useTeamStore.getState().setProjects(DEMO_TEAM_PROJECTS);
   useDocumentsStore.getState().setDocuments(DEMO_DOCUMENTS);
-  useAdminStore.getState().setStats(DEMO_STATS);
-  useAdminStore.getState().setRecentClients(DEMO_RECENT_CLIENTS);
-  useAdminStore.getState().setExpenses(DEMO_EXPENSES);
+  useExpenseStore.getState().setStats(DEMO_STATS);
+  useExpenseStore.getState().setRecentClients(DEMO_RECENT_CLIENTS);
+  useExpenseStore.getState().setExpenses(DEMO_EXPENSES);
 }

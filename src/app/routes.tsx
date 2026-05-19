@@ -1,11 +1,11 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
 import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
-import Expenses from '@/src/pages/Expenses';
 import { CalendarPage, UserCalendarPage } from '@/src/features/calendar';
 import { ChatPage, UserChatPage } from '@/src/features/chat';
 import { AdminDashboardPage, UserDashboardPage } from '@/src/features/dashboard';
 import { DocumentsPage, UserDocumentsPage } from '@/src/features/documents';
+import { ExpensesPage } from '@/src/features/expenses';
 import { PaymentsPage, UserPaymentsPage } from '@/src/features/payments';
 import { ProjectDetailPage, ProjectsPage, UserProjectsPage } from '@/src/features/projects';
 import { SettingsPage, UserSettingsPage } from '@/src/features/settings';
@@ -54,7 +54,7 @@ export function AppRoutes() {
       <Route path="/admin/clients/:id" element={adminRoute(<ClientDetailPage />)} />
       <Route path="/admin/team" element={adminRoute(<TeamPage />)} />
       <Route path="/admin/team/:id" element={adminRoute(<TeamDetailPage />)} />
-      <Route path="/admin/expenses" element={superadminRoute(<Expenses />)} />
+      <Route path="/admin/expenses" element={superadminRoute(<ExpensesPage />)} />
       <Route path="/admin/payments" element={adminRoute(<PaymentsPage />)} />
       <Route path="/admin/chat" element={adminRoute(<ChatPage />)} />
       <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />
