@@ -16,9 +16,9 @@ const project: ClientProject = {
   package: 'growth',
   assignedMemberIds: [],
   phases: [
-    { id: 'ph_1', title: 'Discovery/Brief', icon: 'explore', status: 'done', requiresClientAction: false, clientCompleted: true },
+    { id: 'ph_1', title: 'Discovery/Brief', icon: 'explore', status: 'done', requiresClientAction: false, clientCompleted: true, phaseAmount: 1500 },
     { id: 'ph_2', title: 'Proposal', icon: 'description', status: 'done', requiresClientAction: false, clientCompleted: true },
-    { id: 'ph_3', title: 'Quotation', icon: 'request_quote', status: 'active', requiresClientAction: true, clientCompleted: false, targetDate: '15 May 2026', description: 'Client to review pricing.' },
+    { id: 'ph_3', title: 'Quotation', icon: 'request_quote', status: 'active', requiresClientAction: true, clientCompleted: false, targetDate: '15 May 2026', description: 'Client to review pricing.', phaseAmount: 2000 },
     { id: 'ph_4', title: 'Invoice', icon: 'receipt', status: 'pending', requiresClientAction: false, clientCompleted: false },
     { id: 'ph_5', title: 'Design', icon: 'design_services', status: 'pending', requiresClientAction: false, clientCompleted: false },
   ],
@@ -40,12 +40,12 @@ const meta = {
   component: ProjectTimeline,
   args: {
     project,
-    isManaging: false,
     getPhaseAssignment: (_projectId: string, phaseId: string) => phaseId === assignment.phaseKey ? assignment : undefined,
-    onToggleManage: () => {},
     onAddPhase: () => {},
     onEditPhase: () => {},
+    onUpdatePhase: () => {},
     onAssignTemplate: () => {},
+    onViewDocument: () => {},
     onOpenDocument: () => {},
     onCompletePhase: () => {},
     onSetActivePhase: () => {},
@@ -59,12 +59,6 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-
-export const Managing: Story = {
-  args: {
-    isManaging: true,
-  },
-};
 
 export const Empty: Story = {
   args: {

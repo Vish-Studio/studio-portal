@@ -18,6 +18,8 @@ import { useProjectsStore } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
 import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useClientsStore } from '@/src/features/clients';
+import { useDiscoveryStore } from '@/src/features/discovery';
+import { useAuthStore } from '@/src/features/auth';
 import { getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
 import { TEMPLATES } from '@/src/features/templates';
 
@@ -58,7 +60,6 @@ const ProjectDetail = () => {
   const [confirmTask, setConfirmTask]           = useState<Task | null>(null);
   const [assignPhaseId, setAssignPhaseId]       = useState<string | null>(null);
   const [removeDocId, setRemoveDocId]           = useState<string | null>(null);
-  const [isPhasesEditing, setIsPhasesEditing]   = useState(false);
   const [editingPhaseId, setEditingPhaseId]     = useState<string | null>(null);
   const [insertAfterIdx, setInsertAfterIdx]     = useState<number | null>(null);
   const [deletePhaseId, setDeletePhaseId]       = useState<string | null>(null);
@@ -88,6 +89,11 @@ const ProjectDetail = () => {
       </DashboardLayout>
     );
   }
+
+  const profile        = useAuthStore(s => s.profile);
+  const { getDiscovery } = useDiscoveryStore();
+  const discovery      = getDiscovery(project.id);
+  const discoveryStatus = discovery?.status ?? 'not_started';
 
   const accent         = getProjectAccent(project.service, project.package);
   const projectMembers = members.filter(m => project.assignedMemberIds?.includes(m.id));
@@ -280,20 +286,87 @@ const ProjectDetail = () => {
           </CardContent>
         </div>
 
+        {/* Discovery Brief */}
+        {(() => {
+          const canFill = profile?.role === 'superadmin' || profile?.role === 'admin' || profile?.role === 'freelancer' || profile?.role === 'client';
+          const isLocked = discoveryStatus === 'submitted' && profile?.role !== 'superadmin';
+
+          const statusConfig = {
+            not_started: { label: 'Not started', icon: 'edit_note', cls: 'text-gray-400 bg-gray-100', dot: 'bg-gray-300' },
+            draft:       { label: 'Draft saved',  icon: 'draft',     cls: 'text-amber-700 bg-amber-100', dot: 'bg-amber-400' },
+            submitted:   { label: 'Submitted',    icon: 'check_circle', cls: 'text-green-700 bg-green-100', dot: 'bg-green-500' },
+          } as const;
+          const s = statusConfig[discoveryStatus];
+
+          return (
+            <div className="flex items-center justify-between gap-4 bg-white border border-gray-200 rounded-2xl px-5 py-4 shadow-sm">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                  discoveryStatus === 'submitted' ? 'bg-green-50 text-green-600' :
+                  discoveryStatus === 'draft'     ? 'bg-amber-50 text-amber-600' :
+                                                   'bg-gray-50 text-gray-400'
+                }`}>
+                  <MaterialIcon name={s.icon} size={20} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-sm font-bold text-gray-900">Discovery Brief</h3>
+                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full ${s.cls}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
+                      {s.label}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {discoveryStatus === 'not_started'
+                      ? `Service-specific requirements questionnaire for ${project.service.replace('-', ' ')}`
+                      : discoveryStatus === 'draft'
+                        ? 'Brief is saved as a draft — submit when ready'
+                        : `Brief submitted${discovery?.submittedAt ? ` on ${new Date(discovery.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}`
+                    }
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {isLocked ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/admin/projects/${id}/discovery`)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                  >
+                    <MaterialIcon name="visibility" size={14} />
+                    View brief
+                  </button>
+                ) : canFill ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/admin/projects/${id}/discovery`)}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-gray-900 hover:bg-gray-700 rounded-xl transition-colors"
+                  >
+                    <MaterialIcon name={discoveryStatus === 'not_started' ? 'edit_note' : 'edit'} size={14} />
+                    {discoveryStatus === 'not_started' ? 'Fill brief' : 'Edit brief'}
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          );
+        })()}
+
         <ProjectTimeline
           project={project}
-          isManaging={isPhasesEditing}
           getPhaseAssignment={getPhaseAssignment}
-          onToggleManage={() => setIsPhasesEditing(v => !v)}
           onAddPhase={openInsert}
           onEditPhase={openPhaseEdit}
+          onUpdatePhase={(phaseId, updates) => updatePhase(project.id, phaseId, updates)}
           onAssignTemplate={setAssignPhaseId}
+          onViewDocument={(assignmentId) => navigate(`/admin/projects/${id}/templates/${assignmentId}/view`)}
           onOpenDocument={(assignmentId) => navigate(`/admin/projects/${id}/templates/${assignmentId}`)}
           onCompletePhase={(phaseId) => completePhase(project.id, phaseId)}
           onSetActivePhase={(phaseId) => setActivePhase(project.id, phaseId)}
           onMovePhase={(phaseId, direction) => movePhase(project.id, phaseId, direction)}
           onDeletePhase={setDeletePhaseId}
           onCreateDefaultPhase={(phase, afterIndex) => insertPhase(project.id, afterIndex, phase)}
+          onOpenDiscovery={() => navigate(`/admin/projects/${id}/discovery`)}
+          discoveryStatus={discoveryStatus}
         />
 
         {/* Team & Financials */}

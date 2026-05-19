@@ -21,6 +21,7 @@ import {
   TemplatesPage,
 } from '@/src/features/templates';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
+import { DiscoveryPage } from '@/src/features/discovery';
 import { AuthGate, AuthLanding } from '@/src/features/auth';
 
 const adminRoute = (page: React.ReactNode) => (
@@ -59,6 +60,7 @@ export function AppRoutes() {
       <Route path="/admin/chat" element={adminRoute(<ChatPage />)} />
       <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />
       <Route path="/admin/projects/:id" element={adminRoute(<ProjectDetailPage />)} />
+      <Route path="/admin/projects/:id/discovery" element={adminRoute(<DiscoveryPage />)} />
       <Route path="/admin/projects/:projectId/templates/:assignmentId" element={adminRoute(<TemplateEditorPage />)} />
       <Route path="/admin/tasks" element={adminRoute(<TasksPage />)} />
       <Route path="/admin/calendar" element={adminRoute(<CalendarPage />)} />

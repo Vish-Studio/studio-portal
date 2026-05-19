@@ -79,6 +79,8 @@ export interface Phase {
   clientCompleted: boolean;
   targetDate?: string;
   description?: string;
+  /** Payment amount allocated to this phase (portion of agreedPayment) */
+  phaseAmount?: number;
 }
 
 // ─── Default phase definitions ────────────────────────────────────────────────
