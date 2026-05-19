@@ -1,7 +1,7 @@
 import { FunctionComponent, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Select from '@/src/components/common/select/select';
-import Option from '@/src/components/common/select/option';
+import Select from '@/src/shared/components/select/select';
+import Option from '@/src/shared/components/select/option';
 
 type CalendarVariant = 'dashboard' | 'full';
 

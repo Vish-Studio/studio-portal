@@ -4,7 +4,7 @@ import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, Printer, Check } fro
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import BlockEditorPanel from '../components/editor/block-editor-panel';
 import AddBlockMenu from '../components/editor/add-block-menu';
-import ConfirmDialog from '@/src/components/common/confirm-dialog/confirm-dialog';
+import ConfirmDialog from '@/src/shared/components/confirm-dialog/confirm-dialog';
 import { useTemplateAssignmentsStore } from '../stores/templateAssignmentsStore';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';

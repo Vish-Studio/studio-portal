@@ -12,9 +12,9 @@ import {
 } from './event-types';
 import { Avatar, DatePicker, MaterialIcon, Toggle } from '@/src/shared/components';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
-import Select from '@/src/components/common/select/select';
-import Option from '@/src/components/common/select/option';
-import Button from '@/src/components/common/button/button';
+import Select from '@/src/shared/components/select/select';
+import Option from '@/src/shared/components/select/option';
+import Button from '@/src/shared/components/button/button';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';

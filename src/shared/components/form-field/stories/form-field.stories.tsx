@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import FormField, { inputCls, selectCls } from '../form-field';
-import Select from '@/src/components/common/select/select';
-import Option from '@/src/components/common/select/option';
+import Select from '@/src/shared/components/select/select';
+import Option from '@/src/shared/components/select/option';
 
 const meta = {
   title: 'Common/FormField',

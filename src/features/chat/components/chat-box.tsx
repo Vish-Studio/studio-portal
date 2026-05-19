@@ -1,6 +1,6 @@
 import { Avatar } from '@/src/shared/components';
-import ButtonIcon from '@/src/components/common/button-icon/button-icon';
-import Tabs from '@/src/components/common/tabs/tabs';
+import ButtonIcon from '@/src/shared/components/button-icon/button-icon';
+import Tabs from '@/src/shared/components/tabs/tabs';
 import type { ChatConversation, ChatConversationType, ChatSenderRole } from '../stores/chatStore';
 import { cn } from '@/src/lib/utils';
 import {

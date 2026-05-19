@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import { ArrowLeft, MessageCircle, Plus, Send, UserRound } from 'lucide-react';
 import { Avatar, MaterialIcon } from '@/src/shared/components';
-import Button from '@/src/components/common/button/button';
+import Button from '@/src/shared/components/button/button';
 import type { ChatMessage, ChatSenderRole } from '../stores/chatStore';
 import { cn } from '@/src/lib/utils';
 import { formatChatTime, type ChatParticipant } from './chat-types';

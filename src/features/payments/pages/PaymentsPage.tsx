@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Trash2 } from 'lucide-react';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import { RowActionsMenu } from '@/src/components/common/table/table';
+import { RowActionsMenu } from '@/src/shared/components/table/table';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { MaterialIcon, StatusBadge } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';

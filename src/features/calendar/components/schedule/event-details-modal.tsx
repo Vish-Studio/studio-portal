@@ -2,7 +2,7 @@ import { Phone } from 'lucide-react';
 import { type ScheduleEvent, EVENT_TYPE_CONFIG } from './event-types';
 import { MaterialIcon } from '@/src/shared/components';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
-import Button from '@/src/components/common/button/button';
+import Button from '@/src/shared/components/button/button';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';

@@ -1,8 +1,8 @@
 import { MONTH_NAMES } from '../../data';
-import ButtonIcon from '@/src/components/common/button-icon/button-icon';
-import Button from '@/src/components/common/button/button';
-import Select from '@/src/components/common/select/select';
-import Option from '@/src/components/common/select/option';
+import ButtonIcon from '@/src/shared/components/button-icon/button-icon';
+import Button from '@/src/shared/components/button/button';
+import Select from '@/src/shared/components/select/select';
+import Option from '@/src/shared/components/select/option';
 
 interface MonthYearNavProps {
   value: Date;

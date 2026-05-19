@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { CalendarDays, Plus } from 'lucide-react';
 import { useCalendarStore } from '../../stores/calendarStore';
-import Button from '@/src/components/common/button/button';
+import Button from '@/src/shared/components/button/button';
 import { MaterialIcon } from '@/src/shared/components';
 import ScheduleSidebarForm from '../schedule/schedule-sidebar-form';
 import EventDetailsModal from '../schedule/event-details-modal';

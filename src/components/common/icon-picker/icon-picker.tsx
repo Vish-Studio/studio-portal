@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
-import MaterialIcon from '../material-icon/material-icon';
+import MaterialIcon from '@/src/shared/components/material-icon/material-icon';
 
 // ─── Curated icon catalogue ───────────────────────────────────────────────────
 
