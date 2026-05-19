@@ -18,3 +18,7 @@ View your app in AI Studio: https://ai.studio/apps/d3941ce8-f3bc-4f64-bf91-d23d9
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+## Project Structure
+
+See [docs/architecture.md](docs/architecture.md) for the feature-based React, Firebase, RBAC, and Zustand conventions used in this project.
