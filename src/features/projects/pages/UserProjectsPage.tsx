@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Briefcase, CheckCircle, Layers, Pencil, Trash2 } from 'lucide-react';
-import UserLayout from '@/src/components/user/user-layout/user-layout';
+import UserLayout from '@/src/layouts/UserLayout';
 import Fab from '@/src/components/common/button-fab/button-fab';
 import Button from '@/src/components/common/button/button';
 import StatCard from '@/src/components/common/stat-card/stat-card';

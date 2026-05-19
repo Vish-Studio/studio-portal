@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { CalendarCheck, CalendarDays } from 'lucide-react';
-import UserLayout from '@/src/components/user/user-layout/user-layout';
+import UserLayout from '@/src/layouts/UserLayout';
 import CalendarWidget from '../components/calendar/calendar';
 import ScheduleList from '../components/calendar/schedule-list';
 import StatCard from '@/src/components/common/stat-card/stat-card';

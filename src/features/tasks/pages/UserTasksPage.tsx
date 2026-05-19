@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { CheckSquare } from 'lucide-react';
-import UserLayout from '@/src/components/user/user-layout/user-layout';
+import UserLayout from '@/src/layouts/UserLayout';
 import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
 import Fab from '@/src/components/common/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';

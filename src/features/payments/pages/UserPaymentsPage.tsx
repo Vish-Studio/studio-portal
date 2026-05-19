@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { CreditCard, Clock, CheckCircle } from 'lucide-react';
-import UserLayout from '@/src/components/user/user-layout/user-layout';
+import UserLayout from '@/src/layouts/UserLayout';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import { MaterialIcon, StatusBadge } from '@/src/shared/components';

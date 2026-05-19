@@ -1,4 +1,4 @@
-import UserLayout from '@/src/components/user/user-layout/user-layout';
+import UserLayout from '@/src/layouts/UserLayout';
 import ChatWorkspace from '../components/chat-workspace';
 import { useAuthStore } from '@/src/features/auth';
 

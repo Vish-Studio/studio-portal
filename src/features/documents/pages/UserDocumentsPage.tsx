@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import { FileText, ShieldCheck, Clock } from 'lucide-react';
-import UserLayout from '@/src/components/user/user-layout/user-layout';
+import UserLayout from '@/src/layouts/UserLayout';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import CardContent from '@/src/components/common/card-content/card-content';
 import { MaterialIcon, StatusBadge } from '@/src/shared/components';
