@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
+import { ForgotPasswordPage, ResetPasswordPage, SignInPage } from '@/src/features/auth';
 import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
 import { CalendarPage, UserCalendarPage } from '@/src/features/calendar';
 import { ChatPage, UserChatPage } from '@/src/features/chat';
@@ -18,9 +19,6 @@ import ProjectProposalTemplate from '@/src/pages/templates/project-proposal';
 import QuotationTemplate from '@/src/pages/templates/quotation';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
 import TemplateEditor from '@/src/pages/admin/TemplateEditor';
-import SignIn from '@/src/pages/SignIn';
-import ForgotPassword from '@/src/pages/ForgotPassword';
-import ResetPassword from '@/src/pages/ResetPassword';
 import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
 
 const adminRoute = (page: React.ReactNode) => (
@@ -71,9 +69,9 @@ export function AppRoutes() {
       <Route path="/admin/templates/quotation" element={adminRoute(<QuotationTemplate />)} />
       <Route path="/admin/settings" element={adminRoute(<SettingsPage />)} />
 
-      <Route path="/sign-in" element={<SignIn />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

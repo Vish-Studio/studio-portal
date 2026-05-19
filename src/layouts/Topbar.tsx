@@ -4,7 +4,7 @@ import { ButtonIcon, DropdownMenu, MaterialIcon, SearchBar } from '@/src/shared/
 import { useUIStore } from '@/src/store/ui';
 import type { DropdownMenuSectionType } from '@/src/shared/components';
 import { usePwaInstall } from '@/src/hooks/usePwaInstall';
-import { useAuthStore } from '@/src/store/auth';
+import { useAuthStore } from '@/src/features/auth';
 
 interface TopbarProps {
   setIsMobileMenuOpen: (isOpen: boolean) => void;

@@ -7,7 +7,7 @@ import {
   MaterialIcon,
   Toggle,
 } from '@/src/shared/components';
-import { useAuthStore } from '@/src/store/auth';
+import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/store/ui';
 import type { AuthProfileUpdateInput, NewsletterPreferences } from '@/src/types/auth';
 

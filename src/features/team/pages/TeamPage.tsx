@@ -7,7 +7,7 @@ import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-
 import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
 import Fab from '@/src/components/common/button-fab/button-fab';
 import { Button, FormField, inputCls, Modal, Option, RowActionsMenu, Select } from '@/src/shared/components';
-import { useAuthStore } from '@/src/store/auth';
+import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/store/ui';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';

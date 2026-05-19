@@ -1,6 +1,6 @@
 import UserLayout from '@/src/components/user/user-layout/user-layout';
 import ChatWorkspace from '../components/chat-workspace';
-import { useAuthStore } from '@/src/store/auth';
+import { useAuthStore } from '@/src/features/auth';
 
 export default function UserChatPage() {
   const profile = useAuthStore(state => state.profile);

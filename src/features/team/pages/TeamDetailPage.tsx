@@ -13,7 +13,7 @@ import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, Ta
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
-import { useAuthStore } from '@/src/store/auth';
+import { useAuthStore } from '@/src/features/auth';
 import type { TeamAccessRole } from '../types';
 
 interface TeamMemberFormValues {
