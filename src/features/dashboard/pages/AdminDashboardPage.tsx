@@ -5,7 +5,7 @@ import { DocumentOverview, useDocumentsStore } from '@/src/features/documents';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
 import { TasksOverview, useTasksStore } from '@/src/features/tasks';
-import StatCard from '@/src/components/common/stat-card/stat-card';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { ProjectsOverview } from '@/src/features/projects';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { CalendarWidget, ScheduleList } from '@/src/features/calendar';

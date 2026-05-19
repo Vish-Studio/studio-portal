@@ -11,7 +11,7 @@ import {
   getEventCategory,
 } from './event-types';
 import { Avatar, DatePicker, MaterialIcon, Toggle } from '@/src/shared/components';
-import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Select from '@/src/components/common/select/select';
 import Option from '@/src/components/common/select/option';
 import Button from '@/src/components/common/button/button';

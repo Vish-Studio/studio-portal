@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CalendarWidget from '../components/calendar/calendar';
-import StatCard from '@/src/components/common/stat-card/stat-card';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { CalendarCheck, CalendarDays } from 'lucide-react';
 import ScheduleList from '../components/calendar/schedule-list';
 import { useCalendarStore } from '../stores/calendarStore';

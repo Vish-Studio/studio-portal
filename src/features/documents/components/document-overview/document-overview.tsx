@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Presentation, FileCheck2, FileHeart, PenTool, User, Users } from 'lucide-react';
 import { format } from 'date-fns';
-import ContentCard from '@/src/components/common/card-content/card-content';
+import ContentCard from '@/src/shared/components/card-content/card-content';
 import ButtonIcon from '@/src/components/common/button-icon/button-icon';
 import type { StudioDocument } from '../../types';
 

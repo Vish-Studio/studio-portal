@@ -9,8 +9,10 @@ export {
   type AvatarStackProps,
 } from './avatar/avatar';
 export { default as Button } from './button/button';
+export { default as ButtonFab } from './button-fab/button-fab';
 export { default as ButtonIcon } from './button-icon/button-icon';
 export { default as Breadcrumb } from './breadcrumb/breadcrumb';
+export { default as CardContent } from './card-content/card-content';
 export { default as Checkbox } from './checkbox/checkbox';
 export { default as ConfirmDialog } from './confirm-dialog/confirm-dialog';
 export { default as DatePicker } from './date-picker/date-picker';
@@ -22,6 +24,12 @@ export {
   selectCls,
   type FormFieldProps,
 } from './form-field/form-field';
+export {
+  default as FormSidebar,
+  FormSidebarFooter,
+  type FormSidebarProps,
+  type SidebarWidth,
+} from './form-sidebar/form-sidebar';
 export { default as MaterialIcon } from './material-icon/material-icon';
 export { default as MemberPicker } from './member-picker/member-picker';
 export { default as Modal } from './modal/modal';
@@ -42,14 +50,18 @@ export {
   type StatusVariant,
   type TaskStatus,
 } from './status-badge/status-badge';
+export { default as StatCard } from './stat-card/stat-card';
 export { default as Table } from './table/table';
+export { default as TableTab } from './table-tab/table-tab';
 export { default as Tabs } from './tabs/tabs';
 export { default as Toggle } from './toggle/toggle';
 export { default as Tooltip } from './tooltip/tooltip';
 export * from './confirm-dialog/confirm-dialog';
 export * from './dropdown-menu/dropdown-menu';
+export * from './form-sidebar/form-sidebar';
 export * from './modal/modal';
 export * from './select/option';
 export * from './select/select';
 export * from './table/table';
+export * from './table-tab/table-tab';
 export * from './tabs/tabs';

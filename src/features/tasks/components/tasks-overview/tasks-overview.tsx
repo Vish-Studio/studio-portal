@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
-import CardContent from '@/src/components/common/card-content/card-content';
+import CardContent from '@/src/shared/components/card-content/card-content';
 import { ButtonIcon, MaterialIcon, TaskStatusBadge } from '@/src/shared/components';
 import { getProjectAccent } from '@/src/features/projects';
 import { useProjectsStore } from '@/src/features/projects';

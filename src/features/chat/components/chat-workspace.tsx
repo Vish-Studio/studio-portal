@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import Fab from '@/src/components/common/button-fab/button-fab';
+import Fab from '@/src/shared/components/button-fab/button-fab';
 import {
   useChatStore,
   type ChatConversationType,

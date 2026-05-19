@@ -4,15 +4,15 @@ import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { Briefcase, Pencil } from 'lucide-react';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import CardContent from '@/src/components/common/card-content/card-content';
-import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
+import CardContent from '@/src/shared/components/card-content/card-content';
+import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { ProjectCard } from '@/src/features/projects';
 import ClientDetailCard from '../components/client-detail-card/client-detail-card';
 import { useClientsStore } from '../stores/clientStore';
 import type { ClientStatus } from '../types';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
-import Fab from '@/src/components/common/button-fab/button-fab';
+import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select } from '@/src/shared/components';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

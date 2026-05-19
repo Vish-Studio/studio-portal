@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Briefcase, CheckSquare, CreditCard } from 'lucide-react';
 import UserLayout from '@/src/layouts/UserLayout';
-import StatCard from '@/src/components/common/stat-card/stat-card';
-import CardContent from '@/src/components/common/card-content/card-content';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
+import CardContent from '@/src/shared/components/card-content/card-content';
 import { MaterialIcon, ProjectStatusBadge, TaskStatusBadge } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';

@@ -3,7 +3,7 @@ import { CalendarCheck, CalendarDays } from 'lucide-react';
 import UserLayout from '@/src/layouts/UserLayout';
 import CalendarWidget from '../components/calendar/calendar';
 import ScheduleList from '../components/calendar/schedule-list';
-import StatCard from '@/src/components/common/stat-card/stat-card';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useCalendarStore } from '../stores/calendarStore';
 
 const dateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;

@@ -1,5 +1,5 @@
 import { format, formatDistanceToNow, isPast, parseISO } from 'date-fns';
-import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { Avatar, Button, MaterialIcon, TASK_STATUS_LABEL, TaskStatusBadge } from '@/src/shared/components';
 import { getProjectAccent } from '@/src/features/projects';
 import { PRIORITY_DOT } from '../task-card/task-card';

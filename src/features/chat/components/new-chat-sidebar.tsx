@@ -1,5 +1,5 @@
 import { Avatar, MaterialIcon } from '@/src/shared/components';
-import FormSidebar from '@/src/components/common/form-sidebar/form-sidebar';
+import FormSidebar from '@/src/shared/components/form-sidebar/form-sidebar';
 import SearchBar from '@/src/components/common/search-bar/search-bar';
 import Tabs from '@/src/components/common/tabs/tabs';
 import type { ChatConversation, ChatConversationType } from '../stores/chatStore';

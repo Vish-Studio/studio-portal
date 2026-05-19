@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import CardContent from '@/src/components/common/card-content/card-content';
+import CardContent from '@/src/shared/components/card-content/card-content';
 import { AvatarStack, ButtonIcon, MaterialIcon, ProjectStatusBadge, type AvatarStackMember } from '@/src/shared/components';
 import { getProjectAccent, getPhaseProgress, type ClientProject } from '../../types';
 import type { TeamMember } from '@/src/features/team';

@@ -1,5 +1,5 @@
 import { Check, Pencil, Plus, Trash2, UserRound } from 'lucide-react';
-import CardContent from '@/src/components/common/card-content/card-content';
+import CardContent from '@/src/shared/components/card-content/card-content';
 import { Button, MaterialIcon } from '@/src/shared/components';
 import { DEFAULT_PHASE_DEFS, getPhaseProgress, type ClientProject, type Phase, type PhaseStatus } from '../../types';
 import { TEMPLATES, type TemplateAssignment } from '@/src/features/templates';
