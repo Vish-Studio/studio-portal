@@ -12,7 +12,7 @@ import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
 import { getMemberColors, type TeamAccessRole, type TeamMember, type TeamProject } from '../types';
-import StatusIcon from '@/src/components/common/status-icon/status-icon';
+import StatusIcon from '@/src/shared/components/status-icon/status-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

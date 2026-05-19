@@ -5,7 +5,7 @@ import { Briefcase, Check, Pencil, Trash2 } from 'lucide-react';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
-import IconPicker from '@/src/components/common/icon-picker/icon-picker';
+import IconPicker from '@/src/features/projects/components/icon-picker/icon-picker';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import ProjectHeroCard from '../components/project-hero-card/project-hero-card';
 import ProjectTimeline from '../components/project-timeline/project-timeline';

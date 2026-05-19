@@ -51,6 +51,7 @@ export {
   type TaskStatus,
 } from './status-badge/status-badge';
 export { default as StatCard } from './stat-card/stat-card';
+export { default as StatusIcon } from './status-icon/status-icon';
 export { default as Table } from './table/table';
 export { default as TableTab } from './table-tab/table-tab';
 export { default as Tabs } from './tabs/tabs';
