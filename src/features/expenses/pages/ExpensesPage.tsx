@@ -1,11 +1,558 @@
+import { useMemo, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { ArrowDownLeft, ArrowUpRight, CalendarDays, Pencil, Plus, Trash2, WalletCards, X } from 'lucide-react';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
+import Fab from '@/src/shared/components/button-fab/button-fab';
+import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
+import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
+import { Avatar, Button, ConfirmDialog, FormField, inputCls, MaterialIcon, Modal, Option, RowActionsMenu, Select, StatusBadge } from '@/src/shared/components';
+import { useUIStore } from '@/src/app/stores/uiStore';
+import { useTeamStore } from '@/src/features/team';
+import { useExpenseStore, type ExpenseInput } from '../stores/expenseStore';
+import {
+  FINANCIAL_CATEGORY_LABELS,
+  FINANCIAL_STATUS_LABELS,
+  type Expense,
+  type FinancialRecordCategory,
+  type FinancialRecordStatus,
+  type FinancialRecordType,
+} from '../types';
+
+type FilterKey = 'all' | 'income' | 'expense' | 'pending';
+type SortKey = 'date' | 'amount' | 'category';
+
+interface ExpenseFormValues {
+  type: FinancialRecordType;
+  category: FinancialRecordCategory;
+  status: FinancialRecordStatus;
+  amount: number;
+  title: string;
+  description: string;
+  vendor: string;
+  memberId: string;
+  date: string;
+}
+
+const CATEGORY_OPTIONS = Object.entries(FINANCIAL_CATEGORY_LABELS) as [FinancialRecordCategory, string][];
+const STATUS_OPTIONS = Object.entries(FINANCIAL_STATUS_LABELS) as [FinancialRecordStatus, string][];
+
+const STATUS_VARIANT: Record<FinancialRecordStatus, 'green' | 'amber' | 'blue'> = {
+  paid: 'green',
+  pending: 'amber',
+  scheduled: 'blue',
+};
+
+const CATEGORY_ICON: Record<FinancialRecordCategory, string> = {
+  'team-salary': 'groups',
+  overtime: 'more_time',
+  'company-expense': 'business_center',
+  software: 'deployed_code',
+  office: 'apartment',
+  marketing: 'campaign',
+  travel: 'flight_takeoff',
+  'project-income': 'payments',
+  retainer: 'event_repeat',
+  other: 'receipt_long',
+};
+
+const today = () => new Date().toISOString().slice(0, 10);
+
+const fmt = (amount: number) =>
+  '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+const dateLabel = (value: string) => {
+  const date = new Date(`${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
+const toExpenseInput = (data: ExpenseFormValues): ExpenseInput => ({
+  type: data.type,
+  category: data.category,
+  status: data.status,
+  amount: Number(data.amount),
+  title: data.title.trim(),
+  description: data.description.trim(),
+  vendor: data.vendor.trim() || undefined,
+  memberId: data.memberId || undefined,
+  date: data.date,
+});
+
+const defaultFormValues: ExpenseFormValues = {
+  type: 'expense',
+  category: 'company-expense',
+  status: 'paid',
+  amount: 0,
+  title: '',
+  description: '',
+  vendor: '',
+  memberId: '',
+  date: today(),
+};
+
+function RecordDetailsModal({
+  record,
+  memberName,
+  onClose,
+  onEdit,
+  onDelete,
+}: {
+  record: Expense;
+  memberName?: string;
+  onClose: () => void;
+  onEdit: (record: Expense) => void;
+  onDelete: (record: Expense) => void;
+}) {
+  const isIncome = record.type === 'income';
+
+  return (
+    <Modal
+      onClose={onClose}
+      title={record.title}
+      description={FINANCIAL_CATEGORY_LABELS[record.category]}
+      size="md"
+      headerIcon={
+        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+          <MaterialIcon name={CATEGORY_ICON[record.category]} size={20} />
+        </div>
+      }
+      footer={
+        <div className="flex justify-end gap-2">
+          <Button type="button" variant="secondary" iconLeft={<Pencil size={14} />} onClick={() => onEdit(record)}>
+            Edit
+          </Button>
+          <Button type="button" variant="danger" iconLeft={<Trash2 size={14} />} onClick={() => onDelete(record)}>
+            Delete
+          </Button>
+        </div>
+      }
+    >
+      <div className="space-y-4 px-6 pb-6">
+        <div className="rounded-[18px] bg-(--color-surface) p-4">
+          <p className="type-label text-gray-400">Amount</p>
+          <p className={`mt-1 text-3xl font-bold ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+            {isIncome ? '+' : '-'}{fmt(record.amount)}
+          </p>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-gray-100 p-3">
+            <p className="type-label text-gray-400">Status</p>
+            <div className="mt-2">
+              <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={STATUS_VARIANT[record.status]} />
+            </div>
+          </div>
+          <div className="rounded-2xl border border-gray-100 p-3">
+            <p className="type-label text-gray-400">Date</p>
+            <p className="mt-2 text-sm font-semibold text-gray-800">{dateLabel(record.date)}</p>
+          </div>
+        </div>
+        <div>
+          <p className="type-label text-gray-400">Paid to / from</p>
+          <p className="mt-1 text-sm font-semibold text-gray-800">{record.vendor ?? 'Not specified'}</p>
+        </div>
+        {record.memberId && (
+          <div>
+            <p className="type-label text-gray-400">Assigned team member</p>
+            <p className="mt-1 text-sm font-semibold text-gray-800">{memberName ?? 'Team member'}</p>
+          </div>
+        )}
+        <div>
+          <p className="type-label text-gray-400">Notes</p>
+          <p className="mt-1 text-sm leading-6 text-gray-600">{record.description || 'No description added.'}</p>
+        </div>
+      </div>
+    </Modal>
+  );
+}
 
 export default function ExpensesPage() {
+  const { searchQuery } = useUIStore();
+  const { members } = useTeamStore();
+  const { expenses, addExpense, updateExpense, removeExpense } = useExpenseStore();
+  const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [sortKey, setSortKey] = useState<SortKey>('date');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [editingRecord, setEditingRecord] = useState<Expense | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<Expense | null>(null);
+  const [deleteRecord, setDeleteRecord] = useState<Expense | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<ExpenseFormValues>({ defaultValues: defaultFormValues });
+
+  const selectedType = watch('type');
+  const selectedMemberId = watch('memberId');
+  const selectedMember = members.find(member => member.id === selectedMemberId);
+
+  const totals = useMemo(() => {
+    const income = expenses.filter(item => item.type === 'income').reduce((sum, item) => sum + item.amount, 0);
+    const outgoing = expenses.filter(item => item.type === 'expense').reduce((sum, item) => sum + item.amount, 0);
+    const pending = expenses.filter(item => item.status !== 'paid').reduce((sum, item) => sum + item.amount, 0);
+    return { income, outgoing, pending, net: income - outgoing };
+  }, [expenses]);
+
+  const tabCounts = useMemo(() => ({
+    all: expenses.length,
+    income: expenses.filter(item => item.type === 'income').length,
+    expense: expenses.filter(item => item.type === 'expense').length,
+    pending: expenses.filter(item => item.status !== 'paid').length,
+  }), [expenses]);
+
+  const tabs: TabItem[] = [
+    { key: 'all', label: 'All', count: tabCounts.all },
+    { key: 'income', label: 'Income', count: tabCounts.income },
+    { key: 'expense', label: 'Expenses', count: tabCounts.expense },
+    { key: 'pending', label: 'Pending', count: tabCounts.pending },
+  ];
+
+  const filtered = useMemo(() => {
+    let list = expenses;
+    if (activeTab === 'income') list = list.filter(item => item.type === 'income');
+    if (activeTab === 'expense') list = list.filter(item => item.type === 'expense');
+    if (activeTab === 'pending') list = list.filter(item => item.status !== 'paid');
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(item =>
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        FINANCIAL_CATEGORY_LABELS[item.category].toLowerCase().includes(q) ||
+        item.vendor?.toLowerCase().includes(q) ||
+        members.find(member => member.id === item.memberId)?.name.toLowerCase().includes(q),
+      );
+    }
+
+    return [...list].sort((a, b) => {
+      const result = sortKey === 'amount'
+        ? a.amount - b.amount
+        : sortKey === 'category'
+          ? FINANCIAL_CATEGORY_LABELS[a.category].localeCompare(FINANCIAL_CATEGORY_LABELS[b.category])
+          : Date.parse(a.date) - Date.parse(b.date);
+
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [activeTab, expenses, members, searchQuery, sortDirection, sortKey]);
+
+  const openAdd = () => {
+    setEditingRecord(null);
+    reset(defaultFormValues);
+    setSidebarOpen(true);
+  };
+
+  const openEdit = (record: Expense) => {
+    setEditingRecord(record);
+    setSelectedRecord(null);
+    reset({
+      type: record.type,
+      category: record.category,
+      status: record.status,
+      amount: record.amount,
+      title: record.title,
+      description: record.description,
+      vendor: record.vendor ?? '',
+      memberId: record.memberId ?? '',
+      date: record.date,
+    });
+    setSidebarOpen(true);
+  };
+
+  const onSubmit = (data: ExpenseFormValues) => {
+    const input = toExpenseInput(data);
+    if (editingRecord) updateExpense(editingRecord.id, input);
+    else addExpense(input);
+    setSidebarOpen(false);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteRecord) return;
+    removeExpense(deleteRecord.id);
+    if (selectedRecord?.id === deleteRecord.id) setSelectedRecord(null);
+    setDeleteRecord(null);
+  };
+
   return (
     <DashboardLayout title="Expenses">
-      <div className="flex-1 rounded-[32px] bg-[#F5F6F8] p-8 min-h-[500px] flex items-center justify-center border border-gray-100">
-        <h2 className="text-xl text-gray-500 font-medium">Expenses Page Content</h2>
+      <div className="flex w-full flex-col gap-6 py-6 md:min-h-full md:gap-8 md:py-10">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <StatCard
+            variant="lime"
+            icon={<ArrowDownLeft size={16} />}
+            label="Project Income"
+            value={fmt(totals.income)}
+            badge={`${tabCounts.income} record${tabCounts.income === 1 ? '' : 's'}`}
+            badgeLabel="incoming"
+          />
+          <StatCard
+            variant="surface"
+            icon={<ArrowUpRight size={16} />}
+            label="Company Expenses"
+            value={fmt(totals.outgoing)}
+            badge={`${tabCounts.expense} record${tabCounts.expense === 1 ? '' : 's'}`}
+            badgeLabel="outgoing"
+          />
+          <StatCard
+            variant="dark"
+            icon={<WalletCards size={16} />}
+            label="Net Balance"
+            value={fmt(totals.net)}
+            badge={totals.net >= 0 ? 'Positive' : 'Negative'}
+            badgeLabel="current ledger"
+          />
+          <StatCard
+            variant="white"
+            icon={<CalendarDays size={16} />}
+            label="Pending / Scheduled"
+            value={fmt(totals.pending)}
+            badge={tabCounts.pending}
+            badgeLabel="open records"
+          />
+        </div>
+
+        <div className="flex flex-col gap-3 md:flex-1 md:min-h-0">
+          <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+            <TableTab
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={key => setActiveTab(key as FilterKey)}
+              sortValue={sortKey}
+              sortOptions={[
+                { key: 'date', label: 'Date' },
+                { key: 'amount', label: 'Amount' },
+                { key: 'category', label: 'Category' },
+              ]}
+              onSortChange={key => setSortKey(key as SortKey)}
+              sortDirection={sortDirection}
+              onSortDirectionChange={setSortDirection}
+              actionLabel="Add Record"
+              onAction={openAdd}
+            />
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+              <p className="type-card-title text-gray-500">
+                {searchQuery ? `No records match "${searchQuery}".` : 'No financial records yet.'}
+              </p>
+              <Button type="button" className="mt-4" iconLeft={<Plus size={14} />} onClick={openAdd}>
+                Add first record
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="type-eyebrow hidden grid-cols-[minmax(240px,1fr)_150px_150px_120px_110px_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
+                <span>Record</span>
+                <span>Category</span>
+                <span>Team member</span>
+                <span>Status</span>
+                <span className="text-right">Amount</span>
+                <span />
+              </div>
+
+              {filtered.map(record => {
+                const isIncome = record.type === 'income';
+                const member = members.find(item => item.id === record.memberId);
+                return (
+                  <div
+                    key={record.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSelectedRecord(record)}
+                    onKeyDown={event => { if (event.key === 'Enter') setSelectedRecord(record); }}
+                    className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(240px,1fr)_150px_150px_120px_110px_32px] lg:items-center"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                        <MaterialIcon name={CATEGORY_ICON[record.category]} size={18} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2">
+                          <p className="type-card-title truncate text-(--color-ink)">{record.title}</p>
+                          <span className={`type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                            {isIncome ? 'Income' : 'Expense'}
+                          </span>
+                        </div>
+                        <p className="type-muted mt-1 truncate text-gray-400">{record.vendor || record.description}</p>
+                      </div>
+                    </div>
+
+                    <p className="type-label text-gray-500">{FINANCIAL_CATEGORY_LABELS[record.category]}</p>
+                    <div className="min-w-0">
+                      {member ? (
+                        <div className="flex items-center gap-2">
+                          <Avatar name={member.name} id={member.id} size="xs" />
+                          <div className="min-w-0">
+                            <p className="type-label truncate text-gray-700">{member.name}</p>
+                            <p className="type-meta truncate text-gray-400">{dateLabel(record.date)}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="type-label text-gray-400">{dateLabel(record.date)}</p>
+                      )}
+                    </div>
+                    <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={STATUS_VARIANT[record.status]} />
+                    <p className={`type-card-title tabular-nums lg:text-right ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+                      {isIncome ? '+' : '-'}{fmt(record.amount)}
+                    </p>
+
+                    <div className="flex justify-end" onClick={event => event.stopPropagation()}>
+                      <RowActionsMenu
+                        actions={[
+                          { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => setSelectedRecord(record) },
+                          { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => openEdit(record) },
+                          { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => setDeleteRecord(record), variant: 'danger' },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
+
+      <Fab icon={Plus} ariaLabel="Add financial record" onClick={openAdd} />
+
+      <FormSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        title={editingRecord ? 'Edit Record' : 'New Record'}
+        description={editingRecord ? editingRecord.title : 'Track company expenses and project income.'}
+        width="md"
+      >
+        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label="Type" required>
+                <Select {...register('type', { required: true })}>
+                  <Option value="expense">Expense</Option>
+                  <Option value="income">Income</Option>
+                </Select>
+              </FormField>
+              <FormField label="Status" required>
+                <Select {...register('status', { required: true })}>
+                  {STATUS_OPTIONS.map(([value, label]) => (
+                    <Option key={value} value={value}>{label}</Option>
+                  ))}
+                </Select>
+              </FormField>
+            </div>
+
+            <FormField label="Title" required error={errors.title?.message}>
+              <input
+                {...register('title', { required: 'Title is required' })}
+                placeholder={selectedType === 'income' ? 'Project payment' : 'Team salary'}
+                className={inputCls(!!errors.title)}
+              />
+            </FormField>
+
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label="Amount" required error={errors.amount?.message}>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  {...register('amount', { required: 'Amount is required', valueAsNumber: true, min: { value: 0.01, message: 'Amount must be greater than 0' } })}
+                  className={inputCls(!!errors.amount)}
+                />
+              </FormField>
+              <FormField label="Date" required error={errors.date?.message}>
+                <input type="date" {...register('date', { required: 'Date is required' })} className={inputCls(!!errors.date)} />
+              </FormField>
+            </div>
+
+            <FormField label="Category" required>
+              <Select {...register('category', { required: true })}>
+                {CATEGORY_OPTIONS.map(([value, label]) => (
+                  <Option key={value} value={value}>{label}</Option>
+                ))}
+              </Select>
+            </FormField>
+
+            <FormField label={selectedType === 'income' ? 'Client / source' : 'Vendor / payee'}>
+              <input {...register('vendor')} placeholder={selectedType === 'income' ? 'Acme Corp' : 'Internal payroll'} className={inputCls(false)} />
+            </FormField>
+
+            <FormField label="Team member">
+              <div className="space-y-2">
+                {selectedMember && (
+                  <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Avatar name={selectedMember.name} id={selectedMember.id} size="sm" />
+                      <div className="min-w-0">
+                        <p className="type-card-title truncate text-gray-900">{selectedMember.name}</p>
+                        <p className="type-muted truncate text-gray-400">{selectedMember.role}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setValue('memberId', '')}
+                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-white hover:text-gray-700"
+                      aria-label={`Remove ${selectedMember.name}`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                )}
+                <Select {...register('memberId')} wrapperClassName="w-full">
+                  <Option value="">No member assigned</Option>
+                  {members.map(member => (
+                    <Option key={member.id} value={member.id}>{member.name} — {member.role}</Option>
+                  ))}
+                </Select>
+                <p className="type-meta text-gray-400">
+                  Use this for salary, overtime, reimbursements, or member-specific payouts.
+                </p>
+              </div>
+            </FormField>
+
+            <FormField label="Description">
+              <textarea
+                {...register('description')}
+                rows={4}
+                placeholder="Add notes for finance reconciliation"
+                className={`${inputCls(false)} resize-none`}
+              />
+            </FormField>
+          </div>
+
+          <FormSidebarFooter>
+            <Button type="button" variant="secondary" onClick={() => setSidebarOpen(false)} className="flex-1">
+              Cancel
+            </Button>
+            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
+              {editingRecord ? 'Save Changes' : 'Create Record'}
+            </Button>
+          </FormSidebarFooter>
+        </form>
+      </FormSidebar>
+
+      {selectedRecord && (
+        <RecordDetailsModal
+          record={selectedRecord}
+          memberName={members.find(member => member.id === selectedRecord.memberId)?.name}
+          onClose={() => setSelectedRecord(null)}
+          onEdit={openEdit}
+          onDelete={record => setDeleteRecord(record)}
+        />
+      )}
+
+      <ConfirmDialog
+        isOpen={!!deleteRecord}
+        title="Delete record"
+        message={deleteRecord ? `"${deleteRecord.title}" will be permanently removed from the ledger.` : ''}
+        confirmLabel="Delete"
+        variant="danger"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteRecord(null)}
+      />
     </DashboardLayout>
   );
 }

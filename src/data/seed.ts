@@ -22,9 +22,8 @@ const createdAt = (daysAgo: number, hoursAgo = 0) => ({
   toDate: () => new Date(msAgo(daysAgo) - hoursAgo * 3_600_000),
 });
 
-const expenseAt = (daysAgo: number) => ({
-  toMillis: () => msAgo(daysAgo),
-});
+const expenseAt = (daysAgo: number) => msAgo(daysAgo);
+const dateAgo = (daysAgo: number) => new Date(msAgo(daysAgo)).toISOString().slice(0, 10);
 
 // ─── Clients ──────────────────────────────────────────────────────────────────
 
@@ -792,26 +791,84 @@ export const DEMO_STATS: AdminStats = {
 export const DEMO_EXPENSES: Expense[] = [
   {
     id: "e1",
+    type: "expense",
+    category: "software",
+    status: "paid",
     amount: 3250,
+    title: "Design asset license",
     description: "Crypter - NFT UI Kit",
+    vendor: "UI8",
+    date: dateAgo(1),
     createdAt: expenseAt(1),
+    updatedAt: expenseAt(1),
   },
   {
     id: "e2",
+    type: "expense",
+    category: "company-expense",
+    status: "paid",
     amount: 7890,
+    title: "Illustration package",
     description: "Bento Pro 2.0 Illustrations",
+    vendor: "Bento Studio",
+    date: dateAgo(2),
     createdAt: expenseAt(2),
+    updatedAt: expenseAt(2),
   },
   {
     id: "e3",
+    type: "expense",
+    category: "travel",
+    status: "paid",
     amount: 1500,
+    title: "Project travel",
     description: "Fleet - travel shopping kit",
+    vendor: "Fleet",
+    date: dateAgo(5),
     createdAt: expenseAt(5),
+    updatedAt: expenseAt(5),
   },
   {
     id: "e4",
+    type: "expense",
+    category: "team-salary",
+    status: "scheduled",
     amount: 9999,
-    description: "SimpleSocial UI Design Kit",
+    title: "Team salary payout",
+    description: "Monthly team salary allocation",
+    vendor: "Internal payroll",
+    memberId: "m1",
+    date: dateAgo(10),
     createdAt: expenseAt(10),
+    updatedAt: expenseAt(10),
+  },
+  {
+    id: "e5",
+    type: "income",
+    category: "project-income",
+    status: "paid",
+    amount: 18500,
+    title: "Brand refresh deposit",
+    description: "Initial payment for Brand Refresh",
+    projectId: "p1",
+    vendor: "Acme Corp",
+    date: dateAgo(3),
+    createdAt: expenseAt(3),
+    updatedAt: expenseAt(3),
+  },
+  {
+    id: "e6",
+    type: "expense",
+    category: "overtime",
+    status: "pending",
+    amount: 1250,
+    title: "Launch overtime",
+    description: "Weekend overtime for QA and launch support",
+    projectId: "p3",
+    memberId: "m2",
+    vendor: "Internal payroll",
+    date: dateAgo(0),
+    createdAt: expenseAt(0),
+    updatedAt: expenseAt(0),
   },
 ];

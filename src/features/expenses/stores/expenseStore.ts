@@ -1,6 +1,6 @@
 import { create } from "zustand";
-export type { AdminStats, Expense } from "../types";
-import type { AdminStats, Expense } from "../types";
+export type { AdminStats, Expense, FinancialRecordCategory, FinancialRecordStatus, FinancialRecordType } from "../types";
+import type { AdminStats, Expense, FinancialRecordCategory, FinancialRecordStatus, FinancialRecordType } from "../types";
 
 interface RecentClient {
   id: string;
@@ -17,9 +17,24 @@ interface ExpenseState {
   setStats: (stats: AdminStats) => void;
   setRecentClients: (clients: RecentClient[]) => void;
   setExpenses: (expenses: Expense[]) => void;
-  addExpense: (expense: Expense) => void;
+  addExpense: (input: ExpenseInput) => Expense;
+  updateExpense: (id: string, updates: Partial<ExpenseInput>) => void;
+  removeExpense: (id: string) => void;
   toggleWorking: () => void;
   incrementExpenseTotal: (amount: number) => void;
+}
+
+export interface ExpenseInput {
+  type: FinancialRecordType;
+  category: FinancialRecordCategory;
+  status: FinancialRecordStatus;
+  amount: number;
+  title: string;
+  description: string;
+  vendor?: string;
+  projectId?: string;
+  memberId?: string;
+  date: string;
 }
 
 const EMPTY_STATS: AdminStats = {
@@ -39,8 +54,28 @@ export const useExpenseStore = create<ExpenseState>((set) => ({
   setRecentClients: (recentClients) => set({ recentClients }),
   setExpenses: (expenses) => set({ expenses }),
 
-  addExpense: (expense) =>
-    set((s) => ({ expenses: [expense, ...s.expenses].slice(0, 5) })),
+  addExpense: (input) => {
+    const now = Date.now();
+    const expense: Expense = {
+      ...input,
+      id: `fin_${now}`,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    set((s) => ({ expenses: [expense, ...s.expenses] }));
+    return expense;
+  },
+
+  updateExpense: (id, updates) =>
+    set((s) => ({
+      expenses: s.expenses.map((expense) =>
+        expense.id === id ? { ...expense, ...updates, updatedAt: Date.now() } : expense,
+      ),
+    })),
+
+  removeExpense: (id) =>
+    set((s) => ({ expenses: s.expenses.filter((expense) => expense.id !== id) })),
 
   toggleWorking: () => set((s) => ({ isWorking: !s.isWorking })),
 
