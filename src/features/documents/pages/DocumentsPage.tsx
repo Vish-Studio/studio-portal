@@ -7,12 +7,12 @@ import StatCard from '@/src/components/common/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import { MaterialIcon, StatusBadge } from '@/src/shared/components';
 import { useDocumentsStore } from '../stores/documentStore';
-import { useTemplateAssignmentsStore } from '@/src/store/template-assignments';
+import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
-import { TEMPLATES } from '@/src/data/templates';
+import { TEMPLATES } from '@/src/features/templates';
 import type { StudioDocument, DocumentType } from '../types';
-import type { TemplateAssignment } from '@/src/store/template-assignments';
+import type { TemplateAssignment } from '@/src/features/templates';
 
 // ─── Document type icons ──────────────────────────────────────────────────────
 

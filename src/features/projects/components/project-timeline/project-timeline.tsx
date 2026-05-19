@@ -2,8 +2,7 @@ import { Check, Pencil, Plus, Trash2, UserRound } from 'lucide-react';
 import CardContent from '@/src/components/common/card-content/card-content';
 import { Button, MaterialIcon } from '@/src/shared/components';
 import { DEFAULT_PHASE_DEFS, getPhaseProgress, type ClientProject, type Phase, type PhaseStatus } from '../../types';
-import { TEMPLATES } from '@/src/data/templates';
-import type { TemplateAssignment } from '@/src/store/template-assignments';
+import { TEMPLATES, type TemplateAssignment } from '@/src/features/templates';
 
 const PHASE_STATUS_CLS: Record<PhaseStatus, string> = {
   done: 'bg-green-50 text-green-700 border-green-200',

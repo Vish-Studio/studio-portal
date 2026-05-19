@@ -11,14 +11,16 @@ import { PaymentsPage, UserPaymentsPage } from '@/src/features/payments';
 import { ProjectDetailPage, ProjectsPage, UserProjectsPage } from '@/src/features/projects';
 import { SettingsPage, UserSettingsPage } from '@/src/features/settings';
 import { TasksPage, UserTasksPage } from '@/src/features/tasks';
-import Templates from '@/src/pages/Templates';
-import ContractTemplate from '@/src/pages/templates/contract';
-import InvoiceTemplate from '@/src/pages/templates/invoice';
-import OverdueInvoiceTemplate from '@/src/pages/templates/overdue-invoice';
-import ProjectProposalTemplate from '@/src/pages/templates/project-proposal';
-import QuotationTemplate from '@/src/pages/templates/quotation';
+import {
+  ContractTemplatePage,
+  InvoiceTemplatePage,
+  OverdueInvoiceTemplatePage,
+  ProjectProposalTemplatePage,
+  QuotationTemplatePage,
+  TemplateEditorPage,
+  TemplatesPage,
+} from '@/src/features/templates';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
-import TemplateEditor from '@/src/pages/admin/TemplateEditor';
 import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
 
 const adminRoute = (page: React.ReactNode) => (
@@ -57,16 +59,16 @@ export function AppRoutes() {
       <Route path="/admin/chat" element={adminRoute(<ChatPage />)} />
       <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />
       <Route path="/admin/projects/:id" element={adminRoute(<ProjectDetailPage />)} />
-      <Route path="/admin/projects/:projectId/templates/:assignmentId" element={adminRoute(<TemplateEditor />)} />
+      <Route path="/admin/projects/:projectId/templates/:assignmentId" element={adminRoute(<TemplateEditorPage />)} />
       <Route path="/admin/tasks" element={adminRoute(<TasksPage />)} />
       <Route path="/admin/calendar" element={adminRoute(<CalendarPage />)} />
       <Route path="/admin/documents" element={adminRoute(<DocumentsPage />)} />
-      <Route path="/admin/templates" element={adminRoute(<Templates />)} />
-      <Route path="/admin/templates/contract" element={adminRoute(<ContractTemplate />)} />
-      <Route path="/admin/templates/invoice" element={adminRoute(<InvoiceTemplate />)} />
-      <Route path="/admin/templates/overdue-invoice" element={adminRoute(<OverdueInvoiceTemplate />)} />
-      <Route path="/admin/templates/project-proposal" element={adminRoute(<ProjectProposalTemplate />)} />
-      <Route path="/admin/templates/quotation" element={adminRoute(<QuotationTemplate />)} />
+      <Route path="/admin/templates" element={adminRoute(<TemplatesPage />)} />
+      <Route path="/admin/templates/contract" element={adminRoute(<ContractTemplatePage />)} />
+      <Route path="/admin/templates/invoice" element={adminRoute(<InvoiceTemplatePage />)} />
+      <Route path="/admin/templates/overdue-invoice" element={adminRoute(<OverdueInvoiceTemplatePage />)} />
+      <Route path="/admin/templates/project-proposal" element={adminRoute(<ProjectProposalTemplatePage />)} />
+      <Route path="/admin/templates/quotation" element={adminRoute(<QuotationTemplatePage />)} />
       <Route path="/admin/settings" element={adminRoute(<SettingsPage />)} />
 
       <Route path="/sign-in" element={<SignInPage />} />

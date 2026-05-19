@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProjectTimeline from '../project-timeline';
 import type { ClientProject } from '../../../types';
-import type { TemplateAssignment } from '@/src/store/template-assignments';
+import type { TemplateAssignment } from '@/src/features/templates';
 
 const project: ClientProject = {
   id: 'p_story',

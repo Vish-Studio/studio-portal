@@ -13,13 +13,13 @@ import { Avatar, AvatarStack, Breadcrumb, Button, ButtonIcon, ConfirmDialog, For
 import { ClientPicker } from '@/src/features/clients';
 import MemberPicker from '@/src/components/admin/pickers/member-picker/member-picker';
 import { TaskDetailModal, TaskRow, useTasksStore, type Task, type TaskStatus } from '@/src/features/tasks';
-import AssignTemplateModal from '@/src/components/admin/template-editor/assign-template-modal';
+import { AssignTemplateModal } from '@/src/features/templates';
 import { useProjectsStore } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
-import { useTemplateAssignmentsStore } from '@/src/store/template-assignments';
+import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useClientsStore } from '@/src/features/clients';
 import { getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
-import { TEMPLATES } from '@/src/data/templates';
+import { TEMPLATES } from '@/src/features/templates';
 
 interface ProjectFormValues {
   name: string; service: ServiceType; package: PackageType | ''; status: 'active' | 'paused' | 'completed'; timeline: string;

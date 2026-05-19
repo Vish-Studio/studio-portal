@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProjectTemplateDocument from '../project-template-document';
-import { getDefaultBlocks } from '../../../../data/template-blocks';
+import { getDefaultBlocks } from '../../../templateBlocks';
 
 const meta = {
   title: 'Admin/Templates/ProjectTemplateDocument',
