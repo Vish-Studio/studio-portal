@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { MaterialIcon } from "@/src/shared/components";
-import { useUIStore, type ToastItem } from "@/src/store/ui";
+import { useUIStore, type ToastItem } from "@/src/app/stores/uiStore";
 
 const toastIcon: Record<ToastItem["status"], string> = {
   success: "check_circle",

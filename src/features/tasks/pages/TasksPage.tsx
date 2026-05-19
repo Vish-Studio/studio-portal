@@ -14,7 +14,7 @@ import { useTasksStore } from '../stores/taskStore';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 
 // ─── Tab config ───────────────────────────────────────────────────────────────

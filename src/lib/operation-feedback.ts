@@ -1,4 +1,4 @@
-import { useUIStore } from "@/src/store/ui";
+import { useUIStore } from "@/src/app/stores/uiStore";
 
 interface OperationFeedbackOptions<T> {
   loadingLabel: string;

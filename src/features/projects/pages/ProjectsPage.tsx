@@ -14,7 +14,7 @@ import { useProjectsStore, makeNewProject } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '../types';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 
 interface ProjectFormValues {
   name: string;

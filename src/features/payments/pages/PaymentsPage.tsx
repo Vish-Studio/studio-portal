@@ -5,7 +5,7 @@ import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { RowActionsMenu } from '@/src/components/common/table/table';
 import TableTab, { type TabItem } from '@/src/components/common/table-tab/table-tab';
 import { MaterialIcon, StatusBadge } from '@/src/shared/components';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

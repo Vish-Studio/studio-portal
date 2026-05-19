@@ -9,7 +9,7 @@ import {
   type TabItem,
 } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 import type { AuthProfileUpdateInput, NewsletterPreferences } from '@/src/types/auth';
 
 type SettingsSection = 'profile' | 'email' | 'password' | 'newsletters';

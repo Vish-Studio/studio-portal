@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Topbar from './Topbar';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 
 interface AppShellProps {
   children: React.ReactNode;

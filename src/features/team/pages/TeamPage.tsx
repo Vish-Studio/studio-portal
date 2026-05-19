@@ -9,7 +9,7 @@ import Fab from '@/src/components/common/button-fab/button-fab';
 import { Button, FormField, inputCls, Modal, Option, RowActionsMenu, Select } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
 import { getMemberColors, type TeamAccessRole, type TeamMember, type TeamProject } from '../types';
 import StatusIcon from '@/src/components/common/status-icon/status-icon';

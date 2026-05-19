@@ -10,7 +10,7 @@ import Fab from '@/src/components/common/button-fab/button-fab';
 import StatCard from '@/src/components/common/stat-card/stat-card';
 import { Button, ClientStatusBadge, FormField, inputCls, Option, RowActionsMenu, Select } from '@/src/shared/components';
 import { useClientsStore } from '../stores/clientStore';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 import type { Client, ClientStatus } from '../types';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

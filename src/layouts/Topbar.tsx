@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ButtonIcon, DropdownMenu, MaterialIcon, SearchBar } from '@/src/shared/components';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 import type { DropdownMenuSectionType } from '@/src/shared/components';
 import { usePwaInstall } from '@/src/hooks/usePwaInstall';
 import { useAuthStore } from '@/src/features/auth';

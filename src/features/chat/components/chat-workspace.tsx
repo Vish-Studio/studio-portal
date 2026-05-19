@@ -7,7 +7,7 @@ import {
 } from '../stores/chatStore';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
-import { useUIStore } from '@/src/store/ui';
+import { useUIStore } from '@/src/app/stores/uiStore';
 import { useProjectsStore } from '@/src/features/projects';
 import { useAuthStore } from '@/src/features/auth';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
