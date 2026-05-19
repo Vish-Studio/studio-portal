@@ -1,15 +1,15 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import Projects from '../../Projects';
+import { ProjectsPage } from '@/src/features/projects';
 
 const meta = {
   title: 'Pages/Admin/Projects',
-  component: Projects,
+  component: ProjectsPage,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: { story: { inline: false, iframeHeight: 900 } },
   },
-} satisfies Meta<typeof Projects>;
+} satisfies Meta<typeof ProjectsPage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

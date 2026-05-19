@@ -1,16 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import ProjectDetail from '../ProjectDetail';
+import { ProjectDetailPage } from '@/src/features/projects';
 
 const meta = {
   title: 'Pages/Admin/ProjectDetail',
-  component: ProjectDetail,
+  component: ProjectDetailPage,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     docs: { story: { inline: false, iframeHeight: 900 } },
   },
-} satisfies Meta<typeof ProjectDetail>;
+} satisfies Meta<typeof ProjectDetailPage>;
 
 export default meta;
 
@@ -18,7 +18,7 @@ const withProject = (id: string) => ({
   render: () => (
     <MemoryRouter initialEntries={[`/admin/projects/${id}`]}>
       <Routes>
-        <Route path="/admin/projects/:id" element={<ProjectDetail />} />
+        <Route path="/admin/projects/:id" element={<ProjectDetailPage />} />
       </Routes>
     </MemoryRouter>
   ),

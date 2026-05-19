@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import Dashboard from '../Dashboard';
+import { AdminDashboardPage } from '@/src/features/dashboard';
 
 const meta = {
   title: 'Pages/Admin/Dashboard',
-  component: Dashboard,
+  component: AdminDashboardPage,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -11,7 +11,7 @@ const meta = {
     // Storybook docs: disable args table for full-page stories
     docs: { story: { inline: false, iframeHeight: 900 } },
   },
-} satisfies Meta<typeof Dashboard>;
+} satisfies Meta<typeof AdminDashboardPage>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
