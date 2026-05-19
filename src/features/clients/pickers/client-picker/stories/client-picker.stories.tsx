@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import ClientPicker from '../client-picker';
-import { DEMO_CLIENTS } from '@/src/data/clients';
+import { DEMO_CLIENTS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/Pickers/ClientPicker',

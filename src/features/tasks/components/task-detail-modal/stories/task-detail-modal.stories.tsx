@@ -1,7 +1,7 @@
 import type { StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import TaskDetailModal from '../task-detail-modal';
-import { DEMO_TASKS } from '@/src/data/tasks';
+import { DEMO_TASKS } from '@/src/data/seed';
 
 export default {
   title: 'Admin/TaskDetailModal',

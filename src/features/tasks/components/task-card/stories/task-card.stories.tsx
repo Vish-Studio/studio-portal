@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import TaskCard from '../task-card';
-import { DEMO_TASKS } from '@/src/data/tasks';
+import { DEMO_TASKS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/TaskCard',

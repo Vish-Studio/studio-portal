@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import TasksOverview from '../tasks-overview';
-import { DEMO_TASKS } from '@/src/data/tasks';
+import { DEMO_TASKS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/TasksOverview',

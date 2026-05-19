@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ClientDetailCard from '../client-detail-card';
-import { DEMO_CLIENTS } from '@/src/data/clients';
+import { DEMO_CLIENTS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/ClientDetailCard',

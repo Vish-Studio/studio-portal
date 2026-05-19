@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import DocumentOverview from '../document-overview';
-import { DEMO_DOCUMENTS } from '@/src/data/documents';
+import { DEMO_DOCUMENTS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/DocumentOverview',

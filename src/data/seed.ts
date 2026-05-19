@@ -4,13 +4,12 @@
  * Individual data files re-export these constants for backward-compat with Storybook.
  */
 
-import type { Client } from "./clients";
-import type { AdminStats, Expense } from "./admin";
-import type { TeamMember, TeamProject } from "./team";
-import type { StudioDocument } from "./documents";
-import type { Task } from "./tasks";
-import type { ClientProject } from "./projects";
-import { buildDefaultPhases } from "./projects";
+import type { Client } from "@/src/features/clients";
+import type { AdminStats, Expense } from "@/src/features/expenses";
+import type { TeamMember, TeamProject } from "@/src/features/team";
+import type { StudioDocument } from "@/src/features/documents";
+import type { Task } from "@/src/features/tasks";
+import { buildDefaultPhases, type ClientProject } from "@/src/features/projects";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

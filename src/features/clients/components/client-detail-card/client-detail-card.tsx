@@ -3,7 +3,7 @@ import { Briefcase, Building2, Mail, Phone, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { DetailHeroCard } from '@/src/shared/components';
 import { avatarColor, ClientStatusBadge } from '@/src/shared/components';
-import { DEMO_PROJECTS } from '@/src/data/projects';
+import { DEMO_PROJECTS } from '@/src/data/seed';
 import type { Client } from '../../types';
 
 interface Props {

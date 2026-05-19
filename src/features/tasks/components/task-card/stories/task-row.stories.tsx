@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import TaskRow from '../task-row';
-import { DEMO_TASKS } from '@/src/data/tasks';
+import { DEMO_TASKS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/TaskRow',

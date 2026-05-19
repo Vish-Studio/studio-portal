@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ProjectCard, { ProjectCardMini } from '../project-card';
-import { DEMO_PROJECTS } from '@/src/data/projects';
-import { DEMO_MEMBERS } from '@/src/data/team';
+import { DEMO_MEMBERS, DEMO_PROJECTS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/ProjectCard',

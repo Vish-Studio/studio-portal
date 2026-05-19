@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
 import MemberPicker from '../member-picker';
-import { DEMO_MEMBERS } from '@/src/data/team';
+import { DEMO_MEMBERS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/Pickers/MemberPicker',
