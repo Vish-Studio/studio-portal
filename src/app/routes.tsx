@@ -21,7 +21,7 @@ import {
   TemplatesPage,
 } from '@/src/features/templates';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
-import { AuthGate, AuthLanding } from '@/src/components/common/auth-gate/auth-gate';
+import { AuthGate, AuthLanding } from '@/src/features/auth';
 
 const adminRoute = (page: React.ReactNode) => (
   <AuthGate role="admin">{page}</AuthGate>

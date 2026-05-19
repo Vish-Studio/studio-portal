@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, type AuthRole } from '@/src/features/auth';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { defaultRouteForRole, isStaffRole } from '@/src/auth/roleAccess';
-import { AppLoader } from '../app-loader/app-loader';
+import { AppLoader } from '@/src/app/components/loading';
 
 interface AuthGateProps {
   children: React.ReactNode;

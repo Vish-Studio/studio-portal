@@ -1,5 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
-import { AuthProvider } from '@/src/components/common/auth-gate/auth-gate';
+import { AuthProvider } from '@/src/features/auth';
 import { ToastViewport } from '@/src/app/components/feedback/ToastViewport';
 import { AppLoadingGate } from '@/src/app/components/loading/AppLoadingGate';
 import { GlobalOperationLoader } from '@/src/app/components/loading/GlobalOperationLoader';
