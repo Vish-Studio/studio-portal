@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 import { format } from 'date-fns';
-import DetailHeroCard from '@/src/components/admin/detail-hero-card/detail-hero-card';
+import { DetailHeroCard } from '@/src/shared/components';
 import { Avatar, MaterialIcon, ProjectStatusBadge } from '@/src/shared/components';
 import { getProjectAccent, getPhaseProgress, type ClientProject } from '../../types';
 import { useClientsStore } from '@/src/features/clients';

@@ -9,7 +9,7 @@ import FormSidebar, { FormSidebarFooter } from '@/src/components/common/form-sid
 import { Button, ConfirmDialog, FormField, inputCls, Option, Select } from '@/src/shared/components';
 import ProjectCard, { ProjectCardMini } from '../components/project-card/project-card';
 import { ClientPicker } from '@/src/features/clients';
-import MemberPicker from '@/src/components/admin/pickers/member-picker/member-picker';
+import { MemberPicker } from '@/src/shared/components';
 import { useProjectsStore, makeNewProject } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';

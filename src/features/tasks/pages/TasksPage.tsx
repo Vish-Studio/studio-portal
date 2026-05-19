@@ -9,7 +9,7 @@ import { Button, Checkbox, ConfirmDialog, DatePicker, FormField, inputCls, Optio
 import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
-import MemberPicker from '@/src/components/admin/pickers/member-picker/member-picker';
+import { MemberPicker } from '@/src/shared/components';
 import { useTasksStore } from '../stores/taskStore';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';

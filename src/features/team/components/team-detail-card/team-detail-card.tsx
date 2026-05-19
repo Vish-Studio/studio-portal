@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Briefcase, CheckSquare, Mail, UserRound } from 'lucide-react';
 import { format } from 'date-fns';
-import DetailHeroCard from '@/src/components/admin/detail-hero-card/detail-hero-card';
+import { DetailHeroCard } from '@/src/shared/components';
 import { getMemberColors, type TeamMember } from '../../types';
 import type { ClientProject } from '@/src/features/projects';
 import type { Task } from '@/src/features/tasks';

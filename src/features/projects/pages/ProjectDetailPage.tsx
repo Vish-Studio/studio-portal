@@ -11,7 +11,7 @@ import ProjectHeroCard from '../components/project-hero-card/project-hero-card';
 import ProjectTimeline from '../components/project-timeline/project-timeline';
 import { Avatar, AvatarStack, Breadcrumb, Button, ButtonIcon, ConfirmDialog, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
 import { ClientPicker } from '@/src/features/clients';
-import MemberPicker from '@/src/components/admin/pickers/member-picker/member-picker';
+import { MemberPicker } from '@/src/shared/components';
 import { TaskDetailModal, TaskRow, useTasksStore, type Task, type TaskStatus } from '@/src/features/tasks';
 import { AssignTemplateModal } from '@/src/features/templates';
 import { useProjectsStore } from '../stores/projectStore';

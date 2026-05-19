@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Briefcase, Building2, Mail, Phone, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
-import DetailHeroCard from '@/src/components/admin/detail-hero-card/detail-hero-card';
+import { DetailHeroCard } from '@/src/shared/components';
 import { avatarColor, ClientStatusBadge } from '@/src/shared/components';
 import { DEMO_PROJECTS } from '@/src/data/projects';
 import type { Client } from '../../types';

@@ -14,6 +14,7 @@ export { default as Breadcrumb } from './breadcrumb/breadcrumb';
 export { default as Checkbox } from './checkbox/checkbox';
 export { default as ConfirmDialog } from './confirm-dialog/confirm-dialog';
 export { default as DatePicker } from './date-picker/date-picker';
+export { default as DetailHeroCard } from './detail-hero-card/detail-hero-card';
 export { default as DropdownMenu } from './dropdown-menu/dropdown-menu';
 export {
   default as FormField,
@@ -22,6 +23,7 @@ export {
   type FormFieldProps,
 } from './form-field/form-field';
 export { default as MaterialIcon } from './material-icon/material-icon';
+export { default as MemberPicker } from './member-picker/member-picker';
 export { default as Modal } from './modal/modal';
 export { default as Option } from './select/option';
 export { default as SearchBar } from './search-bar/search-bar';
