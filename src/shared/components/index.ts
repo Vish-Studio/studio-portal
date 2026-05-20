@@ -57,7 +57,7 @@ export { default as Table } from './table/table';
 export { default as TableTab } from './table-tab/table-tab';
 export { default as Tabs } from './tabs/tabs';
 export { default as Toggle } from './toggle/toggle';
-export { default as Tooltip } from './tooltip/tooltip';
+export { default as Tooltip, type TooltipProps, type TooltipSide, type TooltipVariant } from './tooltip/tooltip';
 export * from './confirm-dialog/confirm-dialog';
 export * from './dropdown-menu/dropdown-menu';
 export * from './form-sidebar/form-sidebar';

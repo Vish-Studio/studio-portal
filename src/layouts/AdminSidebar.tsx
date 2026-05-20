@@ -29,13 +29,13 @@ const AdminSidebar: FunctionComponent<SidebarProps> = (props) => {
   const navItems: SidebarNavItem[] = [
     { icon: <Home size={18} />, label: 'Dashboard', path: '/admin' },
     { icon: <Calendar size={18} />, label: 'Calendar', path: '/admin/calendar' },
-    { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/admin/tasks' },
-    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount },
     { icon: <Users size={18} />, label: 'Clients', path: '/admin/clients' },
     { icon: <Briefcase size={18} />, label: 'Projects', path: '/admin/projects' },
+    { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/admin/tasks' },
+    { icon: <UserCircle2 size={18} />, label: 'Team', path: '/admin/team' },
+    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount },
     { icon: <CreditCard size={18} />, label: 'Payments', path: '/admin/payments' },
     { icon: <FileText size={18} />, label: 'Documents', path: '/admin/documents' },
-    { icon: <UserCircle2 size={18} />, label: 'Team', path: '/admin/team' },
     ...(profile?.role === 'superadmin'
       ? [{ icon: <Receipt size={18} />, label: 'Expenses', path: '/admin/expenses' }]
       : []),

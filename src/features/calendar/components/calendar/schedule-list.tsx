@@ -78,12 +78,13 @@ export default function ScheduleList({ date }: ScheduleListProps) {
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
               <CalendarDays size={16} />
-              <span>Schedule</span>
+              {/* <span>Schedule</span> */}
+              <p className="text-sm font-medium text-gray-500">{formatDate(date)}</p>
             </div>
-            <h2 className="mt-3 text-[24px] font-bold leading-none text-(--color-ink) md:text-[28px]">
+            {/* <h2 className="mt-3 text-[24px] font-bold leading-none text-(--color-ink) md:text-[28px]">
               {date.toLocaleDateString('en-GB', { weekday: 'long' })}
             </h2>
-            <p className="mt-2 text-sm font-medium text-gray-500">{formatDate(date)}</p>
+            <p className="mt-2 text-sm font-medium text-gray-500">{formatDate(date)}</p> */}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <span className="schedule-list-count rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-600">

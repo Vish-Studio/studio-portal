@@ -1,6 +1,7 @@
 import type { FunctionComponent, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { PanelLeftClose, Settings, X } from '@/src/shared/components/material-icon/material-lucide-icons';
+import Tooltip from '@/src/shared/components/tooltip/tooltip';
 
 export interface SidebarNavItem {
   icon: ReactNode;
@@ -84,13 +85,12 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
     }
 
     return (
-      <div key={item.label} className="sidebar-item-wrap group relative flex justify-center">
-        <Link to={item.path} className={`sidebar-item ${btnClass}`}>
-          {content}
-        </Link>
-        <div className="sidebar-tooltip type-sidebar-tooltip absolute left-full top-1/2 z-100 ml-4 hidden -translate-y-1/2 whitespace-nowrap rounded-lg border border-gray-700/50 bg-(--color-sidebar-active) px-3 py-1.5 text-white shadow-md group-hover:block">
-          {item.label}
-        </div>
+      <div key={item.label} className="sidebar-item-wrap flex justify-center">
+        <Tooltip content={item.label} side="right" variant="sidebar">
+          <Link to={item.path} className={`sidebar-item ${btnClass}`}>
+            {content}
+          </Link>
+        </Tooltip>
       </div>
     );
   };
@@ -106,7 +106,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
 
       <header
         className={`sidebar bg-(--color-sidebar-bg) flex flex-col overflow-hidden py-6 lg:py-8 lg:pb-4 justify-between shrink-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-100 md:z-50
-          ${!isExpanded ? '[&_.sidebar-item-icon_svg]:h-4 [&_.sidebar-item-icon_svg]:w-4 lg:[&_.sidebar-item-icon_svg]:h-[18px] lg:[&_.sidebar-item-icon_svg]:w-[18px]' : ''}
+          ${!isExpanded ? '[&_.sidebar-item-icon_svg]:h-4 [&_.sidebar-item-icon_svg]:w-4 lg:[&_.sidebar-item-icon_svg]:h-4.5 lg:[&_.sidebar-item-icon_svg]:w-4.5' : ''}
           ${isMobile
             ? `fixed inset-y-0 left-0 w-65 px-4 m-0 rounded-none transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}`
             : `relative md:flex md:my-4 md:ml-4 md:rounded-[32px] lg:my-2 lg:ml-2 ${isSidebarOpen ? 'md:w-65 md:px-4 md:items-stretch' : 'md:w-21 md:items-center md:px-4 md:pb-4'}`
@@ -149,7 +149,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
             )}
           </div>
 
-          <div className={`sidebar-nav min-h-0 flex-1 overflow-y-auto text-(--color-sidebar-text) no-scrollbar ${isExpanded ? 'flex flex-col gap-2' : 'flex flex-col items-center gap-3 lg:gap-4'}`}>
+          <div className={`sidebar-nav min-h-0 flex-1 overflow-y-auto text-(--color-sidebar-text) no-scrollbar ${isExpanded ? 'flex flex-col gap-2' : 'flex flex-col items-center gap-1 lg:gap-2'}`}>
             {navItems.map(renderNavLink)}
           </div>
         </div>
