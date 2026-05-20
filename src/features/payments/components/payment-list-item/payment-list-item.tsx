@@ -1,6 +1,5 @@
 import { RefreshCw, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { MaterialIcon, RecordMeta, StatusBadge } from '@/src/shared/components';
-import { RowActionsMenu } from '@/src/shared/components/table/table';
+import { CardListItem, MaterialIcon, RecordMeta, StatusBadge } from '@/src/shared/components';
 
 export type PaymentStatus = 'paid' | 'pending' | 'overdue';
 export type PaymentType = 'one-time' | 'recurring';
@@ -54,10 +53,12 @@ interface PaymentListItemProps {
 
 export default function PaymentListItem({ payment, onEdit, onDelete }: PaymentListItemProps) {
   return (
-    <div className="payment-list-item grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] md:items-center">
-      <div className="payment-list-item-invoice min-w-0">
-        <div className="payment-list-item-invoice-header flex items-center gap-2">
-          <span className="payment-list-item-invoice-id type-label font-mono text-gray-500">{payment.invoiceId}</span>
+    <CardListItem
+      title={payment.invoiceId}
+      titleClassName="payment-list-item-invoice-id font-mono text-gray-500"
+      subtitle={(
+        <div className="payment-list-item-subtitle flex flex-wrap items-center gap-2">
+          <RecordMeta className="payment-list-item-date" items={[{ label: payment.date, icon: 'event' }]} />
           {payment.type === 'recurring' && (
             <span className="payment-list-item-recurring type-count inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-violet-600">
               <RefreshCw size={9} />
@@ -65,9 +66,15 @@ export default function PaymentListItem({ payment, onEdit, onDelete }: PaymentLi
             </span>
           )}
         </div>
-        <RecordMeta className="payment-list-item-date mt-1" items={[{ label: payment.date, icon: 'event' }]} />
-      </div>
-
+      )}
+      actions={[
+        { label: 'Edit payment', icon: <MaterialIcon name="edit" size={16} />, onClick: () => onEdit?.(payment) },
+        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete?.(payment), variant: 'danger' },
+      ]}
+      className="payment-list-item grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] md:items-center"
+      headerClassName="payment-list-item-header"
+      actionsClassName="payment-list-item-actions"
+    >
       <div className="payment-list-item-client flex min-w-0 items-center gap-2.5">
         <div className={`payment-list-item-avatar flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-[11px] font-bold text-white`}>
           {payment.client.charAt(0)}
@@ -85,15 +92,6 @@ export default function PaymentListItem({ payment, onEdit, onDelete }: PaymentLi
       <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
 
       <RecordMeta className="payment-list-item-next-date" items={[{ label: payment.nextDate ?? '-', icon: 'event_repeat' }]} />
-
-      <div className="payment-list-item-actions flex justify-end">
-        <RowActionsMenu
-          actions={[
-            { label: 'Edit payment', icon: <MaterialIcon name="edit" size={16} />, onClick: () => onEdit?.(payment) },
-            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete?.(payment), variant: 'danger' },
-          ]}
-        />
-      </div>
-    </div>
+    </CardListItem>
   );
 }

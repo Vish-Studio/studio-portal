@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { MaterialIcon, StatusBadge } from '@/src/shared/components';
+import { CardListItem, MaterialIcon, StatusBadge } from '@/src/shared/components';
 import type { StudioDocument, DocumentType } from '../../types';
 
 export const USER_DOC_META: Record<DocumentType, { icon: string; label: string; iconClass: string; bgClass: string }> = {
@@ -22,22 +22,11 @@ export default function UserDocumentListItem({ document, onSign }: UserDocumentL
   const isSigned = isContract && !!document.isSigned;
 
   return (
-    <div className="user-document-list-item group flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-(--color-surface-subtle) md:px-6">
-      <div className={`user-document-list-item-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] ${meta.bgClass}`}>
-        <MaterialIcon name={meta.icon} size={16} className={`user-document-list-item-icon-symbol ${meta.iconClass}`} />
-      </div>
-
-      <div className="user-document-list-item-copy min-w-0 flex-1">
-        <div className="user-document-list-item-heading flex flex-wrap items-center gap-2">
-          <p className="user-document-list-item-title truncate text-sm font-semibold leading-tight text-(--color-ink)">{document.title}</p>
-          {needsSignature && (
-            <StatusBadge label="Action Required" variant="violet" className="user-document-list-item-status shrink-0" />
-          )}
-          {isSigned && (
-            <StatusBadge label="Signed" variant="green" className="user-document-list-item-status shrink-0" />
-          )}
-        </div>
-        <div className="user-document-list-item-meta mt-0.5 flex items-center gap-2">
+    <CardListItem
+      title={document.title}
+      titleClassName="user-document-list-item-title text-sm font-semibold leading-tight"
+      subtitle={(
+        <div className="user-document-list-item-meta flex items-center gap-2">
           <span className="user-document-list-item-type text-[10px] font-bold uppercase tracking-wider text-gray-400">{meta.label}</span>
           {document.createdAt && (
             <>
@@ -54,9 +43,18 @@ export default function UserDocumentListItem({ document, onSign }: UserDocumentL
             </>
           )}
         </div>
-      </div>
-
-      <div className="user-document-list-item-actions flex shrink-0 items-center gap-2">
+      )}
+      icon={(
+        <div className={`user-document-list-item-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] ${meta.bgClass}`}>
+          <MaterialIcon name={meta.icon} size={16} className={`user-document-list-item-icon-symbol ${meta.iconClass}`} />
+        </div>
+      )}
+      className="user-document-list-item group flex items-center gap-3 rounded-none border-0 px-4 py-3.5 transition-colors hover:bg-(--color-surface-subtle) md:px-6"
+      headerClassName="user-document-list-item-header flex-1"
+    >
+      {needsSignature && <StatusBadge label="Action Required" variant="violet" className="user-document-list-item-status shrink-0" />}
+      {isSigned && <StatusBadge label="Signed" variant="green" className="user-document-list-item-status shrink-0" />}
+      <div className="user-document-list-item-actions flex shrink-0 items-center gap-2" onClick={event => event.stopPropagation()}>
         {needsSignature && (
           <button
             onClick={onSign}
@@ -77,6 +75,6 @@ export default function UserDocumentListItem({ document, onSign }: UserDocumentL
           <MaterialIcon name="open_in_new" size={14} />
         </a>
       </div>
-    </div>
+    </CardListItem>
   );
 }

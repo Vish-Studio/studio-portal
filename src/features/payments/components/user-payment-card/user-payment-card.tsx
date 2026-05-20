@@ -1,4 +1,4 @@
-import { MaterialIcon, StatusBadge } from '@/src/shared/components';
+import { CardListItem, MaterialIcon, StatusBadge } from '@/src/shared/components';
 import { formatPaymentAmount } from '../payment-list-item/payment-list-item';
 
 export type UserPaymentStatus = 'paid' | 'partial' | 'pending';
@@ -38,20 +38,19 @@ export default function UserPaymentCard({ payment }: UserPaymentCardProps) {
   const progress = paymentProgress(payment);
 
   return (
-    <div className="user-payment-card rounded-[18px] border border-gray-200 bg-white p-4">
-      <div className="user-payment-card-header flex items-start justify-between gap-3">
-        <div className="user-payment-card-summary flex min-w-0 items-center gap-3">
-          <div className="user-payment-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gray-100">
-            <MaterialIcon name={payment.serviceIcon} size={16} className="user-payment-card-icon-symbol text-gray-500" />
-          </div>
-          <div className="user-payment-card-copy min-w-0">
-            <p className="user-payment-card-project truncate text-sm font-bold text-(--color-ink)">{payment.project}</p>
-            <p className="user-payment-card-service truncate text-xs font-medium text-gray-400">{payment.service} - {payment.timeline || 'No timeline'}</p>
-          </div>
+    <CardListItem
+      title={payment.project}
+      titleClassName="user-payment-card-project text-sm font-bold"
+      subtitle={<p className="user-payment-card-service truncate text-xs font-medium text-gray-400">{payment.service} - {payment.timeline || 'No timeline'}</p>}
+      icon={(
+        <div className="user-payment-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gray-100">
+          <MaterialIcon name={payment.serviceIcon} size={16} className="user-payment-card-icon-symbol text-gray-500" />
         </div>
-        <StatusBadge label={STATUS_LABEL[payment.status]} variant={STATUS_VARIANT[payment.status]} />
-      </div>
-
+      )}
+      className="user-payment-card rounded-[18px] border border-gray-200 bg-white p-4"
+      headerClassName="user-payment-card-header"
+      footer={<StatusBadge label={STATUS_LABEL[payment.status]} variant={STATUS_VARIANT[payment.status]} />}
+    >
       <div className="user-payment-card-amounts mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-(--color-surface) p-3">
         <div className="user-payment-card-amount">
           <p className="user-payment-card-label text-[10px] font-bold uppercase tracking-widest text-gray-400">Agreed</p>
@@ -78,6 +77,6 @@ export default function UserPaymentCard({ payment }: UserPaymentCardProps) {
         </div>
         <span className="user-payment-card-progress-label w-9 text-right text-[11px] font-bold text-gray-400">{progress}%</span>
       </div>
-    </div>
+    </CardListItem>
   );
 }

@@ -1,4 +1,4 @@
-import { MaterialIcon, RecordMeta, StatusBadge, formatRecordDate } from '@/src/shared/components';
+import { CardListItem, MaterialIcon, RecordMeta, StatusBadge, formatRecordDate } from '@/src/shared/components';
 import type { StudioDocument, DocumentType } from '../../types';
 import type { TemplateAssignment } from '@/src/features/templates';
 
@@ -67,26 +67,14 @@ interface DocumentListItemProps {
 
 export default function DocumentListItem({ document, onOpen }: DocumentListItemProps) {
   return (
-    <div
-      onClick={() => onOpen(document)}
-      className="document-list-item group flex cursor-pointer items-center gap-3 px-4 py-3.5 transition-colors hover:bg-(--color-surface-subtle) md:px-6"
-    >
-      <div className="document-list-item-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-gray-100 transition-colors group-hover:bg-gray-200">
-        <MaterialIcon name={document.icon} size={16} className="document-list-item-icon-symbol text-gray-500" />
-      </div>
-
-      <div className="document-list-item-copy min-w-0 flex-1">
-        <div className="document-list-item-heading flex flex-wrap items-center gap-2">
-          <p className="document-list-item-title truncate text-sm font-semibold leading-tight text-(--color-ink)">
-            {document.title}
-          </p>
-          <StatusBadge
-            label={DOC_STATUS_LABEL[document.status]}
-            variant={DOC_STATUS_VARIANT[document.status]}
-          />
-        </div>
+    <CardListItem
+      item={document}
+      onOpen={onOpen}
+      title={document.title}
+      titleClassName="document-list-item-title text-sm font-semibold leading-tight"
+      subtitle={(
         <RecordMeta
-          className="document-list-item-meta mt-1"
+          className="document-list-item-meta"
           items={[
             { label: document.typeLabel, icon: 'description' },
             document.projectName && { label: document.projectName, icon: 'work' },
@@ -94,8 +82,16 @@ export default function DocumentListItem({ document, onOpen }: DocumentListItemP
             document.clientName && { label: document.clientName, icon: 'person' },
           ]}
         />
-      </div>
-
+      )}
+      icon={(
+        <div className="document-list-item-icon flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-gray-100 transition-colors group-hover:bg-gray-200">
+          <MaterialIcon name={document.icon} size={16} className="document-list-item-icon-symbol text-gray-500" />
+        </div>
+      )}
+      className="document-list-item group flex cursor-pointer items-center gap-3 rounded-none border-0 px-4 py-3.5 transition-colors hover:bg-(--color-surface-subtle) md:px-6"
+      headerClassName="document-list-item-header flex-1"
+    >
+      <StatusBadge label={DOC_STATUS_LABEL[document.status]} variant={DOC_STATUS_VARIANT[document.status]} />
       <RecordMeta className="document-list-item-date hidden shrink-0 tabular-nums sm:flex" items={[{ label: formatRecordDate(document.date), icon: 'event' }]} />
 
       <MaterialIcon
@@ -103,6 +99,6 @@ export default function DocumentListItem({ document, onOpen }: DocumentListItemP
         size={14}
         className="document-list-item-open-icon shrink-0 text-gray-300 transition-colors group-hover:text-gray-600"
       />
-    </div>
+    </CardListItem>
   );
 }

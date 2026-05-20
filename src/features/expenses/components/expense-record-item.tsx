@@ -1,12 +1,13 @@
 import { Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import {
   Button,
+  CardListItem,
   FormSidebar,
   FormSidebarFooter,
   formatRecordDate,
+  ListItemRow,
   MaterialIcon,
   RecordMeta,
-  RowActionsMenu,
   StatusBadge,
 } from '@/src/shared/components';
 import {
@@ -53,52 +54,45 @@ export function ExpenseRecordRow({ record, memberName, onView, onEdit, onDelete 
   const isIncome = record.type === 'income';
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onView(record)}
-      onKeyDown={event => { if (event.key === 'Enter') onView(record); }}
-      className="expense-record-row grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(260px,1fr)_140px_120px_32px] lg:items-center"
-    >
-      <div className="expense-record-row-main flex min-w-0 items-center gap-3">
+    <ListItemRow
+      item={record}
+      onOpen={onView}
+      title={record.title}
+      subtitle={(
+        <RecordMeta
+          className="expense-record-row-meta"
+          items={[
+            { label: FINANCIAL_CATEGORY_LABELS[record.category], icon: FINANCIAL_CATEGORY_ICON[record.category] },
+            { label: dateLabel(record.date), icon: 'event' },
+            memberName && { label: memberName, icon: 'person' },
+            !memberName && record.vendor && { label: record.vendor, icon: 'storefront' },
+          ]}
+        />
+      )}
+      icon={(
         <div className={`expense-record-row-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
           <MaterialIcon name={FINANCIAL_CATEGORY_ICON[record.category]} size={18} />
         </div>
-        <div className="expense-record-row-copy min-w-0">
-          <div className="expense-record-row-title-row flex min-w-0 flex-wrap items-center gap-2">
-            <p className="expense-record-row-title type-card-title truncate text-(--color-ink)">{record.title}</p>
-            <span className={`expense-record-row-type type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-              {isIncome ? 'Income' : 'Expense'}
-            </span>
-          </div>
-          <RecordMeta
-            className="expense-record-row-meta mt-1"
-            items={[
-              { label: FINANCIAL_CATEGORY_LABELS[record.category], icon: FINANCIAL_CATEGORY_ICON[record.category] },
-              { label: dateLabel(record.date), icon: 'event' },
-              memberName && { label: memberName, icon: 'person' },
-              !memberName && record.vendor && { label: record.vendor, icon: 'storefront' },
-            ]}
-          />
-        </div>
-      </div>
-
-      <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={FINANCIAL_STATUS_VARIANT[record.status]} />
-
-      <p className={`expense-record-row-amount type-card-title tabular-nums lg:text-right ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
-        {isIncome ? '+' : '-'}{fmt(record.amount)}
-      </p>
-
-      <div className="expense-record-row-actions flex justify-end" onClick={event => event.stopPropagation()}>
-        <RowActionsMenu
-          actions={[
-            { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
-            { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
-            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
-          ]}
-        />
-      </div>
-    </div>
+      )}
+      actions={[
+        { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
+        { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
+        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
+      ]}
+      secondary={<StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={FINANCIAL_STATUS_VARIANT[record.status]} />}
+      tertiary={(
+        <p className={`expense-record-row-amount type-card-title tabular-nums lg:text-right ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+          {isIncome ? '+' : '-'}{fmt(record.amount)}
+        </p>
+      )}
+      status={(
+        <span className={`expense-record-row-type type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+          {isIncome ? 'Income' : 'Expense'}
+        </span>
+      )}
+      className="expense-record-row grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(260px,1fr)_140px_120px_32px] lg:items-center"
+      gridClassName="lg:grid-cols-[minmax(260px,1fr)_140px_120px_110px_32px]"
+    />
   );
 }
 
@@ -106,37 +100,36 @@ export function ExpenseRecordCard({ record, memberName, onView, onEdit, onDelete
   const isIncome = record.type === 'income';
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onView(record)}
-      onKeyDown={event => { if (event.key === 'Enter') onView(record); }}
+    <CardListItem
+      item={record}
+      onOpen={onView}
+      title={record.title}
+      icon={(
+        <div className={`expense-record-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+          <MaterialIcon name={FINANCIAL_CATEGORY_ICON[record.category]} size={18} />
+        </div>
+      )}
+      actions={[
+        { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
+        { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
+        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
+      ]}
       className="expense-record-card flex flex-col rounded-[18px] border border-gray-200 bg-white text-left transition-colors hover:bg-gray-50"
+      headerClassName="expense-record-card-header"
+      actionsClassName="expense-record-card-actions"
+      footerClassName="expense-record-card-footer mt-auto flex items-center justify-between gap-3 border-t border-gray-50 px-4 py-2.5"
+      footer={(
+        <>
+          <span className={`expense-record-card-type type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+            {isIncome ? 'Income' : 'Expense'}
+          </span>
+          <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={FINANCIAL_STATUS_VARIANT[record.status]} />
+          <p className={`expense-record-card-amount type-card-title shrink-0 tabular-nums ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+            {isIncome ? '+' : '-'}{fmt(record.amount)}
+          </p>
+        </>
+      )}
     >
-      <div className="expense-record-card-header flex items-start justify-between gap-3 p-4 pb-3">
-        <div className="expense-record-card-main flex min-w-0 items-start gap-3">
-          <div className={`expense-record-card-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-            <MaterialIcon name={FINANCIAL_CATEGORY_ICON[record.category]} size={18} />
-          </div>
-          <div className="expense-record-card-copy min-w-0">
-            <p className="expense-record-card-title type-card-title truncate text-(--color-ink)">{record.title}</p>
-            <div className="expense-record-card-status mt-1">
-              <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={FINANCIAL_STATUS_VARIANT[record.status]} />
-            </div>
-          </div>
-        </div>
-
-        <div className="expense-record-card-actions shrink-0" onClick={event => event.stopPropagation()}>
-          <RowActionsMenu
-            actions={[
-              { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
-              { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
-              { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
-            ]}
-          />
-        </div>
-      </div>
-
       <RecordMeta
         className="expense-record-card-meta px-4 pb-3"
         items={[
@@ -147,15 +140,7 @@ export function ExpenseRecordCard({ record, memberName, onView, onEdit, onDelete
         ]}
       />
 
-      <div className="expense-record-card-footer mt-auto flex items-center justify-between gap-3 border-t border-gray-50 px-4 py-2.5">
-        <span className={`expense-record-card-type type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-          {isIncome ? 'Income' : 'Expense'}
-        </span>
-        <p className={`expense-record-card-amount type-card-title shrink-0 tabular-nums ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
-          {isIncome ? '+' : '-'}{fmt(record.amount)}
-        </p>
-      </div>
-    </div>
+    </CardListItem>
   );
 }
 

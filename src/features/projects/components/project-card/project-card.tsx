@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { AvatarStack, MaterialIcon, ProjectStatusBadge, RowActionsMenu, type AvatarStackMember, type RowAction } from '@/src/shared/components';
+import { AvatarStack, CardListItem, MaterialIcon, ProjectStatusBadge, RowActionsMenu, type AvatarStackMember, type RowAction } from '@/src/shared/components';
 import { getProjectAccent, getPhaseProgress, type ClientProject } from '../../types';
 import type { TeamMember } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
@@ -51,23 +51,33 @@ const ProjectCard = ({
   const activePhase    = project.phases.find(p => p.status === 'active');
 
   return (
-    <div
-      onClick={() => navigate(resolveDetailPath(detailPath, project))}
-      className={`project-card bg-white border border-gray-200 rounded-[16px] hover:border-gray-300 hover:bg-gray-50 hover:cursor-pointer transition-all duration-150 flex flex-col ${className}`}
-    >
-      <div className="project-card-body px-4 pt-4 pb-3">
-        <div className="project-card-header flex items-start justify-between gap-2 mb-1">
-          <h3 className="type-card-title line-clamp-2 min-w-0 flex-1 text-gray-900">{project.name}</h3>
-          <div className="project-card-actions flex items-center gap-1 shrink-0 mt-0.5" onClick={e => e.stopPropagation()}>
+    <CardListItem
+      item={project}
+      onOpen={() => navigate(resolveDetailPath(detailPath, project))}
+      title={project.name}
+      subTitle={`${accent.label}${client ? ` - ${client.fullName}` : ''}`}
+      actions={actions}
+      className={`project-card flex flex-col rounded-[16px] border border-gray-200 bg-white transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 ${className}`}
+      headerClassName="project-card-header"
+      contentClassName="project-card-body"
+      footerClassName="project-card-footer"
+      footer={(
+        <>
+          <div className="project-card-footer-meta type-muted flex flex-wrap items-center gap-2 text-gray-400">
             <ProjectStatusBadge status={project.status} />
-            {actions && <RowActionsMenu actions={actions} />}
+            <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>
+            <span className="text-gray-200">-</span>
+            <span>{project.timeline}</span>
+            {remaining === 0 && (
+              <><span className="text-gray-200">-</span><span className="font-semibold text-green-500">Settled</span></>
+            )}
           </div>
-        </div>
-
-        <p className="type-muted truncate text-gray-400">
-          {accent.label}{client ? ` · ${client.fullName}` : ''}
-        </p>
-
+          <div className="project-card-team flex shrink-0 items-center gap-2" onClick={e => e.stopPropagation()}>
+            {projectMembers.length > 0 && <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />}
+          </div>
+        </>
+      )}
+    >
         <div className="project-card-progress mt-3.5">
           <div className="project-card-progress-meta flex items-center justify-between mb-1.5">
             <span className="type-meta text-gray-400">
@@ -82,7 +92,6 @@ const ProjectCard = ({
             <div className="h-full bg-gray-700 rounded-full transition-all" style={{ width: `${progress}%` }} />
           </div>
         </div>
-      </div>
 
       {clientAction && (
         <div className="project-card-client-action mx-4 mb-3 flex items-center gap-3 rounded-[12px] border border-violet-200 bg-violet-50 px-3 py-2.5" onClick={e => e.stopPropagation()}>
@@ -100,21 +109,7 @@ const ProjectCard = ({
           </button>
         </div>
       )}
-
-      <div className="project-card-footer px-4 py-2.5 border-t border-gray-50 flex items-center justify-between gap-2 mt-auto">
-        <div className="project-card-footer-meta type-muted flex flex-wrap items-center gap-2 text-gray-400">
-          <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>
-          <span className="text-gray-200">·</span>
-          <span>{project.timeline}</span>
-          {remaining === 0 && (
-            <><span className="text-gray-200">·</span><span className="font-semibold text-green-500">Settled</span></>
-          )}
-        </div>
-        <div className="project-card-team flex items-center gap-2 shrink-0" onClick={e => e.stopPropagation()}>
-          {projectMembers.length > 0 && <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />}
-        </div>
-      </div>
-    </div>
+    </CardListItem>
   );
 };
 
