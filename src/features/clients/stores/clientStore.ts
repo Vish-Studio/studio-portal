@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 export type { Client, ClientStatus } from '../types';
 import type { Client } from '../types';
-import { clientsService, type ClientInput } from '../services/clientService';
+import { clientsService, type ClientCreateResult, type ClientInput } from '../services/clientService';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
 
 interface ClientsState {
@@ -12,7 +12,7 @@ interface ClientsState {
   unsubscribe?: () => void;
   setClients: (clients: Client[]) => void;
   subscribeClients: () => () => void;
-  addClient: (client: ClientInput) => Promise<string | undefined>;
+  addClient: (client: ClientInput) => Promise<ClientCreateResult | undefined>;
   updateClient: (id: string, updates: Partial<ClientInput>) => Promise<void>;
   removeClient: (id: string) => Promise<void>;
 }

@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -15,6 +16,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { requireFirebase } from "@/src/firebase/requireFirebase";
+import { userProvisioningService } from "@/src/features/auth/services/userProvisioningService";
 import type { TeamAccessRole, TeamMember } from "../types";
 
 export interface TeamMemberInput {
@@ -23,21 +25,47 @@ export interface TeamMemberInput {
   accessRole: TeamAccessRole;
   email: string;
   assignedProjectId?: string | null;
+  temporaryPassword?: string;
+}
+
+export interface TeamMemberCreateResult {
+  id: string;
+  email: string;
+  temporaryPassword: string;
 }
 
 const teamCollection = () => collection(requireFirebase().db, "team");
 const userProfileRef = (email: string) => doc(requireFirebase().db, "users", email.trim().toLowerCase());
+
+const legacyUserFieldDeletes = () => ({
+  fullName: deleteField(),
+  phone: deleteField(),
+  jobTitle: deleteField(),
+  company: deleteField(),
+  recoveryEmail: deleteField(),
+  newsletter: deleteField(),
+  staffRole: deleteField(),
+  teamId: deleteField(),
+  teamMemberId: deleteField(),
+  clientId: deleteField(),
+  createdAt: deleteField(),
+  updatedAt: deleteField(),
+});
+
+const splitName = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  return { first_name: parts[0] ?? "", last_name: parts.slice(1).join(" ") };
+};
 
 const upsertTeamUserProfile = async (
   profileId: string,
   payload: {
     email: string;
     role: TeamAccessRole;
-    staffRole: TeamAccessRole;
-    teamId: string;
-    teamMemberId: string;
-    fullName: string;
-    jobTitle: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    job_title: string;
     status: "active";
   },
 ) => {
@@ -46,9 +74,14 @@ const upsertTeamUserProfile = async (
   await setDoc(
     ref,
     {
+      ...legacyUserFieldDeletes(),
       ...payload,
-      ...(snapshot.exists() ? {} : { createdAt: serverTimestamp() }),
-      updatedAt: serverTimestamp(),
+      id: profileId,
+      feature_access: {},
+      is_active: true,
+      newsletterPreferences: false,
+      ...(snapshot.exists() ? {} : { created_at: serverTimestamp() }),
+      updated_at: serverTimestamp(),
     },
     { merge: true },
   );
@@ -85,14 +118,14 @@ const teamMemberFromSnapshot = (
 
   return {
     id: snapshot.id,
-    userId: data.userId ?? null,
-    name: data.name ?? "Unnamed member",
-    role: data.role ?? "Team member",
+    userId: data.userId ?? data.user_id ?? null,
+    name: data.name ?? data.full_name ?? "Unnamed member",
+    role: data.role ?? data.job_title ?? "Team member",
     accessRole: data.accessRole ?? "freelancer",
     email: data.email ?? "",
     assignedProjectId: data.assignedProjectId ?? null,
-    createdAt: data.createdAt,
-    updatedAt: data.updatedAt,
+    createdAt: data.createdAt ?? data.created_at,
+    updatedAt: data.updatedAt ?? data.updated_at,
   };
 };
 
@@ -110,25 +143,45 @@ export const teamService = {
 
   async createMember(input: TeamMemberInput) {
     const payload = cleanTeamMemberInput(input);
+    const temporaryPassword = input.temporaryPassword?.trim();
+
+    if (!temporaryPassword) {
+      throw new Error("Temporary password is required to create a team member login.");
+    }
+
+    const user = await userProvisioningService.createUser({
+      email: payload.email,
+      password: temporaryPassword,
+      displayName: payload.name,
+    });
+    const nameParts = splitName(payload.name);
     const ref = await addDoc(teamCollection(), {
       ...payload,
-      userId: null,
+      userId: user.uid,
+      user_id: user.uid,
+      full_name: payload.name,
+      first_name: nameParts.first_name,
+      last_name: nameParts.last_name,
+      job_title: payload.role,
+      status: "active",
+      is_active: true,
       createdAt: serverTimestamp(),
+      created_at: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      updated_at: serverTimestamp(),
     });
 
-    await upsertTeamUserProfile(payload.email, {
+    await upsertTeamUserProfile(user.uid, {
       email: payload.email,
       role: payload.accessRole,
-      staffRole: payload.accessRole,
-      teamId: ref.id,
-      teamMemberId: ref.id,
-      fullName: payload.name,
-      jobTitle: payload.role,
+      full_name: payload.name,
+      first_name: nameParts.first_name,
+      last_name: nameParts.last_name,
+      job_title: payload.role,
       status: "active",
     });
 
-    return ref.id;
+    return { id: ref.id, email: payload.email, temporaryPassword };
   },
 
   async updateMember(id: string, input: Partial<TeamMemberInput>) {
@@ -144,7 +197,12 @@ export const teamService = {
 
     await updateDoc(ref, {
       ...payload,
+      ...(payload.name !== undefined
+        ? { full_name: payload.name, ...splitName(payload.name) }
+        : {}),
+      ...(payload.role !== undefined ? { job_title: payload.role } : {}),
       updatedAt: serverTimestamp(),
+      updated_at: serverTimestamp(),
     });
 
     const shouldSyncAccess =
@@ -160,14 +218,13 @@ export const teamService = {
     }
     if (nextEmail) {
       const role = payload.accessRole ?? previous?.accessRole ?? "freelancer";
+      const fullName = payload.name ?? previous?.name ?? nextEmail;
       const userProfilePayload = {
         email: nextEmail,
         role,
-        staffRole: role,
-        teamId: id,
-        teamMemberId: id,
-        fullName: payload.name ?? previous?.name ?? nextEmail,
-        jobTitle: payload.role ?? previous?.role ?? role,
+        full_name: fullName,
+        ...splitName(fullName),
+        job_title: payload.role ?? previous?.role ?? role,
         status: "active",
       } as const;
       await upsertTeamUserProfile(nextEmail, userProfilePayload);

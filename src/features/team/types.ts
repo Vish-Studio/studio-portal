@@ -3,13 +3,22 @@ export type TeamAccessRole = 'superadmin' | 'admin' | 'freelancer';
 export interface TeamMember {
   id: string;
   userId?: string | null;
+  user_id?: string | null;
   name: string;
+  full_name?: string;
+  first_name?: string;
+  last_name?: string;
   role: string;
+  job_title?: string;
   accessRole?: TeamAccessRole;
   email: string;
   assignedProjectId: string | null;
+  status?: 'active' | 'inactive' | 'lost';
+  is_active?: boolean;
   createdAt?: { toMillis: () => number; toDate: () => Date };
+  created_at?: { toMillis: () => number; toDate: () => Date };
   updatedAt?: { toMillis: () => number; toDate: () => Date };
+  updated_at?: { toMillis: () => number; toDate: () => Date };
 }
 
 export interface TeamProject {
@@ -37,4 +46,3 @@ export function getMemberColors(id: string) {
   const key = COLOR_KEYS[id.charCodeAt(id.length - 1) % COLOR_KEYS.length];
   return AVATAR_COLORS[key];
 }
-

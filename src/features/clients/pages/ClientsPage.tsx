@@ -12,6 +12,7 @@ import { useClientsStore } from '../stores/clientStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import type { Client, ClientStatus } from '../types';
 import ClientListItem from '../components/client-list-item/client-list-item';
+import { generateTemporaryPassword } from '@/src/lib/temporary-password';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -24,6 +25,14 @@ interface ClientFormValues {
   email: string;
   phone: string;
   status: ClientStatus;
+  generatePassword: boolean;
+  temporaryPassword: string;
+}
+
+interface TemporaryAccess {
+  name: string;
+  email: string;
+  temporaryPassword: string;
 }
 
 // ─── Clients Page ─────────────────────────────────────────────────────────────
@@ -46,15 +55,27 @@ export default function Clients() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [temporaryAccess, setTemporaryAccess] = useState<TemporaryAccess | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
     reset,
+    setValue,
+    watch,
   } = useForm<ClientFormValues>({
-    defaultValues: { fullName: '', companyName: '', email: '', phone: '', status: 'active' },
+    defaultValues: {
+      fullName: '',
+      companyName: '',
+      email: '',
+      phone: '',
+      status: 'active',
+      generatePassword: true,
+      temporaryPassword: generateTemporaryPassword(),
+    },
   });
+  const generatePassword = watch('generatePassword');
 
   useEffect(() => subscribeClients(), [subscribeClients]);
 
@@ -98,18 +119,30 @@ export default function Clients() {
   // ── Sidebar helpers ──
   const openAdd = () => {
     setEditingClient(null);
-    reset({ fullName: '', companyName: '', email: '', phone: '', status: 'active' });
+    setTemporaryAccess(null);
+    reset({
+      fullName: '',
+      companyName: '',
+      email: '',
+      phone: '',
+      status: 'active',
+      generatePassword: true,
+      temporaryPassword: generateTemporaryPassword(),
+    });
     setSidebarOpen(true);
   };
 
   const openEdit = (client: Client) => {
     setEditingClient(client);
+    setTemporaryAccess(null);
     reset({
       fullName: client.fullName,
       companyName: client.companyName ?? '',
       email: client.email,
       phone: client.phone ?? '',
       status: client.status,
+      generatePassword: false,
+      temporaryPassword: '',
     });
     setSidebarOpen(true);
   };
@@ -117,10 +150,26 @@ export default function Clients() {
   const onSubmit = async (data: ClientFormValues) => {
     if (editingClient) {
       await updateClient(editingClient.id, data);
+      setSidebarOpen(false);
     } else {
-      await addClient(data);
+      const result = await addClient(data);
+      if (result) {
+        setTemporaryAccess({
+          name: data.fullName,
+          email: result.email,
+          temporaryPassword: result.temporaryPassword,
+        });
+        reset({
+          fullName: '',
+          companyName: '',
+          email: '',
+          phone: '',
+          status: 'active',
+          generatePassword: true,
+          temporaryPassword: generateTemporaryPassword(),
+        });
+      }
     }
-    setSidebarOpen(false);
   };
 
   const handleDelete = async (client: Client) => {
@@ -224,7 +273,10 @@ export default function Clients() {
       {/* Client Form Sidebar */}
       <FormSidebar
         isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={() => {
+          setSidebarOpen(false);
+          setTemporaryAccess(null);
+        }}
         title={editingClient ? 'Edit Client' : 'New Client'}
         description={
           editingClient
@@ -234,6 +286,27 @@ export default function Clients() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            {temporaryAccess ? (
+              <div className="clients-temporary-access rounded-[18px] border border-green-100 bg-green-50 p-4">
+                <p className="type-card-title text-green-700">Client login created</p>
+                <p className="type-muted mt-1 text-green-700/70">
+                  Share this temporary password with {temporaryAccess.name}. They can sign in and change it from settings.
+                </p>
+                <div className="clients-temporary-access-details mt-4 rounded-[14px] bg-white p-3">
+                  <p className="type-label text-gray-400">Email</p>
+                  <p className="type-card-title mt-1 break-all text-(--color-ink)">{temporaryAccess.email}</p>
+                  <p className="type-label mt-3 text-gray-400">Temporary password</p>
+                  <p className="type-card-title mt-1 break-all text-(--color-ink)">{temporaryAccess.temporaryPassword}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard?.writeText(`${temporaryAccess.email}\n${temporaryAccess.temporaryPassword}`)}
+                  className="clients-temporary-access-copy mt-3 w-full rounded-[14px] bg-(--color-ink) px-4 py-3 text-sm font-bold text-white"
+                >
+                  Copy login details
+                </button>
+              </div>
+            ) : null}
 
             <FormField label="Full Name" required error={errors.fullName?.message}>
               <input
@@ -284,6 +357,41 @@ export default function Clients() {
                 <Option value="lost">Lost — churned</Option>
               </Select>
             </FormField>
+
+            {!editingClient ? (
+              <div className="clients-password-section rounded-[18px] border border-gray-100 bg-(--color-surface-alt) p-4">
+                <label className="clients-password-toggle flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    {...register('generatePassword')}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="type-card-title text-(--color-ink)">Generate temporary password</span>
+                </label>
+                <div className="clients-password-field mt-4">
+                  <FormField label="Temporary Password" required error={errors.temporaryPassword?.message}>
+                    <div className="clients-password-row flex gap-2">
+                      <input
+                        {...register('temporaryPassword', {
+                          required: 'Temporary password is required',
+                          minLength: { value: 6, message: 'Password must be at least 6 characters' },
+                        })}
+                        type="text"
+                        readOnly={generatePassword}
+                        className={`${inputCls(!!errors.temporaryPassword)} ${generatePassword ? 'bg-white text-gray-500' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setValue('temporaryPassword', generateTemporaryPassword(), { shouldDirty: true, shouldValidate: true })}
+                        className="clients-password-generate rounded-[14px] border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600"
+                      >
+                        Generate
+                      </button>
+                    </div>
+                  </FormField>
+                </div>
+              </div>
+            ) : null}
 
           </div>
 

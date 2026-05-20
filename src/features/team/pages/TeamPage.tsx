@@ -15,6 +15,7 @@ import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
 import type { TeamAccessRole, TeamMember } from '../types';
 import TeamMemberListItem, { type TeamMemberListItemData } from '../components/team-member-list-item/team-member-list-item';
 import AssignProjectModal from '../components/assign-project-modal/assign-project-modal';
+import { generateTemporaryPassword } from '@/src/lib/temporary-password';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,6 +28,14 @@ interface MemberFormValues {
   role: string;
   accessRole: TeamAccessRole;
   email: string;
+  generatePassword: boolean;
+  temporaryPassword: string;
+}
+
+interface TemporaryAccess {
+  name: string;
+  email: string;
+  temporaryPassword: string;
 }
 
 // ─── Team Page ────────────────────────────────────────────────────────────────
@@ -58,6 +67,7 @@ export default function Team() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
+  const [temporaryAccess, setTemporaryAccess] = useState<TemporaryAccess | null>(null);
   const visibleMembers = useMemo(
     () => withoutCurrentTeamMember(members, profile),
     [members, profile],
@@ -68,9 +78,19 @@ export default function Team() {
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
     reset,
+    setValue,
+    watch,
   } = useForm<MemberFormValues>({
-    defaultValues: { name: '', role: '', accessRole: 'freelancer', email: '' },
+    defaultValues: {
+      name: '',
+      role: '',
+      accessRole: 'freelancer',
+      email: '',
+      generatePassword: true,
+      temporaryPassword: generateTemporaryPassword(),
+    },
   });
+  const generatePassword = watch('generatePassword');
 
   useEffect(() => subscribeMembers(), [subscribeMembers]);
 
@@ -116,18 +136,29 @@ export default function Team() {
   const openAdd = () => {
     if (!canManageTeam) return;
     setEditingMember(null);
-    reset({ name: '', role: '', accessRole: 'freelancer', email: '' });
+    setTemporaryAccess(null);
+    reset({
+      name: '',
+      role: '',
+      accessRole: 'freelancer',
+      email: '',
+      generatePassword: true,
+      temporaryPassword: generateTemporaryPassword(),
+    });
     setSidebarOpen(true);
   };
 
   const openEdit = (member: TeamMember) => {
     if (!canManageTeam || (!isSuperAdmin && member.accessRole === 'superadmin')) return;
     setEditingMember(member);
+    setTemporaryAccess(null);
     reset({
       name: member.name,
       role: member.role,
       accessRole: member.accessRole ?? 'freelancer',
       email: member.email,
+      generatePassword: false,
+      temporaryPassword: '',
     });
     setSidebarOpen(true);
   };
@@ -140,10 +171,25 @@ export default function Team() {
 
     if (editingMember) {
       await updateMember(editingMember.id, data);
+      setSidebarOpen(false);
     } else {
-      await addMember({ assignedProjectId: null, ...data });
+      const result = await addMember({ assignedProjectId: null, ...data });
+      if (result) {
+        setTemporaryAccess({
+          name: data.name,
+          email: result.email,
+          temporaryPassword: result.temporaryPassword,
+        });
+        reset({
+          name: '',
+          role: '',
+          accessRole: 'freelancer',
+          email: '',
+          generatePassword: true,
+          temporaryPassword: generateTemporaryPassword(),
+        });
+      }
     }
-    setSidebarOpen(false);
   };
 
   const handleDelete = async (member: TeamMember) => {
@@ -252,12 +298,37 @@ export default function Team() {
       {/* Member Form Sidebar */}
       <FormSidebar
         isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={() => {
+          setSidebarOpen(false);
+          setTemporaryAccess(null);
+        }}
         title={editingMember ? 'Edit Member' : 'Add Team Member'}
         description={editingMember ? `Editing ${editingMember.name}` : 'New members start unassigned.'}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            {temporaryAccess ? (
+              <div className="team-temporary-access rounded-[18px] border border-green-100 bg-green-50 p-4">
+                <p className="type-card-title text-green-700">Team login created</p>
+                <p className="type-muted mt-1 text-green-700/70">
+                  Share this temporary password with {temporaryAccess.name}. They can sign in and change it from settings.
+                </p>
+                <div className="team-temporary-access-details mt-4 rounded-[14px] bg-white p-3">
+                  <p className="type-label text-gray-400">Email</p>
+                  <p className="type-card-title mt-1 break-all text-(--color-ink)">{temporaryAccess.email}</p>
+                  <p className="type-label mt-3 text-gray-400">Temporary password</p>
+                  <p className="type-card-title mt-1 break-all text-(--color-ink)">{temporaryAccess.temporaryPassword}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard?.writeText(`${temporaryAccess.email}\n${temporaryAccess.temporaryPassword}`)}
+                  className="team-temporary-access-copy mt-3 w-full rounded-[14px] bg-(--color-ink) px-4 py-3 text-sm font-bold text-white"
+                >
+                  Copy login details
+                </button>
+              </div>
+            ) : null}
+
             <FormField label="Full Name" required error={errors.name?.message}>
               <input
                 {...register('name', { required: 'Name is required' })}
@@ -287,6 +358,7 @@ export default function Team() {
             <FormField label="Email" error={errors.email?.message}>
               <input
                 {...register('email', {
+                  required: 'Email is required',
                   pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
                 })}
                 type="email"
@@ -294,6 +366,41 @@ export default function Team() {
                 className={inputCls(!!errors.email)}
               />
             </FormField>
+
+            {!editingMember ? (
+              <div className="team-password-section rounded-[18px] border border-gray-100 bg-(--color-surface-alt) p-4">
+                <label className="team-password-toggle flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    {...register('generatePassword')}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span className="type-card-title text-(--color-ink)">Generate temporary password</span>
+                </label>
+                <div className="team-password-field mt-4">
+                  <FormField label="Temporary Password" required error={errors.temporaryPassword?.message}>
+                    <div className="team-password-row flex gap-2">
+                      <input
+                        {...register('temporaryPassword', {
+                          required: 'Temporary password is required',
+                          minLength: { value: 6, message: 'Password must be at least 6 characters' },
+                        })}
+                        type="text"
+                        readOnly={generatePassword}
+                        className={`${inputCls(!!errors.temporaryPassword)} ${generatePassword ? 'bg-white text-gray-500' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setValue('temporaryPassword', generateTemporaryPassword(), { shouldDirty: true, shouldValidate: true })}
+                        className="team-password-generate rounded-[14px] border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600"
+                      >
+                        Generate
+                      </button>
+                    </div>
+                  </FormField>
+                </div>
+              </div>
+            ) : null}
           </div>
           <FormSidebarActions
             onCancel={() => setSidebarOpen(false)}

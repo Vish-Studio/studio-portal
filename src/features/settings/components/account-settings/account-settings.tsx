@@ -1,4 +1,4 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import {
   Button,
   FormField,
@@ -10,16 +10,9 @@ import {
 } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import type { AuthProfileUpdateInput, NewsletterPreferences } from '@/src/types/auth';
+import type { AuthProfileUpdateInput } from '@/src/types/auth';
 
 type SettingsSection = 'profile' | 'email' | 'password' | 'newsletters';
-
-const defaultNewsletterPreferences: NewsletterPreferences = {
-  marketingEmails: false,
-  productUpdates: true,
-  weeklyDigest: true,
-  securityAlerts: true,
-};
 
 const sections: Array<{ key: SettingsSection; icon: string; label: string; description: string }> = [
   { key: 'profile', icon: 'person', label: 'Profile details', description: 'Name, role and phone number' },
@@ -61,12 +54,15 @@ export default function AccountSettings() {
   const [resettingPassword, setResettingPassword] = useState(false);
   const [form, setForm] = useState<AuthProfileUpdateInput>({
     email: '',
-    fullName: '',
-    phone: '',
+    full_name: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
     jobTitle: '',
-    company: '',
-    recoveryEmail: '',
-    newsletterPreferences: defaultNewsletterPreferences,
+    company_name: '',
+    recovery_email: '',
+    gender: '',
+    newsletterPreferences: false,
   });
 
   useEffect(() => {
@@ -74,15 +70,15 @@ export default function AccountSettings() {
 
     setForm({
       email: profile.email ?? '',
-      fullName: profile.fullName ?? '',
-      phone: profile.phone ?? '',
+      full_name: profile.full_name ?? '',
+      first_name: profile.first_name ?? '',
+      last_name: profile.last_name ?? '',
+      phone_number: profile.phone_number ?? '',
       jobTitle: profile.jobTitle ?? '',
-      company: profile.company ?? '',
-      recoveryEmail: profile.recoveryEmail ?? '',
-      newsletterPreferences: {
-        ...defaultNewsletterPreferences,
-        ...profile.newsletterPreferences,
-      },
+      company_name: profile.company_name ?? '',
+      recovery_email: profile.recovery_email ?? '',
+      gender: profile.gender ?? '',
+      newsletterPreferences: profile.newsletterPreferences ?? false,
     });
     setIsDirty(false);
   }, [profile]);
@@ -93,33 +89,24 @@ export default function AccountSettings() {
     label: section.label,
     icon: <MaterialIcon name={section.icon} size={16} />,
   }));
-  const newsletterPreferences = useMemo(
-    () => ({ ...defaultNewsletterPreferences, ...form.newsletterPreferences }),
-    [form.newsletterPreferences],
-  );
-
   const updateForm = <Key extends keyof AuthProfileUpdateInput>(key: Key, value: AuthProfileUpdateInput[Key]) => {
     setForm(prev => ({ ...prev, [key]: value }));
     setIsDirty(true);
-  };
-
-  const updateNewsletterPreference = (key: keyof NewsletterPreferences, value: boolean) => {
-    updateForm('newsletterPreferences', {
-      ...newsletterPreferences,
-      [key]: value,
-    });
   };
 
   const handleSave = async () => {
     await updateProfile({
       ...form,
       email: form.email?.trim().toLowerCase(),
-      fullName: form.fullName?.trim(),
-      phone: form.phone?.trim(),
+      full_name: form.full_name?.trim(),
+      first_name: form.first_name?.trim(),
+      last_name: form.last_name?.trim(),
+      phone_number: form.phone_number?.trim(),
       jobTitle: form.jobTitle?.trim(),
-      company: form.company?.trim(),
-      recoveryEmail: form.recoveryEmail?.trim().toLowerCase(),
-      newsletterPreferences,
+      company_name: form.company_name?.trim(),
+      recovery_email: form.recovery_email?.trim().toLowerCase(),
+      gender: form.gender,
+      newsletterPreferences: !!form.newsletterPreferences,
     });
     setIsDirty(false);
   };
@@ -151,16 +138,31 @@ export default function AccountSettings() {
     profile: (
       <div className="account-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField label="Full name">
-          <input value={form.fullName ?? ''} onChange={event => updateForm('fullName', event.target.value)} className={inputCls()} />
+          <input value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} className={inputCls()} />
+        </FormField>
+        <FormField label="First name">
+          <input value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} className={inputCls()} />
+        </FormField>
+        <FormField label="Last name">
+          <input value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} className={inputCls()} />
         </FormField>
         <FormField label="Role or title">
           <input value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} className={inputCls()} />
         </FormField>
+        <FormField label="Gender">
+          <select value={form.gender ?? ''} onChange={event => updateForm('gender', event.target.value as AuthProfileUpdateInput['gender'])} className={inputCls()}>
+            <option value="">Not set</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="non_binary">Non-binary</option>
+            <option value="prefer_not_to_say">Prefer not to say</option>
+          </select>
+        </FormField>
         <FormField label="Phone number">
-          <input value={form.phone ?? ''} onChange={event => updateForm('phone', event.target.value)} className={inputCls()} />
+          <input value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} className={inputCls()} />
         </FormField>
         <FormField label="Company">
-          <input value={form.company ?? ''} onChange={event => updateForm('company', event.target.value)} className={inputCls()} />
+          <input value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} className={inputCls()} />
         </FormField>
       </div>
     ),
@@ -170,7 +172,7 @@ export default function AccountSettings() {
           <input type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} className={inputCls()} />
         </FormField>
         <FormField label="Recovery email">
-          <input type="email" value={form.recoveryEmail ?? ''} onChange={event => updateForm('recoveryEmail', event.target.value)} className={inputCls()} />
+          <input type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} className={inputCls()} />
         </FormField>
       </div>
     ),
@@ -193,10 +195,7 @@ export default function AccountSettings() {
     ),
     newsletters: (
       <div className="account-settings-newsletters rounded-2xl bg-(--color-surface) p-4">
-        <PreferenceRow label="Marketing emails" description="Receive occasional offers and studio portal news." checked={newsletterPreferences.marketingEmails} onChange={checked => updateNewsletterPreference('marketingEmails', checked)} />
-        <PreferenceRow label="Product updates" description="Receive updates when new features are available." checked={newsletterPreferences.productUpdates} onChange={checked => updateNewsletterPreference('productUpdates', checked)} />
-        <PreferenceRow label="Weekly digest" description="Receive a weekly summary of projects, tasks and scheduled items." checked={newsletterPreferences.weeklyDigest} onChange={checked => updateNewsletterPreference('weeklyDigest', checked)} />
-        <PreferenceRow label="Security alerts" description="Receive important account and sign-in alerts." checked={newsletterPreferences.securityAlerts} onChange={checked => updateNewsletterPreference('securityAlerts', checked)} />
+        <PreferenceRow label="Newsletter" description="Receive studio news, product updates, and useful project digests." checked={!!form.newsletterPreferences} onChange={checked => updateForm('newsletterPreferences', checked)} />
       </div>
     ),
   };

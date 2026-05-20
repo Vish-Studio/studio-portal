@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -15,6 +16,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { requireFirebase } from "@/src/firebase/requireFirebase";
+import { userProvisioningService } from "@/src/features/auth/services/userProvisioningService";
 import type { Client, ClientStatus } from "../types";
 
 export interface ClientInput {
@@ -23,20 +25,43 @@ export interface ClientInput {
   email: string;
   phone?: string;
   status: ClientStatus;
+  temporaryPassword?: string;
+}
+
+export interface ClientCreateResult {
+  id: string;
+  email: string;
+  temporaryPassword: string;
 }
 
 const clientsCollection = () => collection(requireFirebase().db, "clients");
 const userProfileRef = (email: string) => doc(requireFirebase().db, "users", email.trim().toLowerCase());
+
+const legacyUserFieldDeletes = () => ({
+  fullName: deleteField(),
+  phone: deleteField(),
+  jobTitle: deleteField(),
+  company: deleteField(),
+  recoveryEmail: deleteField(),
+  newsletter: deleteField(),
+  staffRole: deleteField(),
+  teamId: deleteField(),
+  teamMemberId: deleteField(),
+  clientId: deleteField(),
+  createdAt: deleteField(),
+  updatedAt: deleteField(),
+});
 
 const upsertClientUserProfile = async (
   profileId: string,
   payload: {
     email: string;
     role: "client";
-    clientId: string;
-    fullName: string;
-    company: string;
-    phone: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    company_name: string;
+    phone_number: string;
     status: "active" | "inactive";
   },
 ) => {
@@ -45,9 +70,14 @@ const upsertClientUserProfile = async (
   await setDoc(
     ref,
     {
+      ...legacyUserFieldDeletes(),
       ...payload,
-      ...(snapshot.exists() ? {} : { createdAt: serverTimestamp() }),
-      updatedAt: serverTimestamp(),
+      id: profileId,
+      feature_access: {},
+      is_active: payload.status === "active",
+      newsletterPreferences: false,
+      ...(snapshot.exists() ? {} : { created_at: serverTimestamp() }),
+      updated_at: serverTimestamp(),
     },
     { merge: true },
   );
@@ -60,6 +90,11 @@ const cleanClientInput = (input: ClientInput) => ({
   phone: input.phone?.trim() || "",
   status: input.status,
 });
+
+const splitName = (fullName: string) => {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  return { first_name: parts[0] ?? "", last_name: parts.slice(1).join(" ") };
+};
 
 const cleanClientUpdate = (input: Partial<ClientInput>) => {
   const payload: Partial<ClientInput> = {};
@@ -109,28 +144,47 @@ export const clientsService = {
 
   async createClient(input: ClientInput) {
     const payload = cleanClientInput(input);
+    const temporaryPassword = input.temporaryPassword?.trim();
+
+    if (!temporaryPassword) {
+      throw new Error("Temporary password is required to create a client login.");
+    }
+
+    const user = await userProvisioningService.createUser({
+      email: payload.email,
+      password: temporaryPassword,
+      displayName: payload.fullName,
+    });
 
     const ref = await addDoc(clientsCollection(), {
       ...payload,
-      userId: null,
+      userId: user.uid,
+      user_id: user.uid,
+      full_name: payload.fullName,
+      company_name: payload.companyName,
+      phone_number: payload.phone,
       createdAt: serverTimestamp(),
+      created_at: serverTimestamp(),
       updatedAt: serverTimestamp(),
+      updated_at: serverTimestamp(),
     });
+    const nameParts = splitName(payload.fullName);
 
-    await upsertClientUserProfile(payload.email, {
+    await upsertClientUserProfile(user.uid, {
       email: payload.email,
       role: "client",
-      clientId: ref.id,
-      fullName: payload.fullName,
-      company: payload.companyName,
-      phone: payload.phone,
+      full_name: payload.fullName,
+      first_name: nameParts.first_name,
+      last_name: nameParts.last_name,
+      company_name: payload.companyName,
+      phone_number: payload.phone,
       status:
         payload.status === "inactive" || payload.status === "lost"
           ? "inactive"
           : "active",
     });
 
-    return ref.id;
+    return { id: ref.id, email: payload.email, temporaryPassword };
   },
 
   async updateClient(id: string, input: Partial<ClientInput>) {
@@ -144,7 +198,11 @@ export const clientsService = {
 
     await updateDoc(ref, {
       ...payload,
+      ...(payload.fullName !== undefined ? { full_name: payload.fullName } : {}),
+      ...(payload.companyName !== undefined ? { company_name: payload.companyName } : {}),
+      ...(payload.phone !== undefined ? { phone_number: payload.phone } : {}),
       updatedAt: serverTimestamp(),
+      updated_at: serverTimestamp(),
     });
 
     const nextEmail = (payload.email ?? previous?.email ?? "").trim().toLowerCase();
@@ -161,10 +219,10 @@ export const clientsService = {
       const userProfilePayload = {
         email: nextEmail,
         role: "client" as const,
-        clientId: id,
-        fullName: payload.fullName ?? previous?.fullName ?? nextEmail,
-        company: payload.companyName ?? previous?.companyName ?? "",
-        phone: payload.phone ?? previous?.phone ?? "",
+        full_name: payload.fullName ?? previous?.fullName ?? nextEmail,
+        ...splitName(payload.fullName ?? previous?.fullName ?? nextEmail),
+        company_name: payload.companyName ?? previous?.companyName ?? "",
+        phone_number: payload.phone ?? previous?.phone ?? "",
         status: profileStatus,
       };
       await upsertClientUserProfile(nextEmail, userProfilePayload);

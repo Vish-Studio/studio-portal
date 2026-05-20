@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 export type { TeamMember, TeamProject } from '../types';
 import type { TeamMember, TeamProject } from '../types';
-import { teamService, type TeamMemberInput } from '../services/teamService';
+import { teamService, type TeamMemberCreateResult, type TeamMemberInput } from '../services/teamService';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
 
 interface TeamState {
@@ -14,7 +14,7 @@ interface TeamState {
   setMembers: (members: TeamMember[]) => void;
   setProjects: (projects: TeamProject[]) => void;
   subscribeMembers: () => () => void;
-  addMember: (member: TeamMemberInput) => Promise<string | undefined>;
+  addMember: (member: TeamMemberInput) => Promise<TeamMemberCreateResult | undefined>;
   updateMember: (id: string, updates: Partial<TeamMemberInput>) => Promise<void>;
   removeMember: (id: string) => Promise<void>;
   assignMember: (memberId: string, projectId: string | null) => Promise<void>;

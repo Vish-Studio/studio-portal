@@ -1,5 +1,5 @@
-import { initializeApp, type FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
+import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 export const firebaseConfig = {
@@ -22,6 +22,7 @@ const requiredKeys = [
 export const isFirebaseConfigured = requiredKeys.every(Boolean);
 
 let app: FirebaseApp | null = null;
+let provisioningAuth: Auth | null = null;
 
 if (isFirebaseConfigured) {
   app = initializeApp(firebaseConfig);
@@ -31,3 +32,17 @@ export const firebaseApp = app;
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
 
+export const getProvisioningAuth = () => {
+  if (!isFirebaseConfigured) {
+    throw new Error('Firebase is not configured. Add the VITE_FIREBASE_* values to your .env.local file.');
+  }
+
+  if (!provisioningAuth) {
+    const provisioningApp = getApps().some(item => item.name === 'user-provisioning')
+      ? getApp('user-provisioning')
+      : initializeApp(firebaseConfig, 'user-provisioning');
+    provisioningAuth = getAuth(provisioningApp);
+  }
+
+  return provisioningAuth;
+};

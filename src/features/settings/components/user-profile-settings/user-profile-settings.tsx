@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Avatar,
   Button,
@@ -9,16 +9,9 @@ import {
 } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import type { AuthProfileUpdateInput, NewsletterPreferences } from '@/src/types/auth';
+import type { AuthProfileUpdateInput } from '@/src/types/auth';
 
 type SettingsTab = 'profile' | 'newsletters' | 'security';
-
-const defaultNewsletterPreferences: NewsletterPreferences = {
-  marketingEmails: false,
-  productUpdates: true,
-  weeklyDigest: true,
-  securityAlerts: true,
-};
 
 const tabs: Array<{
   key: SettingsTab;
@@ -77,12 +70,15 @@ export default function UserProfileSettings() {
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [form, setForm] = useState<AuthProfileUpdateInput>({
     email: '',
-    fullName: '',
-    phone: '',
+    full_name: '',
+    first_name: '',
+    last_name: '',
+    phone_number: '',
     jobTitle: '',
-    company: '',
-    recoveryEmail: '',
-    newsletterPreferences: defaultNewsletterPreferences,
+    company_name: '',
+    recovery_email: '',
+    gender: '',
+    newsletterPreferences: false,
   });
   const [isDirty, setIsDirty] = useState(false);
   const [resettingPassword, setResettingPassword] = useState(false);
@@ -91,48 +87,39 @@ export default function UserProfileSettings() {
     if (!profile) return;
 
     setForm({
-      fullName: profile.fullName ?? '',
+      full_name: profile.full_name ?? '',
+      first_name: profile.first_name ?? '',
+      last_name: profile.last_name ?? '',
       email: profile.email ?? '',
-      phone: profile.phone ?? '',
+      phone_number: profile.phone_number ?? '',
       jobTitle: profile.jobTitle ?? '',
-      company: profile.company ?? '',
-      recoveryEmail: profile.recoveryEmail ?? '',
-      newsletterPreferences: {
-        ...defaultNewsletterPreferences,
-        ...profile.newsletterPreferences,
-      },
+      company_name: profile.company_name ?? '',
+      recovery_email: profile.recovery_email ?? '',
+      gender: profile.gender ?? '',
+      newsletterPreferences: profile.newsletterPreferences ?? false,
     });
     setIsDirty(false);
   }, [profile]);
 
   const activeTabMeta = tabs.find(tab => tab.key === activeTab) ?? tabs[0];
-  const newsletterPreferences = useMemo(
-    () => ({ ...defaultNewsletterPreferences, ...form.newsletterPreferences }),
-    [form.newsletterPreferences],
-  );
-
   const updateForm = <Key extends keyof AuthProfileUpdateInput>(key: Key, value: AuthProfileUpdateInput[Key]) => {
     setForm(prev => ({ ...prev, [key]: value }));
     setIsDirty(true);
-  };
-
-  const updateNewsletterPreference = (key: keyof NewsletterPreferences, value: boolean) => {
-    updateForm('newsletterPreferences', {
-      ...newsletterPreferences,
-      [key]: value,
-    });
   };
 
   const handleSave = async () => {
     await updateProfile({
       ...form,
       email: form.email?.trim().toLowerCase(),
-      fullName: form.fullName?.trim(),
-      phone: form.phone?.trim(),
+      full_name: form.full_name?.trim(),
+      first_name: form.first_name?.trim(),
+      last_name: form.last_name?.trim(),
+      phone_number: form.phone_number?.trim(),
       jobTitle: form.jobTitle?.trim(),
-      company: form.company?.trim(),
-      recoveryEmail: form.recoveryEmail?.trim(),
-      newsletterPreferences,
+      company_name: form.company_name?.trim(),
+      recovery_email: form.recovery_email?.trim().toLowerCase(),
+      gender: form.gender,
+      newsletterPreferences: !!form.newsletterPreferences,
     });
     setIsDirty(false);
   };
@@ -238,22 +225,37 @@ export default function UserProfileSettings() {
             {activeTab === 'profile' ? (
               <div className="user-profile-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField label="Full name">
-                  <input value={form.fullName ?? ''} onChange={event => updateForm('fullName', event.target.value)} className={inputCls()} />
+                  <input value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} className={inputCls()} />
+                </FormField>
+                <FormField label="First name">
+                  <input value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} className={inputCls()} />
+                </FormField>
+                <FormField label="Last name">
+                  <input value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} className={inputCls()} />
                 </FormField>
                 <FormField label="Primary email" hint="Email sign-in is managed by Firebase Authentication.">
                   <input type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} className={inputCls()} />
                 </FormField>
                 <FormField label="Phone number">
-                  <input value={form.phone ?? ''} onChange={event => updateForm('phone', event.target.value)} className={inputCls()} placeholder="+230 5 000 0000" />
+                  <input value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} className={inputCls()} placeholder="+230 5 000 0000" />
                 </FormField>
                 <FormField label="Recovery email">
-                  <input type="email" value={form.recoveryEmail ?? ''} onChange={event => updateForm('recoveryEmail', event.target.value)} className={inputCls()} placeholder="backup@email.com" />
+                  <input type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} className={inputCls()} placeholder="backup@email.com" />
                 </FormField>
                 <FormField label="Role or title">
                   <input value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} className={inputCls()} placeholder="Marketing Manager" />
                 </FormField>
                 <FormField label="Company">
-                  <input value={form.company ?? ''} onChange={event => updateForm('company', event.target.value)} className={inputCls()} placeholder="Company name" />
+                  <input value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} className={inputCls()} placeholder="Company name" />
+                </FormField>
+                <FormField label="Gender">
+                  <select value={form.gender ?? ''} onChange={event => updateForm('gender', event.target.value as AuthProfileUpdateInput['gender'])} className={inputCls()}>
+                    <option value="">Not set</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="non_binary">Non-binary</option>
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                  </select>
                 </FormField>
               </div>
             ) : null}
@@ -261,28 +263,10 @@ export default function UserProfileSettings() {
             {activeTab === 'newsletters' ? (
               <div className="user-profile-settings-newsletters rounded-2xl px-4">
                 <PreferenceRow
-                  label="Project updates"
-                  description="Receive email updates when project phases, files, or approvals change."
-                  checked={newsletterPreferences.productUpdates}
-                  onChange={checked => updateNewsletterPreference('productUpdates', checked)}
-                />
-                <PreferenceRow
-                  label="Weekly digest"
-                  description="Get a weekly summary of schedules, tasks, documents, and pending actions."
-                  checked={newsletterPreferences.weeklyDigest}
-                  onChange={checked => updateNewsletterPreference('weeklyDigest', checked)}
-                />
-                <PreferenceRow
-                  label="Studio newsletters"
-                  description="Receive occasional announcements and studio news."
-                  checked={newsletterPreferences.marketingEmails}
-                  onChange={checked => updateNewsletterPreference('marketingEmails', checked)}
-                />
-                <PreferenceRow
-                  label="Security alerts"
-                  description="Receive important account and sign-in notifications."
-                  checked={newsletterPreferences.securityAlerts}
-                  onChange={checked => updateNewsletterPreference('securityAlerts', checked)}
+                  label="Newsletter"
+                  description="Receive studio news, product updates, and useful project digests."
+                  checked={!!form.newsletterPreferences}
+                  onChange={checked => updateForm('newsletterPreferences', checked)}
                 />
               </div>
             ) : null}
