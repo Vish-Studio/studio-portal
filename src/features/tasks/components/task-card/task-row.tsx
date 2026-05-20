@@ -1,6 +1,6 @@
 import { FunctionComponent } from 'react';
 import { format, isPast, parseISO } from 'date-fns';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { AvatarStack, MaterialIcon, RowActionsMenu, TaskStatusBadge, type RowAction } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';

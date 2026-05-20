@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Command, Users, CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
+import { Command, Users, CreditCard, TrendingUp, TrendingDown } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { DocumentOverview, useDocumentsStore } from '@/src/features/documents';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';

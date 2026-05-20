@@ -1,11 +1,10 @@
 import { useMemo, useState } from 'react';
-import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { MaterialIcon, StatusBadge } from '@/src/shared/components';
+import { MaterialIcon, RecordMeta, StatusBadge, formatRecordDate } from '@/src/shared/components';
 import { useDocumentsStore } from '../stores/documentStore';
 import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useProjectsStore } from '@/src/features/projects';
@@ -195,33 +194,29 @@ export default function DocumentsPage() {
     <DashboardLayout title="Documents">
       <div className="flex flex-col gap-5 pb-10">
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            variant="white"
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard size="sm" variant="lime"
             icon={<MaterialIcon name="folder" size={16} />}
             label="Total Documents"
             value={unified.length}
             badge={tabCounts['pending'] ?? 0}
             badgeLabel="pending"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<MaterialIcon name="person_check" size={16} />}
             label="Awaits Client"
             value={tabCounts['awaits-client'] ?? 0}
             badge={tabCounts['awaits-signature'] ?? 0}
             badgeLabel="awaiting signature"
           />
-          <StatCard
-            variant="lime"
+          <StatCard size="sm" variant="white"
             icon={<MaterialIcon name="edit_document" size={16} />}
             label="Admin Action"
             value={tabCounts['admin-action'] ?? 0}
             badge={filtered.length}
             badgeLabel="visible"
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="dark"
             icon={<MaterialIcon name="verified" size={16} />}
             label="Completed"
             value={(tabCounts['signed'] ?? 0) + (tabCounts['complete'] ?? 0)}
@@ -275,47 +270,19 @@ export default function DocumentsPage() {
                         variant={STATUS_VARIANT[doc.status]}
                       />
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                      {/* Type label */}
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                        {doc.typeLabel}
-                      </span>
-                      {/* Project */}
-                      {doc.projectName && (
-                        <>
-                          <span className="text-gray-200 text-[10px]">·</span>
-                          <span className="text-[10px] text-gray-400 truncate flex items-center gap-0.5">
-                            <MaterialIcon name="work" size={9} />
-                            {doc.projectName}
-                          </span>
-                        </>
-                      )}
-                      {/* Phase */}
-                      {doc.phaseName && (
-                        <>
-                          <span className="text-gray-200 text-[10px]">·</span>
-                          <span className="text-[10px] text-gray-400 truncate flex items-center gap-0.5">
-                            <MaterialIcon name="route" size={9} />
-                            {doc.phaseName}
-                          </span>
-                        </>
-                      )}
-                      {/* Client */}
-                      {doc.clientName && (
-                        <>
-                          <span className="text-gray-200 text-[10px]">·</span>
-                          <span className="text-[10px] text-gray-400 truncate">
-                            {doc.clientName}
-                          </span>
-                        </>
-                      )}
-                    </div>
+                    <RecordMeta
+                      className="mt-1"
+                      items={[
+                        { label: doc.typeLabel, icon: 'description' },
+                        doc.projectName && { label: doc.projectName, icon: 'work' },
+                        doc.phaseName && { label: doc.phaseName, icon: 'route' },
+                        doc.clientName && { label: doc.clientName, icon: 'person' },
+                      ]}
+                    />
                   </div>
 
                   {/* Date */}
-                  <span className="hidden sm:block text-[11px] text-gray-400 shrink-0 tabular-nums">
-                    {format(doc.date, 'MMM d, yyyy')}
-                  </span>
+                  <RecordMeta className="hidden shrink-0 tabular-nums sm:flex" items={[{ label: formatRecordDate(doc.date), icon: 'event' }]} />
 
                   {/* Open arrow */}
                   <MaterialIcon

@@ -1,6 +1,6 @@
 import type { FunctionComponent, ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { PanelLeftClose, Settings, X } from 'lucide-react';
+import { PanelLeftClose, Settings, X } from '@/src/shared/components/material-icon/material-lucide-icons';
 
 export interface SidebarNavItem {
   icon: ReactNode;

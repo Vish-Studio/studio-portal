@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal } from '@/src/shared/components/material-icon/material-lucide-icons';
 import MaterialIcon from '../material-icon/material-icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

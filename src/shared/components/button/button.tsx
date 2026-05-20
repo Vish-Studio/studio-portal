@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md';

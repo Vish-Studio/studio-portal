@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckCircle, Layers, Pencil, Trash2 } from 'lucide-react';
+import { Briefcase, CheckCircle, Layers, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import Button from '@/src/shared/components/button/button';
@@ -133,10 +133,10 @@ export default function UserProjectsPage() {
   return (
     <UserLayout title="My Projects">
       <div className="flex flex-col gap-5 py-10">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-          <StatCard variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={myProjects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
-          <StatCard variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
-          <StatCard variant="dark" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${myProjects.length} project${myProjects.length !== 1 ? 's' : ''}`} badgeLabel="tracked" />
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <StatCard size="sm" variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={myProjects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
+          <StatCard size="sm" variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
+          <StatCard size="sm" variant="dark" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${myProjects.length} project${myProjects.length !== 1 ? 's' : ''}`} badgeLabel="tracked" />
         </div>
 
         {pendingActions > 0 && (

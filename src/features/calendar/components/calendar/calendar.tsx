@@ -1,5 +1,5 @@
 import { FunctionComponent, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from '@/src/shared/components/material-icon/material-lucide-icons';
 import Select from '@/src/shared/components/select/select';
 import Option from '@/src/shared/components/select/option';
 

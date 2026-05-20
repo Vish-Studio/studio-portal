@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X } from '@/src/shared/components/material-icon/material-lucide-icons';
 
 export type SidebarWidth = 'sm' | 'md' | 'lg';
 
@@ -114,7 +114,7 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
 */
 export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="form-sidebar-footer shrink-0 border-t border-gray-100 px-6 py-4 bg-white flex gap-3">
+    <div className="form-sidebar-footer flex shrink-0 gap-3 border-t border-gray-100 bg-white px-6 py-4 [&_a]:flex-1 [&_a>button]:w-full [&_button]:min-w-0 [&_button]:flex-1">
       {children}
     </div>
   );

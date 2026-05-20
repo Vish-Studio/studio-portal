@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, Printer, Check } from 'lucide-react';
+import { ArrowLeft, Pencil, Trash2, ChevronUp, ChevronDown, Printer, Check } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import BlockEditorPanel from '../components/editor/block-editor-panel';
 import AddBlockMenu from '../components/editor/add-block-menu';

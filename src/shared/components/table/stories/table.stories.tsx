@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Eye, Pencil, Trash2 } from 'lucide-react';
+import { Eye, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import TableData, { RowActionsMenu, RowActions, type Column } from '../table';
 import StatusBadge from '../../status-badge/status-badge';
 

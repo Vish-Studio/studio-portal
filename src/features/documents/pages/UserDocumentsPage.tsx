@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { format } from 'date-fns';
-import { FileText, ShieldCheck, Clock } from 'lucide-react';
+import { FileText, ShieldCheck, Clock } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import CardContent from '@/src/shared/components/card-content/card-content';
@@ -201,25 +201,22 @@ const UserDocumentsPage = () => {
       <div className="flex flex-col gap-5 py-10">
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <StatCard
-            variant="lime"
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <StatCard size="sm" variant="lime"
             icon={<FileText size={16} />}
             label="Total Documents"
             value={myDocuments.length}
             badge={`${presentTypes.length} type${presentTypes.length !== 1 ? 's' : ''}`}
             badgeLabel="of documents"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<ShieldCheck size={16} />}
             label="Signed"
             value={signedCount}
             badge={signedCount === contracts.length && contracts.length > 0 ? 'All signed' : `${contracts.length} contract${contracts.length !== 1 ? 's' : ''}`}
             badgeLabel={contracts.length > 0 ? 'total' : 'no contracts'}
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="dark"
             icon={<Clock size={16} />}
             label="Pending Signature"
             value={pendingSignature}

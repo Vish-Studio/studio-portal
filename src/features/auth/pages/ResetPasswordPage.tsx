@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, Check, Eye, EyeOff, KeyRound, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, Check, Eye, EyeOff, KeyRound, ShieldAlert } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, FormField, inputCls } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { useAuthStore } from '../stores/authStore';

@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Briefcase, Building2, Mail, Phone, TrendingUp } from 'lucide-react';
+import { Briefcase, Building2, Mail, Phone, TrendingUp } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
 import { DetailHeroCard } from '@/src/shared/components';
 import { avatarColor, ClientStatusBadge } from '@/src/shared/components';

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { Briefcase, Mail, Phone, TrendingUp } from 'lucide-react';
+import { Briefcase, Mail, Phone, TrendingUp } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DetailHeroCard from '../detail-hero-card';
 
 const meta = {

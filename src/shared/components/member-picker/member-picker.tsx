@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect, FunctionComponent } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X } from '@/src/shared/components/material-icon/material-lucide-icons';
 import Avatar from '../avatar/avatar';
 import { inputCls } from '../form-field/form-field';
 import type { TeamMember } from '@/src/features/team';

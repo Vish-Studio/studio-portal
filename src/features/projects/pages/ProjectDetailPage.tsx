@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, Check, Pencil, Trash2 } from 'lucide-react';
+import { Briefcase, Check, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';

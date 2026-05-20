@@ -1,12 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, Briefcase, UserCheck } from 'lucide-react';
+import { Briefcase, ShieldCheck, UserCheck, UserRoundCheck, UserRoundX, Users, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Button, FormField, inputCls, Modal, Option, RowActionsMenu, Select } from '@/src/shared/components';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
@@ -135,6 +136,11 @@ export default function Team() {
     unassigned: visibleMembers.filter(m => m.assignedProjectId === null).length,
   }), [visibleMembers]);
 
+  const accessCounts = useMemo(() => ({
+    admins: visibleMembers.filter(m => m.accessRole === 'admin' || m.accessRole === 'superadmin').length,
+    freelancers: visibleMembers.filter(m => m.accessRole === 'freelancer').length,
+  }), [visibleMembers]);
+
   const tabs: TabItem[] = [
     { key: 'all', label: 'All', count: tabCounts.all },
     { key: 'assigned', label: 'Assigned', count: tabCounts.assigned },
@@ -203,6 +209,45 @@ export default function Team() {
   return (
     <DashboardLayout title="Team">
       <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard
+            size="sm"
+            variant="lime"
+            icon={<Users size={16} />}
+            label="Team Members"
+            value={tabCounts.all}
+            badge={`${accessCounts.freelancers} freelancer${accessCounts.freelancers !== 1 ? 's' : ''}`}
+            badgeLabel="delivery team"
+          />
+          <StatCard
+            size="sm"
+            variant="surface"
+            icon={<UserRoundCheck size={16} />}
+            label="Assigned"
+            value={tabCounts.assigned}
+            badge={`${projects.length} project${projects.length !== 1 ? 's' : ''}`}
+            badgeLabel="available to assign"
+          />
+          <StatCard
+            size="sm"
+            variant="white"
+            icon={<UserRoundX size={16} />}
+            label="Available"
+            value={tabCounts.unassigned}
+            badge={tabCounts.unassigned > 0 ? 'Ready' : 'Fully assigned'}
+            badgeLabel="unassigned members"
+          />
+          <StatCard
+            size="sm"
+            variant="dark"
+            icon={<ShieldCheck size={16} />}
+            label="Admin Access"
+            value={accessCounts.admins}
+            badge={isSuperAdmin ? 'Full control' : 'Limited'}
+            badgeLabel="role access"
+          />
+        </div>
+
         <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
           <TableTab
             tabs={tabs}

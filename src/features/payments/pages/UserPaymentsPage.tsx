@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { CreditCard, Clock, CheckCircle } from 'lucide-react';
+import { CreditCard, Clock, CheckCircle } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
@@ -123,25 +123,22 @@ const UserPaymentsPage = () => {
         )}
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">
-          <StatCard
-            variant="lime"
+        <div className="grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-3">
+          <StatCard size="sm" variant="lime"
             icon={<CreditCard size={16} />}
             label="Contract Value"
             value={fmt(totalAgreed)}
             badge={`${rows.length} project${rows.length !== 1 ? 's' : ''}`}
             badgeLabel="total"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<CheckCircle size={16} />}
             label="Total Paid"
             value={fmt(totalPaid)}
             badge={`${Math.round((totalPaid / (totalAgreed || 1)) * 100)}%`}
             badgeLabel="of contract value"
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="dark"
             icon={<Clock size={16} />}
             label="Outstanding"
             value={fmt(totalDue)}

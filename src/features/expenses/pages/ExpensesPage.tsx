@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, Pencil, Plus, Trash2, WalletCards, X } from 'lucide-react';
+import { ArrowDownLeft, ArrowUpRight, CalendarDays, Pencil, Plus, Trash2, WalletCards, X } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { Avatar, Button, ConfirmDialog, FormField, inputCls, MaterialIcon, Modal, Option, RowActionsMenu, Select, StatusBadge } from '@/src/shared/components';
+import { Avatar, Button, ConfirmDialog, FormField, formatRecordDate, inputCls, MaterialIcon, Option, RecordMeta, RowActionsMenu, Select, StatusBadge } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { useTeamStore } from '@/src/features/team';
 import { useExpenseStore, type ExpenseInput } from '../stores/expenseStore';
@@ -61,11 +61,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 const fmt = (amount: number) =>
   '$' + amount.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-const dateLabel = (value: string) => {
-  const date = new Date(`${value}T00:00:00`);
-  if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-};
+const dateLabel = (value: string) => formatRecordDate(`${value}T00:00:00`, value);
 
 const toExpenseInput = (data: ExpenseFormValues): ExpenseInput => ({
   type: data.type,
@@ -91,7 +87,7 @@ const defaultFormValues: ExpenseFormValues = {
   date: today(),
 };
 
-function RecordDetailsModal({
+function RecordDetailsSidebar({
   record,
   memberName,
   onClose,
@@ -107,62 +103,214 @@ function RecordDetailsModal({
   const isIncome = record.type === 'income';
 
   return (
-    <Modal
+    <FormSidebar
+      isOpen
       onClose={onClose}
-      title={record.title}
-      description={FINANCIAL_CATEGORY_LABELS[record.category]}
-      size="md"
-      headerIcon={
-        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-          <MaterialIcon name={CATEGORY_ICON[record.category]} size={20} />
+      title="Record details"
+      description={record.title}
+      width="md"
+    >
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="mb-5 border-b border-gray-100 pb-5">
+            <div className="mb-4 flex items-start gap-3">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                <MaterialIcon name={CATEGORY_ICON[record.category]} size={20} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-xl font-bold leading-tight text-(--color-ink)">{record.title}</h2>
+                  <span className={`type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {isIncome ? 'Income' : 'Expense'}
+                  </span>
+                </div>
+                <p className="mt-1 text-xs font-semibold text-gray-400">{FINANCIAL_CATEGORY_LABELS[record.category]}</p>
+              </div>
+            </div>
+            <div className="rounded-[18px] bg-(--color-surface) p-4">
+              <p className="type-label text-gray-400">Amount</p>
+              <p className={`mt-1 text-3xl font-bold ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+                {isIncome ? '+' : '-'}{fmt(record.amount)}
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3">
+            <div className="rounded-2xl bg-(--color-surface) p-4">
+              <p className="type-label text-gray-400">Status</p>
+              <div className="mt-2">
+                <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={STATUS_VARIANT[record.status]} />
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-(--color-surface) p-4">
+              <p className="type-label text-gray-400">Date</p>
+              <p className="mt-1 text-sm font-semibold text-gray-800">{dateLabel(record.date)}</p>
+            </div>
+
+            <div className="rounded-2xl bg-(--color-surface) p-4">
+              <p className="type-label text-gray-400">Paid to / from</p>
+              <p className="mt-1 text-sm font-semibold text-gray-800">{record.vendor ?? 'Not specified'}</p>
+            </div>
+
+            {record.memberId && (
+              <div className="rounded-2xl bg-(--color-surface) p-4">
+                <p className="type-label text-gray-400">Assigned team member</p>
+                <p className="mt-1 text-sm font-semibold text-gray-800">{memberName ?? 'Team member'}</p>
+              </div>
+            )}
+
+            <div className="rounded-2xl bg-(--color-surface) p-4">
+              <p className="type-label text-gray-400">Notes</p>
+              <p className="mt-1 text-sm leading-6 text-gray-600">{record.description || 'No description added.'}</p>
+            </div>
+          </div>
         </div>
-      }
-      footer={
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="secondary" iconLeft={<Pencil size={14} />} onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+
+        <FormSidebarFooter>
           <Button type="button" variant="danger" iconLeft={<Trash2 size={14} />} onClick={() => onDelete(record)}>
             Delete
           </Button>
-        </div>
-      }
+          <Button type="button" iconLeft={<Pencil size={14} />} onClick={() => onEdit(record)}>
+            Edit
+          </Button>
+        </FormSidebarFooter>
+      </div>
+    </FormSidebar>
+  );
+}
+
+function ExpenseRecordRow({
+  record,
+  memberName,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  record: Expense;
+  memberName?: string;
+  onView: (record: Expense) => void;
+  onEdit: (record: Expense) => void;
+  onDelete: (record: Expense) => void;
+}) {
+  const isIncome = record.type === 'income';
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onView(record)}
+      onKeyDown={event => { if (event.key === 'Enter') onView(record); }}
+      className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(260px,1fr)_140px_120px_32px] lg:items-center"
     >
-      <div className="space-y-4 px-6 pb-6">
-        <div className="rounded-[18px] bg-(--color-surface) p-4">
-          <p className="type-label text-gray-400">Amount</p>
-          <p className={`mt-1 text-3xl font-bold ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
-            {isIncome ? '+' : '-'}{fmt(record.amount)}
-          </p>
+      <div className="flex min-w-0 items-center gap-3">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+          <MaterialIcon name={CATEGORY_ICON[record.category]} size={18} />
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-2xl border border-gray-100 p-3">
-            <p className="type-label text-gray-400">Status</p>
-            <div className="mt-2">
+        <div className="min-w-0">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <p className="type-card-title truncate text-(--color-ink)">{record.title}</p>
+            <span className={`type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+              {isIncome ? 'Income' : 'Expense'}
+            </span>
+          </div>
+          <RecordMeta
+            className="mt-1"
+            items={[
+              { label: FINANCIAL_CATEGORY_LABELS[record.category], icon: CATEGORY_ICON[record.category] },
+              { label: dateLabel(record.date), icon: 'event' },
+              memberName && { label: memberName, icon: 'person' },
+              !memberName && record.vendor && { label: record.vendor, icon: 'storefront' },
+            ]}
+          />
+        </div>
+      </div>
+
+      <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={STATUS_VARIANT[record.status]} />
+
+      <p className={`type-card-title tabular-nums lg:text-right ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+        {isIncome ? '+' : '-'}{fmt(record.amount)}
+      </p>
+
+      <div className="flex justify-end" onClick={event => event.stopPropagation()}>
+        <RowActionsMenu
+          actions={[
+            { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
+            { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
+            { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
+          ]}
+        />
+      </div>
+    </div>
+  );
+}
+
+function ExpenseRecordCard({
+  record,
+  memberName,
+  onView,
+  onEdit,
+  onDelete,
+}: {
+  record: Expense;
+  memberName?: string;
+  onView: (record: Expense) => void;
+  onEdit: (record: Expense) => void;
+  onDelete: (record: Expense) => void;
+}) {
+  const isIncome = record.type === 'income';
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onView(record)}
+      onKeyDown={event => { if (event.key === 'Enter') onView(record); }}
+      className="flex flex-col rounded-[18px] border border-gray-200 bg-white text-left transition-colors hover:bg-gray-50"
+    >
+      <div className="flex items-start justify-between gap-3 p-4 pb-3">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+            <MaterialIcon name={CATEGORY_ICON[record.category]} size={18} />
+          </div>
+          <div className="min-w-0">
+            <p className="type-card-title truncate text-(--color-ink)">{record.title}</p>
+            <div className="mt-1">
               <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={STATUS_VARIANT[record.status]} />
             </div>
           </div>
-          <div className="rounded-2xl border border-gray-100 p-3">
-            <p className="type-label text-gray-400">Date</p>
-            <p className="mt-2 text-sm font-semibold text-gray-800">{dateLabel(record.date)}</p>
-          </div>
         </div>
-        <div>
-          <p className="type-label text-gray-400">Paid to / from</p>
-          <p className="mt-1 text-sm font-semibold text-gray-800">{record.vendor ?? 'Not specified'}</p>
-        </div>
-        {record.memberId && (
-          <div>
-            <p className="type-label text-gray-400">Assigned team member</p>
-            <p className="mt-1 text-sm font-semibold text-gray-800">{memberName ?? 'Team member'}</p>
-          </div>
-        )}
-        <div>
-          <p className="type-label text-gray-400">Notes</p>
-          <p className="mt-1 text-sm leading-6 text-gray-600">{record.description || 'No description added.'}</p>
+
+        <div className="shrink-0" onClick={event => event.stopPropagation()}>
+          <RowActionsMenu
+            actions={[
+              { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
+              { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
+              { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
+            ]}
+          />
         </div>
       </div>
-    </Modal>
+
+      <RecordMeta
+        className="px-4 pb-3"
+        items={[
+          { label: FINANCIAL_CATEGORY_LABELS[record.category], icon: CATEGORY_ICON[record.category] },
+          { label: dateLabel(record.date), icon: 'event' },
+          memberName && { label: memberName, icon: 'person' },
+          !memberName && record.vendor && { label: record.vendor, icon: 'storefront' },
+        ]}
+      />
+
+      <div className="mt-auto flex items-center justify-between gap-3 border-t border-gray-50 px-4 py-2.5">
+        <span className={`type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+          {isIncome ? 'Income' : 'Expense'}
+        </span>
+        <p className={`type-card-title shrink-0 tabular-nums ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+          {isIncome ? '+' : '-'}{fmt(record.amount)}
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -171,6 +319,7 @@ export default function ExpensesPage() {
   const { members } = useTeamStore();
   const { expenses, addExpense, updateExpense, removeExpense } = useExpenseStore();
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -280,33 +429,29 @@ export default function ExpensesPage() {
   return (
     <DashboardLayout title="Expenses">
       <div className="flex w-full flex-col gap-6 py-6 md:min-h-full md:gap-8 md:py-10">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            variant="lime"
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard size="sm" variant="lime"
             icon={<ArrowDownLeft size={16} />}
             label="Project Income"
             value={fmt(totals.income)}
             badge={`${tabCounts.income} record${tabCounts.income === 1 ? '' : 's'}`}
             badgeLabel="incoming"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<ArrowUpRight size={16} />}
             label="Company Expenses"
             value={fmt(totals.outgoing)}
             badge={`${tabCounts.expense} record${tabCounts.expense === 1 ? '' : 's'}`}
             badgeLabel="outgoing"
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="white"
             icon={<WalletCards size={16} />}
             label="Net Balance"
             value={fmt(totals.net)}
             badge={totals.net >= 0 ? 'Positive' : 'Negative'}
             badgeLabel="current ledger"
           />
-          <StatCard
-            variant="white"
+          <StatCard size="sm" variant="dark"
             icon={<CalendarDays size={16} />}
             label="Pending / Scheduled"
             value={fmt(totals.pending)}
@@ -321,6 +466,8 @@ export default function ExpensesPage() {
               tabs={tabs}
               activeTab={activeTab}
               onTabChange={key => setActiveTab(key as FilterKey)}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
               sortValue={sortKey}
               sortOptions={[
                 { key: 'date', label: 'Date' },
@@ -344,73 +491,43 @@ export default function ExpensesPage() {
                 Add first record
               </Button>
             </div>
+          ) : viewMode === 'grid' ? (
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {filtered.map(record => {
+                const member = members.find(item => item.id === record.memberId);
+
+                return (
+                  <ExpenseRecordCard
+                    key={record.id}
+                    record={record}
+                    memberName={member?.name}
+                    onView={setSelectedRecord}
+                    onEdit={openEdit}
+                    onDelete={setDeleteRecord}
+                  />
+                );
+              })}
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
-              <div className="type-eyebrow hidden grid-cols-[minmax(240px,1fr)_150px_150px_120px_110px_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
+              <div className="type-eyebrow hidden grid-cols-[minmax(260px,1fr)_140px_120px_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
                 <span>Record</span>
-                <span>Category</span>
-                <span>Team member</span>
                 <span>Status</span>
                 <span className="text-right">Amount</span>
                 <span />
               </div>
 
               {filtered.map(record => {
-                const isIncome = record.type === 'income';
                 const member = members.find(item => item.id === record.memberId);
                 return (
-                  <div
+                  <ExpenseRecordRow
                     key={record.id}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setSelectedRecord(record)}
-                    onKeyDown={event => { if (event.key === 'Enter') setSelectedRecord(record); }}
-                    className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(240px,1fr)_150px_150px_120px_110px_32px] lg:items-center"
-                  >
-                    <div className="flex min-w-0 items-center gap-3">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                        <MaterialIcon name={CATEGORY_ICON[record.category]} size={18} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 flex-wrap items-center gap-2">
-                          <p className="type-card-title truncate text-(--color-ink)">{record.title}</p>
-                          <span className={`type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                            {isIncome ? 'Income' : 'Expense'}
-                          </span>
-                        </div>
-                        <p className="type-muted mt-1 truncate text-gray-400">{record.vendor || record.description}</p>
-                      </div>
-                    </div>
-
-                    <p className="type-label text-gray-500">{FINANCIAL_CATEGORY_LABELS[record.category]}</p>
-                    <div className="min-w-0">
-                      {member ? (
-                        <div className="flex items-center gap-2">
-                          <Avatar name={member.name} id={member.id} size="xs" />
-                          <div className="min-w-0">
-                            <p className="type-label truncate text-gray-700">{member.name}</p>
-                            <p className="type-meta truncate text-gray-400">{dateLabel(record.date)}</p>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="type-label text-gray-400">{dateLabel(record.date)}</p>
-                      )}
-                    </div>
-                    <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={STATUS_VARIANT[record.status]} />
-                    <p className={`type-card-title tabular-nums lg:text-right ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
-                      {isIncome ? '+' : '-'}{fmt(record.amount)}
-                    </p>
-
-                    <div className="flex justify-end" onClick={event => event.stopPropagation()}>
-                      <RowActionsMenu
-                        actions={[
-                          { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => setSelectedRecord(record) },
-                          { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => openEdit(record) },
-                          { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => setDeleteRecord(record), variant: 'danger' },
-                        ]}
-                      />
-                    </div>
-                  </div>
+                    record={record}
+                    memberName={member?.name}
+                    onView={setSelectedRecord}
+                    onEdit={openEdit}
+                    onDelete={setDeleteRecord}
+                  />
                 );
               })}
             </div>
@@ -535,7 +652,7 @@ export default function ExpensesPage() {
       </FormSidebar>
 
       {selectedRecord && (
-        <RecordDetailsModal
+        <RecordDetailsSidebar
           record={selectedRecord}
           memberName={members.find(member => member.id === selectedRecord.memberId)?.name}
           onClose={() => setSelectedRecord(null)}

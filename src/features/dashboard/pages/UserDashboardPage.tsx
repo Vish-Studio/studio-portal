@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Briefcase, CheckSquare, CreditCard } from 'lucide-react';
+import { Briefcase, CheckSquare, CreditCard } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import CardContent from '@/src/shared/components/card-content/card-content';

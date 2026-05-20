@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckSquare, Clock3, Mail, Pencil } from 'lucide-react';
+import { Briefcase, CheckSquare, Clock3, Mail, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
@@ -241,25 +241,22 @@ export default function TeamDetail() {
           </CardContent>
         </div>
 
-        <div className="team-detail-stats grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard
-            variant="lime"
+        <div className="team-detail-stats grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <StatCard size="sm" variant="lime"
             icon={<Briefcase size={18} />}
             label="Current Projects"
             value={currentProjects.length}
             badge={`${pastProjects.length} past`}
             badgeLabel="completed projects"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<CheckSquare size={18} />}
             label="Open Tasks"
             value={openTasks.length}
             badge={`${completedTasks.length} done`}
             badgeLabel="assigned tasks"
           />
-          <StatCard
-            variant="white"
+          <StatCard size="sm" variant="white"
             icon={<Mail size={18} />}
             label="Contact"
             value={<span className="text-xl">{member.email ? 'Ready' : 'Missing'}</span>}

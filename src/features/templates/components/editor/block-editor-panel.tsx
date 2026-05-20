@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import type { TemplateBlock, ServiceRow, PaymentRow, PartyInfo } from '../../templateBlocks';
 import { newId } from '../../templateBlocks';
 import { Checkbox } from '@/src/shared/components';

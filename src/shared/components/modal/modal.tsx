@@ -1,6 +1,5 @@
 import React from 'react';
-import { X } from 'lucide-react';
-import ButtonIcon from '../button-icon/button-icon';
+import { X } from '@/src/shared/components/material-icon/material-lucide-icons';
 
 export type ModalVariant = 'dialog' | 'sheet';
 export type ModalSize = 'sm' | 'md' | 'lg';
@@ -58,8 +57,8 @@ export default function Modal({
     : 'items-center';
 
   const containerShape = isSheet
-    ? 'rounded-t-lg sm:rounded-lg'
-    : 'rounded-lg';
+    ? 'rounded-t-[18px] sm:rounded-[18px]'
+    : 'rounded-[18px]';
 
   const closeBtnClass = isSheet
     ? 'w-8 h-8 flex items-center justify-center rounded-full bg-white/50 hover:bg-white/80 text-gray-600 transition-colors shrink-0'
@@ -78,7 +77,7 @@ export default function Modal({
 
       {/* Panel */}
       <div
-        className={`modal-panel relative w-full ${SIZE_CLASS[size]} bg-white ${containerShape} overflow-hidden shadow-2xl flex flex-col`}
+        className={`modal-panel relative flex max-h-[calc(100vh-2rem)] w-full ${SIZE_CLASS[size]} flex-col overflow-hidden bg-white ${containerShape} shadow-2xl`}
         onClick={e => e.stopPropagation()}
       >
         {/* ── Header ── */}
@@ -88,7 +87,7 @@ export default function Modal({
               {/* Row 1: icon left, close right */}
               <div className="flex items-start justify-between mb-4">
                 <div className="shrink-0">{headerIcon}</div>
-                <button onClick={onClose} className={`modal-close ${closeBtnClass}`}>
+                <button type="button" onClick={onClose} className={`modal-close ${closeBtnClass}`} aria-label="Close">
                   <X size={15} strokeWidth={2.5} />
                 </button>
               </div>
@@ -120,19 +119,21 @@ export default function Modal({
                 )}
               </div>
 
-              <ButtonIcon iconName='close' clickHandler={onClose} />
+              <button type="button" onClick={onClose} className={`modal-close ${closeBtnClass}`} aria-label="Close">
+                <X size={15} strokeWidth={2.5} />
+              </button>
             </div>
           )}
         </div>
 
         {/* ── Body ── */}
-        <div className={`modal-body flex-1 overflow-y-auto ${bodyClassName ?? ''}`}>
+        <div className={`modal-body min-h-0 flex-1 overflow-y-auto ${bodyClassName ?? ''}`}>
           {children}
         </div>
 
         {/* ── Footer ── */}
         {footer && (
-          <div className="modal-footer border-t border-gray-100 px-6 py-4 bg-white shrink-0">
+          <div className="modal-footer shrink-0 border-t border-gray-100 bg-white px-6 py-4 [&_a]:flex-1 [&_a>button]:w-full [&_button]:min-w-0 [&_button]:flex-1">
             {footer}
           </div>
         )}

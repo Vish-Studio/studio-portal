@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { format, isPast, parseISO } from 'date-fns';
-import { Pencil, Trash2 } from 'lucide-react';
-import { AvatarStack, MaterialIcon, RowActionsMenu, TaskStatusBadge, type RowAction } from '@/src/shared/components';
+import { Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { AvatarStack, MaterialIcon, RecordMeta, RowActionsMenu, TaskStatusBadge, type RowAction } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
@@ -58,9 +58,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         <div className="task-card-meta flex items-center justify-between gap-2 mb-2.5">
           <div className="task-card-project flex items-center gap-1.5 min-w-0">
             <span className={`task-card-priority w-1.5 h-1.5 rounded-full shrink-0 ${PRIORITY_DOT[task.priority]}`} />
-            <span className="type-meta truncate text-gray-400">
-              {project?.name ?? 'No project'}
-            </span>
+            <RecordMeta items={[{ label: project?.name ?? 'No project', icon: 'work' }]} />
           </div>
           {menuActions.length > 0 && (
             <div className="task-card-actions shrink-0" onClick={e => e.stopPropagation()}>
@@ -98,11 +96,10 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
         </div>
 
         {due && (
-          <span className={`type-count flex items-center gap-0.5 shrink-0 ${overdue ? 'text-red-500' : 'text-gray-400'
-            }`}>
-            {overdue && <MaterialIcon name="warning" size={10} />}
-            {format(due, 'MMM d')}
-          </span>
+          <RecordMeta
+            className={`shrink-0 ${overdue ? 'text-red-500 [&_.material-icon]:text-red-500 [&_.record-meta-label]:text-red-500' : ''}`}
+            items={[{ label: format(due, 'MMM d'), icon: overdue ? 'warning' : 'event' }]}
+          />
         )}
       </div>
     </div>

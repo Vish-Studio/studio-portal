@@ -34,6 +34,7 @@ export { default as MaterialIcon } from './material-icon/material-icon';
 export { default as MemberPicker } from './member-picker/member-picker';
 export { default as Modal } from './modal/modal';
 export { default as Option } from './select/option';
+export { default as RecordMeta, formatRecordDate, type RecordMetaItem } from './record-meta/record-meta';
 export { default as SearchBar } from './search-bar/search-bar';
 export { default as Select } from './select/select';
 export {

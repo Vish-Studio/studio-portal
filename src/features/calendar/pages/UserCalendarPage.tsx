@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CalendarCheck, CalendarDays } from 'lucide-react';
+import { CalendarCheck, CalendarDays } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import CalendarWidget from '../components/calendar/calendar';
 import ScheduleList from '../components/calendar/schedule-list';
@@ -40,25 +40,22 @@ export default function UserCalendarPage() {
   return (
     <UserLayout title="Calendar">
       <div className="flex flex-col gap-4 md:gap-6 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard
-            variant="lime"
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+          <StatCard size="sm" variant="lime"
             icon={<CalendarCheck size={16} />}
             label="Today"
             value={String(todayItems)}
             badge="planned"
             badgeLabel="Items today"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<CalendarDays size={16} />}
             label="This Week"
             value={String(weekItems)}
             badge="week"
             badgeLabel="Items scheduled"
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="dark"
             icon={<CalendarDays size={16} />}
             label="Selected Day"
             value={String(selectedItems)}

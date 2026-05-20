@@ -1,14 +1,13 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
-import { Pencil, Trash2, UserCheck, UserMinus, UserRoundX, Users } from 'lucide-react';
+import { Pencil, Trash2, UserCheck, UserMinus, UserRoundX, Users } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { Button, ClientStatusBadge, FormField, inputCls, Option, RowActionsMenu, Select } from '@/src/shared/components';
+import { Button, ClientStatusBadge, FormField, formatRecordDate, inputCls, Option, RecordMeta, RowActionsMenu, Select } from '@/src/shared/components';
 import { useClientsStore } from '../stores/clientStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import type { Client, ClientStatus } from '../types';
@@ -230,18 +229,16 @@ export default function Clients() {
                     </div>
                     <div className="min-w-0">
                       <p className="type-card-title truncate text-(--color-ink)">{client.fullName}</p>
-                      <p className="type-muted truncate text-gray-400">{client.companyName || 'No company'}</p>
+                      <RecordMeta items={[{ label: client.companyName || 'No company', icon: 'business' }]} className="mt-1" />
                     </div>
                   </div>
 
                   <div className="min-w-0">
                     <p className="type-label truncate text-gray-600">{client.email}</p>
-                    <p className="type-muted mt-0.5 truncate text-gray-400">{client.phone || 'No phone'}</p>
+                    <RecordMeta items={[{ label: client.phone || 'No phone', icon: 'call' }]} className="mt-1" />
                   </div>
 
-                  <span className="type-label text-gray-400">
-                    {client.createdAt?.toDate ? format(client.createdAt.toDate(), 'MMM d, yyyy') : '—'}
-                  </span>
+                  <RecordMeta items={[{ label: formatRecordDate(client.createdAt?.toDate?.()), icon: 'event' }]} />
 
                   <div className="flex items-center justify-between gap-3 lg:justify-end">
                     <ClientStatusBadge status={client.status} />

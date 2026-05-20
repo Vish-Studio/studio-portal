@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Check, ChevronDown, ChevronUp, Eye, Pencil, Plus, Trash2, UserRound } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Eye, Pencil, Plus, Trash2, UserRound } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { MaterialIcon } from '@/src/shared/components';
 import { DEFAULT_PHASE_DEFS, getPhaseProgress, type ClientProject, type Phase } from '../../types';
 import { TEMPLATES, type TemplateAssignment } from '@/src/features/templates';

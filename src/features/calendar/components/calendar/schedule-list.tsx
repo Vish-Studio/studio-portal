@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CalendarDays, Plus } from 'lucide-react';
+import { CalendarDays, Plus } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { useCalendarStore } from '../../stores/calendarStore';
 import Button from '@/src/shared/components/button/button';
 import { MaterialIcon } from '@/src/shared/components';

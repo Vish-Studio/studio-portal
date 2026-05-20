@@ -8,7 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { cn } from '@/src/lib/utils';
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {

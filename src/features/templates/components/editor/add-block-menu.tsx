@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus } from '@/src/shared/components/material-icon/material-lucide-icons';
 import type { BlockType, TemplateBlock } from '../../templateBlocks';
 import { newId } from '../../templateBlocks';
 

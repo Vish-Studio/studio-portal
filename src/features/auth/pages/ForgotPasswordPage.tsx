@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, MailCheck } from 'lucide-react';
+import { ArrowLeft, MailCheck } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, FormField, inputCls } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { useAuthStore } from '../stores/authStore';

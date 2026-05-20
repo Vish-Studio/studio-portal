@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes, ReactNode } from 'react';
-import { Check } from 'lucide-react';
+import { Check } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { cn } from '@/src/lib/utils';
 
 interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {

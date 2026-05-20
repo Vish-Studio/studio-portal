@@ -1,5 +1,5 @@
 import { FunctionComponent } from 'react';
-import { Plus, type LucideIcon } from 'lucide-react';
+import { Plus, type LucideIcon } from '@/src/shared/components/material-icon/material-lucide-icons';
 
 export interface FabProps {
   onClick: () => void;

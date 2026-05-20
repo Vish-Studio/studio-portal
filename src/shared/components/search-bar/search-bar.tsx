@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Search } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { FunctionComponent } from "react";
 
 

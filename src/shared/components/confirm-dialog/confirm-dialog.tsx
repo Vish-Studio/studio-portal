@@ -1,6 +1,7 @@
 import React from 'react';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import { AlertTriangle, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import Modal from '../modal/modal';
+import Button from '../button/button';
 
 export interface ConfirmDialogProps {
   isOpen:        boolean;
@@ -44,25 +45,23 @@ export default function ConfirmDialog({
       title={title}
       description={typeof message === 'string' ? message : undefined}
       footer={
-        <div className="confirm-dialog-actions flex gap-3">
-          <button
+        <div className="confirm-dialog-actions flex w-full gap-3">
+          <Button
             type="button"
+            variant="secondary"
             onClick={onCancel}
-            className="confirm-dialog-cancel flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+            className="confirm-dialog-cancel flex-1"
           >
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant={isDanger ? 'danger' : 'primary'}
             onClick={onConfirm}
-            className={`confirm-dialog-confirm flex-1 py-2.5 text-sm font-semibold rounded-xl transition-colors ${
-              isDanger
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-black hover:bg-gray-800 text-white'
-            }`}
+            className={`confirm-dialog-confirm flex-1 ${isDanger ? 'bg-red-500 text-white hover:bg-red-600 disabled:hover:bg-red-500' : ''}`}
           >
             {confirmLabel}
-          </button>
+          </Button>
         </div>
       }
     >

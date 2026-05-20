@@ -1,10 +1,10 @@
 import { useState, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Trash2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { RowActionsMenu } from '@/src/shared/components/table/table';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { MaterialIcon, StatusBadge } from '@/src/shared/components';
+import { MaterialIcon, RecordMeta, StatusBadge } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -125,25 +125,22 @@ const PaymentsPage = () => {
       <div className="flex flex-col gap-6 w-full mx-auto py-6 md:min-h-full md:gap-8 md:py-10">
 
         {/* Stats row */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 shrink-0">
-          <StatCard
-            variant="lime"
+        <div className="grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-3">
+          <StatCard size="sm" variant="lime"
             icon={<CreditCard size={16} />}
             label="Total Collected"
             value={fmt(totalCollected)}
             badge={<><TrendingUp size={14} className="text-green-700" /> +8%</>}
             badgeLabel="vs last month"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<Clock size={16} />}
             label="Pending"
             value={fmt(totalPending)}
             badge={`${tabCounts.pending} invoice${tabCounts.pending !== 1 ? 's' : ''}`}
             badgeLabel="awaiting payment"
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="dark"
             icon={<TrendingDown size={16} />}
             label="Overdue"
             value={fmt(totalOverdue)}
@@ -202,7 +199,7 @@ const PaymentsPage = () => {
                         </span>
                       )}
                     </div>
-                    <p className="type-muted mt-1 text-gray-400">{payment.date}</p>
+                    <RecordMeta className="mt-1" items={[{ label: payment.date, icon: 'event' }]} />
                   </div>
 
                   <div className="flex min-w-0 items-center gap-2.5">
@@ -211,7 +208,7 @@ const PaymentsPage = () => {
                     </div>
                     <div className="min-w-0">
                       <p className="type-card-title truncate text-(--color-ink)">{payment.client}</p>
-                      <p className="type-muted truncate text-gray-400">{payment.project}</p>
+                      <RecordMeta items={[{ label: payment.project, icon: 'work' }]} className="mt-1" />
                     </div>
                   </div>
 
@@ -221,7 +218,7 @@ const PaymentsPage = () => {
 
                   <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
 
-                  <p className="type-label text-gray-400">{payment.nextDate ?? '—'}</p>
+                  <RecordMeta items={[{ label: payment.nextDate ?? '—', icon: 'event_repeat' }]} />
 
                   <div className="flex justify-end">
                     <RowActionsMenu

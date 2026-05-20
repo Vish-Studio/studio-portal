@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { FunctionComponent } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/src/lib/utils";

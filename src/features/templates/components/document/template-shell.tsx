@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Printer } from 'lucide-react';
+import { ArrowLeft, Printer } from '@/src/shared/components/material-icon/material-lucide-icons';
 
 interface TemplateShellProps {
   title: string;

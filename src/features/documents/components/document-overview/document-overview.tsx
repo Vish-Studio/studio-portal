@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Presentation, FileCheck2, FileHeart, PenTool, User, Users } from 'lucide-react';
+import { FileText, Presentation, FileCheck2, FileHeart, PenTool, User, Users } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
 import ContentCard from '@/src/shared/components/card-content/card-content';
 import ButtonIcon from '@/src/shared/components/button-icon/button-icon';

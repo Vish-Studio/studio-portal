@@ -1,11 +1,13 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { CheckSquare } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, CheckSquare, ListTodo, Timer } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { isPast, parseISO } from 'date-fns';
 import UserLayout from '@/src/layouts/UserLayout';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Button, ConfirmDialog, DatePicker, FormField, inputCls, Option, Select } from '@/src/shared/components';
+import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
@@ -82,6 +84,19 @@ const UserTasks = () => {
     completed:    myTasks.filter(t => t.status === 'completed').length,
   }), [myTasks]);
 
+  const taskStats = useMemo(() => {
+    const open = myTasks.filter(t => t.status !== 'completed');
+    const overdue = open.filter(t => t.dueDate && isPast(parseISO(t.dueDate))).length;
+    const highPriority = open.filter(t => t.priority === 'high').length;
+
+    return {
+      open: open.length,
+      overdue,
+      highPriority,
+      completionRate: myTasks.length ? Math.round((counts.completed / myTasks.length) * 100) : 0,
+    };
+  }, [counts.completed, myTasks]);
+
   const tabs = useMemo<TabItem[]>(() => (
     TABS.map(tab => ({ key: tab.key, label: tab.label, count: counts[tab.key] }))
   ), [counts]);
@@ -145,6 +160,44 @@ const UserTasks = () => {
   return (
     <UserLayout title="Tasks">
       <div className="flex flex-col gap-4 pb-10">
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard
+            size="sm"
+            variant="lime"
+            icon={<ListTodo size={16} />}
+            label="My Tasks"
+            value={counts.all}
+            badge={`${myProjects.length} project${myProjects.length !== 1 ? 's' : ''}`}
+            badgeLabel="assigned to you"
+          />
+          <StatCard
+            size="sm"
+            variant="surface"
+            icon={<Timer size={16} />}
+            label="Open Work"
+            value={taskStats.open}
+            badge={`${counts['in-progress']} in progress`}
+            badgeLabel="active tasks"
+          />
+          <StatCard
+            size="sm"
+            variant="white"
+            icon={<AlertTriangle size={16} />}
+            label="Overdue"
+            value={taskStats.overdue}
+            badge={`${taskStats.highPriority} high priority`}
+            badgeLabel="needs attention"
+          />
+          <StatCard
+            size="sm"
+            variant="dark"
+            icon={<CheckCircle2 size={16} />}
+            label="Completed"
+            value={counts.completed}
+            badge={`${taskStats.completionRate}%`}
+            badgeLabel="completion rate"
+          />
+        </div>
 
         {/* Toolbar — shared table/list controls */}
         <div className="sticky top-0 z-20 -mx-4 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

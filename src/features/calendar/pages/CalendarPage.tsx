@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CalendarWidget from '../components/calendar/calendar';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { CalendarCheck, CalendarDays } from 'lucide-react';
+import { CalendarCheck, CalendarDays } from '@/src/shared/components/material-icon/material-lucide-icons';
 import ScheduleList from '../components/calendar/schedule-list';
 import { useCalendarStore } from '../stores/calendarStore';
 
@@ -53,33 +53,29 @@ export default function CalendarPage() {
   return (
     <DashboardLayout title="Calendar">
       <div className="flex flex-col gap-4 md:gap-6 pt-6 pb-10">
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard
-            variant="lime"
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard size="sm" variant="lime"
             icon={<CalendarCheck size={16} />}
             label="Today"
             value={String(todayItems)}
             badge="planned"
             badgeLabel="Items today"
           />
-          <StatCard
-            variant="surface"
+          <StatCard size="sm" variant="surface"
             icon={<CalendarDays size={16} />}
             label="This Week"
             value={String(weekItems)}
             badge="week"
             badgeLabel="Items scheduled"
           />
-          <StatCard
-            variant="white"
+          <StatCard size="sm" variant="white"
             icon={<CalendarDays size={16} />}
             label="This Month"
             value={String(monthItems)}
             badge={selectedDate.toLocaleDateString('en-GB', { month: 'short' })}
             badgeLabel="Items scheduled"
           />
-          <StatCard
-            variant="dark"
+          <StatCard size="sm" variant="dark"
             icon={<CalendarDays size={16} />}
             label="Selected Day"
             value={String(selectedItems)}

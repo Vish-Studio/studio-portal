@@ -1,4 +1,4 @@
-import { Phone } from 'lucide-react';
+import { Phone } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { type ScheduleEvent, EVENT_TYPE_CONFIG } from './event-types';
 import { MaterialIcon } from '@/src/shared/components';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';

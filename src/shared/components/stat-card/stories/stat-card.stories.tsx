@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { TrendingUp, TrendingDown, Command, Users, CreditCard, Briefcase } from 'lucide-react';
+import { TrendingUp, TrendingDown, Command, Users, CreditCard, Briefcase } from '@/src/shared/components/material-icon/material-lucide-icons';
 import StatCard from '../stat-card';
 
 const meta = {

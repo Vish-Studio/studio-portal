@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckCircle, TrendingUp, Layers, Pencil, Trash2 } from 'lucide-react';
+import { Briefcase, CheckCircle, TrendingUp, Layers, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
@@ -126,11 +126,11 @@ const Projects = () => {
     <DashboardLayout title="Projects">
       <div className="flex flex-col gap-5 pt-6 py-10">
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={projects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
-          <StatCard variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
-          <StatCard variant="dark" icon={<TrendingUp size={16} />} label="Total Value" value={`$${(totalBudget / 1000).toFixed(0)}k`} badge={`$${(totalPaid / 1000).toFixed(0)}k collected`} badgeLabel="to date" />
-          <StatCard variant="white" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${projects.length} projects`} badgeLabel="tracked" />
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard size="sm" variant="lime" icon={<Briefcase size={16} />} label="Total Projects" value={projects.length} badge={`${tabCounts.active} active`} badgeLabel="in progress" />
+          <StatCard size="sm" variant="surface" icon={<CheckCircle size={16} />} label="Completed" value={tabCounts.completed} badge={`${tabCounts.paused} paused`} badgeLabel="on hold" />
+          <StatCard size="sm" variant="white" icon={<TrendingUp size={16} />} label="Total Value" value={`$${(totalBudget / 1000).toFixed(0)}k`} badge={`$${(totalPaid / 1000).toFixed(0)}k collected`} badgeLabel="to date" />
+          <StatCard size="sm" variant="dark" icon={<Layers size={16} />} label="Avg. Progress" value={`${avgProgress}%`} badge={`${projects.length} projects`} badgeLabel="tracked" />
         </div>
 
         <div className="sticky top-0 z-20 -mx-4 flex items-center gap-3 bg-white/95 px-4 py-3 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">

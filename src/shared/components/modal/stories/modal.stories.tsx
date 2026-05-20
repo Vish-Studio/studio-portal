@@ -28,10 +28,15 @@ export const Dialog: StoryObj = {
             title="Confirm Action"
             description="Are you sure you want to proceed? This cannot be undone."
             variant="dialog"
+            footer={
+              <div className="flex w-full gap-3">
+                <button onClick={() => setOpen(false)} className="flex-1 rounded-xl bg-gray-100 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200">Cancel</button>
+                <button className="flex-1 rounded-xl bg-red-600 py-2.5 text-sm font-semibold text-white hover:bg-red-700">Delete</button>
+              </div>
+            }
           >
-            <div className="flex gap-3 px-6 pb-6">
-              <button onClick={() => setOpen(false)} className="flex-1 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl">Cancel</button>
-              <button className="flex-1 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl">Delete</button>
+            <div className="px-6 py-4">
+              <p className="text-sm font-medium text-gray-500">Footer actions are equal-width and consistently placed.</p>
             </div>
           </Modal>
         )}

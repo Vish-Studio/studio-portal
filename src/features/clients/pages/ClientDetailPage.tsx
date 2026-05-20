@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
-import { Briefcase, Pencil } from 'lucide-react';
+import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';

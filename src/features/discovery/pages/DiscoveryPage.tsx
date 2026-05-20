@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Check, ChevronRight, FileText, Lock, Send } from 'lucide-react';
+import { ArrowLeft, Check, ChevronRight, FileText, Lock, Send } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import { useProjectsStore } from '@/src/features/projects';
 import { useAuthStore } from '@/src/features/auth';
