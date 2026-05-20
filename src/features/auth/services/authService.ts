@@ -103,8 +103,10 @@ const legacyUserFieldDeletes = () => ({
   teamId: deleteField(),
   teamMemberId: deleteField(),
   clientId: deleteField(),
-  createdAt: deleteField(),
-  updatedAt: deleteField(),
+  // createdAt / updatedAt must NOT be deleted here.
+  // The Firestore update rule enforces incoming().createdAt == existing().createdAt,
+  // so deleting createdAt during a profile sync causes the rule to deny the write,
+  // which surfaces as "Missing or insufficient permissions" on sign-in.
 });
 
 const findLinkedDocumentId = async (

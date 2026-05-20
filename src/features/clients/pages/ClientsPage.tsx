@@ -56,6 +56,7 @@ export default function Clients() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [temporaryAccess, setTemporaryAccess] = useState<TemporaryAccess | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -120,6 +121,7 @@ export default function Clients() {
   const openAdd = () => {
     setEditingClient(null);
     setTemporaryAccess(null);
+    setSubmitError(null);
     reset({
       fullName: '',
       companyName: '',
@@ -135,6 +137,7 @@ export default function Clients() {
   const openEdit = (client: Client) => {
     setEditingClient(client);
     setTemporaryAccess(null);
+    setSubmitError(null);
     reset({
       fullName: client.fullName,
       companyName: client.companyName ?? '',
@@ -148,27 +151,32 @@ export default function Clients() {
   };
 
   const onSubmit = async (data: ClientFormValues) => {
-    if (editingClient) {
-      await updateClient(editingClient.id, data);
-      setSidebarOpen(false);
-    } else {
-      const result = await addClient(data);
-      if (result) {
-        setTemporaryAccess({
-          name: data.fullName,
-          email: result.email,
-          temporaryPassword: result.temporaryPassword,
-        });
-        reset({
-          fullName: '',
-          companyName: '',
-          email: '',
-          phone: '',
-          status: 'active',
-          generatePassword: true,
-          temporaryPassword: generateTemporaryPassword(),
-        });
+    setSubmitError(null);
+    try {
+      if (editingClient) {
+        await updateClient(editingClient.id, data);
+        setSidebarOpen(false);
+      } else {
+        const result = await addClient(data);
+        if (result) {
+          setTemporaryAccess({
+            name: data.fullName,
+            email: result.email,
+            temporaryPassword: result.temporaryPassword,
+          });
+          reset({
+            fullName: '',
+            companyName: '',
+            email: '',
+            phone: '',
+            status: 'active',
+            generatePassword: true,
+            temporaryPassword: generateTemporaryPassword(),
+          });
+        }
       }
+    } catch (err: unknown) {
+      setSubmitError((err as Error).message ?? 'Something went wrong. Please try again.');
     }
   };
 
@@ -286,6 +294,13 @@ export default function Clients() {
       >
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            {submitError && (
+              <div className="rounded-[16px] border border-red-100 bg-red-50 px-4 py-3">
+                <p className="type-label font-semibold text-red-700">Failed to create client</p>
+                <p className="type-muted mt-1 text-red-600">{submitError}</p>
+              </div>
+            )}
+
             {temporaryAccess ? (
               <div className="clients-temporary-access rounded-[18px] border border-green-100 bg-green-50 p-4">
                 <p className="type-card-title text-green-700">Client login created</p>

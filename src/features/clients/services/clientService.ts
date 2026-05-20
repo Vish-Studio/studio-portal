@@ -35,7 +35,8 @@ export interface ClientCreateResult {
 }
 
 const clientsCollection = () => collection(requireFirebase().db, "clients");
-const userProfileRef = (email: string) => doc(requireFirebase().db, "users", email.trim().toLowerCase());
+/** Look up a user profile by uid (the correct key). */
+const userProfileByUid = (uid: string) => doc(requireFirebase().db, "users", uid);
 
 const legacyUserFieldDeletes = () => ({
   fullName: deleteField(),
@@ -184,15 +185,18 @@ export const clientsService = {
           : "active",
     });
 
+    // Write the domain record ID back to the user profile so the
+    // app can look up the client record directly from the auth profile.
+    await updateDoc(doc(requireFirebase().db, "users", user.uid), {
+      clientId: ref.id,
+    });
+
     return { id: ref.id, email: payload.email, temporaryPassword };
   },
 
   async updateClient(id: string, input: Partial<ClientInput>) {
     const ref = doc(requireFirebase().db, "clients", id);
     const snapshot = await getDoc(ref);
-    const previousEmail = snapshot.exists()
-      ? String(snapshot.data().email ?? "").trim().toLowerCase()
-      : "";
     const previous = snapshot.exists() ? clientFromSnapshot(snapshot) : null;
     const payload = cleanClientUpdate(input);
 
@@ -206,10 +210,6 @@ export const clientsService = {
     });
 
     const nextEmail = (payload.email ?? previous?.email ?? "").trim().toLowerCase();
-    if (previousEmail && nextEmail && previousEmail !== nextEmail) {
-      await deleteDoc(userProfileRef(previousEmail));
-    }
-
     if (nextEmail) {
       const profileStatus: "active" | "inactive" =
         (payload.status ?? previous?.status) === "inactive" ||
@@ -225,7 +225,7 @@ export const clientsService = {
         phone_number: payload.phone ?? previous?.phone ?? "",
         status: profileStatus,
       };
-      await upsertClientUserProfile(nextEmail, userProfilePayload);
+      // Always sync by uid (the canonical key). Email was a legacy key — no longer used.
       if (previous?.userId) {
         await upsertClientUserProfile(previous.userId, userProfilePayload);
       }
@@ -235,8 +235,8 @@ export const clientsService = {
   async deleteClient(id: string) {
     const ref = doc(requireFirebase().db, "clients", id);
     const snapshot = await getDoc(ref);
-    const email = snapshot.exists() ? String(snapshot.data().email ?? "") : "";
+    const userId = snapshot.exists() ? String(snapshot.data().userId ?? snapshot.data().user_id ?? "") : "";
     await deleteDoc(ref);
-    if (email) await deleteDoc(userProfileRef(email));
+    if (userId) await deleteDoc(userProfileByUid(userId));
   },
 };

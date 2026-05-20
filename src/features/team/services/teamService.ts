@@ -35,7 +35,8 @@ export interface TeamMemberCreateResult {
 }
 
 const teamCollection = () => collection(requireFirebase().db, "team");
-const userProfileRef = (email: string) => doc(requireFirebase().db, "users", email.trim().toLowerCase());
+/** Look up a user profile by uid (the canonical key). */
+const userProfileByUid = (uid: string) => doc(requireFirebase().db, "users", uid);
 
 const legacyUserFieldDeletes = () => ({
   fullName: deleteField(),
@@ -181,15 +182,18 @@ export const teamService = {
       status: "active",
     });
 
+    // Write the domain record ID back to the user profile so the
+    // app can look up the team member record directly from the auth profile.
+    await updateDoc(userProfileByUid(user.uid), {
+      teamMemberId: ref.id,
+    });
+
     return { id: ref.id, email: payload.email, temporaryPassword };
   },
 
   async updateMember(id: string, input: Partial<TeamMemberInput>) {
     const ref = doc(requireFirebase().db, "team", id);
     const snapshot = await getDoc(ref);
-    const previousEmail = snapshot.exists()
-      ? String(snapshot.data().email ?? "").trim().toLowerCase()
-      : "";
     const previous = snapshot.exists()
       ? teamMemberFromSnapshot(snapshot)
       : null;
@@ -213,9 +217,6 @@ export const teamService = {
     if (!shouldSyncAccess) return;
 
     const nextEmail = (payload.email ?? previous?.email ?? "").trim().toLowerCase();
-    if (previousEmail && nextEmail && previousEmail !== nextEmail) {
-      await deleteDoc(userProfileRef(previousEmail));
-    }
     if (nextEmail) {
       const role = payload.accessRole ?? previous?.accessRole ?? "freelancer";
       const fullName = payload.name ?? previous?.name ?? nextEmail;
@@ -227,7 +228,7 @@ export const teamService = {
         job_title: payload.role ?? previous?.role ?? role,
         status: "active",
       } as const;
-      await upsertTeamUserProfile(nextEmail, userProfilePayload);
+      // Always sync by uid (the canonical key).
       if (previous?.userId) {
         await upsertTeamUserProfile(previous.userId, userProfilePayload);
       }
@@ -237,8 +238,10 @@ export const teamService = {
   async deleteMember(id: string) {
     const ref = doc(requireFirebase().db, "team", id);
     const snapshot = await getDoc(ref);
-    const email = snapshot.exists() ? String(snapshot.data().email ?? "") : "";
+    const userId = snapshot.exists()
+      ? String(snapshot.data().userId ?? snapshot.data().user_id ?? "")
+      : "";
     await deleteDoc(ref);
-    if (email) await deleteDoc(userProfileRef(email));
+    if (userId) await deleteDoc(userProfileByUid(userId));
   },
 };
