@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { ProjectCard } from '@/src/features/projects';
 import ClientDetailCard from '../components/client-detail-card/client-detail-card';
 import { useClientsStore } from '../stores/clientStore';
@@ -347,14 +347,12 @@ const ClientDetail = () => {
             </FormField>
           </div>
 
-          <FormSidebarFooter>
-            <Button type="button" variant="secondary" onClick={handleCancel} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
-              Save
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={handleCancel}
+            isSubmitting={isSubmitting}
+            isDirty={isDirty}
+            submitLabel="Save"
+          />
         </form>
       </FormSidebar>
     </DashboardLayout>

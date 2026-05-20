@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { AlertTriangle, CheckCircle2, CheckSquare, ListTodo, Timer } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { isPast, parseISO } from 'date-fns';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Button, Checkbox, ConfirmDialog, DatePicker, FormField, inputCls, Option, Select } from '@/src/shared/components';
@@ -46,6 +46,10 @@ const EMPTY_MSG: Record<FilterKey, string> = {
   completed: 'No completed tasks yet.',
 };
 
+const sameStringSet = (left: string[] = [], right: string[] = []) => (
+  left.length === right.length && left.every(value => right.includes(value))
+);
+
 // ─── Form values ──────────────────────────────────────────────────────────────
 
 interface TaskFormValues {
@@ -77,7 +81,7 @@ const Tasks = () => {
   const [confirmTask, setConfirmTask] = useState<Task | null>(null);
   const [detailTask, setDetailTask] = useState<Task | null>(null);
 
-  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, reset, watch, formState: { errors, isDirty, isSubmitting } } =
     useForm<TaskFormValues>({
       defaultValues: { title: '', description: '', projectId: '', status: 'todo', priority: 'medium', dueDate: '' },
     });
@@ -85,6 +89,11 @@ const Tasks = () => {
   const selectedProjectId = watch('projectId');
   const selectedProject = projects.find(project => project.id === selectedProjectId);
   const selectedClient = clients.find(client => client.id === selectedProject?.clientId);
+  const hasTaskFormChanges = isDirty || (
+    editingTask
+      ? !sameStringSet(selectedMemberIds, editingTask.assigneeIds ?? []) || assignToClient !== Boolean(editingTask.clientAssigneeId)
+      : selectedMemberIds.length > 0 || assignToClient
+  );
 
   // ── Counts per status ──
   const counts = useMemo(() => ({
@@ -401,23 +410,12 @@ const Tasks = () => {
 
           </div>
 
-          <FormSidebarFooter>
-            <Button
-              type="button"
-              onClick={() => setSidebarOpen(false)}
-              variant="secondary"
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              loading={isSubmitting}
-              className="flex-1"
-            >
-              {editingTask ? 'Save Changes' : 'Add Task'}
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={() => setSidebarOpen(false)}
+            isSubmitting={isSubmitting}
+            isDirty={hasTaskFormChanges}
+            submitLabel={editingTask ? 'Save Changes' : 'Add Task'}
+          />
         </form>
       </FormSidebar>
     </DashboardLayout>

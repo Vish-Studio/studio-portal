@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, ShieldCheck, UserCheck, UserRoundCheck, UserRoundX, Users, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Button, FormField, inputCls, Modal, Option, RowActionsMenu, Select } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
@@ -122,7 +122,7 @@ export default function Team() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
     reset,
   } = useForm<MemberFormValues>({
     defaultValues: { name: '', role: '', accessRole: 'freelancer', email: '' },
@@ -401,14 +401,12 @@ export default function Team() {
               />
             </FormField>
           </div>
-          <FormSidebarFooter>
-            <Button type="button" onClick={() => setSidebarOpen(false)} variant="secondary" className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting} className="flex-1">
-              {editingMember ? 'Save' : 'Add Member'}
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={() => setSidebarOpen(false)}
+            isSubmitting={isSubmitting}
+            isDirty={isDirty}
+            submitLabel={editingMember ? 'Save' : 'Add Member'}
+          />
         </form>
       </FormSidebar>
 

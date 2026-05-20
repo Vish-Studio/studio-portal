@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, Check, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import IconPicker from '@/src/features/projects/components/icon-picker/icon-picker';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import ProjectHeroCard from '../components/project-hero-card/project-hero-card';
@@ -199,6 +199,14 @@ const ProjectDetail = () => {
 
   const assignedPhase = assignPhaseId ? project.phases.find(p => p.id === assignPhaseId) : null;
   const editingPhase = editingPhaseId ? project.phases.find(p => p.id === editingPhaseId) : null;
+  const hasPhaseChanges = editingPhase
+    ? phaseTitle.trim() !== editingPhase.title ||
+      phaseIcon !== editingPhase.icon ||
+      phaseDate.trim() !== (editingPhase.targetDate ?? '') ||
+      phaseDesc.trim() !== (editingPhase.description ?? '') ||
+      phaseStatus !== editingPhase.status ||
+      phaseFlag !== editingPhase.requiresClientAction
+    : Boolean(newPhaseTitle.trim());
 
   return (
     <DashboardLayout title={project.name}>
@@ -507,14 +515,13 @@ const ProjectDetail = () => {
             </FormField>
           </div>
 
-          <FormSidebarFooter>
-            <Button type="button" variant="secondary" onClick={cancelEdit} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
-              Save
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={cancelEdit}
+            isSubmitting={isSubmitting}
+            isDirty={hasProjectChanges}
+            disabled={!selectedClientId}
+            submitLabel="Save"
+          />
         </form>
       </FormSidebar>
 
@@ -623,7 +630,7 @@ const ProjectDetail = () => {
             <Button
               type="button"
               onClick={editingPhase ? savePhaseEdit : confirmInsert}
-              disabled={editingPhase ? !phaseTitle.trim() : !newPhaseTitle.trim()}
+              disabled={editingPhase ? !phaseTitle.trim() || !hasPhaseChanges : !newPhaseTitle.trim()}
               className="flex-1"
             >
               {editingPhase ? 'Save Phase' : 'Add Phase'}

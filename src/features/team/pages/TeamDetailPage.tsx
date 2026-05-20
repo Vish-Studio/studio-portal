@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, CheckSquare, Clock3, Mail, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { ProjectCard } from '@/src/features/projects';
 import TeamDetailCard from '../components/team-detail-card/team-detail-card';
@@ -407,14 +407,12 @@ export default function TeamDetail() {
             </FormField>
           </div>
 
-          <FormSidebarFooter>
-            <Button type="button" variant="secondary" onClick={handleCancel} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
-              Save
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={handleCancel}
+            isSubmitting={isSubmitting}
+            isDirty={isDirty}
+            submitLabel="Save"
+          />
         </form>
       </FormSidebar>
     </DashboardLayout>

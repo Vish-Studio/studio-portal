@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, Pencil, Plus, Trash2, WalletCards, X } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Avatar, Button, ConfirmDialog, FormField, formatRecordDate, inputCls, MaterialIcon, Option, RecordMeta, RowActionsMenu, Select, StatusBadge } from '@/src/shared/components';
@@ -333,7 +333,7 @@ export default function ExpensesPage() {
     watch,
     reset,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isDirty, isSubmitting },
   } = useForm<ExpenseFormValues>({ defaultValues: defaultFormValues });
 
   const selectedType = watch('type');
@@ -610,7 +610,7 @@ export default function ExpensesPage() {
                     </div>
                     <button
                       type="button"
-                      onClick={() => setValue('memberId', '')}
+                      onClick={() => setValue('memberId', '', { shouldDirty: true })}
                       className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-white hover:text-gray-700"
                       aria-label={`Remove ${selectedMember.name}`}
                     >
@@ -640,14 +640,12 @@ export default function ExpensesPage() {
             </FormField>
           </div>
 
-          <FormSidebarFooter>
-            <Button type="button" variant="secondary" onClick={() => setSidebarOpen(false)} className="flex-1">
-              Cancel
-            </Button>
-            <Button type="submit" loading={isSubmitting} disabled={isSubmitting} className="flex-1">
-              {editingRecord ? 'Save Changes' : 'Create Record'}
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={() => setSidebarOpen(false)}
+            isSubmitting={isSubmitting}
+            isDirty={isDirty}
+            submitLabel={editingRecord ? 'Save Changes' : 'Create Record'}
+          />
         </form>
       </FormSidebar>
 

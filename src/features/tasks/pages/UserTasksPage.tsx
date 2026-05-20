@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { AlertTriangle, CheckCircle2, CheckSquare, ListTodo, Timer } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { isPast, parseISO } from 'date-fns';
 import UserLayout from '@/src/layouts/UserLayout';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Button, ConfirmDialog, DatePicker, FormField, inputCls, Option, Select } from '@/src/shared/components';
@@ -70,7 +70,7 @@ const UserTasks = () => {
   const [confirmTask,   setConfirmTask]   = useState<Task | null>(null);
   const [detailTask,    setDetailTask]    = useState<Task | null>(null);
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<TaskFormValues>({
       defaultValues: { title: '', description: '', projectId: '', status: 'todo', priority: 'medium', dueDate: '' },
     });
@@ -346,23 +346,12 @@ const UserTasks = () => {
 
           </div>
 
-          <FormSidebarFooter>
-            <Button
-              type="button"
-              onClick={() => setSidebarOpen(false)}
-              variant="secondary"
-              className="flex-1"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              loading={isSubmitting}
-              className="flex-1"
-            >
-              {editingTask ? 'Save Changes' : 'Add Task'}
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={() => setSidebarOpen(false)}
+            isSubmitting={isSubmitting}
+            isDirty={isDirty}
+            submitLabel={editingTask ? 'Save Changes' : 'Add Task'}
+          />
         </form>
       </FormSidebar>
     </UserLayout>

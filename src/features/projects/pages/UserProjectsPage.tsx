@@ -7,7 +7,7 @@ import Button from '@/src/shared/components/button/button';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { MaterialIcon } from '@/src/shared/components';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import FormField, { inputCls } from '@/src/shared/components/form-field/form-field';
 import Select from '@/src/shared/components/select/select';
 import Option from '@/src/shared/components/select/option';
@@ -49,7 +49,7 @@ export default function UserProjectsPage() {
   const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
   const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
 
-  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, watch, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<ProjectFormValues>({
       defaultValues: { name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' },
     });
@@ -247,12 +247,12 @@ export default function UserProjectsPage() {
               <input {...register('timeline')} placeholder="e.g. Q3 2026" className={inputCls(!!errors.timeline)} />
             </FormField>
           </div>
-          <FormSidebarFooter>
-            <Button type="button" onClick={() => setSidebarOpen(false)} variant="secondary" className="flex-1">Cancel</Button>
-            <Button type="submit" loading={isSubmitting} className="flex-1">
-              {editingProject ? 'Save Changes' : 'Add Project'}
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={() => setSidebarOpen(false)}
+            isSubmitting={isSubmitting}
+            isDirty={isDirty}
+            submitLabel={editingProject ? 'Save Changes' : 'Add Project'}
+          />
         </form>
       </FormSidebar>
 

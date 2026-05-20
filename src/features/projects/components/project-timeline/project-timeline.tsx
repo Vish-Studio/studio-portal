@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Check, ChevronDown, ChevronUp, Eye, Pencil, Plus, Trash2, UserRound } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { MaterialIcon } from '@/src/shared/components';
+import { MaterialIcon, RowActionsMenu } from '@/src/shared/components';
 import { DEFAULT_PHASE_DEFS, getPhaseProgress, type ClientProject, type Phase } from '../../types';
 import { TEMPLATES, type TemplateAssignment } from '@/src/features/templates';
 
@@ -411,25 +411,25 @@ export default function ProjectTimeline({
   const phases = project.phases;
   const doneCount = phases.filter(p => p.status === 'done').length;
   const progress = getPhaseProgress(phases);
+  const activePhase = phases.find(p => p.status === 'active') ?? phases.find(p => p.status === 'pending') ?? phases[phases.length - 1];
+  const activeIndex = activePhase ? phases.indexOf(activePhase) : -1;
+  const activeAssignment = activePhase ? getPhaseAssignment(project.id, activePhase.id) : undefined;
+  const activeTemplate = activeAssignment ? TEMPLATES.find(t => t.slug === activeAssignment.templateSlug) : null;
+  const needsClientInput = Boolean(activePhase?.requiresClientAction && !activePhase.clientCompleted);
+  const needsAdminInput = Boolean(activePhase && !activeAssignment && !/discovery|brief/i.test(activePhase.title));
+  const allDone = phases.length > 0 && doneCount === phases.length;
 
-  const defaultId = phases.find(p => p.status === 'active')?.id ?? phases[0]?.id ?? null;
-  const [selectedId, setSelectedId] = useState<string | null>(defaultId);
-
-  useEffect(() => {
-    if (!phases.find(p => p.id === selectedId)) {
-      setSelectedId(phases.find(p => p.status === 'active')?.id ?? phases[0]?.id ?? null);
-    }
-  }, [phases, selectedId]);
-
-  const selectedPhase = phases.find(p => p.id === selectedId) ?? null;
-  const selectedIndex = selectedPhase ? phases.indexOf(selectedPhase) : -1;
-  const selectedAssignment = selectedPhase ? getPhaseAssignment(project.id, selectedPhase.id) : undefined;
+  const statusConfig = {
+    pending: { label: 'Pending', icon: 'radio_button_unchecked', dot: 'bg-gray-300', badge: 'bg-gray-100 text-gray-600', node: 'bg-gray-100 text-gray-500' },
+    active: { label: 'Active', icon: 'play_arrow', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', node: 'bg-amber-500 text-white' },
+    done: { label: 'Done', icon: 'check', dot: 'bg-green-500', badge: 'bg-green-100 text-green-700', node: 'bg-gray-900 text-white' },
+  } as const;
 
   // ── Empty state ───────────────────────────────────────────────────────────
 
   if (phases.length === 0) {
     return (
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm">
+      <div className="rounded-2xl border border-gray-200 bg-white">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -477,169 +477,239 @@ export default function ProjectTimeline({
     );
   }
 
-  // ── Two-panel layout ──────────────────────────────────────────────────────
+  // ── Timeline-only layout ──────────────────────────────────────────────────
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4 items-start">
-
-      {/* ── LEFT: Timeline list ── */}
-      <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <MaterialIcon name="route" size={15} className="text-gray-400" />
-            <h2 className="text-sm font-bold text-gray-900">Timeline</h2>
-          </div>
-          <button
-            type="button"
-            onClick={() => onAddPhase(phases.length - 1)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-          >
-            <Plus size={11} /> Add
-          </button>
-        </div>
-
-        {/* Progress */}
-        <div className="px-4 pt-4 pb-3">
-          <div className="flex items-center gap-2.5 mb-1">
-            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gray-900 rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
+        <div className="flex flex-col gap-3 border-b border-gray-100 px-4 py-3.5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+              allDone ? 'bg-green-50 text-green-700' : needsClientInput ? 'bg-violet-50 text-violet-700' : needsAdminInput ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-700'
+            }`}>
+              <MaterialIcon name={allDone ? 'task_alt' : needsClientInput ? 'person_alert' : needsAdminInput ? 'admin_panel_settings' : activePhase?.icon ?? 'route'} size={19} />
             </div>
-            <span className="text-[11px] font-bold tabular-nums text-gray-500 shrink-0">
-              {doneCount}/{phases.length}
-            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-sm font-bold text-gray-900">Project Timeline</h2>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                  allDone ? 'bg-green-100 text-green-700' : needsClientInput ? 'bg-violet-100 text-violet-700' : needsAdminInput ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                }`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${allDone ? 'bg-green-500' : needsClientInput ? 'bg-violet-500' : needsAdminInput ? 'bg-amber-500' : 'bg-gray-400'}`} />
+                  {allDone ? 'Timeline complete' : needsClientInput ? 'Client input required' : needsAdminInput ? 'Admin input required' : 'On track'}
+                </span>
+              </div>
+              <p className="mt-1 text-xs leading-5 text-gray-500">
+                {allDone
+                  ? 'All project phases are complete.'
+                  : activePhase
+                    ? `Current phase: ${activePhase.title}${activePhase.targetDate ? ` · target ${activePhase.targetDate}` : ''}`
+                    : 'No active phase selected.'}
+              </p>
+              {(activeAssignment && activeTemplate) || needsClientInput || needsAdminInput ? (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {activeAssignment && activeTemplate && (
+                    <button
+                      type="button"
+                      onClick={() => onViewDocument(activeAssignment.id)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+                    >
+                      <MaterialIcon name={activeTemplate.icon} size={13} />
+                      {activeAssignment.documentTitle}
+                    </button>
+                  )}
+                  {needsClientInput && (
+                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-violet-50 px-2.5 py-1.5 text-[11px] font-semibold text-violet-700">
+                      <MaterialIcon name="person" size={13} />
+                      Waiting for client confirmation
+                    </span>
+                  )}
+                  {needsAdminInput && (
+                    <button
+                      type="button"
+                      onClick={() => onAssignTemplate(activePhase.id)}
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[11px] font-semibold text-amber-700 transition-colors hover:bg-amber-100"
+                    >
+                      <MaterialIcon name="note_add" size={13} />
+                      Assign document
+                    </button>
+                  )}
+                </div>
+              ) : null}
+            </div>
           </div>
-          <p className="text-[10px] text-gray-400">{progress}% complete</p>
+
+          <div className="shrink-0 lg:min-w-60">
+            <div className="mb-1.5 flex items-center justify-between gap-3">
+              <span className="text-[11px] font-bold text-gray-500">{progress}% complete</span>
+              <span className="text-[11px] font-semibold text-gray-400">{doneCount}/{phases.length} phases</span>
+            </div>
+            <div className="h-1.5 w-full min-w-48 overflow-hidden rounded-full bg-gray-100 lg:w-60">
+              <div className="h-full rounded-full bg-gray-900 transition-all duration-500" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
         </div>
 
-        {/* Phase list */}
-        <div className="relative px-2 pb-2">
-          {/* Spine line */}
-          {phases.length > 1 && (
-            <div className="absolute left-5.5 top-4 bottom-10 w-px bg-gray-200 pointer-events-none" />
-          )}
-
-          <div className="space-y-0.5">
-            {phases.map((phase, i) => {
-              const isActive = phase.status === 'active';
-              const isDone = phase.status === 'done';
-              const isSelected = phase.id === selectedId;
-
-              return (
-                <button
-                  key={phase.id}
-                  type="button"
-                  onClick={() => setSelectedId(phase.id)}
-                  className={`w-full flex items-center gap-3 px-2.5 py-2.5 rounded-xl text-left transition-all ${
-                    isSelected
-                      ? 'bg-gray-900 shadow-sm'
-                      : isActive
-                        ? 'hover:bg-amber-50'
-                        : 'hover:bg-gray-50'
-                  }`}
-                >
-                  {/* Icon circle (doubles as status indicator) */}
-                  <div className={`relative z-10 w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${
-                    isSelected
-                      ? 'bg-white text-gray-900'
-                      : isDone
-                        ? 'bg-gray-900 text-white'
-                        : isActive
-                          ? 'bg-amber-500 text-white'
-                          : 'bg-gray-100 text-gray-500'
-                  }`}>
-                    {isDone
-                      ? <Check size={13} strokeWidth={2.5} />
-                      : <MaterialIcon name={phase.icon} size={14} />
-                    }
-                  </div>
-
-                  {/* Phase label */}
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className={`text-[10px] font-bold tabular-nums shrink-0 ${
-                        isSelected ? 'text-gray-400' : 'text-gray-400'
-                      }`}>
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
-                      <span className={`text-xs font-bold truncate ${
-                        isSelected
-                          ? 'text-white'
-                          : isDone
-                            ? 'text-gray-500'
-                            : isActive
-                              ? 'text-gray-900'
-                              : 'text-gray-700'
-                      }`}>
-                        {phase.title}
-                      </span>
-                    </div>
-                    {phase.phaseAmount != null && (
-                      <p className={`text-[10px] font-semibold mt-0.5 ml-5 ${
-                        isSelected ? 'text-gray-400' : 'text-gray-500'
-                      }`}>
-                        ${phase.phaseAmount.toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Active pip */}
-                  {isActive && !isSelected && (
-                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Add inline */}
+        <div className="flex items-center justify-between gap-3 px-4 py-2.5">
+          <p className="text-xs font-semibold text-gray-500">
+            {activePhase ? `Phase ${activeIndex + 1} of ${phases.length}` : 'Timeline phases'}
+          </p>
           <button
             type="button"
             onClick={() => onAddPhase(phases.length - 1)}
-            className="mt-1 w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gray-900 px-3 text-xs font-bold text-white transition-colors hover:bg-gray-700"
           >
-            <Plus size={12} />
+            <Plus size={13} />
             Add phase
           </button>
         </div>
       </div>
 
-      {/* ── RIGHT: Phase detail ── */}
-      {selectedPhase ? (
-        <PhaseDetailCard
-          phase={selectedPhase}
-          phaseIndex={selectedIndex}
-          totalPhases={phases.length}
-          project={project}
-          assignment={selectedAssignment}
-          onEditPhase={onEditPhase}
-          onUpdatePhase={onUpdatePhase}
-          onAssignTemplate={onAssignTemplate}
-          onOpenDocument={onOpenDocument}
-          onViewDocument={onViewDocument}
-          onCompletePhase={id => {
-            onCompletePhase(id);
-            const next = phases.find((p, idx) => idx > selectedIndex && p.status === 'pending');
-            if (next) setSelectedId(next.id);
-          }}
-          onSetActivePhase={onSetActivePhase}
-          onMovePhase={onMovePhase}
-          onDeletePhase={id => {
-            onDeletePhase(id);
-            setSelectedId(phases.find(p => p.id !== id)?.id ?? null);
-          }}
-          onOpenDiscovery={onOpenDiscovery}
-          discoveryStatus={discoveryStatus}
-        />
-      ) : (
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-sm flex items-center justify-center min-h-48">
-          <p className="text-sm font-medium text-gray-400">Select a phase to view details</p>
+      <div className="rounded-2xl border border-gray-200 bg-white">
+        <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+          <div className="flex items-center gap-2">
+            <MaterialIcon name="route" size={17} className="text-gray-400" />
+            <h3 className="text-sm font-bold text-gray-900">Timeline</h3>
+          </div>
+          <div className="hidden items-center gap-6 pr-12 text-[10px] font-bold uppercase tracking-widest text-gray-400 lg:flex">
+            <span className="w-32">Schedule</span>
+            <span className="w-56">Document / Input</span>
+            <span className="w-28 text-right">Action</span>
+          </div>
         </div>
-      )}
+
+        <div className="px-3 py-3 md:px-4">
+          <div className="relative">
+            {phases.length > 1 && <div className="absolute left-[23px] top-8 bottom-8 w-px bg-gray-200" />}
+
+            <div className="space-y-2">
+              {phases.map((phase, i) => {
+                const isActive = phase.status === 'active';
+                const isDone = phase.status === 'done';
+                const isDiscovery = /discovery|brief/i.test(phase.title);
+                const assignment = getPhaseAssignment(project.id, phase.id);
+                const tplMeta = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
+                const allocated = phase.phaseAmount != null && phase.phaseAmount > 0;
+                const cfg = statusConfig[phase.status];
+
+                return (
+                  <div key={phase.id} className={`relative grid gap-3 rounded-[18px] border px-3 py-3 transition-colors lg:grid-cols-[36px_minmax(220px,1fr)_140px_minmax(220px,260px)_150px] lg:items-center ${
+                    isActive ? 'border-amber-200 bg-amber-50/35' : 'border-gray-100 bg-white hover:bg-gray-50'
+                  }`}>
+                    <div className={`relative z-10 flex h-9 w-9 items-center justify-center rounded-xl ${cfg.node}`}>
+                      {isDone ? <MaterialIcon name="check" size={16} /> : <MaterialIcon name={phase.icon} size={16} />}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex min-w-0 flex-wrap items-center gap-2">
+                        <span className="text-[10px] font-bold tabular-nums text-gray-400">{String(i + 1).padStart(2, '0')}</span>
+                        <h4 className="type-card-title truncate text-(--color-ink)">{phase.title}</h4>
+                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold ${cfg.badge}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+                          {cfg.label}
+                        </span>
+                        {phase.requiresClientAction && (
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            phase.clientCompleted ? 'bg-green-50 text-green-700' : 'bg-violet-50 text-violet-700'
+                          }`}>
+                            <MaterialIcon name={phase.clientCompleted ? 'task_alt' : 'person'} size={11} />
+                            {phase.clientCompleted ? 'Client completed' : 'Client input'}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-1 truncate text-xs font-medium leading-5 text-gray-500">
+                        {phase.description || (isActive ? 'Current project step' : isDone ? 'Completed step' : 'Upcoming step')}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 rounded-2xl bg-(--color-surface) p-2 lg:block lg:bg-transparent lg:p-0">
+                      <div className="min-w-0">
+                        <p className="type-meta text-gray-400 lg:hidden">Date</p>
+                        <p className="truncate text-xs font-bold text-gray-700">
+                          {phase.targetDate || 'No date'}
+                        </p>
+                      </div>
+                      <div className="min-w-0 lg:mt-1">
+                        <p className="type-meta text-gray-400 lg:hidden">Value</p>
+                        <p className="truncate text-xs font-semibold text-gray-500">
+                          {allocated ? `$${phase.phaseAmount?.toLocaleString()}` : 'No amount'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {isDiscovery && onOpenDiscovery ? (
+                          <button
+                            type="button"
+                            onClick={onOpenDiscovery}
+                            className={`inline-flex max-w-full items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
+                              discoveryStatus === 'submitted'
+                                ? 'bg-green-50 text-green-700 hover:bg-green-100'
+                                : discoveryStatus === 'draft'
+                                  ? 'bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                            }`}
+                          >
+                            <MaterialIcon name={discoveryStatus === 'submitted' ? 'check_circle' : discoveryStatus === 'draft' ? 'draft' : 'edit_note'} size={13} />
+                            <span className="truncate">{discoveryStatus === 'submitted' ? 'View discovery brief' : discoveryStatus === 'draft' ? 'Continue discovery brief' : 'Fill discovery brief'}</span>
+                          </button>
+                        ) : null}
+
+                        {assignment && tplMeta ? (
+                          <button
+                            type="button"
+                            onClick={() => onViewDocument(assignment.id)}
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-lg bg-gray-100 px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 transition-colors hover:bg-gray-200"
+                          >
+                            <MaterialIcon name={tplMeta.icon} size={13} />
+                            <span className="truncate">{assignment.documentTitle}</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => onAssignTemplate(phase.id)}
+                            className="inline-flex max-w-full items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-2.5 py-1.5 text-[11px] font-semibold text-gray-500 transition-colors hover:border-gray-400 hover:text-gray-800"
+                          >
+                            <MaterialIcon name="note_add" size={13} />
+                            <span className="truncate">Assign document</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1.5">
+                      {isActive && (
+                        <button type="button" onClick={() => onCompletePhase(phase.id)} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gray-900 px-3 text-xs font-bold text-white transition-colors hover:bg-gray-700">
+                          <MaterialIcon name="skip_next" size={14} />
+                          Advance
+                        </button>
+                      )}
+                      {!isActive && !isDone && (
+                        <button type="button" onClick={() => onSetActivePhase(phase.id)} className="hidden h-9 items-center gap-1.5 rounded-xl bg-gray-100 px-3 text-xs font-bold text-gray-700 transition-colors hover:bg-gray-200 xl:inline-flex">
+                          <MaterialIcon name="play_arrow" size={14} />
+                          Activate
+                        </button>
+                      )}
+                      <RowActionsMenu
+                        actions={[
+                          { label: 'Edit phase', icon: <Pencil size={13} />, onClick: () => onEditPhase(phase) },
+                          ...(!isActive && !isDone ? [{ label: 'Set active', icon: <MaterialIcon name="play_arrow" size={14} />, onClick: () => onSetActivePhase(phase.id) }] : []),
+                          ...(assignment ? [{ label: 'Edit document', icon: <MaterialIcon name="edit_document" size={14} />, onClick: () => onOpenDocument(assignment.id) }] : [{ label: 'Assign document', icon: <MaterialIcon name="note_add" size={14} />, onClick: () => onAssignTemplate(phase.id) }]),
+                          ...(i > 0 ? [{ label: 'Move up', icon: <ChevronUp size={14} />, onClick: () => onMovePhase(phase.id, 'up') }] : []),
+                          ...(i < phases.length - 1 ? [{ label: 'Move down', icon: <ChevronDown size={14} />, onClick: () => onMovePhase(phase.id, 'down') }] : []),
+                          { label: 'Delete phase', icon: <Trash2 size={13} />, onClick: () => onDeletePhase(phase.id), variant: 'danger' as const },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

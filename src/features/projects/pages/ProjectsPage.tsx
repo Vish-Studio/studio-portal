@@ -5,7 +5,7 @@ import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { Button, ConfirmDialog, FormField, inputCls, Option, Select } from '@/src/shared/components';
 import ProjectCard, { ProjectCardMini } from '../components/project-card/project-card';
 import { ClientPicker } from '@/src/features/clients';
@@ -26,6 +26,10 @@ interface ProjectFormValues {
 
 type SortKey = 'updated' | 'name';
 
+const sameStringSet = (left: string[] = [], right: string[] = []) => (
+  left.length === right.length && left.every(value => right.includes(value))
+);
+
 const Projects = () => {
   const { searchQuery } = useUIStore();
   const { projects, addProject, updateProject, removeProject } = useProjectsStore();
@@ -42,13 +46,18 @@ const Projects = () => {
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
-  const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting } } =
+  const { register, handleSubmit, watch, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<ProjectFormValues>({
       defaultValues: { name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' },
     });
 
   const watchedService = watch('service');
   const hasPackages = watchedService === 'website' || watchedService === 'software';
+  const hasProjectFormChanges = isDirty || (
+    editingProject
+      ? selectedClientId !== editingProject.clientId || !sameStringSet(selectedMemberIds, editingProject.assignedMemberIds ?? [])
+      : Boolean(selectedClientId || selectedMemberIds.length)
+  );
 
   const tabCounts = useMemo(() => ({
     all: projects.length,
@@ -225,12 +234,13 @@ const Projects = () => {
               <MemberPicker members={members} selectedIds={selectedMemberIds} onToggle={id => setSelectedMemberIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])} />
             </FormField>
           </div>
-          <FormSidebarFooter>
-            <Button type="button" onClick={() => setSidebarOpen(false)} variant="secondary" className="flex-1">Cancel</Button>
-            <Button type="submit" loading={isSubmitting} className="flex-1">
-              {editingProject ? 'Save Changes' : 'Add Project'}
-            </Button>
-          </FormSidebarFooter>
+          <FormSidebarActions
+            onCancel={() => setSidebarOpen(false)}
+            isSubmitting={isSubmitting}
+            isDirty={hasProjectFormChanges}
+            disabled={!selectedClientId}
+            submitLabel={editingProject ? 'Save Changes' : 'Add Project'}
+          />
         </form>
       </FormSidebar>
 

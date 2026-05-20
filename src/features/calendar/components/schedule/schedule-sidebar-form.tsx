@@ -48,6 +48,10 @@ const fromDateInputValue = (value: string) => {
 
 const scheduleCategories: ScheduleCategory[] = ['team', 'project', 'client'];
 
+const sameStringSet = (left: string[] = [], right: string[] = []) => (
+  left.length === right.length && left.every(value => right.includes(value))
+);
+
 interface ScheduleSidebarFormProps {
   date: Date;
   onAdd: (event: ScheduleEvent, date: Date) => void;
@@ -89,6 +93,23 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
   const showProject = selectedCategory === 'project';
   const showClient = selectedCategory === 'client' || selectedCategory === 'project';
   const showTeam = selectedCategory === 'team';
+  const initialTimeParts = initialEvent?.time && initialEvent.time !== 'All Day'
+    ? initialEvent.time.split(' – ')
+    : [];
+  const hasScheduleChanges = !initialEvent || (
+    selectedCategory !== (initialEvent.category ?? getEventCategory(initialEvent.type)) ||
+    selectedType !== initialEvent.type ||
+    title !== (initialEvent.title ?? '') ||
+    description !== (initialEvent.description ?? '') ||
+    callLink !== (initialEvent.callLink ?? '') ||
+    allDay !== (initialEvent.time === 'All Day') ||
+    startTime !== parseTimeFromDisplay(initialTimeParts[0] ?? '') ||
+    endTime !== parseTimeFromDisplay(initialTimeParts[1] ?? '') ||
+    linkedProjectId !== (initialEvent.projectId ?? '') ||
+    linkedPhaseId !== (initialEvent.phaseId ?? '') ||
+    linkedClientId !== (initialEvent.clientId ?? '') ||
+    !sameStringSet(linkedMemberIds, initialEvent.memberIds ?? [])
+  );
 
   const handleCategoryChange = (category: ScheduleCategory) => {
     setSelectedCategory(category);
@@ -387,7 +408,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
           </Button>
           <Button
             type="submit"
-            disabled={!title.trim()}
+            disabled={!title.trim() || !hasScheduleChanges}
             className="flex-[1.4]"
             iconLeft={<MaterialIcon name={initialEvent ? 'edit' : 'add'} size={16} className="text-white" />}
           >

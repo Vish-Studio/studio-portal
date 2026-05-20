@@ -1,5 +1,6 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import React, { FunctionComponent, ReactNode, useEffect } from 'react';
 import { X } from '@/src/shared/components/material-icon/material-lucide-icons';
+import Button from '../button/button';
 
 export type SidebarWidth = 'sm' | 'md' | 'lg';
 
@@ -117,6 +118,41 @@ export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
     <div className="form-sidebar-footer flex shrink-0 gap-3 border-t border-gray-100 bg-white px-6 py-4 [&_a]:flex-1 [&_a>button]:w-full [&_button]:min-w-0 [&_button]:flex-1">
       {children}
     </div>
+  );
+}
+
+export function FormSidebarActions({
+  onCancel,
+  submitLabel,
+  cancelLabel = 'Cancel',
+  isSubmitting = false,
+  isDirty = true,
+  disabled = false,
+  submitIcon,
+}: {
+  onCancel: () => void;
+  submitLabel: string;
+  cancelLabel?: string;
+  isSubmitting?: boolean;
+  isDirty?: boolean;
+  disabled?: boolean;
+  submitIcon?: ReactNode;
+}) {
+  return (
+    <FormSidebarFooter>
+      <Button type="button" onClick={onCancel} variant="secondary" className="flex-1">
+        {cancelLabel}
+      </Button>
+      <Button
+        type="submit"
+        loading={isSubmitting}
+        disabled={disabled || isSubmitting || !isDirty}
+        iconLeft={submitIcon}
+        className="flex-1"
+      >
+        {submitLabel}
+      </Button>
+    </FormSidebarFooter>
   );
 }
 
