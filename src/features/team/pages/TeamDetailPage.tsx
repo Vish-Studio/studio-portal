@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckSquare, Clock3, Mail, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, CheckSquare, Mail, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
@@ -9,12 +9,13 @@ import Fab from '@/src/shared/components/button-fab/button-fab';
 import { ProjectCard } from '@/src/features/projects';
 import TeamDetailCard from '../components/team-detail-card/team-detail-card';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TaskStatusBadge } from '@/src/shared/components';
+import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/features/auth';
 import type { TeamAccessRole } from '../types';
+import TeamDetailTaskRow from '../components/team-detail-task-row/team-detail-task-row';
 
 interface TeamMemberFormValues {
   name: string;
@@ -308,19 +309,7 @@ export default function TeamDetail() {
                 const project = projects.find(item => item.id === task.projectId);
 
                 return (
-                  <div key={task.id} className="team-detail-task-row grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 md:grid-cols-[minmax(240px,1fr)_160px_120px] md:items-center">
-                    <div className="team-detail-task-main min-w-0">
-                      <p className="type-card-title truncate text-(--color-ink)">{task.title}</p>
-                      <p className="type-muted mt-0.5 truncate text-gray-400">{project?.name ?? 'No project linked'}</p>
-                    </div>
-                    <div className="team-detail-task-meta flex items-center gap-2 text-gray-400">
-                      <Clock3 size={14} />
-                      <span className="type-label">{task.dueDate || 'No due date'}</span>
-                    </div>
-                    <div className="team-detail-task-status flex justify-start md:justify-end">
-                      <TaskStatusBadge status={task.status} />
-                    </div>
-                  </div>
+                  <TeamDetailTaskRow key={task.id} task={task} project={project} />
                 );
               })}
             </div>

@@ -1,170 +1,18 @@
-import React, { useState } from 'react';
-import { format } from 'date-fns';
+import { useState } from 'react';
 import { FileText, ShieldCheck, Clock } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import { MaterialIcon, StatusBadge } from '@/src/shared/components';
+import { MaterialIcon } from '@/src/shared/components';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { useDocumentsStore } from '../stores/documentStore';
 import type { StudioDocument, DocumentType } from '../types';
+import UserDocumentListItem, { USER_DOC_META } from '../components/user-document-list-item/user-document-list-item';
+import SignDocumentModal from '../components/sign-document-modal/sign-document-modal';
 
 const CURRENT_CLIENT_ID = 'c1';
 
-// ─── Document type metadata ───────────────────────────────────────────────────
-
-const DOC_META: Record<DocumentType, { icon: string; label: string; iconClass: string; bgClass: string }> = {
-  contract: { icon: 'draw', label: 'Contract', iconClass: 'text-violet-500', bgClass: 'bg-violet-50' },
-  proposal: { icon: 'description', label: 'Proposal', iconClass: 'text-blue-500', bgClass: 'bg-blue-50' },
-  invoice: { icon: 'receipt', label: 'Invoice', iconClass: 'text-green-500', bgClass: 'bg-green-50' },
-  quotation: { icon: 'request_quote', label: 'Quotation', iconClass: 'text-amber-500', bgClass: 'bg-amber-50' },
-  onboarding: { icon: 'person_add', label: 'Onboarding', iconClass: 'text-rose-500', bgClass: 'bg-rose-50' },
-};
-
 type FilterKey = 'all' | DocumentType;
-
-// ─── Sign modal ───────────────────────────────────────────────────────────────
-
-const SignModal = ({
-  doc,
-  onSign,
-  onClose,
-}: {
-  doc: StudioDocument;
-  onSign: (name: string) => void;
-  onClose: () => void;
-}) => {
-  const [name, setName] = useState('');
-
-  const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    onSign(name.trim());
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white p-8 rounded-[28px] max-w-md w-full shadow-2xl">
-        <div className="w-12 h-12 rounded-2xl bg-violet-50 flex items-center justify-center mb-5">
-          <MaterialIcon name="draw" size={22} className="text-violet-500" />
-        </div>
-        <h3 className="text-xl font-extrabold text-gray-900 mb-1">Sign Contract</h3>
-        <p className="text-sm font-medium text-gray-500 mb-6">
-          Electronically signing:{' '}
-          <span className="font-bold text-gray-900">{doc.title}</span>
-        </p>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
-              Full Legal Name
-            </label>
-            <input
-              required
-              autoFocus
-              value={name}
-              onChange={e => setName(e.target.value)}
-              type="text"
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm font-medium py-3 px-4 rounded-[12px] focus:outline-none focus:border-gray-400 transition-colors"
-              placeholder="Your full name"
-            />
-          </div>
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 text-xs font-extrabold uppercase tracking-widest rounded-full transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-3 bg-black hover:bg-gray-800 text-white text-xs font-extrabold uppercase tracking-widest rounded-full transition-colors"
-            >
-              Confirm & Sign
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-// ─── Document row ─────────────────────────────────────────────────────────────
-
-const DocumentRow = ({
-  doc,
-  onSign,
-}: {
-  doc: StudioDocument;
-  onSign: () => void;
-}) => {
-  const meta = DOC_META[doc.type];
-  const isContract = doc.type === 'contract';
-  const needsSignature = isContract && !doc.isSigned;
-  const isSigned = isContract && !!doc.isSigned;
-
-  return (
-    <div className="flex items-center gap-3 px-4 md:px-6 py-3.5 hover:bg-(--color-surface-subtle) transition-colors group">
-      {/* Type icon */}
-      <div className={`w-9 h-9 rounded-[12px] ${meta.bgClass} flex items-center justify-center shrink-0`}>
-        <MaterialIcon name={meta.icon} size={16} className={meta.iconClass} />
-      </div>
-
-      {/* Info */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm font-semibold text-(--color-ink) truncate leading-tight">{doc.title}</p>
-          {needsSignature && (
-            <StatusBadge label="Action Required" variant="violet" className="shrink-0" />
-          )}
-          {isSigned && (
-            <StatusBadge label="Signed" variant="green" className="shrink-0" />
-          )}
-        </div>
-        <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">{meta.label}</span>
-          {doc.createdAt && (
-            <>
-              <span className="text-gray-300 text-[10px]">·</span>
-              <span className="text-[10px] text-gray-400">
-                {format(doc.createdAt.toMillis(), 'MMM dd, yyyy')}
-              </span>
-            </>
-          )}
-          {doc.author && (
-            <>
-              <span className="text-gray-300 text-[10px]">·</span>
-              <span className="text-[10px] text-gray-400">{doc.author.name}</span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div className="flex items-center gap-2 shrink-0">
-        {needsSignature && (
-          <button
-            onClick={onSign}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white text-[11px] font-bold rounded-[10px] transition-colors"
-          >
-            <MaterialIcon name="draw" size={12} />
-            Sign
-          </button>
-        )}
-        <a
-          href={doc.url}
-          target="_blank"
-          rel="noreferrer"
-          className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 transition-colors"
-          title="Open document"
-          onClick={e => e.stopPropagation()}
-        >
-          <MaterialIcon name="open_in_new" size={14} />
-        </a>
-      </div>
-    </div>
-  );
-};
 
 // ─── UserDocuments page ───────────────────────────────────────────────────────
 
@@ -183,7 +31,7 @@ const UserDocumentsPage = () => {
   const presentTypes = [...new Set(myDocuments.map(d => d.type))] as DocumentType[];
   const tabs: TabItem[] = [
     { key: 'all', label: 'All', count: myDocuments.length },
-    ...presentTypes.map(t => ({ key: t as string, label: DOC_META[t].label, count: myDocuments.filter(d => d.type === t).length })),
+    ...presentTypes.map(t => ({ key: t as string, label: USER_DOC_META[t].label, count: myDocuments.filter(d => d.type === t).length })),
   ];
 
   const filtered = activeTab === 'all'
@@ -249,9 +97,9 @@ const UserDocumentsPage = () => {
             bodyClassName="divide-y divide-gray-100"
           >
             {filtered.map(doc => (
-              <DocumentRow
+              <UserDocumentListItem
                 key={doc.id}
-                doc={doc}
+                document={doc}
                 onSign={() => setSigningDoc(doc)}
               />
             ))}
@@ -277,8 +125,8 @@ const UserDocumentsPage = () => {
 
       {/* Sign modal */}
       {signingDoc && (
-        <SignModal
-          doc={signingDoc}
+        <SignDocumentModal
+          document={signingDoc}
           onSign={handleSign}
           onClose={() => setSigningDoc(null)}
         />

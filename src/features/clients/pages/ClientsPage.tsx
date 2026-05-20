@@ -1,16 +1,17 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Pencil, Trash2, UserCheck, UserMinus, UserRoundX, Users } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { UserCheck, UserMinus, UserRoundX, Users } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { Button, ClientStatusBadge, FormField, formatRecordDate, inputCls, Option, RecordMeta, RowActionsMenu, Select } from '@/src/shared/components';
+import { FormField, inputCls, Option, Select } from '@/src/shared/components';
 import { useClientsStore } from '../stores/clientStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import type { Client, ClientStatus } from '../types';
+import ClientListItem from '../components/client-list-item/client-list-item';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -211,49 +212,15 @@ export default function Clients() {
               <span className="text-right">Status</span>
             </div>
 
-            {filtered.map(client => {
-              const circleBg: Record<ClientStatus, string> = { active: 'bg-green', inactive: 'bg-amber-400', lost: 'bg-red-400' };
-
-              return (
-                <div
-                  key={client.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`/admin/clients/${client.id}`)}
-                  onKeyDown={event => { if (event.key === 'Enter') navigate(`/admin/clients/${client.id}`); }}
-                  className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 cursor-pointer lg:grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] lg:items-center"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${circleBg[client.status]} text-xs font-bold text-white`}>
-                      {client.fullName.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="type-card-title truncate text-(--color-ink)">{client.fullName}</p>
-                      <RecordMeta items={[{ label: client.companyName || 'No company', icon: 'business' }]} className="mt-1" />
-                    </div>
-                  </div>
-
-                  <div className="min-w-0">
-                    <p className="type-label truncate text-gray-600">{client.email}</p>
-                    <RecordMeta items={[{ label: client.phone || 'No phone', icon: 'call' }]} className="mt-1" />
-                  </div>
-
-                  <RecordMeta items={[{ label: formatRecordDate(client.createdAt?.toDate?.()), icon: 'event' }]} />
-
-                  <div className="flex items-center justify-between gap-3 lg:justify-end">
-                    <ClientStatusBadge status={client.status} />
-                    <div onClick={event => event.stopPropagation()}>
-                      <RowActionsMenu
-                        actions={[
-                          { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => openEdit(client) },
-                          { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(client), variant: 'danger' },
-                        ]}
-                      />
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {filtered.map(client => (
+              <ClientListItem
+                key={client.id}
+                client={client}
+                onOpen={item => navigate(`/admin/clients/${item.id}`)}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+              />
+            ))}
           </div>
         )}
       </div>

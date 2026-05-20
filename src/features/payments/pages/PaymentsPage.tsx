@@ -1,36 +1,22 @@
 import { useState, useMemo } from 'react';
-import { TrendingUp, TrendingDown, Clock, CreditCard, RefreshCw, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { TrendingUp, TrendingDown, Clock, CreditCard } from '@/src/shared/components/material-icon/material-lucide-icons';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import { RowActionsMenu } from '@/src/shared/components/table/table';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { MaterialIcon, RecordMeta, StatusBadge } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
+import PaymentListItem, {
+  formatPaymentAmount,
+  type PaymentListItemData,
+} from '../components/payment-list-item/payment-list-item';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type PaymentStatus = 'paid' | 'pending' | 'overdue';
-type PaymentType = 'one-time' | 'recurring';
-type RecurringInterval = 'monthly' | 'quarterly' | 'annually';
 type FilterKey = 'all' | 'paid' | 'pending' | 'overdue' | 'recurring';
 type SortKey = 'date' | 'amount';
 
-interface Payment {
-  id: string;
-  invoiceId: string;
-  client: string;
-  project: string;
-  amount: number;
-  status: PaymentStatus;
-  type: PaymentType;
-  interval?: RecurringInterval;
-  date: string;
-  nextDate?: string;
-}
-
 // ─── Demo Data ────────────────────────────────────────────────────────────────
 
-const PAYMENTS: Payment[] = [
+const PAYMENTS: PaymentListItemData[] = [
   { id: '1', invoiceId: 'INV-001', client: 'Acme Corp', project: 'Brand Refresh', amount: 2400, status: 'paid', type: 'recurring', interval: 'monthly', date: 'Apr 15, 2026', nextDate: 'May 15, 2026' },
   { id: '2', invoiceId: 'INV-002', client: 'TechStart Ltd', project: 'App Development', amount: 1800, status: 'pending', type: 'recurring', interval: 'monthly', date: 'Apr 18, 2026', nextDate: 'May 18, 2026' },
   { id: '3', invoiceId: 'INV-003', client: 'NovaSoft', project: 'Dashboard UI', amount: 3200, status: 'paid', type: 'one-time', date: 'Apr 10, 2026' },
@@ -44,29 +30,6 @@ const PAYMENTS: Payment[] = [
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const fmt = (n: number) =>
-  '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-const INTERVAL_LABEL: Record<RecurringInterval, string> = {
-  monthly: 'Monthly',
-  quarterly: 'Quarterly',
-  annually: 'Annual',
-};
-
-const STATUS_VARIANT: Record<PaymentStatus, 'green' | 'amber' | 'red'> = {
-  paid: 'green',
-  pending: 'amber',
-  overdue: 'red',
-};
-
-const CLIENT_COLORS = [
-  'bg-violet-500', 'bg-blue-500', 'bg-emerald-500',
-  'bg-orange-500', 'bg-pink-500', 'bg-cyan-500', 'bg-indigo-500',
-];
-
-const clientColor = (name: string) =>
-  CLIENT_COLORS[name.charCodeAt(0) % CLIENT_COLORS.length];
 
 // ─── Payments Page ────────────────────────────────────────────────────────────
 
@@ -129,21 +92,21 @@ const PaymentsPage = () => {
           <StatCard size="sm" variant="lime"
             icon={<CreditCard size={16} />}
             label="Total Collected"
-            value={fmt(totalCollected)}
+            value={formatPaymentAmount(totalCollected)}
             badge={<><TrendingUp size={14} className="text-green-700" /> +8%</>}
             badgeLabel="vs last month"
           />
           <StatCard size="sm" variant="surface"
             icon={<Clock size={16} />}
             label="Pending"
-            value={fmt(totalPending)}
+            value={formatPaymentAmount(totalPending)}
             badge={`${tabCounts.pending} invoice${tabCounts.pending !== 1 ? 's' : ''}`}
             badgeLabel="awaiting payment"
           />
           <StatCard size="sm" variant="dark"
             icon={<TrendingDown size={16} />}
             label="Overdue"
-            value={fmt(totalOverdue)}
+            value={formatPaymentAmount(totalOverdue)}
             badge={<><TrendingDown size={14} className="text-red-400" /> {tabCounts.overdue} overdue</>}
             badgeLabel="requires attention"
           />
@@ -185,50 +148,10 @@ const PaymentsPage = () => {
               </div>
 
               {filtered.map(payment => (
-                <div
+                <PaymentListItem
                   key={payment.id}
-                  className="grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="type-label font-mono text-gray-500">{payment.invoiceId}</span>
-                      {payment.type === 'recurring' && (
-                        <span className="type-count inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-violet-600">
-                          <RefreshCw size={9} />
-                          {payment.interval ? INTERVAL_LABEL[payment.interval] : 'Recurring'}
-                        </span>
-                      )}
-                    </div>
-                    <RecordMeta className="mt-1" items={[{ label: payment.date, icon: 'event' }]} />
-                  </div>
-
-                  <div className="flex min-w-0 items-center gap-2.5">
-                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-[11px] font-bold text-white`}>
-                      {payment.client.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="type-card-title truncate text-(--color-ink)">{payment.client}</p>
-                      <RecordMeta items={[{ label: payment.project, icon: 'work' }]} className="mt-1" />
-                    </div>
-                  </div>
-
-                  <p className="type-card-title text-left tabular-nums text-(--color-ink) md:text-right">
-                    {fmt(payment.amount)}
-                  </p>
-
-                  <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
-
-                  <RecordMeta items={[{ label: payment.nextDate ?? '—', icon: 'event_repeat' }]} />
-
-                  <div className="flex justify-end">
-                    <RowActionsMenu
-                      actions={[
-                        { label: 'Edit payment', icon: <MaterialIcon name="edit" size={16} />, onClick: () => { } },
-                        { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => { }, variant: 'danger' },
-                      ]}
-                    />
-                  </div>
-                </div>
+                  payment={payment}
+                />
               ))}
             </div>
           )}

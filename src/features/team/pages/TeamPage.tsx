@@ -1,23 +1,24 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, ShieldCheck, UserCheck, UserRoundCheck, UserRoundX, Users, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { ShieldCheck, UserRoundCheck, UserRoundX, Users } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import { Button, FormField, inputCls, Modal, Option, RowActionsMenu, Select } from '@/src/shared/components';
+import { FormField, inputCls, Option, Select } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
-import { getMemberColors, type TeamAccessRole, type TeamMember, type TeamProject } from '../types';
-import StatusIcon from '@/src/shared/components/status-icon/status-icon';
+import type { TeamAccessRole, TeamMember } from '../types';
+import TeamMemberListItem, { type TeamMemberListItemData } from '../components/team-member-list-item/team-member-list-item';
+import AssignProjectModal from '../components/assign-project-modal/assign-project-modal';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type MemberRow = TeamMember & { project?: TeamProject };
+type MemberRow = TeamMemberListItemData;
 type FilterKey = 'all' | 'assigned' | 'unassigned';
 type SortKey = 'name' | 'role';
 
@@ -26,63 +27,6 @@ interface MemberFormValues {
   role: string;
   accessRole: TeamAccessRole;
   email: string;
-}
-
-// ─── Assign Project Modal ──────────────────────────────────────────────────────
-
-interface AssignModalProps {
-  member: TeamMember;
-  projects: TeamProject[];
-  onClose: () => void;
-  onAssign: (memberId: string, projectId: string | null) => Promise<void>;
-}
-
-function AssignModal({ member, projects, onClose, onAssign }: AssignModalProps) {
-  const colors = getMemberColors(member.id);
-  return (
-    <Modal
-      variant="dialog"
-      size="sm"
-      onClose={onClose}
-      title="Assign Project"
-      description={member.name}
-      headerIcon={
-        <div className={`w-10 h-10 rounded-xl ${colors.bg} flex items-center justify-center text-white font-bold text-base shrink-0`}>
-          {member.name.charAt(0)}
-        </div>
-      }
-    >
-      <div className="px-4 pb-4 flex flex-col gap-1.5 max-h-80 overflow-y-auto">
-        {projects.map(project => {
-          const isSelected = project.id === member.assignedProjectId;
-          return (
-            <button
-              key={project.id}
-              onClick={() => { onAssign(member.id, project.id); onClose(); }}
-              className={`w-full text-left px-3.5 py-3 rounded-xl border transition-all flex items-center gap-3
-                ${isSelected ? 'bg-black border-black' : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
-            >
-              <Briefcase size={14} className={isSelected ? 'text-white/50 shrink-0' : 'text-gray-400 shrink-0'} />
-              <div className="min-w-0 flex-1">
-                <p className={`type-card-title truncate ${isSelected ? 'text-white' : 'text-gray-900'}`}>{project.name}</p>
-                <p className={`type-muted mt-0.5 truncate ${isSelected ? 'text-white/50' : 'text-gray-400'}`}>
-                  {project.client}{project.status === 'paused' && <span className="ml-1.5">· Paused</span>}
-                </p>
-              </div>
-              {isSelected && <UserCheck size={14} className="text-white/70 shrink-0" />}
-            </button>
-          );
-        })}
-        <button
-          onClick={() => { onAssign(member.id, null); onClose(); }}
-          disabled={member.assignedProjectId === null}
-          className="w-full mt-1 py-2.5 rounded-xl text-xs font-semibold text-gray-400 border border-dashed border-gray-200 hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-all disabled:opacity-30 disabled:pointer-events-none"
-        >
-          Remove assignment
-        </button>
-      </div>
-    </Modal>
-  );
 }
 
 // ─── Team Page ────────────────────────────────────────────────────────────────
@@ -291,62 +235,19 @@ export default function Team() {
               <span />
             </div>
 
-            {tableData.map(member => {
-              const colors = getMemberColors(member.id);
-              const canEditMember = canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin');
-              const canAssignMember = isSuperAdmin || member.accessRole !== 'superadmin';
-
-              return (
-                <div
-                  key={member.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => navigate(`/admin/team/${member.id}`)}
-                  onKeyDown={event => { if (event.key === 'Enter') navigate(`/admin/team/${member.id}`); }}
-                  className="grid cursor-pointer gap-3 rounded-[18px] border border-gray-200 bg-white p-4 text-left transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] lg:items-center"
-                >
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-xs font-bold text-white`}>
-                      {member.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="type-card-title truncate text-(--color-ink)">{member.name}</p>
-                      <p className="type-muted truncate text-gray-400">{member.email || 'No email'}</p>
-                    </div>
-                  </div>
-
-                  <p className="type-label truncate text-gray-600">{member.role}</p>
-
-                  <div className="flex min-w-0 items-center gap-2">
-                    <StatusIcon status={member.assignedProjectId ? 'active' : 'inactive'} />
-                    <div className="min-w-0">
-                      <p className="type-card-title truncate text-gray-800">
-                        {member.project?.name ?? 'Unassigned'}
-                      </p>
-                      <p className="type-muted truncate text-gray-400">
-                        {member.project?.client ?? 'Available for a project'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end" onClick={event => event.stopPropagation()}>
-                    <RowActionsMenu
-                      actions={[
-                        ...(canEditMember
-                          ? [{ label: 'Edit member', icon: <Pencil size={14} />, onClick: () => openEdit(member) }]
-                          : []),
-                        ...(canAssignMember
-                          ? [{ label: 'Assign project', icon: <Briefcase size={14} />, onClick: () => setAssigningMember(member) }]
-                          : []),
-                        ...(isSuperAdmin
-                          ? [{ label: 'Delete', icon: <Trash2 size={14} />, onClick: () => handleDelete(member), variant: 'danger' as const }]
-                          : []),
-                      ]}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+            {tableData.map(member => (
+              <TeamMemberListItem
+                key={member.id}
+                member={member}
+                canEdit={canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin')}
+                canAssign={isSuperAdmin || member.accessRole !== 'superadmin'}
+                canDelete={isSuperAdmin}
+                onOpen={item => navigate(`/admin/team/${item.id}`)}
+                onEdit={openEdit}
+                onAssign={setAssigningMember}
+                onDelete={handleDelete}
+              />
+            ))}
           </div>
         )}
 
@@ -412,7 +313,7 @@ export default function Team() {
 
       {/* Assign Project Modal */}
       {assigningMember && (
-        <AssignModal
+        <AssignProjectModal
           member={assigningMember}
           projects={projects}
           onClose={() => setAssigningMember(null)}

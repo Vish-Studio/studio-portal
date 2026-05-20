@@ -4,76 +4,18 @@ import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { MaterialIcon, RecordMeta, StatusBadge, formatRecordDate } from '@/src/shared/components';
+import { MaterialIcon } from '@/src/shared/components';
 import { useDocumentsStore } from '../stores/documentStore';
 import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { TEMPLATES } from '@/src/features/templates';
-import type { StudioDocument, DocumentType } from '../types';
-import type { TemplateAssignment } from '@/src/features/templates';
-
-// ─── Document type icons ──────────────────────────────────────────────────────
-
-const DOC_TYPE_ICON: Record<DocumentType, string> = {
-  contract:   'draw',
-  proposal:   'description',
-  invoice:    'receipt',
-  quotation:  'request_quote',
-  onboarding: 'person_add',
-};
-
-const DOC_TYPE_LABEL: Record<DocumentType, string> = {
-  contract:   'Contract',
-  proposal:   'Proposal',
-  invoice:    'Invoice',
-  quotation:  'Quotation',
-  onboarding: 'Onboarding',
-};
-
-// ─── Unified entry shape ──────────────────────────────────────────────────────
-
-type DocStatus =
-  | 'awaits-client'    // phase flagged for client, not yet completed
-  | 'admin-action'     // admin-owned active phase with a doc
-  | 'awaits-signature' // contract not yet signed (StudioDoc)
-  | 'signed'           // signed contract
-  | 'complete'         // phase done
-  | 'pending';         // phase not yet started
-
-interface UnifiedDoc {
-  id:           string;
-  title:        string;
-  source:       'studio' | 'template';
-  icon:         string;
-  typeLabel:    string;
-  projectId?:   string;
-  projectName?: string;
-  clientName?:  string;
-  phaseName?:   string;
-  date:         number; // ms timestamp — used for sorting
-  status:       DocStatus;
-  studioDoc?:   StudioDocument;
-  assignment?:  TemplateAssignment;
-}
-
-const STATUS_LABEL: Record<DocStatus, string> = {
-  'awaits-client':    'Awaits Client',
-  'admin-action':     'Admin Action',
-  'awaits-signature': 'Awaits Signature',
-  'signed':           'Signed',
-  'complete':         'Complete',
-  'pending':          'Pending',
-};
-
-const STATUS_VARIANT: Record<DocStatus, 'violet' | 'amber' | 'purple' | 'green' | 'gray' | 'blue'> = {
-  'awaits-client':    'violet',
-  'admin-action':     'amber',
-  'awaits-signature': 'purple',
-  'signed':           'green',
-  'complete':         'green',
-  'pending':          'gray',
-};
+import DocumentListItem, {
+  DOC_TYPE_ICON,
+  DOC_TYPE_LABEL,
+  type DocStatus,
+  type UnifiedDocumentListItem,
+} from '../components/document-list-item/document-list-item';
 
 type FilterKey = 'all' | DocStatus;
 
@@ -90,8 +32,8 @@ export default function DocumentsPage() {
 
   // ── Build unified list ────────────────────────────────────────────────────
 
-  const unified = useMemo<UnifiedDoc[]>(() => {
-    const entries: UnifiedDoc[] = [];
+  const unified = useMemo<UnifiedDocumentListItem[]>(() => {
+    const entries: UnifiedDocumentListItem[] = [];
 
     // 1. StudioDocuments
     for (const doc of documents) {
@@ -182,7 +124,7 @@ export default function DocumentsPage() {
 
   // ── Actions ───────────────────────────────────────────────────────────────
 
-  const openDoc = (doc: UnifiedDoc) => {
+  const openDoc = (doc: UnifiedDocumentListItem) => {
     if (doc.source === 'template' && doc.assignment) {
       navigate(`/admin/projects/${doc.assignment.projectId}/templates/${doc.assignment.id}`);
     } else if (doc.studioDoc) {
@@ -249,48 +191,11 @@ export default function DocumentsPage() {
           >
             <div className="divide-y divide-gray-100">
               {filtered.map(doc => (
-                <div
+                <DocumentListItem
                   key={doc.id}
-                  onClick={() => openDoc(doc)}
-                  className="flex items-center gap-3 px-4 md:px-6 py-3.5 hover:bg-(--color-surface-subtle) transition-colors cursor-pointer group"
-                >
-                  {/* Type icon */}
-                  <div className="w-9 h-9 rounded-[12px] bg-gray-100 flex items-center justify-center shrink-0 group-hover:bg-gray-200 transition-colors">
-                    <MaterialIcon name={doc.icon} size={16} className="text-gray-500" />
-                  </div>
-
-                  {/* Title + meta */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-semibold text-(--color-ink) truncate leading-tight">
-                        {doc.title}
-                      </p>
-                      <StatusBadge
-                        label={STATUS_LABEL[doc.status]}
-                        variant={STATUS_VARIANT[doc.status]}
-                      />
-                    </div>
-                    <RecordMeta
-                      className="mt-1"
-                      items={[
-                        { label: doc.typeLabel, icon: 'description' },
-                        doc.projectName && { label: doc.projectName, icon: 'work' },
-                        doc.phaseName && { label: doc.phaseName, icon: 'route' },
-                        doc.clientName && { label: doc.clientName, icon: 'person' },
-                      ]}
-                    />
-                  </div>
-
-                  {/* Date */}
-                  <RecordMeta className="hidden shrink-0 tabular-nums sm:flex" items={[{ label: formatRecordDate(doc.date), icon: 'event' }]} />
-
-                  {/* Open arrow */}
-                  <MaterialIcon
-                    name="arrow_outward"
-                    size={14}
-                    className="text-gray-300 group-hover:text-gray-600 transition-colors shrink-0"
-                  />
-                </div>
+                  document={doc}
+                  onOpen={openDoc}
+                />
               ))}
             </div>
           </CardContent>
