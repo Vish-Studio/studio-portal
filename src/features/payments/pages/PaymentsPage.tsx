@@ -137,16 +137,7 @@ const PaymentsPage = () => {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col gap-2">
-              <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] items-center gap-3 px-4 text-gray-400 md:grid">
-                <span>Invoice</span>
-                <span>Client / Project</span>
-                <span className="text-right">Amount</span>
-                <span>Status</span>
-                <span>Next</span>
-                <span />
-              </div>
-
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
               {filtered.map(payment => (
                 <PaymentListItem
                   key={payment.id}

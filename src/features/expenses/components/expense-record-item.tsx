@@ -75,7 +75,6 @@ export function ExpenseRecordRow({ record, memberName, onView, onEdit, onDelete 
         </div>
       )}
       actions={[
-        { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
         { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
         { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
       ]}
@@ -90,7 +89,7 @@ export function ExpenseRecordRow({ record, memberName, onView, onEdit, onDelete 
           {isIncome ? 'Income' : 'Expense'}
         </span>
       )}
-      className="expense-record-row grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 lg:grid-cols-[minmax(260px,1fr)_140px_120px_32px] lg:items-center"
+      className="expense-record-row"
       gridClassName="lg:grid-cols-[minmax(260px,1fr)_140px_120px_110px_32px]"
     />
   );
@@ -110,7 +109,6 @@ export function ExpenseRecordCard({ record, memberName, onView, onEdit, onDelete
         </div>
       )}
       actions={[
-        { label: 'View details', icon: <MaterialIcon name="visibility" size={16} />, onClick: () => onView(record) },
         { label: 'Edit record', icon: <Pencil size={14} />, onClick: () => onEdit(record) },
         { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(record), variant: 'danger' },
       ]}
@@ -120,23 +118,33 @@ export function ExpenseRecordCard({ record, memberName, onView, onEdit, onDelete
       footerClassName="expense-record-card-footer mt-auto flex items-center justify-between gap-3 border-t border-gray-50 px-4 py-2.5"
       footer={(
         <>
-          <span className={`expense-record-card-type type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-            {isIncome ? 'Income' : 'Expense'}
-          </span>
-          <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={FINANCIAL_STATUS_VARIANT[record.status]} />
-          <p className={`expense-record-card-amount type-card-title shrink-0 tabular-nums ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
-            {isIncome ? '+' : '-'}{fmt(record.amount)}
-          </p>
+          <div className="expense-record-card-footer-meta flex min-w-0 items-center gap-2">
+            <StatusBadge label={FINANCIAL_STATUS_LABELS[record.status]} variant={FINANCIAL_STATUS_VARIANT[record.status]} />
+          </div>
+          <RecordMeta className="expense-record-card-date shrink-0" items={[{ label: dateLabel(record.date), icon: 'event' }]} />
         </>
       )}
     >
+      <div className="expense-record-card-summary flex items-center justify-between gap-3 rounded-2xl bg-gray-50 px-3 py-2.5">
+        <div className="expense-record-card-summary-meta min-w-0">
+          <span className={`expense-record-card-type type-count inline-flex items-center rounded-md px-1.5 py-0.5 ${isIncome ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+            {isIncome ? 'Income' : 'Expense'}
+          </span>
+          {(memberName || record.vendor) && (
+            <RecordMeta
+              className="expense-record-card-assignment mt-1"
+              items={[{ label: memberName ?? record.vendor ?? '', icon: memberName ? 'person' : 'storefront' }]}
+            />
+          )}
+        </div>
+        <p className={`expense-record-card-amount type-card-title shrink-0 tabular-nums ${isIncome ? 'text-green-700' : 'text-(--color-ink)'}`}>
+          {isIncome ? '+' : '-'}{fmt(record.amount)}
+        </p>
+      </div>
       <RecordMeta
-        className="expense-record-card-meta px-4 pb-3"
+        className="expense-record-card-meta mt-3"
         items={[
           { label: FINANCIAL_CATEGORY_LABELS[record.category], icon: FINANCIAL_CATEGORY_ICON[record.category] },
-          { label: dateLabel(record.date), icon: 'event' },
-          memberName && { label: memberName, icon: 'person' },
-          !memberName && record.vendor && { label: record.vendor, icon: 'storefront' },
         ]}
       />
 

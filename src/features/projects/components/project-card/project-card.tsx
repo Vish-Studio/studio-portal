@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { AvatarStack, CardListItem, MaterialIcon, ProjectStatusBadge, RowActionsMenu, type AvatarStackMember, type RowAction } from '@/src/shared/components';
+import { AvatarStack, CardListItem, formatRecordDate, MaterialIcon, ProjectStatusBadge, RecordMeta, RowActionsMenu, type AvatarStackMember, type RowAction } from '@/src/shared/components';
 import { getProjectAccent, getPhaseProgress, type ClientProject } from '../../types';
 import type { TeamMember } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
@@ -65,19 +65,32 @@ const ProjectCard = ({
         <>
           <div className="project-card-footer-meta type-muted flex flex-wrap items-center gap-2 text-gray-400">
             <ProjectStatusBadge status={project.status} />
-            <span className="font-medium">${(project.agreedPayment / 1000).toFixed(0)}k</span>
-            <span className="text-gray-200">-</span>
-            <span>{project.timeline}</span>
-            {remaining === 0 && (
-              <><span className="text-gray-200">-</span><span className="font-semibold text-green-500">Settled</span></>
-            )}
           </div>
-          <div className="project-card-team flex shrink-0 items-center gap-2" onClick={e => e.stopPropagation()}>
-            {projectMembers.length > 0 && <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />}
-          </div>
+          <RecordMeta className="project-card-date shrink-0" items={[{ label: formatRecordDate(project.startedAt), icon: 'event' }]} />
         </>
       )}
     >
+        <div className="project-card-info mb-3 flex flex-wrap items-center gap-2">
+          <span className="project-card-value type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">${(project.agreedPayment / 1000).toFixed(0)}k</span>
+          <span className="project-card-timeline type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">{project.timeline}</span>
+          {remaining === 0 && <span className="project-card-settled type-count rounded-lg bg-green-50 px-2 py-1 text-green-600">Settled</span>}
+        </div>
+        <div className="project-card-assignment mb-3 flex min-w-0 items-center justify-between gap-2 rounded-2xl bg-gray-50 px-3 py-2.5" onClick={e => e.stopPropagation()}>
+          <div className="project-card-client-team min-w-0">
+            {client && (
+              <RecordMeta className="project-card-client" items={[{ label: client.fullName, icon: 'person' }]} />
+            )}
+          </div>
+          <div className="project-card-team shrink-0">
+            {projectMembers.length > 0 && <AvatarStack members={toStackMembers(projectMembers)} size="xs" limit={3} />}
+            {projectMembers.length === 0 && (
+              <span className="project-card-unassigned type-count inline-flex items-center gap-1 rounded-lg bg-gray-100 px-2 py-1 text-gray-400">
+                <MaterialIcon name="person_off" size={11} />
+                No team
+              </span>
+            )}
+          </div>
+        </div>
         <div className="project-card-progress mt-3.5">
           <div className="project-card-progress-meta flex items-center justify-between mb-1.5">
             <span className="type-meta text-gray-400">

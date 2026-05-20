@@ -1,5 +1,5 @@
 import { Briefcase, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { ListItemRow } from '@/src/shared/components';
+import { CardListItem, formatRecordDate, RecordMeta, StatusBadge } from '@/src/shared/components';
 import StatusIcon from '@/src/shared/components/status-icon/status-icon';
 import { getMemberColors, type TeamMember, type TeamProject } from '../../types';
 
@@ -27,13 +27,14 @@ export default function TeamMemberListItem({
   onDelete,
 }: TeamMemberListItemProps) {
   const colors = getMemberColors(member.id);
+  const assigned = Boolean(member.assignedProjectId);
 
   return (
-    <ListItemRow
+    <CardListItem
       item={member}
       onOpen={onOpen}
       title={member.name}
-      subtitle={<p className="team-member-list-item-email type-muted truncate text-gray-400">{member.email || 'No email'}</p>}
+      subTitle={<p className="team-member-list-item-email type-muted truncate text-gray-400">{member.email || 'No email'}</p>}
       icon={(
         <div className={`team-member-list-item-avatar flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-xs font-bold text-white`}>
           {member.name.charAt(0)}
@@ -50,10 +51,29 @@ export default function TeamMemberListItem({
           ? [{ label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete(member), variant: 'danger' as const }]
           : []),
       ]}
-      secondary={<p className="team-member-list-item-role type-label truncate text-gray-600">{member.role}</p>}
-      tertiary={(
-        <div className="team-member-list-item-assignment flex min-w-0 items-center gap-2">
-          <StatusIcon status={member.assignedProjectId ? 'active' : 'inactive'} />
+      className="team-member-list-item flex min-h-[168px] flex-col rounded-[18px] border border-gray-200 bg-white text-left transition-colors hover:bg-gray-50"
+      headerClassName="team-member-list-item-header"
+      contentClassName="team-member-list-item-content"
+      footerClassName="team-member-list-item-footer"
+      footer={(
+        <>
+          <div className="team-member-list-item-footer-meta flex min-w-0 items-center gap-2">
+            <StatusBadge label={assigned ? 'Assigned' : 'Available'} variant={assigned ? 'green' : 'gray'} />
+          </div>
+          <RecordMeta className="team-member-list-item-created shrink-0" items={[{ label: formatRecordDate(member.createdAt?.toDate?.()), icon: 'event' }]} />
+        </>
+      )}
+    >
+        <div className="team-member-list-item-role-row mb-3 flex min-w-0 flex-wrap items-center gap-2">
+          <span className="team-member-list-item-role-chip type-count max-w-[180px] truncate rounded-lg bg-gray-100 px-2 py-1 text-gray-500">
+            {member.role || 'No role'}
+          </span>
+          <span className={`team-member-list-item-access type-count rounded-lg px-2 py-1 ${member.accessRole === 'admin' || member.accessRole === 'superadmin' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
+            {member.accessRole ?? 'freelancer'}
+          </span>
+        </div>
+        <div className="team-member-list-item-assignment flex min-w-0 items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2.5">
+          <StatusIcon status={assigned ? 'active' : 'inactive'} />
           <div className="team-member-list-item-assignment-copy min-w-0">
             <p className="team-member-list-item-project type-card-title truncate text-gray-800">
               {member.project?.name ?? 'Unassigned'}
@@ -63,9 +83,6 @@ export default function TeamMemberListItem({
             </p>
           </div>
         </div>
-      )}
-      className="team-member-list-item"
-      gridClassName="lg:grid-cols-[minmax(240px,1fr)_minmax(180px,0.7fr)_minmax(220px,1fr)_120px_32px]"
-    />
+    </CardListItem>
   );
 }

@@ -56,42 +56,44 @@ export default function PaymentListItem({ payment, onEdit, onDelete }: PaymentLi
     <CardListItem
       title={payment.invoiceId}
       titleClassName="payment-list-item-invoice-id font-mono text-gray-500"
-      subtitle={(
-        <div className="payment-list-item-subtitle flex flex-wrap items-center gap-2">
-          <RecordMeta className="payment-list-item-date" items={[{ label: payment.date, icon: 'event' }]} />
-          {payment.type === 'recurring' && (
-            <span className="payment-list-item-recurring type-count inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-violet-600">
-              <RefreshCw size={9} />
-              {payment.interval ? INTERVAL_LABEL[payment.interval] : 'Recurring'}
-            </span>
-          )}
-        </div>
+      subtitle={payment.type === 'recurring' && (
+        <span className="payment-list-item-recurring type-count inline-flex items-center gap-1 rounded-md bg-violet-50 px-1.5 py-0.5 text-violet-600">
+          <RefreshCw size={9} />
+          {payment.interval ? INTERVAL_LABEL[payment.interval] : 'Recurring'}
+        </span>
       )}
       actions={[
         { label: 'Edit payment', icon: <MaterialIcon name="edit" size={16} />, onClick: () => onEdit?.(payment) },
         { label: 'Delete', icon: <Trash2 size={14} />, onClick: () => onDelete?.(payment), variant: 'danger' },
       ]}
-      className="payment-list-item grid gap-3 rounded-[18px] border border-gray-200 bg-white p-4 transition-colors hover:bg-gray-50 md:grid-cols-[minmax(220px,1fr)_minmax(190px,1fr)_110px_110px_120px_32px] md:items-center"
+      className="payment-list-item flex flex-col rounded-[18px] border border-gray-200 bg-white text-left transition-colors hover:bg-gray-50"
       headerClassName="payment-list-item-header"
       actionsClassName="payment-list-item-actions"
+      footerClassName="payment-list-item-footer"
+      footer={(
+        <>
+          <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
+          <RecordMeta className="payment-list-item-date shrink-0" items={[{ label: payment.date, icon: 'event' }]} />
+        </>
+      )}
     >
-      <div className="payment-list-item-client flex min-w-0 items-center gap-2.5">
-        <div className={`payment-list-item-avatar flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-[11px] font-bold text-white`}>
-          {payment.client.charAt(0)}
+      <div className="payment-list-item-content-grid grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+        <div className="payment-list-item-client flex min-w-0 items-center gap-2.5">
+          <div className={`payment-list-item-avatar flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl ${clientColor(payment.client)} text-[11px] font-bold text-white`}>
+            {payment.client.charAt(0)}
+          </div>
+          <div className="payment-list-item-client-copy min-w-0">
+            <p className="payment-list-item-client-name type-card-title truncate text-(--color-ink)">{payment.client}</p>
+            <RecordMeta items={[{ label: payment.project, icon: 'work' }]} className="payment-list-item-project mt-1" />
+          </div>
         </div>
-        <div className="payment-list-item-client-copy min-w-0">
-          <p className="payment-list-item-client-name type-card-title truncate text-(--color-ink)">{payment.client}</p>
-          <RecordMeta items={[{ label: payment.project, icon: 'work' }]} className="payment-list-item-project mt-1" />
+        <div className="payment-list-item-amount-wrap sm:text-right">
+          <p className="payment-list-item-amount type-card-title tabular-nums text-(--color-ink)">
+            {formatPaymentAmount(payment.amount)}
+          </p>
+          <RecordMeta className="payment-list-item-next-date mt-1 justify-start sm:justify-end" items={[{ label: payment.nextDate ?? '-', icon: 'event_repeat' }]} />
         </div>
       </div>
-
-      <p className="payment-list-item-amount type-card-title text-left tabular-nums text-(--color-ink) md:text-right">
-        {formatPaymentAmount(payment.amount)}
-      </p>
-
-      <StatusBadge label={payment.status} variant={STATUS_VARIANT[payment.status]} />
-
-      <RecordMeta className="payment-list-item-next-date" items={[{ label: payment.nextDate ?? '-', icon: 'event_repeat' }]} />
     </CardListItem>
   );
 }

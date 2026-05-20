@@ -204,14 +204,7 @@ export default function Clients() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(170px,0.7fr)_120px_110px_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
-              <span>Client</span>
-              <span>Contact</span>
-              <span>Created</span>
-              <span className="text-right">Status</span>
-            </div>
-
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {filtered.map(client => (
               <ClientListItem
                 key={client.id}

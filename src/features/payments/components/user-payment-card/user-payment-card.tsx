@@ -1,4 +1,4 @@
-import { CardListItem, MaterialIcon, StatusBadge } from '@/src/shared/components';
+import { CardListItem, MaterialIcon, RecordMeta, StatusBadge } from '@/src/shared/components';
 import { formatPaymentAmount } from '../payment-list-item/payment-list-item';
 
 export type UserPaymentStatus = 'paid' | 'partial' | 'pending';
@@ -49,7 +49,12 @@ export default function UserPaymentCard({ payment }: UserPaymentCardProps) {
       )}
       className="user-payment-card rounded-[18px] border border-gray-200 bg-white p-4"
       headerClassName="user-payment-card-header"
-      footer={<StatusBadge label={STATUS_LABEL[payment.status]} variant={STATUS_VARIANT[payment.status]} />}
+      footer={(
+        <>
+          <StatusBadge label={STATUS_LABEL[payment.status]} variant={STATUS_VARIANT[payment.status]} />
+          <RecordMeta className="user-payment-card-date shrink-0" items={[{ label: payment.timeline || 'No timeline', icon: 'event' }]} />
+        </>
+      )}
     >
       <div className="user-payment-card-amounts mt-4 grid grid-cols-3 gap-2 rounded-2xl bg-(--color-surface) p-3">
         <div className="user-payment-card-amount">

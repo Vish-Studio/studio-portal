@@ -227,14 +227,7 @@ export default function Team() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            <div className="type-eyebrow hidden grid-cols-[minmax(220px,1fr)_minmax(160px,0.8fr)_minmax(180px,1fr)_32px] items-center gap-3 px-4 text-gray-400 lg:grid">
-              <span>Member</span>
-              <span>Role</span>
-              <span>Assignment</span>
-              <span />
-            </div>
-
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
             {tableData.map(member => (
               <TeamMemberListItem
                 key={member.id}
