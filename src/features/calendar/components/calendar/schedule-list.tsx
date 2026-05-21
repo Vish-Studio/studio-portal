@@ -7,6 +7,8 @@ import ScheduleSidebarForm from '../schedule/schedule-sidebar-form';
 import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
+import { useAuthStore } from '@/src/features/auth';
+import { getAllowedCalendarCategories } from '../../services/calendarService';
 
 interface ScheduleListProps {
   date: Date;
@@ -29,9 +31,13 @@ export default function ScheduleList({ date }: ScheduleListProps) {
   const addEvent = useCalendarStore((state) => state.addEvent);
   const editEvent = useCalendarStore((state) => state.editEvent);
   const removeEvent = useCalendarStore((state) => state.removeEvent);
+  const storeError = useCalendarStore((state) => state.error);
+  const profile = useAuthStore(state => state.profile);
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [viewingEvent, setViewingEvent] = useState<ScheduleEvent | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const canCreate = getAllowedCalendarCategories(profile?.role).length > 0;
 
   const events = useMemo(
     () => sortEvents(customEvents[dateKey(date)] ?? []),
@@ -39,6 +45,8 @@ export default function ScheduleList({ date }: ScheduleListProps) {
   );
 
   const openAddForm = () => {
+    if (!canCreate) return;
+    setActionError(null);
     setEditingEvent(null);
     setShowEventForm(true);
   };
@@ -48,26 +56,36 @@ export default function ScheduleList({ date }: ScheduleListProps) {
     setEditingEvent(null);
   };
 
-  const handleSaveEvent = (event: ScheduleEvent, eventDate: Date) => {
+  const handleSaveEvent = async (event: ScheduleEvent, eventDate: Date) => {
+    if (!profile) return;
+
+    setActionError(null);
     if (editingEvent) {
-      editEvent(event, eventDate);
+      await editEvent(event, eventDate, profile);
     } else {
-      addEvent(event, eventDate);
+      await addEvent(event, eventDate, profile);
     }
-    closeForm();
   };
 
   const handleEditEvent = (event: ScheduleEvent) => {
+    if (event.createdById !== profile?.uid) return;
     setViewingEvent(null);
     setEditingEvent(event);
     setShowEventForm(true);
   };
 
-  const handleDeleteEvent = (event: ScheduleEvent) => {
-    removeEvent(event.id);
-    setViewingEvent(null);
-    if (editingEvent?.id === event.id) {
-      closeForm();
+  const handleDeleteEvent = async (event: ScheduleEvent) => {
+    if (event.createdById !== profile?.uid) return;
+
+    try {
+      setActionError(null);
+      await removeEvent(event.id);
+      setViewingEvent(null);
+      if (editingEvent?.id === event.id) {
+        closeForm();
+      }
+    } catch (error) {
+      setActionError(error instanceof Error ? error.message : 'Unable to delete this calendar event.');
     }
   };
 
@@ -90,28 +108,34 @@ export default function ScheduleList({ date }: ScheduleListProps) {
             <span className="schedule-list-count rounded-md bg-white px-2.5 py-1 text-xs font-bold text-gray-600">
               {events.length} item{events.length === 1 ? '' : 's'}
             </span>
-            <Button
-              size="sm"
-              onClick={openAddForm}
-              iconLeft={<Plus size={14} />}
-            >
-              Add
-            </Button>
+            {canCreate && (
+              <Button
+                size="sm"
+                onClick={openAddForm}
+                iconLeft={<Plus size={14} />}
+              >
+                Add
+              </Button>
+            )}
           </div>
         </div>
 
+        {(actionError || storeError) && (
+          <div className="schedule-list-error mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-semibold text-red-600">
+            {actionError || storeError}
+          </div>
+        )}
+
         {events.length === 0 ? (
-          <button
-            type="button"
-            onClick={openAddForm}
-            className="schedule-list-empty w-full rounded-2xl border border-dashed border-gray-200 bg-white/60 px-4 py-8 text-center transition-colors hover:border-gray-300 hover:bg-white"
+          <div
+            className="schedule-list-empty w-full rounded-2xl border border-dashed border-gray-200 bg-white/60 px-4 py-8 text-center"
           >
             <MaterialIcon name="event_available" size={26} className="mx-auto text-gray-300" />
             <p className="mt-2 text-sm font-bold text-gray-600">No items planned</p>
             <p className="mt-1 text-xs font-medium text-gray-400">
-              Add a team meeting, client call, project phase, or admin focus block.
+              {canCreate ? 'Add a meeting for valid invitees.' : 'Accepted meetings will appear here.'}
             </p>
-          </button>
+          </div>
         ) : (
           <div className="schedule-list-items max-h-80 overflow-y-auto rounded-2xl bg-white">
             {events.map(event => {
@@ -172,8 +196,8 @@ export default function ScheduleList({ date }: ScheduleListProps) {
         <EventDetailsModal
           event={viewingEvent}
           onClose={() => setViewingEvent(null)}
-          onEdit={() => handleEditEvent(viewingEvent)}
-          onDelete={() => handleDeleteEvent(viewingEvent)}
+          onEdit={viewingEvent.createdById === profile?.uid ? () => handleEditEvent(viewingEvent) : undefined}
+          onDelete={viewingEvent.createdById === profile?.uid ? () => handleDeleteEvent(viewingEvent) : undefined}
         />
       )}
     </>

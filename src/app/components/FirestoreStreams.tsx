@@ -6,6 +6,7 @@ import { useDocumentsStore } from '@/src/features/documents';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
 import { useExpenseStore } from '@/src/features/expenses';
+import { useCalendarStore } from '@/src/features/calendar';
 import { isStaffRole } from '@/src/auth/roleAccess';
 
 export function FirestoreStreams() {
@@ -17,6 +18,8 @@ export function FirestoreStreams() {
   const setClients = useClientsStore(state => state.setClients);
   const subscribeMembers = useTeamStore(state => state.subscribeMembers);
   const subscribeToExpenses = useExpenseStore(state => state.subscribeToExpenses);
+  const subscribeToCalendarEvents = useCalendarStore(state => state.subscribeToEvents);
+  const clearCalendarEvents = useCalendarStore(state => state.clearEvents);
 
   useEffect(() => {
     if (!profile) return undefined;
@@ -31,6 +34,7 @@ export function FirestoreStreams() {
       ),
       subscribeToTasks(),
       subscribeToDocuments(),
+      subscribeToCalendarEvents(profile),
     ];
 
     if (isStaffRole(profile.role)) {
@@ -58,8 +62,9 @@ export function FirestoreStreams() {
 
     return () => {
       unsubscribers.forEach(unsubscribe => unsubscribe());
+      clearCalendarEvents();
     };
-  }, [profile, setClients, subscribeClients, subscribeMembers, subscribeToDocuments, subscribeToExpenses, subscribeToProjects, subscribeToTasks]);
+  }, [clearCalendarEvents, profile, setClients, subscribeClients, subscribeMembers, subscribeToCalendarEvents, subscribeToDocuments, subscribeToExpenses, subscribeToProjects, subscribeToTasks]);
 
   return null;
 }

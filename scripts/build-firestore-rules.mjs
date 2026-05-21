@@ -13,6 +13,7 @@ const ruleFiles = [
   'firestore-rules/collections/messages.rules',
   'firestore-rules/collections/tasks.rules',
   'firestore-rules/collections/expenses.rules',
+  'firestore-rules/collections/calendar.rules',
   'firestore-rules/collections/clients.rules',
   'firestore-rules/collections/team.rules',
   'firestore-rules/collections/team-members-legacy.rules',

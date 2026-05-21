@@ -11,6 +11,20 @@
       );
     }
 
+    function currentRole() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        : '';
+    }
+
+    function isManager() {
+      return isSignedIn() && (
+        request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
+        request.auth.token.email == 'vishseenarain@gmail.com' ||
+        currentRole() in ['admin', 'superadmin']
+      );
+    }
+
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
 

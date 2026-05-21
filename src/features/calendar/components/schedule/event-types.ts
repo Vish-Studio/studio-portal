@@ -43,8 +43,16 @@ export interface ScheduleEvent {
   type: EventType;
   title: string;
   time: string;
+  date?: Date;
+  allDay?: boolean;
+  startTime?: string;
+  endTime?: string;
   callLink?: string;
   description?: string;
+  createdById?: string;
+  createdByName?: string;
+  createdByRole?: string;
+  invitees?: string[];
   /** Link to a project from the projects store (optional) */
   projectId?: string;
   /** Link to a phase within the selected project (optional) */

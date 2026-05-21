@@ -1,63 +1,51 @@
 import { create } from "zustand";
 import type { ScheduleEvent } from "../components/schedule/event-types";
-
-const dateKey = (year: number, month: number, day: number) =>
-  `${year}-${month}-${day}`;
+import type { AuthProfile } from "@/src/types/auth";
+import { calendarService, groupCalendarEventsByDate } from "../services/calendarService";
 
 interface CalendarState {
   customEvents: Record<string, ScheduleEvent[]>;
-  addEvent: (event: ScheduleEvent, eventDate: Date) => void;
-  editEvent: (event: ScheduleEvent, newDate: Date) => void;
-  removeEvent: (eventId: string) => void;
+  loading: boolean;
+  error: string | null;
+  subscribeToEvents: (profile: AuthProfile) => () => void;
+  addEvent: (event: ScheduleEvent, eventDate: Date, profile: AuthProfile) => Promise<void>;
+  editEvent: (event: ScheduleEvent, newDate: Date, profile: AuthProfile) => Promise<void>;
+  removeEvent: (eventId: string) => Promise<void>;
+  clearEvents: () => void;
 }
 
 export const useCalendarStore = create<CalendarState>((set) => ({
   customEvents: {},
+  loading: false,
+  error: null,
 
-  addEvent: (event: ScheduleEvent, eventDate: Date) => {
-    const key = dateKey(
-      eventDate.getFullYear(),
-      eventDate.getMonth(),
-      eventDate.getDate(),
+  subscribeToEvents: (profile) => {
+    set({ loading: true, error: null });
+    return calendarService.subscribeToEvents(
+      profile,
+      events => set({
+        customEvents: groupCalendarEventsByDate(events),
+        loading: false,
+        error: null,
+      }),
+      error => set({ customEvents: {}, loading: false, error: error.message }),
     );
-    set((state) => ({
-      customEvents: {
-        ...state.customEvents,
-        [key]: [...(state.customEvents[key] ?? []), event],
-      },
-    }));
   },
 
-  editEvent: (event: ScheduleEvent, newDate: Date) => {
-    const newKey = dateKey(
-      newDate.getFullYear(),
-      newDate.getMonth(),
-      newDate.getDate(),
-    );
-    set((state) => {
-      const newEvents = { ...state.customEvents };
-
-      // Remove the event from all dates (it might have moved to a different date)
-      Object.keys(newEvents).forEach((key) => {
-        newEvents[key] = newEvents[key].filter((e) => e.id !== event.id);
-        if (newEvents[key].length === 0) delete newEvents[key];
-      });
-
-      // Add the updated event to the new date
-      newEvents[newKey] = [...(newEvents[newKey] ?? []), event];
-
-      return { customEvents: newEvents };
-    });
+  addEvent: async (event, eventDate, profile) => {
+    set({ error: null });
+    await calendarService.createEvent({ event, date: eventDate, profile });
   },
 
-  removeEvent: (eventId: string) => {
-    set((state) => {
-      const newEvents = { ...state.customEvents };
-      Object.keys(newEvents).forEach((key) => {
-        newEvents[key] = newEvents[key].filter((e) => e.id !== eventId);
-        if (newEvents[key].length === 0) delete newEvents[key];
-      });
-      return { customEvents: newEvents };
-    });
+  editEvent: async (event, newDate, profile) => {
+    set({ error: null });
+    await calendarService.updateEvent(event.id, { event, date: newDate, profile });
   },
+
+  removeEvent: async (eventId) => {
+    set({ error: null });
+    await calendarService.deleteEvent(eventId);
+  },
+
+  clearEvents: () => set({ customEvents: {}, loading: false, error: null }),
 }));

@@ -10,7 +10,7 @@ import { useTeamStore } from '@/src/features/team';
 interface EventDetailsModalProps {
   event: ScheduleEvent;
   onClose: () => void;
-  onEdit: () => void;
+  onEdit?: () => void;
   onDelete?: () => void;
 }
 
@@ -153,13 +153,15 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
               Delete
             </Button>
           )}
-          <Button
-            onClick={onEdit}
-            className="flex-1"
-            iconLeft={<MaterialIcon name="edit" size={16} className="text-white" />}
-          >
-            Edit
-          </Button>
+          {onEdit && (
+            <Button
+              onClick={onEdit}
+              className="flex-1"
+              iconLeft={<MaterialIcon name="edit" size={16} className="text-white" />}
+            >
+              Edit
+            </Button>
+          )}
         </FormSidebarFooter>
       </div>
     </FormSidebar>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { format, startOfDay } from 'date-fns';
 import {
   type ScheduleEvent,
@@ -18,6 +17,8 @@ import Button from '@/src/shared/components/button/button';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
+import { useAuthStore } from '@/src/features/auth';
+import { getAllowedCalendarCategories } from '../../services/calendarService';
 import { cn } from '@/src/lib/utils';
 
 const toDisplayTime = (time: string) => {
@@ -46,25 +47,28 @@ const fromDateInputValue = (value: string) => {
   return startOfDay(new Date(year, month - 1, day));
 };
 
-const scheduleCategories: ScheduleCategory[] = ['team', 'project', 'client'];
-
 const sameStringSet = (left: string[] = [], right: string[] = []) => (
   left.length === right.length && left.every(value => right.includes(value))
 );
 
 interface ScheduleSidebarFormProps {
   date: Date;
-  onAdd: (event: ScheduleEvent, date: Date) => void;
+  onAdd: (event: ScheduleEvent, date: Date) => Promise<void> | void;
   onClose: () => void;
   initialEvent?: ScheduleEvent;
 }
 
 export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent }: ScheduleSidebarFormProps) {
-  const [selectedDate, setSelectedDate] = useState(startOfDay(date));
+  const profile = useAuthStore(state => state.profile);
+  const allowedCategories = getAllowedCalendarCategories(profile?.role);
+  const fallbackCategory = allowedCategories[0] ?? 'team';
+  const [selectedDate, setSelectedDate] = useState(startOfDay(initialEvent?.date ?? date));
   const initialCategory = initialEvent?.category ?? (initialEvent ? getEventCategory(initialEvent.type) : 'project');
-  const [selectedCategory, setSelectedCategory] = useState<ScheduleCategory>(initialCategory);
+  const [selectedCategory, setSelectedCategory] = useState<ScheduleCategory>(
+    allowedCategories.includes(initialCategory) ? initialCategory : fallbackCategory,
+  );
   const [selectedType, setSelectedType] = useState<EventType>(
-    initialEvent?.type ?? EVENT_TYPES_BY_CATEGORY[initialCategory][0],
+    initialEvent?.type ?? EVENT_TYPES_BY_CATEGORY[allowedCategories.includes(initialCategory) ? initialCategory : fallbackCategory][0],
   );
   const [title, setTitle] = useState(initialEvent?.title ?? '');
   const [description, setDescription] = useState(initialEvent?.description ?? '');
@@ -85,6 +89,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
   const [linkedPhaseId, setLinkedPhaseId] = useState(initialEvent?.phaseId ?? '');
   const [linkedClientId, setLinkedClientId] = useState(initialEvent?.clientId ?? '');
   const [linkedMemberIds, setLinkedMemberIds] = useState<string[]>(initialEvent?.memberIds ?? []);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const config = EVENT_TYPE_CONFIG[selectedType];
   const categoryConfig = SCHEDULE_CATEGORY_CONFIG[selectedCategory];
@@ -92,11 +97,13 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
   const linkedProject = projects.find(project => project.id === linkedProjectId);
   const showProject = selectedCategory === 'project';
   const showClient = selectedCategory === 'client' || selectedCategory === 'project';
-  const showTeam = selectedCategory === 'team';
+  const showTeam = selectedCategory === 'team' || selectedCategory === 'project';
+  const selectedDateChanged = !initialEvent?.date || selectedDate.getTime() !== startOfDay(initialEvent.date).getTime();
   const initialTimeParts = initialEvent?.time && initialEvent.time !== 'All Day'
     ? initialEvent.time.split(' – ')
     : [];
   const hasScheduleChanges = !initialEvent || (
+    selectedDateChanged ||
     selectedCategory !== (initialEvent.category ?? getEventCategory(initialEvent.type)) ||
     selectedType !== initialEvent.type ||
     title !== (initialEvent.title ?? '') ||
@@ -112,6 +119,8 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
   );
 
   const handleCategoryChange = (category: ScheduleCategory) => {
+    if (!allowedCategories.includes(category)) return;
+    setSubmitError(null);
     setSelectedCategory(category);
     const nextType = EVENT_TYPES_BY_CATEGORY[category][0];
     setSelectedType(nextType);
@@ -123,7 +132,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
     if (category === 'team') {
       setLinkedClientId('');
     }
-    if (category !== 'team') {
+    if (category !== 'team' && category !== 'project') {
       setLinkedMemberIds([]);
     }
   };
@@ -133,6 +142,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
   };
 
   const handleProjectChange = (projectId: string) => {
+    setSubmitError(null);
     setLinkedProjectId(projectId);
     setLinkedPhaseId('');
 
@@ -148,9 +158,10 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
     );
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !profile) return;
+    setSubmitError(null);
 
     let time = 'All Day';
     if (!allDay && startTime) {
@@ -159,23 +170,31 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
         : toDisplayTime(startTime);
     }
 
-    onAdd(
-      {
-        id: initialEvent?.id ?? uuidv4(),
-        category: selectedCategory,
-        type: selectedType,
-        title: title.trim(),
-        time,
-        callLink: callLink.trim() || undefined,
-        description: description.trim() || undefined,
-        projectId: linkedProjectId || undefined,
-        phaseId: linkedPhaseId || undefined,
-        clientId: linkedClientId || undefined,
-        memberIds: linkedMemberIds.length ? linkedMemberIds : undefined,
-      },
-      selectedDate,
-    );
-    onClose();
+    try {
+      await onAdd(
+        {
+          id: initialEvent?.id ?? '',
+          category: selectedCategory,
+          type: selectedType,
+          title: title.trim(),
+          time,
+          date: selectedDate,
+          allDay,
+          startTime: allDay ? undefined : startTime,
+          endTime: allDay ? undefined : endTime,
+          callLink: callLink.trim() || undefined,
+          description: description.trim() || undefined,
+          projectId: linkedProjectId || undefined,
+          phaseId: linkedPhaseId || undefined,
+          clientId: linkedClientId || undefined,
+          memberIds: linkedMemberIds.length ? linkedMemberIds : undefined,
+        },
+        selectedDate,
+      );
+      onClose();
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Unable to save this calendar event.');
+    }
   };
 
   return (
@@ -202,7 +221,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
               </div>
             </div>
             <div className="schedule-sidebar-form-categories grid grid-cols-3 border-t border-white/10">
-              {scheduleCategories.map(category => {
+              {allowedCategories.map(category => {
                 const categoryItem = SCHEDULE_CATEGORY_CONFIG[category];
                 const active = selectedCategory === category;
 
@@ -225,6 +244,12 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
           </div>
 
           <div className="schedule-sidebar-form-sections space-y-4">
+            {submitError && (
+              <div className="schedule-sidebar-form-error rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
+                {submitError}
+              </div>
+            )}
+
             <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Title</p>
               <input
@@ -358,26 +383,31 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                   )}
 
                   {showTeam && (
-                    <div className="schedule-sidebar-form-members flex flex-wrap gap-2">
-                      {members.map(member => {
-                        const active = linkedMemberIds.includes(member.id);
+                    <div>
+                      <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                        {selectedCategory === 'project' ? 'Team invitees' : 'Team invitees only'}
+                      </p>
+                      <div className="schedule-sidebar-form-members flex flex-wrap gap-2">
+                        {members.map(member => {
+                          const active = linkedMemberIds.includes(member.id);
 
-                        return (
-                          <button
-                            key={member.id}
-                            type="button"
-                            onClick={() => toggleMember(member.id)}
-                            className={`schedule-sidebar-form-member flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
-                              active
-                                ? 'border-(--color-ink) bg-(--color-ink) text-white'
-                                : 'border-transparent bg-white text-gray-600 hover:border-gray-200'
-                            }`}
-                          >
-                            <Avatar name={member.name} id={member.id} size="xs" />
-                            {member.name.split(' ')[0]}
-                          </button>
-                        );
-                      })}
+                          return (
+                            <button
+                              key={member.id}
+                              type="button"
+                              onClick={() => toggleMember(member.id)}
+                              className={`schedule-sidebar-form-member flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
+                                active
+                                  ? 'border-(--color-ink) bg-(--color-ink) text-white'
+                                  : 'border-transparent bg-white text-gray-600 hover:border-gray-200'
+                              }`}
+                            >
+                              <Avatar name={member.name} id={member.id} size="xs" />
+                              {member.name.split(' ')[0]}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
                   )}
                 </div>

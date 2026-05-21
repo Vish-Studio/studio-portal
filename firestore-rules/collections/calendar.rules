@@ -1,0 +1,81 @@
+    // calendar: meetings visible to managers or invited users.
+    match /calendar/{eventId} {
+      function isValidCalendarEvent(data) {
+        return data.keys().hasAll([
+                 'category',
+                 'type',
+                 'title',
+                 'time',
+                 'date',
+                 'allDay',
+                 'createdById',
+                 'createdByRole',
+                 'invitees',
+                 'createdAt',
+                 'updatedAt'
+               ]) &&
+               data.category in ['team', 'project', 'client'] &&
+               data.type is string && data.type.size() > 0 && data.type.size() <= 80 &&
+               data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+               data.time is string && data.time.size() > 0 && data.time.size() <= 80 &&
+               data.date is timestamp &&
+               data.allDay is bool &&
+               (data.get('startTime', '') is string) &&
+               (data.get('endTime', '') is string) &&
+               (data.get('callLink', '') is string) && data.get('callLink', '').size() <= 2048 &&
+               (data.get('description', '') is string) && data.get('description', '').size() <= 2000 &&
+               data.createdById == request.auth.uid &&
+               data.createdByRole in ['admin', 'superadmin', 'freelancer', 'team', 'client'] &&
+               data.invitees is list &&
+               data.invitees.size() >= 2 &&
+               data.invitees.size() <= 50 &&
+               data.invitees.hasAny([request.auth.uid]) &&
+               (data.get('projectId', '') is string) && data.get('projectId', '').size() <= 128 &&
+               (data.get('phaseId', '') is string) && data.get('phaseId', '').size() <= 128 &&
+               (data.get('clientId', '') is string) && data.get('clientId', '').size() <= 128 &&
+               (data.get('memberIds', []) is list) && data.get('memberIds', []).size() <= 50 &&
+               data.createdAt is timestamp &&
+               data.updatedAt is timestamp;
+      }
+
+      function canWriteCalendarCategory(data) {
+        return (
+          data.category == 'team' &&
+          currentRole() in ['admin', 'superadmin', 'freelancer', 'team'] &&
+          data.get('clientId', '') == ''
+        ) || (
+          data.category == 'client' &&
+          isManager() &&
+          data.get('clientId', '') is string &&
+          data.get('clientId', '').size() > 0 &&
+          data.invitees.hasOnly([request.auth.uid, data.get('clientId', '')])
+        ) || (
+          data.category == 'project' &&
+          isManager() &&
+          data.get('projectId', '') is string &&
+          data.get('projectId', '').size() > 0
+        );
+      }
+
+      allow get: if isSignedIn() && (isManager() || request.auth.uid in existing().invitees);
+      allow list: if isSignedIn() && (isManager() || request.auth.uid in resource.data.invitees);
+
+      allow create: if isSignedIn() &&
+                      isValidId(eventId) &&
+                      isValidCalendarEvent(incoming()) &&
+                      canWriteCalendarCategory(incoming()) &&
+                      incoming().createdAt == request.time &&
+                      incoming().updatedAt == request.time;
+
+      allow update: if isSignedIn() &&
+                      existing().createdById == request.auth.uid &&
+                      isValidId(eventId) &&
+                      isValidCalendarEvent(incoming()) &&
+                      canWriteCalendarCategory(incoming()) &&
+                      incoming().createdById == existing().createdById &&
+                      incoming().createdByRole == existing().createdByRole &&
+                      incoming().createdAt == existing().createdAt &&
+                      incoming().updatedAt == request.time;
+
+      allow delete: if isSignedIn() && existing().createdById == request.auth.uid;
+    }
