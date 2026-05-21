@@ -44,6 +44,7 @@ const ICON_NAMES = {
   ListTodo: 'checklist',
   Loader2: 'progress_activity',
   Lock: 'lock',
+  LogOut: 'logout',
   Mail: 'mail',
   MailCheck: 'mark_email_read',
   MessageCircle: 'chat_bubble',
@@ -118,6 +119,7 @@ export const LayoutTemplate = createMaterialIcon(ICON_NAMES.LayoutTemplate);
 export const ListTodo = createMaterialIcon(ICON_NAMES.ListTodo);
 export const Loader2 = createMaterialIcon(ICON_NAMES.Loader2);
 export const Lock = createMaterialIcon(ICON_NAMES.Lock);
+export const LogOut = createMaterialIcon(ICON_NAMES.LogOut);
 export const Mail = createMaterialIcon(ICON_NAMES.Mail);
 export const MailCheck = createMaterialIcon(ICON_NAMES.MailCheck);
 export const MessageCircle = createMaterialIcon(ICON_NAMES.MessageCircle);

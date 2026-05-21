@@ -72,18 +72,35 @@ export default function TeamDetail() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting, isDirty },
     reset,
   } = useForm<TeamMemberFormValues>({
-    values: member
-      ? {
-        name: member.name,
-        role: member.role,
-        accessRole: member.accessRole ?? 'freelancer',
-        email: member.email,
-      }
-      : undefined,
+    defaultValues: {
+      name: '',
+      role: '',
+      accessRole: 'freelancer',
+      email: '',
+    },
   });
+
+  const watchedMemberForm = watch();
+  const hasMemberChanges = !!member && isEditing && (
+    watchedMemberForm.name !== member.name ||
+    watchedMemberForm.role !== member.role ||
+    watchedMemberForm.accessRole !== (member.accessRole ?? 'freelancer') ||
+    watchedMemberForm.email !== member.email
+  );
+
+  useEffect(() => {
+    if (!member || isEditing) return;
+    reset({
+      name: member.name,
+      role: member.role,
+      accessRole: member.accessRole ?? 'freelancer',
+      email: member.email,
+    });
+  }, [member, isEditing, reset]);
 
   const onSubmit = async (data: TeamMemberFormValues) => {
     if (!member || !canEditMember) return;
@@ -178,7 +195,7 @@ export default function TeamDetail() {
                   <button
                     form="team-edit-form"
                     type="submit"
-                    disabled={isSubmitting || !isDirty}
+                    disabled={isSubmitting || (!isDirty && !hasMemberChanges)}
                     className="team-detail-save rounded-lg bg-(--color-ink) px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     {isSubmitting ? 'Saving...' : 'Save'}
@@ -399,7 +416,7 @@ export default function TeamDetail() {
           <FormSidebarActions
             onCancel={handleCancel}
             isSubmitting={isSubmitting}
-            isDirty={isDirty}
+            isDirty={isDirty || hasMemberChanges}
             submitLabel="Save"
           />
         </form>

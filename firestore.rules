@@ -62,11 +62,11 @@ service cloud.firestore {
       allow update: if isSignedIn() &&
                        isValidUser(incoming()) &&
                        incoming().uid   == existing().get('uid', userId) &&
-                       incoming().email == existing().email &&
                        (
                          isAdmin() ||
                          (
                            userId == request.auth.uid &&
+                           incoming().email == existing().email &&
                            incoming().role == existing().role &&
                            incoming().needsPasswordChange == false
                          )

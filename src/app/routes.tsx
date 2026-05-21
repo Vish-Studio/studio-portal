@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import { ForgotPasswordPage, ResetPasswordPage, SignInPage } from '@/src/features/auth';
+import { ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage, SignInPage } from '@/src/features/auth';
 import { ClientDetailPage, ClientsPage } from '@/src/features/clients';
 import { CalendarPage, UserCalendarPage } from '@/src/features/calendar';
 import { ChatPage, UserChatPage } from '@/src/features/chat';
@@ -70,6 +70,7 @@ export function AppRoutes() {
       <Route path="/admin/settings" element={adminRoute(<SettingsPage />)} />
 
       <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="/change-password" element={<ChangePasswordPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
 

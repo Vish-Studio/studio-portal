@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Check, ChevronRight, FileText, Lock, Send } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
+import { Option, Select } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useAuthStore } from '@/src/features/auth';
 import { useDiscoveryStore } from '../stores/discoveryStore';
@@ -86,12 +87,12 @@ function QuestionField({
 
       {/* Select */}
       {question.type === 'select' && (
-        <select value={str} disabled={readOnly}
+        <Select value={str} disabled={readOnly}
           onChange={e => onChange(question.id, e.target.value)}
           className={`${inputCls} cursor-pointer`}>
-          <option value="">Select an option…</option>
-          {question.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
+          <Option value="">Select an option...</Option>
+          {question.options?.map(opt => <Option key={opt} value={opt}>{opt}</Option>)}
+        </Select>
       )}
 
       {/* Boolean — Yes / No */}

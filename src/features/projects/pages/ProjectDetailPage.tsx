@@ -142,8 +142,8 @@ const ProjectDetail = () => {
     setSelectedMemberIds(prev => prev.includes(memberId) ? prev.filter(id => id !== memberId) : [...prev, memberId]);
   };
 
-  const onSubmit = (data: ProjectFormValues) => {
-    updateProject(project.id, {
+  const onSubmit = async (data: ProjectFormValues) => {
+    await updateProject(project.id, {
       name:              data.name,
       service:           data.service,
       package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
@@ -152,6 +152,7 @@ const ProjectDetail = () => {
       clientId:          selectedClientId,
       assignedMemberIds: selectedMemberIds,
     });
+    reset(data);
     setIsEditing(false);
     setEditSidebarOpen(false);
   };

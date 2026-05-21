@@ -12,6 +12,7 @@ export interface AuthProfile {
   fullName: string;
   role: AuthRole;
   staffRole?: StaffRole;
+  needsPasswordChange?: boolean;
   createdAt?: Timestamp;
   feature_access?: FeatureAccess;
   is_active?: boolean;

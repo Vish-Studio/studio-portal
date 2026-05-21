@@ -4,6 +4,8 @@ import {
   FormField,
   inputCls,
   MaterialIcon,
+  Option,
+  Select,
   Tabs,
   Toggle,
   type TabItem,
@@ -150,13 +152,13 @@ export default function AccountSettings() {
           <input value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} className={inputCls()} />
         </FormField>
         <FormField label="Gender">
-          <select value={form.gender ?? ''} onChange={event => updateForm('gender', event.target.value as AuthProfileUpdateInput['gender'])} className={inputCls()}>
-            <option value="">Not set</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-            <option value="non_binary">Non-binary</option>
-            <option value="prefer_not_to_say">Prefer not to say</option>
-          </select>
+          <Select value={form.gender ?? ''} onChange={event => updateForm('gender', event.target.value as AuthProfileUpdateInput['gender'])}>
+            <Option value="">Not set</Option>
+            <Option value="female">Female</Option>
+            <Option value="male">Male</Option>
+            <Option value="non_binary">Non-binary</Option>
+            <Option value="prefer_not_to_say">Prefer not to say</Option>
+          </Select>
         </FormField>
         <FormField label="Phone number">
           <input value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} className={inputCls()} />

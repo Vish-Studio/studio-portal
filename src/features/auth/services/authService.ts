@@ -4,6 +4,7 @@ import {
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
+  updatePassword,
   updateProfile as firebaseUpdateProfile,
   verifyPasswordResetCode as firebaseVerifyPasswordResetCode,
   type User,
@@ -49,6 +50,7 @@ const profileFromSnapshot = (user: User, data: Record<string, unknown>): AuthPro
     fullName: name,
     role,
     staffRole: role === 'client' ? undefined : role,
+    needsPasswordChange: typeof data.needsPasswordChange === 'boolean' ? data.needsPasswordChange : false,
     createdAt: data.createdAt as AuthProfile['createdAt'],
     created_at: data.created_at as Timestamp | undefined,
     updated_at: data.updated_at as Timestamp | undefined,
@@ -91,13 +93,33 @@ export const authService = {
 
   async loadProfile(user: User): Promise<AuthProfile> {
     const { db } = requireFirebase();
-    const snapshot = await getDoc(doc(db, 'users', user.uid));
+    const profileRef = doc(db, 'users', user.uid);
+    const snapshot = await getDoc(profileRef);
 
     if (!snapshot.exists()) {
       throw new Error('No app profile exists for this Firebase user.');
     }
 
-    return profileFromSnapshot(user, snapshot.data());
+    const data = snapshot.data();
+    if (typeof data.needsPasswordChange !== 'boolean') {
+      const email = normalizeEmail(user.email || String(data.email ?? ''));
+      const name = String(data.name ?? data.full_name ?? user.displayName ?? nameFromEmail(email));
+      await setDoc(
+        profileRef,
+        {
+          uid: typeof data.uid === 'string' ? data.uid : user.uid,
+          name,
+          email: normalizeEmail(String(data.email ?? email)),
+          role: roleFromValue(data.role),
+          needsPasswordChange: false,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true },
+      );
+      return profileFromSnapshot(user, { ...data, needsPasswordChange: false });
+    }
+
+    return profileFromSnapshot(user, data);
   },
 
   async sendPasswordReset(email: string) {
@@ -116,6 +138,37 @@ export const authService = {
   async confirmPasswordReset(code: string, password: string) {
     const { auth } = requireFirebase();
     await firebaseConfirmPasswordReset(auth, code, password);
+  },
+
+  async completeRequiredPasswordChange(password: string): Promise<AuthProfile> {
+    const { auth, db } = requireFirebase();
+    const user = auth.currentUser;
+    if (!user) throw new Error('You need to be signed in to change your password.');
+
+    const profileRef = doc(db, 'users', user.uid);
+    const snapshot = await getDoc(profileRef);
+    if (!snapshot.exists()) throw new Error('No app profile exists for this Firebase user.');
+
+    await updatePassword(user, password);
+
+    const existing = snapshot.data();
+    const email = normalizeEmail(String(existing.email ?? user.email ?? ''));
+    const name = String(existing.name ?? existing.full_name ?? user.displayName ?? nameFromEmail(email));
+
+    await setDoc(
+      profileRef,
+      {
+        uid: typeof existing.uid === 'string' ? existing.uid : user.uid,
+        name,
+        email,
+        role: roleFromValue(existing.role),
+        needsPasswordChange: false,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+
+    return this.loadProfile(user);
   },
 
   async updateCurrentProfile(input: AuthProfileUpdateInput): Promise<AuthProfile> {

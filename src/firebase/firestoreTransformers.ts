@@ -31,7 +31,10 @@ const phaseStatus = (status: unknown): PhaseStatus => {
 
 export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
   const data = doc.data();
-  const name = String(data.name ?? 'Unnamed client');
+  const name = String(data.name ?? data.full_name ?? 'Unnamed client');
+  const companyName = String(data.company_name ?? data.companyName ?? '');
+  const phone = String(data.phone_number ?? data.phone ?? '');
+  const status = data.status === 'inactive' || data.status === 'lost' ? data.status : 'active';
   return {
     id: doc.id,
     userId: doc.id,
@@ -39,12 +42,12 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
     fullName: name,
     full_name: name,
     email: String(data.email ?? ''),
-    companyName: '',
-    company_name: '',
-    phone: '',
-    phone_number: '',
+    companyName,
+    company_name: companyName,
+    phone,
+    phone_number: phone,
     role: 'client',
-    status: 'active',
+    status,
     createdAt: data.createdAt as Client['createdAt'],
     created_at: data.createdAt as Client['created_at'],
   };
@@ -52,24 +55,29 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
 
 export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
   const data = doc.data();
-  const name = String(data.name ?? 'Unnamed member');
+  const name = String(data.name ?? data.full_name ?? 'Unnamed member');
   const role = String(data.role ?? 'freelancer');
   const accessRole = role === 'team' ? 'freelancer' : role;
+  const jobTitle = String(data.job_title ?? data.jobTitle ?? 'Team member');
   return {
     id: doc.id,
     userId: doc.id,
     user_id: doc.id,
     name,
     full_name: name,
-    role: 'Team member',
-    job_title: 'Team member',
+    role: jobTitle,
+    job_title: jobTitle,
     accessRole: (accessRole === 'superadmin' || accessRole === 'admin' || accessRole === 'freelancer')
       ? accessRole
       : 'freelancer',
     email: String(data.email ?? ''),
     assignedProjectId: null,
+    status: data.status === 'inactive' || data.status === 'lost' ? data.status : 'active',
+    is_active: data.is_active !== false,
     createdAt: data.createdAt as TeamMember['createdAt'],
     created_at: data.createdAt as TeamMember['created_at'],
+    updatedAt: data.updatedAt as TeamMember['updatedAt'],
+    updated_at: data.updatedAt as TeamMember['updated_at'],
   };
 };
 

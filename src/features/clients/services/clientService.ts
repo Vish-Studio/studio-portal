@@ -2,11 +2,11 @@ import {
   collection,
   deleteDoc,
   doc,
+  getDoc,
   onSnapshot,
   query,
   serverTimestamp,
   setDoc,
-  updateDoc,
   where,
   type FirestoreError,
   type Unsubscribe,
@@ -50,6 +50,9 @@ export const clientsService = {
     const { db } = requireFirebase();
     const email = input.email.trim().toLowerCase();
     const name = (input.name ?? input.fullName ?? '').trim();
+    const companyName = input.companyName?.trim() ?? '';
+    const phone = input.phone?.trim() ?? '';
+    const status = input.status ?? 'active';
     const temporaryPassword = input.temporaryPassword?.trim();
 
     if (!name) throw new Error('Client name is required.');
@@ -67,19 +70,62 @@ export const clientsService = {
       email,
       role: 'client',
       needsPasswordChange: true,
+      full_name: name,
+      company_name: companyName,
+      phone_number: phone,
+      status,
+      is_active: status === 'active',
       createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    await setDoc(doc(db, 'clients', user.uid), {
+      id: user.uid,
+      companyName,
     });
 
     return { id: user.uid, email, temporaryPassword };
   },
 
   async updateClient(id: string, updates: Partial<ClientInput>): Promise<void> {
+    const { db } = requireFirebase();
+    const userRef = doc(db, 'users', id);
+    const userSnapshot = await getDoc(userRef);
+
+    if (!userSnapshot.exists()) {
+      throw new Error('Client profile was not found.');
+    }
+
+    const existing = userSnapshot.data();
     const name = (updates.name ?? updates.fullName)?.trim();
     const email = updates.email?.trim().toLowerCase();
-    await updateDoc(doc(requireFirebase().db, 'users', id), {
-      ...(name ? { name } : {}),
-      ...(email ? { email } : {}),
-    });
+    const companyName = updates.companyName?.trim();
+    const phone = updates.phone?.trim();
+    const nextName = name || String(existing.name ?? existing.full_name ?? 'Unnamed client');
+    const nextEmail = email || String(existing.email ?? '');
+    const nextStatus = updates.status ?? (existing.status === 'inactive' || existing.status === 'lost' ? existing.status : 'active');
+
+    await setDoc(
+      userRef,
+      {
+        uid: typeof existing.uid === 'string' ? existing.uid : id,
+        name: nextName,
+        full_name: nextName,
+        email: nextEmail,
+        role: 'client',
+        needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
+        company_name: companyName !== undefined ? companyName : String(existing.company_name ?? ''),
+        phone_number: phone !== undefined ? phone : String(existing.phone_number ?? ''),
+        status: nextStatus,
+        is_active: nextStatus === 'active',
+        createdAt: existing.createdAt ?? serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
+
+    if (companyName !== undefined) {
+      await setDoc(doc(db, 'clients', id), { id, companyName }, { merge: true });
+    }
   },
 
   async deleteClient(id: string): Promise<void> {

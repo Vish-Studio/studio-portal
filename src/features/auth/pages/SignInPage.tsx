@@ -51,6 +51,11 @@ const SignInPage = () => {
     setSubmitError(null);
     try {
       const nextProfile = await signIn(values.email, values.password);
+      if (nextProfile.needsPasswordChange) {
+        navigate('/change-password', { replace: true, state: { from: location.state?.from } });
+        return;
+      }
+
       const fallbackPath = isClientRole(nextProfile.role) ? '/user' : '/admin';
       const requestedPath = typeof location.state === 'object' && location.state && 'from' in location.state
         ? String(location.state.from)
@@ -64,6 +69,10 @@ const SignInPage = () => {
   };
 
   if (user && profile) {
+    if (profile.needsPasswordChange) {
+      return <Navigate to="/change-password" replace />;
+    }
+
     return <Navigate to={isClientRole(profile.role) ? '/user' : '/admin'} replace />;
   }
 

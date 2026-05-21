@@ -51,19 +51,38 @@ const ClientDetail = () => {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors, isSubmitting, isDirty },
     reset,
   } = useForm<ClientFormValues>({
-    values: client
-      ? {
-        fullName: client.fullName,
-        companyName: client.companyName ?? '',
-        email: client.email,
-        phone: client.phone ?? '',
-        status: client.status,
-      }
-      : undefined,
+    defaultValues: {
+      fullName: '',
+      companyName: '',
+      email: '',
+      phone: '',
+      status: 'active',
+    },
   });
+
+  const watchedClientForm = watch();
+  const hasClientChanges = !!client && isEditing && (
+    watchedClientForm.fullName !== client.fullName ||
+    watchedClientForm.companyName !== (client.companyName ?? '') ||
+    watchedClientForm.email !== client.email ||
+    watchedClientForm.phone !== (client.phone ?? '') ||
+    watchedClientForm.status !== client.status
+  );
+
+  useEffect(() => {
+    if (!client || isEditing) return;
+    reset({
+      fullName: client.fullName,
+      companyName: client.companyName ?? '',
+      email: client.email,
+      phone: client.phone ?? '',
+      status: client.status,
+    });
+  }, [client, isEditing, reset]);
 
   const onSubmit = async (data: ClientFormValues) => {
     if (!client) return;
@@ -143,106 +162,108 @@ const ClientDetail = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 ">
           <ClientDetailCard client={client} />
 
-          <CardContent
-            iconName="manage_accounts"
-            title="Client Details"
-            variant="white"
-            className="hidden md:flex"
-            action={
-              isEditing ? (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="text-[12px] font-semibold text-gray-500 hover:text-gray-800 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    form="client-edit-form"
-                    type="submit"
-                    disabled={isSubmitting || !isDirty}
-                    className="text-[12px] font-semibold text-white bg-(--color-ink) hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors"
-                  >
-                    {isSubmitting ? 'Saving…' : 'Save'}
-                  </button>
-                </div>
-              ) : (
-                <ButtonIcon iconName="edit" clickHandler={openEdit} />
-              )
-            }
-          >
-            <form
-              id="client-edit-form"
-              onSubmit={handleSubmit(onSubmit)}
-              className="px-4 md:px-6 py-4 md:py-5 space-y-4"
+          {!editSidebarOpen && (
+            <CardContent
+              iconName="manage_accounts"
+              title="Client Details"
+              variant="white"
+              className="hidden md:flex"
+              action={
+                isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCancel}
+                      className="text-[12px] font-semibold text-gray-500 hover:text-gray-800 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      form="client-edit-form"
+                      type="submit"
+                      disabled={isSubmitting || (!isDirty && !hasClientChanges)}
+                      className="text-[12px] font-semibold text-white bg-(--color-ink) hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      {isSubmitting ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+                ) : (
+                  <ButtonIcon iconName="edit" clickHandler={openEdit} />
+                )
+              }
             >
-              <FormField label="Full Name" required={isEditing} error={errors.fullName?.message}>
-                <input
-                  {...register('fullName', { required: isEditing ? 'Name is required' : false })}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.fullName)}
-                />
-              </FormField>
+              <form
+                id="client-edit-form"
+                onSubmit={handleSubmit(onSubmit)}
+                className="px-4 md:px-6 py-4 md:py-5 space-y-4"
+              >
+                <FormField label="Full Name" required={isEditing} error={errors.fullName?.message}>
+                  <input
+                    {...register('fullName', { required: isEditing ? 'Name is required' : false })}
+                    disabled={!isEditing}
+                    className={fieldCls(!!errors.fullName)}
+                  />
+                </FormField>
 
-              <FormField label="Company Name" error={errors.companyName?.message}>
-                <input
-                  {...register('companyName')}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.companyName)}
-                />
-              </FormField>
+                <FormField label="Company Name" error={errors.companyName?.message}>
+                  <input
+                    {...register('companyName')}
+                    disabled={!isEditing}
+                    className={fieldCls(!!errors.companyName)}
+                  />
+                </FormField>
 
-              <FormField label="Email Address" required={isEditing} error={errors.email?.message}>
-                <input
-                  type="email"
-                  {...register('email', {
-                    required: isEditing ? 'Email is required' : false,
-                    pattern: isEditing
-                      ? { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' }
-                      : undefined,
-                  })}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.email)}
-                />
-              </FormField>
+                <FormField label="Email Address" required={isEditing} error={errors.email?.message}>
+                  <input
+                    type="email"
+                    {...register('email', {
+                      required: isEditing ? 'Email is required' : false,
+                      pattern: isEditing
+                        ? { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' }
+                        : undefined,
+                    })}
+                    disabled={!isEditing}
+                    className={fieldCls(!!errors.email)}
+                  />
+                </FormField>
 
-              <FormField label="Phone Number" error={errors.phone?.message}>
-                <input
-                  type="tel"
-                  {...register('phone', {
-                    pattern: isEditing
-                      ? { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' }
-                      : undefined,
-                  })}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.phone)}
-                />
-              </FormField>
+                <FormField label="Phone Number" error={errors.phone?.message}>
+                  <input
+                    type="tel"
+                    {...register('phone', {
+                      pattern: isEditing
+                        ? { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' }
+                        : undefined,
+                    })}
+                    disabled={!isEditing}
+                    className={fieldCls(!!errors.phone)}
+                  />
+                </FormField>
 
-              <FormField label="Status" required={isEditing} error={errors.status?.message}>
-                <Select
-                  {...register('status', { required: isEditing })}
-                  disabled={!isEditing}
-                  hasError={!!errors.status}
-                  className={DISABLED_SELECT_CLS}
-                >
-                  <Option value="active">Active</Option>
-                  <Option value="inactive">Inactive</Option>
-                  <Option value="lost">Lost</Option>
-                </Select>
-              </FormField>
+                <FormField label="Status" required={isEditing} error={errors.status?.message}>
+                  <Select
+                    {...register('status', { required: isEditing })}
+                    disabled={!isEditing}
+                    hasError={!!errors.status}
+                    className={DISABLED_SELECT_CLS}
+                  >
+                    <Option value="active">Active</Option>
+                    <Option value="inactive">Inactive</Option>
+                    <Option value="lost">Lost</Option>
+                  </Select>
+                </FormField>
 
-              {isEditing && (
-                <p className="text-[11px] text-gray-400">
-                  Member since{' '}
-                  {client.createdAt?.toDate
-                    ? format(client.createdAt.toDate(), 'MMM d, yyyy')
-                    : '—'}
-                </p>
-              )}
-            </form>
-          </CardContent>
+                {isEditing && (
+                  <p className="text-[11px] text-gray-400">
+                    Member since{' '}
+                    {client.createdAt?.toDate
+                      ? format(client.createdAt.toDate(), 'MMM d, yyyy')
+                      : '-'}
+                  </p>
+                )}
+              </form>
+            </CardContent>
+          )}
         </div>
 
 
@@ -298,63 +319,65 @@ const ClientDetail = () => {
         className="md:hidden"
       />
 
-      <FormSidebar
-        isOpen={editSidebarOpen}
-        onClose={handleCancel}
-        title="Edit Client"
-        description={client.fullName}
-      >
-        <form onSubmit={handleSubmit(onSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
-          <div className="client-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
-            <FormField label="Full Name" required error={errors.fullName?.message}>
-              <input
-                {...register('fullName', { required: 'Name is required' })}
-                className={inputCls(!!errors.fullName)}
-              />
-            </FormField>
+      {editSidebarOpen && (
+        <FormSidebar
+          isOpen={editSidebarOpen}
+          onClose={handleCancel}
+          title="Edit Client"
+          description={client.fullName}
+        >
+          <form onSubmit={handleSubmit(onSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+            <div className="client-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+              <FormField label="Full Name" required error={errors.fullName?.message}>
+                <input
+                  {...register('fullName', { required: 'Name is required' })}
+                  className={inputCls(!!errors.fullName)}
+                />
+              </FormField>
 
-            <FormField label="Company Name" error={errors.companyName?.message}>
-              <input {...register('companyName')} className={inputCls(!!errors.companyName)} />
-            </FormField>
+              <FormField label="Company Name" error={errors.companyName?.message}>
+                <input {...register('companyName')} className={inputCls(!!errors.companyName)} />
+              </FormField>
 
-            <FormField label="Email Address" required error={errors.email?.message}>
-              <input
-                type="email"
-                {...register('email', {
-                  required: 'Email is required',
-                  pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
-                })}
-                className={inputCls(!!errors.email)}
-              />
-            </FormField>
+              <FormField label="Email Address" required error={errors.email?.message}>
+                <input
+                  type="email"
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
+                  })}
+                  className={inputCls(!!errors.email)}
+                />
+              </FormField>
 
-            <FormField label="Phone Number" error={errors.phone?.message}>
-              <input
-                type="tel"
-                {...register('phone', {
-                  pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
-                })}
-                className={inputCls(!!errors.phone)}
-              />
-            </FormField>
+              <FormField label="Phone Number" error={errors.phone?.message}>
+                <input
+                  type="tel"
+                  {...register('phone', {
+                    pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
+                  })}
+                  className={inputCls(!!errors.phone)}
+                />
+              </FormField>
 
-            <FormField label="Status" required error={errors.status?.message}>
-              <Select {...register('status', { required: true })} hasError={!!errors.status}>
-                <Option value="active">Active</Option>
-                <Option value="inactive">Inactive</Option>
-                <Option value="lost">Lost</Option>
-              </Select>
-            </FormField>
-          </div>
+              <FormField label="Status" required error={errors.status?.message}>
+                <Select {...register('status', { required: true })} hasError={!!errors.status}>
+                  <Option value="active">Active</Option>
+                  <Option value="inactive">Inactive</Option>
+                  <Option value="lost">Lost</Option>
+                </Select>
+              </FormField>
+            </div>
 
-          <FormSidebarActions
-            onCancel={handleCancel}
-            isSubmitting={isSubmitting}
-            isDirty={isDirty}
-            submitLabel="Save"
-          />
-        </form>
-      </FormSidebar>
+            <FormSidebarActions
+              onCancel={handleCancel}
+              isSubmitting={isSubmitting}
+              isDirty={isDirty || hasClientChanges}
+              submitLabel="Save"
+            />
+          </form>
+        </FormSidebar>
+      )}
     </DashboardLayout>
   );
 };

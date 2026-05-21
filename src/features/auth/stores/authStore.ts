@@ -17,6 +17,7 @@ interface AuthState {
   sendPasswordReset: (email: string) => Promise<void>;
   verifyPasswordReset: (code: string) => Promise<string>;
   confirmPasswordReset: (code: string, password: string) => Promise<void>;
+  completeRequiredPasswordChange: (password: string) => Promise<AuthProfile>;
   updateProfile: (updates: AuthProfileUpdateInput) => Promise<AuthProfile>;
   signOutUser: () => Promise<void>;
   initAuthListener: () => () => void;
@@ -84,6 +85,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await authService.confirmPasswordReset(code, password);
       set({ loading: false });
+    } catch (error) {
+      const message = firebaseErrorMessage(error);
+      set({ loading: false, error: message });
+      throw new Error(message);
+    }
+  },
+
+  completeRequiredPasswordChange: async (password) => {
+    set({ loading: true, error: null });
+    try {
+      const profile = await runOperationWithFeedback({
+        loadingLabel: 'Updating password',
+        successTitle: 'Password updated',
+        errorTitle: 'Unable to update password',
+        action: () => authService.completeRequiredPasswordChange(password),
+      });
+      set({ profile, role: profile.role, loading: false });
+      return profile;
     } catch (error) {
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });

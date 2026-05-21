@@ -64,6 +64,10 @@ export function AuthGate({ children, role }: AuthGateProps) {
     );
   }
 
+  if (profile.needsPasswordChange && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace state={{ from: location.pathname }} />;
+  }
+
   if (role === 'client' && profile.role !== 'client') {
     return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
@@ -82,6 +86,10 @@ export function AuthLanding() {
 
   if (!isFirebaseConfigured || !ready || !user) {
     return <Navigate to="/sign-in" replace />;
+  }
+
+  if (profile?.needsPasswordChange) {
+    return <Navigate to="/change-password" replace />;
   }
 
   return <Navigate to={defaultRouteForRole(profile?.role)} replace />;
