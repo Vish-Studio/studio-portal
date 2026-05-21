@@ -64,6 +64,7 @@ export const useTeamStore = create<TeamState>((set) => ({
   },
 
   assignMember: async (memberId, projectId) => {
+    await teamService.assignMember(memberId, projectId);
     set(s => ({
       members: s.members.map(m =>
         m.id !== memberId ? m : { ...m, assignedProjectId: projectId },

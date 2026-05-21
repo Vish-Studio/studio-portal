@@ -6,7 +6,7 @@ import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
-import { Button, ConfirmDialog, FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Button, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import ProjectCard, { ProjectCardMini } from '../components/project-card/project-card';
 import { ClientPicker } from '@/src/features/clients';
 import { MemberPicker } from '@/src/shared/components';
@@ -199,7 +199,7 @@ const Projects = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
             <FormField label="Project Name" required error={errors.name?.message}>
-              <input {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" className={inputCls(!!errors.name)} />
+              <TextInput {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" hasError={!!errors.name} />
             </FormField>
             <FormField label="Service" required error={errors.service?.message}>
               <Select {...register('service', { required: true })} hasError={!!errors.service}>
@@ -225,7 +225,7 @@ const Projects = () => {
               </Select>
             </FormField>
             <FormField label="Timeline" error={errors.timeline?.message}>
-              <input {...register('timeline')} placeholder="e.g. Q3 2026" className={inputCls(!!errors.timeline)} />
+              <TextInput {...register('timeline')} placeholder="e.g. Q3 2026" hasError={!!errors.timeline} />
             </FormField>
             <FormField label="Client" required error={undefined}>
               <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />

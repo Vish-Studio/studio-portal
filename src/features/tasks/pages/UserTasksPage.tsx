@@ -6,7 +6,7 @@ import UserLayout from '@/src/layouts/UserLayout';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { Button, ConfirmDialog, DatePicker, FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Button, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
@@ -292,19 +292,18 @@ const UserTasks = () => {
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
 
             <FormField label="Task Title" required error={errors.title?.message}>
-              <input
+              <TextInput
                 {...register('title', { required: 'Title is required' })}
                 placeholder="e.g. Review design mockups"
-                className={inputCls(!!errors.title)}
+                hasError={!!errors.title}
               />
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <textarea
+              <TextArea
                 {...register('description')}
                 rows={3}
-                placeholder="Optional details or context…"
-                className={inputCls(false) + ' resize-none'}
+                placeholder="Optional details or context..."
               />
             </FormField>
 

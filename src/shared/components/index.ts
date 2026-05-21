@@ -58,6 +58,8 @@ export { default as StatusIcon } from './status-icon/status-icon';
 export { default as Table } from './table/table';
 export { default as TableTab } from './table-tab/table-tab';
 export { default as Tabs } from './tabs/tabs';
+export { default as TextArea, type TextAreaProps } from './text-area/text-area';
+export { default as TextInput, type TextInputProps } from './text-input/text-input';
 export { default as Toggle } from './toggle/toggle';
 export { default as Tooltip, type TooltipProps, type TooltipSide, type TooltipVariant } from './tooltip/tooltip';
 export * from './confirm-dialog/confirm-dialog';

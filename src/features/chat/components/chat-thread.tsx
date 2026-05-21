@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react';
 import { ArrowLeft, MessageCircle, Plus, Send, UserRound } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { Avatar, MaterialIcon } from '@/src/shared/components';
+import { Avatar, MaterialIcon, TextArea } from '@/src/shared/components';
 import Button from '@/src/shared/components/button/button';
 import type { ChatMessage, ChatSenderRole } from '../stores/chatStore';
 import { cn } from '@/src/lib/utils';
@@ -116,12 +116,12 @@ export default function ChatThread({
 
           <form onSubmit={onSubmit} className="chat-thread-composer border-t border-gray-100 bg-white p-3 md:p-4">
             <div className="chat-thread-composer-inner flex items-end gap-2 rounded-[18px] bg-(--color-surface-alt) p-2">
-              <textarea
+              <TextArea
                 value={draft}
                 onChange={event => onDraftChange(event.target.value)}
                 rows={1}
                 placeholder={mode === 'admin' ? `Message ${participant.name}...` : 'Message the studio...'}
-                className="type-body max-h-32 min-h-11 flex-1 resize-none rounded-xl border border-transparent bg-white px-4 py-3 text-gray-900 outline-none placeholder:text-gray-300 focus:border-gray-200 focus:ring-4 focus:ring-gray-100"
+                className="type-body max-h-32 min-h-11 flex-1 border-transparent bg-white"
               />
               <Button type="submit" disabled={!draft.trim()} className="h-11 shrink-0 rounded-xl px-4" iconLeft={<Send size={15} />}>
                 <span className="hidden sm:inline">Send</span>

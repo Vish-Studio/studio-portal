@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Check, Eye, EyeOff, KeyRound, ShieldAlert } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { Button, FormField, inputCls } from '@/src/shared/components';
+import { Button, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { useAuthStore } from '../stores/authStore';
 
@@ -194,12 +194,13 @@ export default function ResetPasswordPage() {
                 <form onSubmit={handleSubmit(onSubmit)} className="reset-password-form flex flex-col gap-4">
                   <FormField label="New password" required error={errors.password?.message}>
                     <div className="relative">
-                      <input
+                      <TextInput
                         id="new-password"
                         type={showPassword ? 'text' : 'password'}
                         autoComplete="new-password"
                         placeholder="New password"
-                        className={`${inputCls(!!errors.password)} pr-11`}
+                        hasError={!!errors.password}
+                        className="pr-11"
                         {...register('password', {
                           required: 'New password is required',
                           minLength: { value: 8, message: 'Use at least 8 characters' },
@@ -218,12 +219,13 @@ export default function ResetPasswordPage() {
 
                   <FormField label="Confirm password" required error={errors.confirmPassword?.message}>
                     <div className="relative">
-                      <input
+                      <TextInput
                         id="confirm-new-password"
                         type={showConfirmPassword ? 'text' : 'password'}
                         autoComplete="new-password"
                         placeholder="Confirm password"
-                        className={`${inputCls(!!errors.confirmPassword)} pr-11`}
+                        hasError={!!errors.confirmPassword}
+                        className="pr-11"
                         {...register('confirmPassword', {
                           required: 'Confirm your new password',
                           validate: value => value === password || 'Passwords do not match',

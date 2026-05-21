@@ -9,7 +9,7 @@ import Fab from '@/src/shared/components/button-fab/button-fab';
 import { ProjectCard } from '@/src/features/projects';
 import TeamDetailCard from '../components/team-detail-card/team-detail-card';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TextInput } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
@@ -375,16 +375,16 @@ export default function TeamDetail() {
         <form onSubmit={handleSubmit(onSubmit)} className="team-detail-sidebar-form flex min-h-0 flex-1 flex-col">
           <div className="team-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <FormField label="Full Name" required error={errors.name?.message}>
-              <input
+              <TextInput
                 {...register('name', { required: 'Name is required' })}
-                className={inputCls(!!errors.name)}
+                hasError={!!errors.name}
               />
             </FormField>
 
             <FormField label="Role" required error={errors.role?.message}>
-              <input
+              <TextInput
                 {...register('role', { required: 'Role is required' })}
-                className={inputCls(!!errors.role)}
+                hasError={!!errors.role}
               />
             </FormField>
 
@@ -402,13 +402,13 @@ export default function TeamDetail() {
             </FormField>
 
             <FormField label="Email" required error={errors.email?.message}>
-              <input
+              <TextInput
                 type="email"
                 {...register('email', {
                   required: 'Email is required',
                   pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
                 })}
-                className={inputCls(!!errors.email)}
+                hasError={!!errors.email}
               />
             </FormField>
           </div>

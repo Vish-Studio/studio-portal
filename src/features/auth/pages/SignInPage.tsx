@@ -10,7 +10,7 @@ import {
   Eye,
   EyeOff,
 } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { Button, Checkbox, FormField, inputCls } from '@/src/shared/components';
+import { Button, Checkbox, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { useAuthStore } from '../stores/authStore';
 import type { AuthRole } from '@/src/types/auth';
@@ -145,12 +145,12 @@ const SignInPage = () => {
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
               <FormField label="Email" required error={errors.email?.message}>
-                <input
+                <TextInput
                   id="email"
                   type="email"
                   autoComplete="email"
                   placeholder="you@studio.com"
-                  className={inputCls(!!errors.email)}
+                  hasError={!!errors.email}
                   {...register('email', {
                     required: 'Email is required',
                     pattern: {
@@ -163,12 +163,13 @@ const SignInPage = () => {
 
               <FormField label="Password" required error={errors.password?.message}>
                 <div className="relative">
-                  <input
+                  <TextInput
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     autoComplete="current-password"
                     placeholder="Password"
-                    className={`${inputCls(!!errors.password)} pr-11`}
+                    hasError={!!errors.password}
+                    className="pr-11"
                     {...register('password', {
                       required: 'Password is required',
                       minLength: { value: 6, message: 'Use at least 6 characters' },

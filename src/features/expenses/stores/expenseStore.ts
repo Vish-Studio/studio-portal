@@ -1,4 +1,17 @@
 import { create } from "zustand";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  updateDoc,
+  type QueryDocumentSnapshot,
+  type Timestamp,
+  type Unsubscribe,
+} from 'firebase/firestore';
+import { requireFirebase } from '@/src/firebase/requireFirebase';
 export type { AdminStats, Expense, FinancialRecordCategory, FinancialRecordStatus, FinancialRecordType } from "../types";
 import type { AdminStats, Expense, FinancialRecordCategory, FinancialRecordStatus, FinancialRecordType } from "../types";
 
@@ -14,12 +27,15 @@ interface ExpenseState {
   recentClients: RecentClient[];
   expenses: Expense[];
   isWorking: boolean;
+  loading: boolean;
+  error: string | null;
+  subscribeToExpenses: () => Unsubscribe;
   setStats: (stats: AdminStats) => void;
   setRecentClients: (clients: RecentClient[]) => void;
   setExpenses: (expenses: Expense[]) => void;
-  addExpense: (input: ExpenseInput) => Expense;
-  updateExpense: (id: string, updates: Partial<ExpenseInput>) => void;
-  removeExpense: (id: string) => void;
+  addExpense: (input: ExpenseInput) => Promise<Expense | undefined>;
+  updateExpense: (id: string, updates: Partial<ExpenseInput>) => Promise<void>;
+  removeExpense: (id: string) => Promise<void>;
   toggleWorking: () => void;
   incrementExpenseTotal: (amount: number) => void;
 }
@@ -44,38 +60,96 @@ const EMPTY_STATS: AdminStats = {
   totalExpenses: 0,
 };
 
+const toMillis = (value: unknown) => {
+  if (typeof value === 'number') return value;
+  if (value && typeof (value as Timestamp).toMillis === 'function') return (value as Timestamp).toMillis();
+  if (value instanceof Date) return value.getTime();
+  return Date.now();
+};
+
+const expenseFromDoc = (snapshot: QueryDocumentSnapshot): Expense => {
+  const data = snapshot.data();
+
+  return {
+    id: snapshot.id,
+    type: data.type === 'income' ? 'income' : 'expense',
+    category: String(data.category ?? 'other') as FinancialRecordCategory,
+    status: data.status === 'pending' || data.status === 'scheduled' ? data.status : 'paid',
+    amount: Number(data.amount ?? 0),
+    title: String(data.title ?? 'Untitled record'),
+    description: String(data.description ?? ''),
+    vendor: data.vendor ? String(data.vendor) : undefined,
+    projectId: data.projectId ? String(data.projectId) : undefined,
+    memberId: data.memberId ? String(data.memberId) : undefined,
+    date: String(data.date ?? new Date().toISOString().slice(0, 10)),
+    createdAt: toMillis(data.createdAt),
+    updatedAt: toMillis(data.updatedAt ?? data.createdAt),
+  };
+};
+
+const toFirestoreExpense = (input: Partial<ExpenseInput>) => ({
+  ...(input.type !== undefined ? { type: input.type } : {}),
+  ...(input.category !== undefined ? { category: input.category } : {}),
+  ...(input.status !== undefined ? { status: input.status } : {}),
+  ...(input.amount !== undefined ? { amount: input.amount } : {}),
+  ...(input.title !== undefined ? { title: input.title } : {}),
+  ...(input.description !== undefined ? { description: input.description } : {}),
+  ...(input.vendor !== undefined ? { vendor: input.vendor || '' } : {}),
+  ...(input.projectId !== undefined ? { projectId: input.projectId || '' } : {}),
+  ...(input.memberId !== undefined ? { memberId: input.memberId || '' } : {}),
+  ...(input.date !== undefined ? { date: input.date } : {}),
+});
+
 export const useExpenseStore = create<ExpenseState>((set) => ({
   stats: EMPTY_STATS, // hydrated on app start via initStores()
   recentClients: [],
   expenses: [],
   isWorking: true,
+  loading: false,
+  error: null,
+
+  subscribeToExpenses: () => {
+    set({ loading: true, error: null });
+    return onSnapshot(
+      collection(requireFirebase().db, 'expenses'),
+      snapshot => set({
+        expenses: snapshot.docs.map(expenseFromDoc).sort((a, b) => b.createdAt - a.createdAt),
+        loading: false,
+        error: null,
+      }),
+      error => set({ loading: false, error: error.message }),
+    );
+  },
 
   setStats: (stats) => set({ stats }),
   setRecentClients: (recentClients) => set({ recentClients }),
   setExpenses: (expenses) => set({ expenses }),
 
-  addExpense: (input) => {
-    const now = Date.now();
-    const expense: Expense = {
-      ...input,
-      id: `fin_${now}`,
-      createdAt: now,
-      updatedAt: now,
-    };
+  addExpense: async (input) => {
+    const ref = await addDoc(collection(requireFirebase().db, 'expenses'), {
+      ...toFirestoreExpense(input),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
 
-    set((s) => ({ expenses: [expense, ...s.expenses] }));
-    return expense;
+    return {
+      ...input,
+      id: ref.id,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
   },
 
-  updateExpense: (id, updates) =>
-    set((s) => ({
-      expenses: s.expenses.map((expense) =>
-        expense.id === id ? { ...expense, ...updates, updatedAt: Date.now() } : expense,
-      ),
-    })),
+  updateExpense: async (id, updates) => {
+    await updateDoc(doc(requireFirebase().db, 'expenses', id), {
+      ...toFirestoreExpense(updates),
+      updatedAt: serverTimestamp(),
+    });
+  },
 
-  removeExpense: (id) =>
-    set((s) => ({ expenses: s.expenses.filter((expense) => expense.id !== id) })),
+  removeExpense: async (id) => {
+    await deleteDoc(doc(requireFirebase().db, 'expenses', id));
+  },
 
   toggleWorking: () => set((s) => ({ isWorking: !s.isWorking })),
 

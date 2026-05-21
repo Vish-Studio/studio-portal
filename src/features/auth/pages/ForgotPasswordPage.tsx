@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, MailCheck } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { Button, FormField, inputCls } from '@/src/shared/components';
+import { Button, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { useAuthStore } from '../stores/authStore';
 
@@ -123,12 +123,12 @@ export default function ForgotPasswordPage() {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="forgot-password-form flex flex-col gap-4">
                   <FormField label="Email" required error={errors.email?.message}>
-                    <input
+                    <TextInput
                       id="reset-email"
                       type="email"
                       autoComplete="email"
                       placeholder="you@studio.com"
-                      className={inputCls(!!errors.email)}
+                      hasError={!!errors.email}
                       {...register('email', {
                         required: 'Email is required',
                         pattern: {

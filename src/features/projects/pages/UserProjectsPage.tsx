@@ -3,12 +3,11 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, CheckCircle, Layers, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import UserLayout from '@/src/layouts/UserLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import Button from '@/src/shared/components/button/button';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { MaterialIcon } from '@/src/shared/components';
+import { Button, MaterialIcon, TextInput } from '@/src/shared/components';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
-import FormField, { inputCls } from '@/src/shared/components/form-field/form-field';
+import FormField from '@/src/shared/components/form-field/form-field';
 import Select from '@/src/shared/components/select/select';
 import Option from '@/src/shared/components/select/option';
 import ConfirmDialog from '@/src/shared/components/confirm-dialog/confirm-dialog';
@@ -176,7 +175,7 @@ export default function UserProjectsPage() {
               <Briefcase size={20} className="text-gray-300" />
             </div>
             <p className="text-sm font-semibold text-gray-500">No projects found</p>
-            <button onClick={openAdd} className="mt-1 text-xs font-semibold text-gray-400 underline transition-colors hover:text-gray-700">Add your first project</button>
+            <Button type="button" variant="ghost" size="sm" onClick={openAdd} className="mt-1">Add your first project</Button>
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -218,7 +217,7 @@ export default function UserProjectsPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
             <FormField label="Project Name" required error={errors.name?.message}>
-              <input {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" className={inputCls(!!errors.name)} />
+              <TextInput {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" hasError={!!errors.name} />
             </FormField>
             <FormField label="Service" required error={errors.service?.message}>
               <Select {...register('service', { required: true })} hasError={!!errors.service}>
@@ -244,7 +243,7 @@ export default function UserProjectsPage() {
               </Select>
             </FormField>
             <FormField label="Timeline" error={errors.timeline?.message}>
-              <input {...register('timeline')} placeholder="e.g. Q3 2026" className={inputCls(!!errors.timeline)} />
+              <TextInput {...register('timeline')} placeholder="e.g. Q3 2026" hasError={!!errors.timeline} />
             </FormField>
           </div>
           <FormSidebarActions

@@ -71,7 +71,7 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
       ? accessRole
       : 'freelancer',
     email: String(data.email ?? ''),
-    assignedProjectId: null,
+    assignedProjectId: typeof data.assignedProjectId === 'string' ? data.assignedProjectId : null,
     status: data.status === 'inactive' || data.status === 'lost' ? data.status : 'active',
     is_active: data.is_active !== false,
     createdAt: data.createdAt as TeamMember['createdAt'],

@@ -3,10 +3,10 @@ import {
   Avatar,
   Button,
   FormField,
-  inputCls,
   MaterialIcon,
   Option,
   Select,
+  TextInput,
   Toggle,
 } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
@@ -227,28 +227,28 @@ export default function UserProfileSettings() {
             {activeTab === 'profile' ? (
               <div className="user-profile-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField label="Full name">
-                  <input value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} className={inputCls()} />
+                  <TextInput value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} />
                 </FormField>
                 <FormField label="First name">
-                  <input value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} className={inputCls()} />
+                  <TextInput value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} />
                 </FormField>
                 <FormField label="Last name">
-                  <input value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} className={inputCls()} />
+                  <TextInput value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} />
                 </FormField>
                 <FormField label="Primary email" hint="Email sign-in is managed by Firebase Authentication.">
-                  <input type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} className={inputCls()} />
+                  <TextInput type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} />
                 </FormField>
                 <FormField label="Phone number">
-                  <input value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} className={inputCls()} placeholder="+230 5 000 0000" />
+                  <TextInput value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} placeholder="+230 5 000 0000" />
                 </FormField>
                 <FormField label="Recovery email">
-                  <input type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} className={inputCls()} placeholder="backup@email.com" />
+                  <TextInput type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} placeholder="backup@email.com" />
                 </FormField>
                 <FormField label="Role or title">
-                  <input value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} className={inputCls()} placeholder="Marketing Manager" />
+                  <TextInput value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} placeholder="Marketing Manager" />
                 </FormField>
                 <FormField label="Company">
-                  <input value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} className={inputCls()} placeholder="Company name" />
+                  <TextInput value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} placeholder="Company name" />
                 </FormField>
                 <FormField label="Gender">
                   <Select value={form.gender ?? ''} onChange={event => updateForm('gender', event.target.value as AuthProfileUpdateInput['gender'])}>

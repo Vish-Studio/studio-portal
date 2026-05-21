@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { ArrowDownLeft, ArrowUpRight, CalendarDays, Plus, WalletCards, X } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { ArrowDownLeft, ArrowUpRight, CalendarDays, Plus, WalletCards } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { Avatar, Button, ConfirmDialog, FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Avatar, Button, ButtonIcon, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { useTeamStore } from '@/src/features/team';
 import { useExpenseStore, type ExpenseInput } from '../stores/expenseStore';
@@ -168,16 +168,16 @@ export default function ExpensesPage() {
     setSidebarOpen(true);
   };
 
-  const onSubmit = (data: ExpenseFormValues) => {
+  const onSubmit = async (data: ExpenseFormValues) => {
     const input = toExpenseInput(data);
-    if (editingRecord) updateExpense(editingRecord.id, input);
-    else addExpense(input);
+    if (editingRecord) await updateExpense(editingRecord.id, input);
+    else await addExpense(input);
     setSidebarOpen(false);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleteRecord) return;
-    removeExpense(deleteRecord.id);
+    await removeExpense(deleteRecord.id);
     if (selectedRecord?.id === deleteRecord.id) setSelectedRecord(null);
     setDeleteRecord(null);
   };
@@ -319,25 +319,25 @@ export default function ExpensesPage() {
             </div>
 
             <FormField label="Title" required error={errors.title?.message}>
-              <input
+              <TextInput
                 {...register('title', { required: 'Title is required' })}
                 placeholder={selectedType === 'income' ? 'Project payment' : 'Team salary'}
-                className={inputCls(!!errors.title)}
+                hasError={!!errors.title}
               />
             </FormField>
 
             <div className="grid grid-cols-2 gap-3">
               <FormField label="Amount" required error={errors.amount?.message}>
-                <input
+                <TextInput
                   type="number"
                   min="0"
                   step="0.01"
                   {...register('amount', { required: 'Amount is required', valueAsNumber: true, min: { value: 0.01, message: 'Amount must be greater than 0' } })}
-                  className={inputCls(!!errors.amount)}
+                  hasError={!!errors.amount}
                 />
               </FormField>
               <FormField label="Date" required error={errors.date?.message}>
-                <input type="date" {...register('date', { required: 'Date is required' })} className={inputCls(!!errors.date)} />
+                <DatePicker {...register('date', { required: 'Date is required' })} hasError={!!errors.date} />
               </FormField>
             </div>
 
@@ -350,7 +350,7 @@ export default function ExpensesPage() {
             </FormField>
 
             <FormField label={selectedType === 'income' ? 'Client / source' : 'Vendor / payee'}>
-              <input {...register('vendor')} placeholder={selectedType === 'income' ? 'Acme Corp' : 'Internal payroll'} className={inputCls(false)} />
+              <TextInput {...register('vendor')} placeholder={selectedType === 'income' ? 'Acme Corp' : 'Internal payroll'} />
             </FormField>
 
             <FormField label="Team member">
@@ -364,14 +364,14 @@ export default function ExpensesPage() {
                         <p className="type-muted truncate text-gray-400">{selectedMember.role}</p>
                       </div>
                     </div>
-                    <button
+                    <ButtonIcon
                       type="button"
+                      iconName="close"
+                      clickHandler={() => setValue('memberId', '', { shouldDirty: true })}
                       onClick={() => setValue('memberId', '', { shouldDirty: true })}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-300 transition-colors hover:bg-white hover:text-gray-700"
+                      className="h-8 w-8 rounded-lg bg-transparent hover:bg-white"
                       aria-label={`Remove ${selectedMember.name}`}
-                    >
-                      <X size={14} />
-                    </button>
+                    />
                   </div>
                 )}
                 <Select {...register('memberId')} wrapperClassName="w-full">
@@ -387,11 +387,10 @@ export default function ExpensesPage() {
             </FormField>
 
             <FormField label="Description">
-              <textarea
+              <TextArea
                 {...register('description')}
                 rows={4}
                 placeholder="Add notes for finance reconciliation"
-                className={`${inputCls(false)} resize-none`}
               />
             </FormField>
           </div>

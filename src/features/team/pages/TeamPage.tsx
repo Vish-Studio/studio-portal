@@ -6,7 +6,7 @@ import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import { FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Button, Checkbox, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
@@ -67,6 +67,7 @@ export default function Team() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
   const [assigningMember, setAssigningMember] = useState<TeamMember | null>(null);
+  const [deleteMember, setDeleteMember] = useState<TeamMember | null>(null);
   const [temporaryAccess, setTemporaryAccess] = useState<TemporaryAccess | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const visibleMembers = useMemo(
@@ -200,8 +201,10 @@ export default function Team() {
     }
   };
 
-  const handleDelete = async (member: TeamMember) => {
-    if (confirm(`Remove ${member.name} from the team?`)) await removeMember(member.id);
+  const handleDelete = async () => {
+    if (!deleteMember) return;
+    await removeMember(deleteMember.id);
+    setDeleteMember(null);
   };
 
   return (
@@ -292,7 +295,7 @@ export default function Team() {
                 onOpen={item => navigate(`/admin/team/${item.id}`)}
                 onEdit={openEdit}
                 onAssign={setAssigningMember}
-                onDelete={handleDelete}
+                onDelete={setDeleteMember}
               />
             ))}
           </div>
@@ -334,28 +337,28 @@ export default function Team() {
                   <p className="type-label mt-3 text-gray-400">Temporary password</p>
                   <p className="type-card-title mt-1 break-all text-(--color-ink)">{temporaryAccess.temporaryPassword}</p>
                 </div>
-                <button
+                <Button
                   type="button"
                   onClick={() => navigator.clipboard?.writeText(`${temporaryAccess.email}\n${temporaryAccess.temporaryPassword}`)}
-                  className="team-temporary-access-copy mt-3 w-full rounded-[14px] bg-(--color-ink) px-4 py-3 text-sm font-bold text-white"
+                  className="team-temporary-access-copy mt-3 w-full"
                 >
                   Copy login details
-                </button>
+                </Button>
               </div>
             ) : null}
 
             <FormField label="Full Name" required error={errors.name?.message}>
-              <input
+              <TextInput
                 {...register('name', { required: 'Name is required' })}
                 placeholder="e.g. Jordan Clarke"
-                className={inputCls(!!errors.name)}
+                hasError={!!errors.name}
               />
             </FormField>
-            <FormField label="Role" required error={errors.role?.message}>
-              <input
-                {...register('role', { required: 'Role is required' })}
+            <FormField label="Job Title" required error={errors.role?.message}>
+              <TextInput
+                {...register('role', { required: 'Job title is required' })}
                 placeholder="e.g. Frontend Developer"
-                className={inputCls(!!errors.role)}
+                hasError={!!errors.role}
               />
             </FormField>
             <FormField label="Access Role" required error={errors.accessRole?.message}>
@@ -371,46 +374,44 @@ export default function Team() {
               </Select>
             </FormField>
             <FormField label="Email" error={errors.email?.message}>
-              <input
+              <TextInput
                 {...register('email', {
                   required: 'Email is required',
                   pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
                 })}
                 type="email"
                 placeholder="team@studio.com"
-                className={inputCls(!!errors.email)}
+                hasError={!!errors.email}
               />
             </FormField>
 
             {!editingMember ? (
               <div className="team-password-section rounded-[18px] border border-gray-100 bg-(--color-surface-alt) p-4">
                 <label className="team-password-toggle flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    {...register('generatePassword')}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
+                  <Checkbox {...register('generatePassword')} />
                   <span className="type-card-title text-(--color-ink)">Generate temporary password</span>
                 </label>
                 <div className="team-password-field mt-4">
                   <FormField label="Temporary Password" required error={errors.temporaryPassword?.message}>
                     <div className="team-password-row flex gap-2">
-                      <input
+                      <TextInput
                         {...register('temporaryPassword', {
                           required: 'Temporary password is required',
                           minLength: { value: 6, message: 'Password must be at least 6 characters' },
                         })}
                         type="text"
                         readOnly={generatePassword}
-                        className={`${inputCls(!!errors.temporaryPassword)} ${generatePassword ? 'bg-white text-gray-500' : ''}`}
+                        hasError={!!errors.temporaryPassword}
+                        className={generatePassword ? 'bg-white text-gray-500' : ''}
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
                         onClick={() => setValue('temporaryPassword', generateTemporaryPassword(), { shouldDirty: true, shouldValidate: true })}
-                        className="team-password-generate rounded-[14px] border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600"
+                        className="team-password-generate"
                       >
                         Generate
-                      </button>
+                      </Button>
                     </div>
                   </FormField>
                 </div>
@@ -435,6 +436,15 @@ export default function Team() {
           onAssign={assignMember}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={!!deleteMember}
+        title="Remove team member?"
+        message={deleteMember ? `Remove ${deleteMember.name} from the team? This cannot be undone.` : ''}
+        confirmLabel="Remove Member"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteMember(null)}
+      />
     </DashboardLayout>
   );
 }

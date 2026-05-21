@@ -13,7 +13,7 @@ import type { ClientStatus } from '../types';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TextInput } from '@/src/shared/components';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -329,34 +329,34 @@ const ClientDetail = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
             <div className="client-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
               <FormField label="Full Name" required error={errors.fullName?.message}>
-                <input
+                <TextInput
                   {...register('fullName', { required: 'Name is required' })}
-                  className={inputCls(!!errors.fullName)}
+                  hasError={!!errors.fullName}
                 />
               </FormField>
 
               <FormField label="Company Name" error={errors.companyName?.message}>
-                <input {...register('companyName')} className={inputCls(!!errors.companyName)} />
+                <TextInput {...register('companyName')} hasError={!!errors.companyName} />
               </FormField>
 
               <FormField label="Email Address" required error={errors.email?.message}>
-                <input
+                <TextInput
                   type="email"
                   {...register('email', {
                     required: 'Email is required',
                     pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' },
                   })}
-                  className={inputCls(!!errors.email)}
+                  hasError={!!errors.email}
                 />
               </FormField>
 
               <FormField label="Phone Number" error={errors.phone?.message}>
-                <input
+                <TextInput
                   type="tel"
                   {...register('phone', {
                     pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
                   })}
-                  className={inputCls(!!errors.phone)}
+                  hasError={!!errors.phone}
                 />
               </FormField>
 

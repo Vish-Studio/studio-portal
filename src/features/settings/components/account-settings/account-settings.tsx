@@ -2,11 +2,11 @@ import { type ReactNode, useEffect, useState } from 'react';
 import {
   Button,
   FormField,
-  inputCls,
   MaterialIcon,
   Option,
   Select,
   Tabs,
+  TextInput,
   Toggle,
   type TabItem,
 } from '@/src/shared/components';
@@ -140,16 +140,16 @@ export default function AccountSettings() {
     profile: (
       <div className="account-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField label="Full name">
-          <input value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} className={inputCls()} />
+          <TextInput value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} />
         </FormField>
         <FormField label="First name">
-          <input value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} className={inputCls()} />
+          <TextInput value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} />
         </FormField>
         <FormField label="Last name">
-          <input value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} className={inputCls()} />
+          <TextInput value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} />
         </FormField>
         <FormField label="Role or title">
-          <input value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} className={inputCls()} />
+          <TextInput value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} />
         </FormField>
         <FormField label="Gender">
           <Select value={form.gender ?? ''} onChange={event => updateForm('gender', event.target.value as AuthProfileUpdateInput['gender'])}>
@@ -161,20 +161,20 @@ export default function AccountSettings() {
           </Select>
         </FormField>
         <FormField label="Phone number">
-          <input value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} className={inputCls()} />
+          <TextInput value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} />
         </FormField>
         <FormField label="Company">
-          <input value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} className={inputCls()} />
+          <TextInput value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} />
         </FormField>
       </div>
     ),
     email: (
       <div className="account-settings-email grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField label="Primary email" hint="Changing email may ask Firebase for a recent sign-in.">
-          <input type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} className={inputCls()} />
+          <TextInput type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} />
         </FormField>
         <FormField label="Recovery email">
-          <input type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} className={inputCls()} />
+          <TextInput type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} />
         </FormField>
       </div>
     ),

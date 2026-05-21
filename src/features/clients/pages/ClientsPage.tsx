@@ -7,7 +7,7 @@ import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-
 import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { FormField, inputCls, Option, Select } from '@/src/shared/components';
+import { Button, Checkbox, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import { useClientsStore } from '../stores/clientStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import type { Client, ClientStatus } from '../types';
@@ -55,6 +55,7 @@ export default function Clients() {
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [deleteClient, setDeleteClient] = useState<Client | null>(null);
   const [temporaryAccess, setTemporaryAccess] = useState<TemporaryAccess | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -180,8 +181,10 @@ export default function Clients() {
     }
   };
 
-  const handleDelete = async (client: Client) => {
-    if (confirm(`Remove ${client.fullName}?`)) await removeClient(client.id);
+  const handleDelete = async () => {
+    if (!deleteClient) return;
+    await removeClient(deleteClient.id);
+    setDeleteClient(null);
   };
 
   return (
@@ -268,7 +271,7 @@ export default function Clients() {
                 client={client}
                 onOpen={item => navigate(`/admin/clients/${item.id}`)}
                 onEdit={openEdit}
-                onDelete={handleDelete}
+                onDelete={setDeleteClient}
               />
             ))}
           </div>
@@ -313,52 +316,52 @@ export default function Clients() {
                   <p className="type-label mt-3 text-gray-400">Temporary password</p>
                   <p className="type-card-title mt-1 break-all text-(--color-ink)">{temporaryAccess.temporaryPassword}</p>
                 </div>
-                <button
+                <Button
                   type="button"
                   onClick={() => navigator.clipboard?.writeText(`${temporaryAccess.email}\n${temporaryAccess.temporaryPassword}`)}
-                  className="clients-temporary-access-copy mt-3 w-full rounded-[14px] bg-(--color-ink) px-4 py-3 text-sm font-bold text-white"
+                  className="clients-temporary-access-copy mt-3 w-full"
                 >
                   Copy login details
-                </button>
+                </Button>
               </div>
             ) : null}
 
             <FormField label="Full Name" required error={errors.fullName?.message}>
-              <input
+              <TextInput
                 {...register('fullName', { required: 'Name is required' })}
                 placeholder="e.g. Sarah Mitchell"
-                className={inputCls(!!errors.fullName)}
+                hasError={!!errors.fullName}
               />
             </FormField>
 
             <FormField label="Company Name" error={errors.companyName?.message}>
-              <input
+              <TextInput
                 {...register('companyName')}
                 placeholder="e.g. Acme Corp"
-                className={inputCls(!!errors.companyName)}
+                hasError={!!errors.companyName}
               />
             </FormField>
 
             <FormField label="Email Address" required error={errors.email?.message}>
-              <input
+              <TextInput
                 {...register('email', {
                   required: 'Email is required',
                   pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email address' },
                 })}
                 type="email"
                 placeholder="hello@company.com"
-                className={inputCls(!!errors.email)}
+                hasError={!!errors.email}
               />
             </FormField>
 
             <FormField label="Phone Number" error={errors.phone?.message}>
-              <input
+              <TextInput
                 {...register('phone', {
                   pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
                 })}
                 type="tel"
                 placeholder="+1 (555) 000-0000"
-                className={inputCls(!!errors.phone)}
+                hasError={!!errors.phone}
               />
             </FormField>
 
@@ -376,32 +379,30 @@ export default function Clients() {
             {!editingClient ? (
               <div className="clients-password-section rounded-[18px] border border-gray-100 bg-(--color-surface-alt) p-4">
                 <label className="clients-password-toggle flex items-center gap-3">
-                  <input
-                    type="checkbox"
-                    {...register('generatePassword')}
-                    className="h-4 w-4 rounded border-gray-300"
-                  />
+                  <Checkbox {...register('generatePassword')} />
                   <span className="type-card-title text-(--color-ink)">Generate temporary password</span>
                 </label>
                 <div className="clients-password-field mt-4">
                   <FormField label="Temporary Password" required error={errors.temporaryPassword?.message}>
                     <div className="clients-password-row flex gap-2">
-                      <input
+                      <TextInput
                         {...register('temporaryPassword', {
                           required: 'Temporary password is required',
                           minLength: { value: 6, message: 'Password must be at least 6 characters' },
                         })}
                         type="text"
                         readOnly={generatePassword}
-                        className={`${inputCls(!!errors.temporaryPassword)} ${generatePassword ? 'bg-white text-gray-500' : ''}`}
+                        hasError={!!errors.temporaryPassword}
+                        className={generatePassword ? 'bg-white text-gray-500' : ''}
                       />
-                      <button
+                      <Button
                         type="button"
+                        variant="secondary"
                         onClick={() => setValue('temporaryPassword', generateTemporaryPassword(), { shouldDirty: true, shouldValidate: true })}
-                        className="clients-password-generate rounded-[14px] border border-gray-200 bg-white px-4 text-sm font-bold text-gray-600"
+                        className="clients-password-generate"
                       >
                         Generate
-                      </button>
+                      </Button>
                     </div>
                   </FormField>
                 </div>
@@ -418,6 +419,15 @@ export default function Clients() {
           />
         </form>
       </FormSidebar>
+
+      <ConfirmDialog
+        isOpen={!!deleteClient}
+        title="Remove client?"
+        message={deleteClient ? `Remove ${deleteClient.fullName}? This cannot be undone.` : ''}
+        confirmLabel="Remove Client"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteClient(null)}
+      />
     </DashboardLayout>
   );
 }
