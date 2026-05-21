@@ -1,4 +1,15 @@
 import { create } from 'zustand';
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  type Unsubscribe,
+} from 'firebase/firestore';
+import { requireFirebase } from '@/src/firebase/requireFirebase';
+import { messageDocToChatMessage } from '@/src/firebase/firestoreTransformers';
 
 export type ChatConversationType = 'client' | 'team' | 'project';
 export type ChatSenderRole = 'admin' | 'client' | 'team';
@@ -27,7 +38,10 @@ export interface ChatConversation {
 
 interface ChatState {
   conversations: ChatConversation[];
+  loading: { chat: boolean };
+  error: { chat: string | null };
   setConversations: (conversations: ChatConversation[]) => void;
+  subscribeToChat: (projectId: string) => Unsubscribe;
   sendMessage: (clientId: string, senderRole: ChatSenderRole, senderName: string, body: string) => void;
   sendConversationMessage: (
     conversationType: ChatConversationType,
@@ -67,12 +81,50 @@ const readPatchForRole = (role: ChatSenderRole, timestamp: number) => {
 
 export const useChatStore = create<ChatState>((set) => ({
   conversations: [],
+  loading: { chat: false },
+  error: { chat: null },
 
   setConversations: (conversations) => set({ conversations }),
+
+  subscribeToChat: (projectId) => {
+    set({ loading: { chat: true }, error: { chat: null } });
+    return onSnapshot(
+      query(collection(requireFirebase().db, 'projects', projectId, 'messages'), orderBy('createdAt', 'asc')),
+      snapshot => set(state => {
+        const conversation: ChatConversation = {
+          id: conversationIdFor('project', projectId),
+          type: 'project',
+          participantId: projectId,
+          projectId,
+          messages: snapshot.docs.map(doc => messageDocToChatMessage(projectId, doc)),
+        };
+        return {
+          conversations: [
+            conversation,
+            ...state.conversations.filter(item => !matchesConversation(item, 'project', projectId)),
+          ],
+          loading: { chat: false },
+          error: { chat: null },
+        };
+      }),
+      error => set({ loading: { chat: false }, error: { chat: error.message } }),
+    );
+  },
 
   sendConversationMessage: (conversationType, participantId, senderRole, senderName, body) => {
     const trimmed = body.trim();
     if (!trimmed) return;
+
+    if (conversationType === 'project') {
+      void addDoc(collection(requireFirebase().db, 'projects', participantId, 'messages'), {
+        senderId: '',
+        senderName,
+        senderRole,
+        text: trimmed,
+        createdAt: serverTimestamp(),
+      });
+      return;
+    }
 
     const now = Date.now();
     const conversationId = conversationIdFor(conversationType, participantId);
@@ -96,7 +148,7 @@ export const useChatStore = create<ChatState>((set) => ({
               participantId,
               clientId: conversationType === 'client' ? participantId : undefined,
               teamMemberId: conversationType === 'team' ? participantId : undefined,
-              projectId: conversationType === 'project' ? participantId : undefined,
+              projectId: undefined,
               ...readPatchForRole(senderRole, now),
               messages: [message],
             },

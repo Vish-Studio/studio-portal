@@ -1,29 +1,9 @@
 /**
- * Hydrates non-Firebase Zustand stores with local demo data before the React tree mounts.
- * Firebase-backed stores such as clients and team subscribe from their pages/components.
+ * Clean-slate data bootstrapping.
+ *
+ * Stores are no longer hydrated with local mock data at startup. Firestore
+ * streams are attached by feature stores and route-level components.
  */
-import {
-  DEMO_PROJECTS,
-  DEMO_TASKS,
-  DEMO_RECENT_CLIENTS,
-  DEMO_TEAM_PROJECTS,
-  DEMO_DOCUMENTS,
-  DEMO_STATS,
-  DEMO_EXPENSES,
-} from '../data/seed';
-
-import { useProjectsStore }  from '@/src/features/projects';
-import { useTasksStore }     from '@/src/features/tasks';
-import { useTeamStore }      from '@/src/features/team';
-import { useDocumentsStore } from '@/src/features/documents';
-import { useExpenseStore }   from '@/src/features/expenses';
-
 export function initStores(): void {
-  useProjectsStore.getState().setProjects(DEMO_PROJECTS);
-  useTasksStore.getState().setTasks(DEMO_TASKS);
-  useTeamStore.getState().setProjects(DEMO_TEAM_PROJECTS);
-  useDocumentsStore.getState().setDocuments(DEMO_DOCUMENTS);
-  useExpenseStore.getState().setStats(DEMO_STATS);
-  useExpenseStore.getState().setRecentClients(DEMO_RECENT_CLIENTS);
-  useExpenseStore.getState().setExpenses(DEMO_EXPENSES);
+  // Intentionally empty.
 }

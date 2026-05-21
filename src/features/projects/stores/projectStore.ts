@@ -1,15 +1,32 @@
 import { create } from 'zustand';
 import { buildDefaultPhases, getActivePhaseIndex } from '../types';
 import type { ClientProject, ServiceType, PackageType, Phase, PhaseStatus } from '../types';
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+  type Unsubscribe,
+} from 'firebase/firestore';
+import { requireFirebase } from '@/src/firebase/requireFirebase';
+import { phaseDocToPhase, projectDocToClientProject } from '@/src/firebase/firestoreTransformers';
 
 export type { ClientProject };
 
 interface ProjectsState {
   projects: ClientProject[];
+  loading: { projects: boolean };
+  error: { projects: string | null };
   setProjects:     (projects: ClientProject[]) => void;
-  addProject:      (project: ClientProject) => void;
-  updateProject:   (id: string, updates: Partial<Omit<ClientProject, 'id'>>) => void;
-  removeProject:   (id: string) => void;
+  subscribeToProjects: (filter?: { clientId?: string; teamId?: string }) => Unsubscribe;
+  addProject:      (project: ClientProject) => Promise<void>;
+  updateProject:   (id: string, updates: Partial<Omit<ClientProject, 'id'>>) => Promise<void>;
+  removeProject:   (id: string) => Promise<void>;
   updatePhase:     (projectId: string, phaseId: string, updates: Partial<Phase>) => void;
   insertPhase:     (projectId: string, afterIndex: number, phase: Phase) => void;
   removePhase:     (projectId: string, phaseId: string) => void;
@@ -21,18 +38,86 @@ interface ProjectsState {
 }
 
 export const useProjectsStore = create<ProjectsState>((set) => ({
-  projects: [], // hydrated on app start via initStores()
+  projects: [],
+  loading: { projects: false },
+  error: { projects: null },
 
   setProjects: (projects) => set({ projects }),
 
-  addProject: (project) =>
-    set((s) => ({ projects: [project, ...s.projects] })),
+  subscribeToProjects: (filter) => {
+    set({ loading: { projects: true }, error: { projects: null } });
+    const db = requireFirebase().db;
+    const projectsRef = filter?.clientId
+      ? query(collection(db, 'projects'), where('clientId', '==', filter.clientId))
+      : filter?.teamId
+        ? query(collection(db, 'projects'), where('assignedTeamIds', 'array-contains', filter.teamId))
+        : collection(db, 'projects');
 
-  updateProject: (id, updates) =>
-    set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...p, ...updates } : p)) })),
+    let rawProjects: Array<{ id: string; data: Record<string, unknown> }> = [];
+    let phases: Phase[] = [];
+    const flush = () => {
+      const phaseMap = new Map<string, Phase[]>();
+      phases.forEach(phase => {
+        const projectId = (phase as Phase & { projectId?: string }).projectId;
+        if (!projectId) return;
+        phaseMap.set(projectId, [...(phaseMap.get(projectId) ?? []), phase]);
+      });
+      set({
+        projects: rawProjects.map(item => projectDocToClientProject(
+          { id: item.id, data: () => item.data } as never,
+          (phaseMap.get(item.id) ?? []).sort((a, b) => a.id.localeCompare(b.id)),
+        )),
+        loading: { projects: false },
+        error: { projects: null },
+      });
+    };
 
-  removeProject: (id) =>
-    set((s) => ({ projects: s.projects.filter((p) => p.id !== id) })),
+    const unsubscribeProjects = onSnapshot(
+      projectsRef,
+      snapshot => {
+        rawProjects = snapshot.docs.map(item => ({ id: item.id, data: item.data() }));
+        flush();
+      },
+      error => set({ loading: { projects: false }, error: { projects: error.message } }),
+    );
+    const unsubscribePhases = onSnapshot(
+      collection(db, 'projectPhases'),
+      snapshot => {
+        phases = snapshot.docs.map(item => ({ ...phaseDocToPhase(item), projectId: String(item.data().projectId ?? '') } as Phase & { projectId: string }));
+        flush();
+      },
+      error => set({ loading: { projects: false }, error: { projects: error.message } }),
+    );
+
+    return () => {
+      unsubscribeProjects();
+      unsubscribePhases();
+    };
+  },
+
+  addProject: async (project) => {
+    await addDoc(collection(requireFirebase().db, 'projects'), {
+      title: project.name,
+      status: project.status === 'paused' ? 'planning' : project.status === 'completed' ? 'completed' : 'in-progress',
+      clientId: project.clientId,
+      assignedTeamIds: project.assignedMemberIds ?? [],
+      currentPhaseId: project.phases.find(phase => phase.status === 'active')?.id ?? '',
+      createdAt: serverTimestamp(),
+    });
+  },
+
+  updateProject: async (id, updates) => {
+    await updateDoc(doc(requireFirebase().db, 'projects', id), {
+      ...(updates.name !== undefined ? { title: updates.name } : {}),
+      ...(updates.status !== undefined ? { status: updates.status === 'paused' ? 'planning' : updates.status === 'completed' ? 'completed' : 'in-progress' } : {}),
+      ...(updates.clientId !== undefined ? { clientId: updates.clientId } : {}),
+      ...(updates.assignedMemberIds !== undefined ? { assignedTeamIds: updates.assignedMemberIds } : {}),
+    });
+  },
+
+  removeProject: async (id) => {
+    await deleteDoc(doc(requireFirebase().db, 'projects', id));
+  },
 
   updatePhase: (projectId, phaseId, updates) =>
     set((s) => ({

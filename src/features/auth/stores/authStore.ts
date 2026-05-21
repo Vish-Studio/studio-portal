@@ -3,7 +3,7 @@ import type { User } from 'firebase/auth';
 import { isFirebaseConfigured } from '@/src/firebase/config';
 import { authService } from '../services/authService';
 export type { AuthProfile, AuthRole } from '@/src/types/auth';
-import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
+import type { AuthProfile, AuthProfileUpdateInput } from '@/src/types/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
 
 interface AuthState {
@@ -12,6 +12,7 @@ interface AuthState {
   loading: boolean;
   ready: boolean;
   error: string | null;
+  role: AuthProfile['role'] | null;
   signIn: (email: string, password: string) => Promise<AuthProfile>;
   sendPasswordReset: (email: string) => Promise<void>;
   verifyPasswordReset: (code: string) => Promise<string>;
@@ -22,7 +23,7 @@ interface AuthState {
 }
 
 const firebaseErrorMessage = (error: unknown) => {
-  if (!(error instanceof Error)) return 'Unable to sign in. Please try again.';
+  if (!(error instanceof Error)) return 'Unable to complete the request. Please try again.';
   if (error.message.includes('auth/invalid-credential')) return 'Invalid email or password.';
   if (error.message.includes('auth/operation-not-allowed')) return 'Email/password sign-in is not enabled in Firebase Authentication.';
   if (error.message.includes('auth/user-not-found')) return 'No user found with this email.';
@@ -40,14 +41,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   loading: false,
   ready: false,
   error: null,
+  role: null,
 
   signIn: async (email, password) => {
     set({ loading: true, error: null });
-
     try {
-      const credential = await authService.signInOrCreateAllowedUser(email, password);
-      const profile = await authService.upsertProfile(credential.user);
-      set({ user: credential.user, profile, loading: false, ready: true });
+      const credential = await authService.signIn(email, password);
+      const profile = await authService.loadProfile(credential.user);
+      set({ user: credential.user, profile, role: profile.role, loading: false, ready: true });
       return profile;
     } catch (error) {
       const message = firebaseErrorMessage(error);
@@ -58,7 +59,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   sendPasswordReset: async (email) => {
     set({ loading: true, error: null });
-
     try {
       await authService.sendPasswordReset(email);
       set({ loading: false });
@@ -81,7 +81,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   confirmPasswordReset: async (code, password) => {
     set({ loading: true, error: null });
-
     try {
       await authService.confirmPasswordReset(code, password);
       set({ loading: false });
@@ -94,7 +93,6 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   updateProfile: async (updates) => {
     set({ loading: true, error: null });
-
     try {
       const profile = await runOperationWithFeedback({
         loadingLabel: 'Updating profile',
@@ -102,7 +100,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         errorTitle: 'Unable to update profile',
         action: () => authService.updateCurrentProfile(updates),
       });
-      set({ profile, loading: false });
+      set({ profile, role: profile.role, loading: false });
       return profile;
     } catch (error) {
       const message = firebaseErrorMessage(error);
@@ -113,7 +111,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signOutUser: async () => {
     await authService.signOut();
-    set({ user: null, profile: null, error: null, ready: true });
+    set({ user: null, profile: null, role: null, error: null, ready: true });
   },
 
   initAuthListener: () => {
@@ -126,21 +124,16 @@ export const useAuthStore = create<AuthState>((set) => ({
 
     return authService.onAuthStateChanged(async (user) => {
       if (!user) {
-        set({ user: null, profile: null, loading: false, ready: true });
+        set({ user: null, profile: null, role: null, loading: false, ready: true });
         return;
       }
 
       try {
-        const profile = await authService.upsertProfile(user);
-        set({ user, profile, loading: false, ready: true });
+        const profile = await authService.loadProfile(user);
+        set({ user, profile, role: profile.role, loading: false, ready: true, error: null });
       } catch (error) {
-        set({
-          user,
-          profile: null,
-          loading: false,
-          ready: true,
-          error: firebaseErrorMessage(error),
-        });
+        const message = firebaseErrorMessage(error);
+        set({ user, profile: null, role: null, loading: false, ready: true, error: message });
       }
     });
   },

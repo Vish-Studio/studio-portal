@@ -1,23 +1,36 @@
-export type ClientStatus = "active" | "inactive" | "lost";
-
+/**
+ * Firestore schema (flat, root-level, no duplicates):
+ *   /clients/{uid}  → { id, companyName }
+ *   /users/{uid}    → { uid, name, email, role, needsPasswordChange }
+ *
+ * The Client interface is the *joined* shape used in the UI.
+ * The service layer reads /users.name and exposes it as fullName so
+ * existing components work without modification.
+ */
 export interface Client {
-  id: string;
-  userId?: string | null;
-  user_id?: string | null;
-  fullName: string;
-  full_name?: string;
-  first_name?: string;
-  last_name?: string;
-  companyName?: string;
+  /** Firebase Auth UID — Firestore doc ID in /clients and /users */
+  id:          string;
+  userId?:     string | null;
+  user_id?:    string | null;
+  /** From /clients/{uid}.companyName */
+  companyName: string;
   company_name?: string;
-  email: string;
-  phone?: string;
+  /**
+   * Display name — sourced from /users/{uid}.name at read time.
+   * Used by all existing UI components.
+   */
+  fullName:    string;
+  full_name?:  string;
+  /** From /users/{uid}.email */
+  email:       string;
+  /** Optional legacy / UI-compat fields — not stored in the new Firestore schema */
+  role?:       "client";
+  phone?:      string;
   phone_number?: string;
-  role: "client";
-  status: ClientStatus;
-  is_active?: boolean;
-  createdAt?: { toMillis: () => number; toDate: () => Date };
+  status?:     ClientStatus;
+  createdAt?:  { toMillis: () => number; toDate: () => Date };
   created_at?: { toMillis: () => number; toDate: () => Date };
-  updatedAt?: { toMillis: () => number; toDate: () => Date };
-  updated_at?: { toMillis: () => number; toDate: () => Date };
 }
+
+/** Kept for backward compat with existing UI filter tabs and dropdowns. */
+export type ClientStatus = "active" | "inactive" | "lost";

@@ -12,8 +12,8 @@
                data.updatedAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
 
       allow create: if isAdmin() && isValidId(projectId) && isValidProject(incoming()) &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&

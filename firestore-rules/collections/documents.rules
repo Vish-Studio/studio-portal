@@ -12,8 +12,8 @@
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId() || existing().clientId == 'global');
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId() || resource.data.clientId == 'global');
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid || existing().clientId == 'global');
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid || resource.data.clientId == 'global');
 
       allow create: if isAdmin() && isValidId(documentId) && isValidDocument(incoming()) &&
                       (incoming().clientId == 'global' || exists(/databases/$(database)/documents/clients/$(incoming().clientId))) &&

@@ -1,52 +1,18 @@
-    // clients: client business data linked to users/{uid} by userId.
+    // clients/{uid} — client profile keyed by Firebase Auth UID.
+    // Schema: { id, companyName }
+    // doc ID == user's Auth UID == /users/{uid}.uid
     match /clients/{clientId} {
+
       function isValidClient(data) {
-        return data.keys().hasAll(['fullName', 'email', 'status', 'createdAt']) &&
-               data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 120 &&
-               data.email is string && data.email.size() <= 255 &&
-               (data.get('companyName', '') is string) && data.get('companyName', '').size() <= 160 &&
-               (data.get('phone', '') is string) && data.get('phone', '').size() <= 40 &&
-               (data.get('userId', '') == null || (data.get('userId', '') is string && data.get('userId', '').size() <= 128)) &&
-               data.status in ['active', 'inactive', 'lost'] &&
-               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
-               data.createdAt is timestamp;
+        return data.keys().hasAll(['id', 'companyName']) &&
+               data.id          is string && data.id == clientId &&
+               data.companyName is string && data.companyName.size() <= 200;
       }
 
-      allow read: if isSignedIn() && (isAdmin() || existing().userId == request.auth.uid);
+      // Admin sees all; client sees only their own record (doc ID = Auth UID)
+      allow read: if isSignedIn() && (isAdmin() || clientId == request.auth.uid);
 
-      allow create: if isValidClient(incoming()) &&
-                      incoming().createdAt == request.time &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isAdmin() ||
-                        (
-                          isSignedIn() &&
-                          currentClientId() == clientId &&
-                          incoming().userId == request.auth.uid &&
-                          incoming().email == request.auth.token.email
-                        )
-                      );
-
-      allow update: if isSignedIn() && isValidClient(incoming()) &&
-                      incoming().createdAt == existing().createdAt &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isAdmin() ||
-                        (
-                          existing().get('userId', null) == null &&
-                          currentClientId() == clientId &&
-                          incoming().userId == request.auth.uid &&
-                          incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'updatedAt'])
-                        ) ||
-                        (existing().userId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly([
-                          'fullName',
-                          'email',
-                          'phone',
-                          'recoveryEmail',
-                          'newsletterPreferences',
-                          'updatedAt'
-                        ]))
-                      );
-
+      allow create: if isAdmin() && isValidClient(incoming());
+      allow update: if isAdmin() && isValidClient(incoming()) && incoming().id == existing().id;
       allow delete: if isAdmin();
     }

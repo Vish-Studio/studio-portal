@@ -8,106 +8,71 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Primitive helpers shared by collection rules.
+// Primitive helpers shared by collection rules.
     function isSignedIn() { return request.auth != null; }
 
+    // Admin = hardcoded owner emails OR users/{uid}.role is admin/superadmin
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
         request.auth.token.email == 'vishseenarain@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['superadmin', 'admin', 'freelancer'])
-      );
-    }
-
-    function isSuperAdmin() {
-      return isSignedIn() && (
-        request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
-        request.auth.token.email == 'vishseenarain@gmail.com' ||
-        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'freelancer'])
       );
     }
 
     function incoming() { return request.resource.data; }
     function existing() { return resource.data; }
 
-    function currentClientId() {
-      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data.clientId
-        : '';
-    }
-
     function isValidId(id) {
       return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
     }
 
-    // users: Firebase auth profile source.
+    // users/{uid} — identity document keyed by Firebase Auth UID.
+    // New schema fields: uid, name, email, role, needsPasswordChange
+    // Extended/legacy fields are also accepted for backward compatibility.
     match /users/{userId} {
+
       function isValidUser(data) {
-        return data.keys().hasAll(['role', 'email', 'createdAt']) &&
-               data.role in ['client', 'superadmin', 'admin', 'freelancer'] &&
-               data.email is string && data.email.size() <= 255 &&
-               (data.get('fullName', '') is string) && (data.get('fullName', '').size() <= 120) &&
-               (data.get('staffRole', 'admin') is string) && data.get('staffRole', 'admin') in ['superadmin', 'admin', 'freelancer'] &&
-               (data.get('teamMemberId', '') is string) && (data.get('teamMemberId', '').size() <= 128) &&
-               (data.get('teamId', '') is string) && (data.get('teamId', '').size() <= 128) &&
-               (data.get('clientId', '') is string) && (data.get('clientId', '').size() <= 128) &&
-               (data.get('company', '') is string) && (data.get('company', '').size() <= 160) &&
-               (data.get('phone', '') is string) && (data.get('phone', '').size() <= 40) &&
-               (data.get('status', 'active') is string) && data.get('status', 'active') in ['prospect', 'agreed', 'lost', 'active', 'inactive'] &&
-               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
-               data.createdAt is timestamp;
+        // Require the new schema fields.
+        // 'superadmin' accepted alongside 'admin' for existing accounts.
+        return data.uid   is string &&
+               data.name  is string && data.name.size() > 0 && data.name.size() <= 120 &&
+               data.email is string && data.email.size() > 0 && data.email.size() <= 255 &&
+               data.role  in ['admin', 'superadmin', 'team', 'client', 'freelancer'] &&
+               data.needsPasswordChange is bool;
       }
 
-      function isOwnUserProfile() {
-        return request.auth.uid == userId || existing().email == request.auth.token.email;
-      }
+      // Any signed-in user can read their own profile; admins can read all
+      allow get:  if isSignedIn() && (isAdmin() || userId == request.auth.uid);
+      allow list: if isAdmin();
 
-      function canWriteUserRole(data) {
-        return isSuperAdmin() || (isAdmin() && data.role != 'superadmin');
-      }
-
-      function isValidUserProfileId(id) {
-        return isValidId(id) || id == incoming().email || id == existing().email;
-      }
-
-      function hasStagedUserProfile() {
-        return exists(/databases/$(database)/documents/users/$(request.auth.token.email)) &&
-               get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.email == request.auth.token.email &&
-               get(/databases/$(database)/documents/users/$(request.auth.token.email)).data.role == incoming().role;
-      }
-
-      allow get: if isSignedIn() && (isAdmin() || isOwnUserProfile());
-      allow list: if isAdmin() || (isSignedIn() && existing().email == request.auth.token.email);
-
-      allow create: if isSignedIn() && isValidUserProfileId(userId) &&
+      // Admin creates profiles (provisioning) OR owner bootstraps their own
+      // profile on first login (e.g. hardcoded admin emails).
+      allow create: if isSignedIn() &&
                        isValidUser(incoming()) &&
-                       incoming().createdAt == request.time &&
+                       userId == incoming().uid &&
                        (
-                         canWriteUserRole(incoming()) ||
+                         isAdmin() ||
+                         userId == request.auth.uid
+                       );
+
+      // Admin can update anything; owner can only clear the password-change flag
+      // or update their own non-role/email/uid fields.
+      allow update: if isSignedIn() &&
+                       isValidUser(incoming()) &&
+                       incoming().uid   == existing().get('uid', userId) &&
+                       incoming().email == existing().email &&
+                       (
+                         isAdmin() ||
                          (
-                           request.auth.uid == userId &&
-                           incoming().email == request.auth.token.email &&
-                           (
-                             request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
-                             request.auth.token.email == 'vishseenarain@gmail.com' ||
-                             hasStagedUserProfile()
-                           )
+                           userId == request.auth.uid &&
+                           incoming().role == existing().role &&
+                           incoming().needsPasswordChange == false
                          )
                        );
 
-      allow update: if isSignedIn() && isValidUserProfileId(userId) && isValidUser(incoming()) &&
-                       incoming().createdAt == existing().createdAt &&
-                       (
-                         isSuperAdmin() ||
-                         (isAdmin() && existing().role != 'superadmin' && incoming().role != 'superadmin') ||
-                         (request.auth.uid == userId && incoming().role == existing().role && incoming().status == existing().status)
-                       );
-
-      allow delete: if isSuperAdmin() ||
-                      (isAdmin() && existing().role != 'superadmin') ||
-                      (isSignedIn() && userId == request.auth.token.email && existing().email == request.auth.token.email);
+      allow delete: if isAdmin();
     }
 
     // projects: client work and process state.
@@ -124,8 +89,8 @@ service cloud.firestore {
                data.updatedAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
 
       allow create: if isAdmin() && isValidId(projectId) && isValidProject(incoming()) &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
@@ -154,8 +119,8 @@ service cloud.firestore {
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId() || existing().clientId == 'global');
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId() || resource.data.clientId == 'global');
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid || existing().clientId == 'global');
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid || resource.data.clientId == 'global');
 
       allow create: if isAdmin() && isValidId(documentId) && isValidDocument(incoming()) &&
                       (incoming().clientId == 'global' || exists(/databases/$(database)/documents/clients/$(incoming().clientId))) &&
@@ -180,11 +145,11 @@ service cloud.firestore {
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
 
       allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming()) &&
-                      (isAdmin() || currentClientId() == incoming().clientId) &&
+                      (isAdmin() || request.auth.uid == incoming().clientId) &&
                       incoming().senderId == request.auth.uid &&
                       incoming().createdAt == request.time &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId));
@@ -203,8 +168,8 @@ service cloud.firestore {
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
 
       allow create: if isAdmin() && isValidId(taskId) && isValidTask(incoming()) &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
@@ -213,99 +178,52 @@ service cloud.firestore {
       allow update: if isSignedIn() && isValidId(taskId) && isValidTask(incoming()) &&
                       incoming().createdAt == existing().createdAt &&
                       incoming().clientId == existing().clientId &&
-                      (isAdmin() || (currentClientId() == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['completed'])));
+                      (isAdmin() || (request.auth.uid == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['completed'])));
 
       allow delete: if isAdmin();
     }
 
     // expenses: internal admin-only accounting data.
     match /expenses/{expenseId} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isAdmin();
     }
 
-    // clients: client business data linked to users/{uid} by userId.
+    // clients/{uid} — client profile keyed by Firebase Auth UID.
+    // Schema: { id, companyName }
+    // doc ID == user's Auth UID == /users/{uid}.uid
     match /clients/{clientId} {
+
       function isValidClient(data) {
-        return data.keys().hasAll(['fullName', 'email', 'status', 'createdAt']) &&
-               data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 120 &&
-               data.email is string && data.email.size() <= 255 &&
-               (data.get('companyName', '') is string) && data.get('companyName', '').size() <= 160 &&
-               (data.get('phone', '') is string) && data.get('phone', '').size() <= 40 &&
-               (data.get('userId', '') == null || (data.get('userId', '') is string && data.get('userId', '').size() <= 128)) &&
-               data.status in ['active', 'inactive', 'lost'] &&
-               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
-               data.createdAt is timestamp;
+        return data.keys().hasAll(['id', 'companyName']) &&
+               data.id          is string && data.id == clientId &&
+               data.companyName is string && data.companyName.size() <= 200;
       }
 
-      allow read: if isSignedIn() && (isAdmin() || existing().userId == request.auth.uid);
+      // Admin sees all; client sees only their own record (doc ID = Auth UID)
+      allow read: if isSignedIn() && (isAdmin() || clientId == request.auth.uid);
 
-      allow create: if isValidClient(incoming()) &&
-                      incoming().createdAt == request.time &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isAdmin() ||
-                        (
-                          isSignedIn() &&
-                          currentClientId() == clientId &&
-                          incoming().userId == request.auth.uid &&
-                          incoming().email == request.auth.token.email
-                        )
-                      );
-
-      allow update: if isSignedIn() && isValidClient(incoming()) &&
-                      incoming().createdAt == existing().createdAt &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isAdmin() ||
-                        (
-                          existing().get('userId', null) == null &&
-                          currentClientId() == clientId &&
-                          incoming().userId == request.auth.uid &&
-                          incoming().diff(existing()).affectedKeys().hasOnly(['userId', 'updatedAt'])
-                        ) ||
-                        (existing().userId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly([
-                          'fullName',
-                          'email',
-                          'phone',
-                          'recoveryEmail',
-                          'newsletterPreferences',
-                          'updatedAt'
-                        ]))
-                      );
-
+      allow create: if isAdmin() && isValidClient(incoming());
+      allow update: if isAdmin() && isValidClient(incoming()) && incoming().id == existing().id;
       allow delete: if isAdmin();
     }
 
-    // team: team business data linked to users/{uid} by userId.
+    // team/{uid} — team member profile keyed by Firebase Auth UID.
+    // Schema: { id, position }
+    // doc ID == user's Auth UID == /users/{uid}.uid
     match /team/{memberId} {
+
       function isValidTeamMember(data) {
-        return data.keys().hasAll(['name', 'role', 'accessRole', 'email', 'assignedProjectId', 'createdAt']) &&
-               data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
-               data.role is string && data.role.size() > 0 && data.role.size() <= 120 &&
-               data.accessRole in ['superadmin', 'admin', 'freelancer'] &&
-               data.email is string && data.email.size() <= 255 &&
-               (data.assignedProjectId == null || (data.assignedProjectId is string && data.assignedProjectId.size() <= 128)) &&
-               (data.get('userId', '') == null || (data.get('userId', '') is string && data.get('userId', '').size() <= 128)) &&
-               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
-               data.createdAt is timestamp;
+        return data.keys().hasAll(['id', 'position']) &&
+               data.id       is string && data.id == memberId &&
+               data.position is string && data.position.size() > 0 && data.position.size() <= 120;
       }
 
-      allow read: if isAdmin();
-      allow create: if isValidTeamMember(incoming()) &&
-                      incoming().createdAt == request.time &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isSuperAdmin() ||
-                        (isAdmin() && incoming().accessRole in ['admin', 'freelancer'])
-                      );
-      allow update: if isValidTeamMember(incoming()) &&
-                      incoming().createdAt == existing().createdAt &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isSuperAdmin() ||
-                        (isAdmin() && existing().accessRole != 'superadmin' && incoming().accessRole in ['admin', 'freelancer'])
-                      );
-      allow delete: if isSuperAdmin();
+      // Admin sees all; team member sees only their own record (doc ID = Auth UID)
+      allow read: if isSignedIn() && (isAdmin() || memberId == request.auth.uid);
+
+      allow create: if isAdmin() && isValidTeamMember(incoming());
+      allow update: if isAdmin() && isValidTeamMember(incoming()) && incoming().id == existing().id;
+      allow delete: if isAdmin();
     }
 
     // Legacy teamMembers collection has been replaced by /team.

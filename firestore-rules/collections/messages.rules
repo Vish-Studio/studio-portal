@@ -9,11 +9,11 @@
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
 
       allow create: if isSignedIn() && isValidId(messageId) && isValidMessage(incoming()) &&
-                      (isAdmin() || currentClientId() == incoming().clientId) &&
+                      (isAdmin() || request.auth.uid == incoming().clientId) &&
                       incoming().senderId == request.auth.uid &&
                       incoming().createdAt == request.time &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId));

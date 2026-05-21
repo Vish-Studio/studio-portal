@@ -1,31 +1,18 @@
-    // team: team business data linked to users/{uid} by userId.
+    // team/{uid} — team member profile keyed by Firebase Auth UID.
+    // Schema: { id, position }
+    // doc ID == user's Auth UID == /users/{uid}.uid
     match /team/{memberId} {
+
       function isValidTeamMember(data) {
-        return data.keys().hasAll(['name', 'role', 'accessRole', 'email', 'assignedProjectId', 'createdAt']) &&
-               data.name is string && data.name.size() > 0 && data.name.size() <= 120 &&
-               data.role is string && data.role.size() > 0 && data.role.size() <= 120 &&
-               data.accessRole in ['superadmin', 'admin', 'freelancer'] &&
-               data.email is string && data.email.size() <= 255 &&
-               (data.assignedProjectId == null || (data.assignedProjectId is string && data.assignedProjectId.size() <= 128)) &&
-               (data.get('userId', '') == null || (data.get('userId', '') is string && data.get('userId', '').size() <= 128)) &&
-               (!('updatedAt' in data) || data.updatedAt is timestamp) &&
-               data.createdAt is timestamp;
+        return data.keys().hasAll(['id', 'position']) &&
+               data.id       is string && data.id == memberId &&
+               data.position is string && data.position.size() > 0 && data.position.size() <= 120;
       }
 
-      allow read: if isAdmin();
-      allow create: if isValidTeamMember(incoming()) &&
-                      incoming().createdAt == request.time &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isSuperAdmin() ||
-                        (isAdmin() && incoming().accessRole in ['admin', 'freelancer'])
-                      );
-      allow update: if isValidTeamMember(incoming()) &&
-                      incoming().createdAt == existing().createdAt &&
-                      incoming().updatedAt == request.time &&
-                      (
-                        isSuperAdmin() ||
-                        (isAdmin() && existing().accessRole != 'superadmin' && incoming().accessRole in ['admin', 'freelancer'])
-                      );
-      allow delete: if isSuperAdmin();
+      // Admin sees all; team member sees only their own record (doc ID = Auth UID)
+      allow read: if isSignedIn() && (isAdmin() || memberId == request.auth.uid);
+
+      allow create: if isAdmin() && isValidTeamMember(incoming());
+      allow update: if isAdmin() && isValidTeamMember(incoming()) && incoming().id == existing().id;
+      allow delete: if isAdmin();
     }

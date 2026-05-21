@@ -28,10 +28,6 @@ const adminRoute = (page: React.ReactNode) => (
   <AuthGate role="admin">{page}</AuthGate>
 );
 
-const superadminRoute = (page: React.ReactNode) => (
-  <AuthGate role="superadmin">{page}</AuthGate>
-);
-
 const clientRoute = (page: React.ReactNode) => (
   <AuthGate role="client">{page}</AuthGate>
 );
@@ -55,7 +51,7 @@ export function AppRoutes() {
       <Route path="/admin/clients/:id" element={adminRoute(<ClientDetailPage />)} />
       <Route path="/admin/team" element={adminRoute(<TeamPage />)} />
       <Route path="/admin/team/:id" element={adminRoute(<TeamDetailPage />)} />
-      <Route path="/admin/expenses" element={superadminRoute(<ExpensesPage />)} />
+      <Route path="/admin/expenses" element={adminRoute(<ExpensesPage />)} />
       <Route path="/admin/payments" element={adminRoute(<PaymentsPage />)} />
       <Route path="/admin/chat" element={adminRoute(<ChatPage />)} />
       <Route path="/admin/projects" element={adminRoute(<ProjectsPage />)} />

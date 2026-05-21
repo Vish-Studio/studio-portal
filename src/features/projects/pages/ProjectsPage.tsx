@@ -37,7 +37,7 @@ const Projects = () => {
   const { clients } = useClientsStore();
 
   const [activeTab, setActiveTab] = useState('all');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
   const [sortKey, setSortKey] = useState<SortKey>('updated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [sidebarOpen, setSidebarOpen] = useState(false);

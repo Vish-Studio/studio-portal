@@ -8,8 +8,8 @@
                data.createdAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == currentClientId());
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == currentClientId());
+      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
+      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
 
       allow create: if isAdmin() && isValidId(taskId) && isValidTask(incoming()) &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
@@ -18,7 +18,7 @@
       allow update: if isSignedIn() && isValidId(taskId) && isValidTask(incoming()) &&
                       incoming().createdAt == existing().createdAt &&
                       incoming().clientId == existing().clientId &&
-                      (isAdmin() || (currentClientId() == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['completed'])));
+                      (isAdmin() || (request.auth.uid == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['completed'])));
 
       allow delete: if isAdmin();
     }

@@ -7,7 +7,7 @@ import { AppLoader } from '@/src/app/components/loading';
 
 interface AuthGateProps {
   children: React.ReactNode;
-  role?: 'admin' | 'client' | 'superadmin';
+  role?: AuthRole;
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -69,10 +69,6 @@ export function AuthGate({ children, role }: AuthGateProps) {
   }
 
   if (role === 'admin' && !isStaffRole(profile.role)) {
-    return <Navigate to={defaultRouteForRole(profile.role)} replace />;
-  }
-
-  if (role === 'superadmin' && profile.role !== 'superadmin') {
     return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
 

@@ -1,4 +1,4 @@
     // expenses: internal admin-only accounting data.
     match /expenses/{expenseId} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isAdmin();
     }

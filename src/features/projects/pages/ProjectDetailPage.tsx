@@ -296,8 +296,8 @@ const ProjectDetail = () => {
 
         {/* Discovery Brief */}
         {(() => {
-          const canFill = profile?.role === 'superadmin' || profile?.role === 'admin' || profile?.role === 'freelancer' || profile?.role === 'client';
-          const isLocked = discoveryStatus === 'submitted' && profile?.role !== 'superadmin';
+          const canFill = false || profile?.role === 'admin' || profile?.role === 'team' || profile?.role === 'client';
+          const isLocked = discoveryStatus === 'submitted' && profile?.role !== 'admin';
 
           const statusConfig = {
             not_started: { label: 'Not started', icon: 'edit_note', cls: 'text-gray-400 bg-gray-100', dot: 'bg-gray-300' },

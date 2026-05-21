@@ -103,7 +103,7 @@ export default function Team() {
 
   const accessCounts = useMemo(() => ({
     admins: visibleMembers.filter(m => m.accessRole === 'admin' || m.accessRole === 'superadmin').length,
-    freelancers: visibleMembers.filter(m => m.accessRole === 'freelancer').length,
+    freelancers: visibleMembers.filter(m => m.accessRole === 'freelancer' || m.accessRole === 'team').length,
   }), [visibleMembers]);
 
   const tabs: TabItem[] = [
