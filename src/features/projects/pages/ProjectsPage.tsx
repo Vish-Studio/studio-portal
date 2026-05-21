@@ -5,7 +5,7 @@ import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { Button, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import ProjectCard, { ProjectCardMini } from '../components/project-card/project-card';
 import { ClientPicker } from '@/src/features/clients';
@@ -15,6 +15,7 @@ import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '../types';
 import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 
 interface ProjectFormValues {
   name: string;
@@ -31,7 +32,7 @@ const sameStringSet = (left: string[] = [], right: string[] = []) => (
 );
 
 const Projects = () => {
-  const { searchQuery } = useUIStore();
+  const { searchQuery, showToast } = useUIStore();
   const { projects, addProject, updateProject, removeProject } = useProjectsStore();
   const { members } = useTeamStore();
   const { clients } = useClientsStore();
@@ -45,6 +46,7 @@ const Projects = () => {
   const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
   const [selectedClientId, setSelectedClientId] = useState('');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<ProjectFormValues>({
@@ -102,6 +104,7 @@ const Projects = () => {
     reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' });
     setSelectedClientId('');
     setSelectedMemberIds([]);
+    setSubmitError(null);
     setSidebarOpen(true);
   };
 
@@ -110,10 +113,18 @@ const Projects = () => {
     reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
+    setSubmitError(null);
     setSidebarOpen(true);
   };
 
   const onSubmit = (data: ProjectFormValues) => {
+    if (!selectedClientId) {
+      const message = FEEDBACK_MESSAGES.sidebar.projectClientRequired;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.projectClientRequiredTitle, message });
+      return;
+    }
+    setSubmitError(null);
     const payload = {
       name: data.name,
       service: data.service,
@@ -129,6 +140,10 @@ const Projects = () => {
       addProject(makeNewProject(payload));
     }
     setSidebarOpen(false);
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   return (
@@ -196,8 +211,13 @@ const Projects = () => {
       </div>
 
       <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : 'Fill in the details to create a new project.'} width="md">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            <FormSidebarError
+              title={editingProject ? FEEDBACK_MESSAGES.sidebar.projectUpdateFailed : FEEDBACK_MESSAGES.sidebar.projectCreateFailed}
+              message={submitError}
+            />
+
             <FormField label="Project Name" required error={errors.name?.message}>
               <TextInput {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" hasError={!!errors.name} />
             </FormField>
@@ -227,8 +247,15 @@ const Projects = () => {
             <FormField label="Timeline" error={errors.timeline?.message}>
               <TextInput {...register('timeline')} placeholder="e.g. Q3 2026" hasError={!!errors.timeline} />
             </FormField>
-            <FormField label="Client" required error={undefined}>
-              <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={setSelectedClientId} />
+            <FormField label="Client" required error={!selectedClientId && submitError ? 'Client is required' : undefined}>
+              <ClientPicker
+                clients={clients}
+                selectedId={selectedClientId}
+                onSelect={clientId => {
+                  setSubmitError(null);
+                  setSelectedClientId(clientId);
+                }}
+              />
             </FormField>
             <FormField label="Assign Team">
               <MemberPicker members={members} selectedIds={selectedMemberIds} onToggle={id => setSelectedMemberIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])} />
@@ -238,7 +265,6 @@ const Projects = () => {
             onCancel={() => setSidebarOpen(false)}
             isSubmitting={isSubmitting}
             isDirty={hasProjectFormChanges}
-            disabled={!selectedClientId}
             submitLabel={editingProject ? 'Save Changes' : 'Add Project'}
           />
         </form>

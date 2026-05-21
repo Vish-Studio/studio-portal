@@ -10,7 +10,7 @@ import {
   getEventCategory,
 } from './event-types';
 import { Avatar, DatePicker, MaterialIcon, Toggle } from '@/src/shared/components';
-import FormSidebar, { FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarError, FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Select from '@/src/shared/components/select/select';
 import Option from '@/src/shared/components/select/option';
 import Button from '@/src/shared/components/button/button';
@@ -18,6 +18,8 @@ import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
 import { useAuthStore } from '@/src/features/auth';
+import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { getAllowedCalendarCategories } from '../../services/calendarService';
 import { cn } from '@/src/lib/utils';
 
@@ -60,6 +62,7 @@ interface ScheduleSidebarFormProps {
 
 export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent }: ScheduleSidebarFormProps) {
   const profile = useAuthStore(state => state.profile);
+  const showToast = useUIStore(state => state.showToast);
   const allowedCategories = getAllowedCalendarCategories(profile?.role);
   const fallbackCategory = allowedCategories[0] ?? 'team';
   const [selectedDate, setSelectedDate] = useState(startOfDay(initialEvent?.date ?? date));
@@ -138,6 +141,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
   };
 
   const handleTypeChange = (type: EventType) => {
+    setSubmitError(null);
     setSelectedType(type);
   };
 
@@ -160,7 +164,17 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!title.trim() || !profile) return;
+    if (!title.trim()) {
+      const message = FEEDBACK_MESSAGES.sidebar.scheduleTitleRequired;
+      setSubmitError(message);
+      return;
+    }
+    if (!profile) {
+      const message = FEEDBACK_MESSAGES.sidebar.scheduleProfileRequired;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.scheduleSaveToast, message });
+      return;
+    }
     setSubmitError(null);
 
     let time = 'All Day';
@@ -193,7 +207,9 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
       );
       onClose();
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Unable to save this calendar event.');
+      const message = error instanceof Error ? error.message : FEEDBACK_MESSAGES.sidebar.scheduleSaveFailed;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.scheduleSaveToast, message });
     }
   };
 
@@ -244,18 +260,20 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
           </div>
 
           <div className="schedule-sidebar-form-sections space-y-4">
-            {submitError && (
-              <div className="schedule-sidebar-form-error rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
-                {submitError}
-              </div>
-            )}
+            <FormSidebarError
+              title={initialEvent ? FEEDBACK_MESSAGES.sidebar.scheduleUpdateFailed : FEEDBACK_MESSAGES.sidebar.scheduleCreateFailed}
+              message={submitError}
+            />
 
             <div className="schedule-sidebar-form-section rounded-[20px] border border-gray-100 bg-white p-4">
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gray-400">Title</p>
               <input
                 type="text"
                 value={title}
-                onChange={event => setTitle(event.target.value)}
+                onChange={event => {
+                  setSubmitError(null);
+                  setTitle(event.target.value);
+                }}
                 placeholder={`e.g. ${config.label} with Acme Corp`}
                 className="w-full rounded-2xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-900 outline-none transition-all placeholder:text-gray-300 focus:border-gray-300 focus:bg-white focus:ring-4 focus:ring-gray-100"
               />
@@ -438,7 +456,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
           </Button>
           <Button
             type="submit"
-            disabled={!title.trim() || !hasScheduleChanges}
+            disabled={!hasScheduleChanges}
             className="flex-[1.4]"
             iconLeft={<MaterialIcon name={initialEvent ? 'edit' : 'add'} size={16} className="text-white" />}
           >

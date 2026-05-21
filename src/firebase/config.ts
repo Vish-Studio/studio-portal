@@ -1,6 +1,7 @@
 import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 
 export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -34,7 +35,7 @@ export const db = app ? getFirestore(app) : null;
 
 export const getProvisioningAuth = () => {
   if (!isFirebaseConfigured) {
-    throw new Error('Firebase is not configured. Add the VITE_FIREBASE_* values to your .env.local file.');
+    throw new Error(FEEDBACK_MESSAGES.common.firebaseNotConfigured);
   }
 
   if (!provisioningAuth) {

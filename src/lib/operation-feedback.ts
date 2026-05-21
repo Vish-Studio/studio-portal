@@ -1,4 +1,5 @@
 import { useUIStore } from "@/src/app/stores/uiStore";
+import { logFirebaseError } from "./firebase-errors";
 
 interface OperationFeedbackOptions<T> {
   loadingLabel: string;
@@ -31,6 +32,7 @@ export async function runOperationWithFeedback<T>({
 
     return result;
   } catch (error) {
+    logFirebaseError(errorTitle, error);
     const message = error instanceof Error ? error.message : errorTitle;
     showToast({
       status: "error",

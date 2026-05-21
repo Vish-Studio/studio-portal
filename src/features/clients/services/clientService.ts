@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -66,15 +67,14 @@ export const clientsService = {
 
     await setDoc(doc(db, 'users', user.uid), {
       uid: user.uid,
-      name,
+      fullName: name,
       email,
       role: 'client',
       needsPasswordChange: true,
-      full_name: name,
-      company_name: companyName,
-      phone_number: phone,
+      companyName,
+      phoneNumber: phone,
       status,
-      is_active: status === 'active',
+      isActive: status === 'active',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -100,7 +100,7 @@ export const clientsService = {
     const email = updates.email?.trim().toLowerCase();
     const companyName = updates.companyName?.trim();
     const phone = updates.phone?.trim();
-    const nextName = name || String(existing.name ?? existing.full_name ?? 'Unnamed client');
+    const nextName = name || String(existing.fullName ?? existing.name ?? existing.full_name ?? 'Unnamed client');
     const nextEmail = email || String(existing.email ?? '');
     const nextStatus = updates.status ?? (existing.status === 'inactive' || existing.status === 'lost' ? existing.status : 'active');
 
@@ -108,17 +108,24 @@ export const clientsService = {
       userRef,
       {
         uid: typeof existing.uid === 'string' ? existing.uid : id,
-        name: nextName,
-        full_name: nextName,
+        fullName: nextName,
         email: nextEmail,
         role: 'client',
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
-        company_name: companyName !== undefined ? companyName : String(existing.company_name ?? ''),
-        phone_number: phone !== undefined ? phone : String(existing.phone_number ?? ''),
+        companyName: companyName !== undefined ? companyName : String(existing.companyName ?? existing.company_name ?? ''),
+        phoneNumber: phone !== undefined ? phone : String(existing.phoneNumber ?? existing.phone_number ?? ''),
         status: nextStatus,
-        is_active: nextStatus === 'active',
+        isActive: nextStatus === 'active',
         createdAt: existing.createdAt ?? serverTimestamp(),
         updatedAt: serverTimestamp(),
+        id: deleteField(),
+        name: deleteField(),
+        full_name: deleteField(),
+        company_name: deleteField(),
+        phone_number: deleteField(),
+        is_active: deleteField(),
+        created_at: deleteField(),
+        updated_at: deleteField(),
       },
       { merge: true },
     );

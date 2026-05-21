@@ -31,9 +31,9 @@ const phaseStatus = (status: unknown): PhaseStatus => {
 
 export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
   const data = doc.data();
-  const name = String(data.name ?? data.full_name ?? 'Unnamed client');
-  const companyName = String(data.company_name ?? data.companyName ?? '');
-  const phone = String(data.phone_number ?? data.phone ?? '');
+  const name = String(data.fullName ?? data.name ?? data.full_name ?? 'Unnamed client');
+  const companyName = String(data.companyName ?? data.company_name ?? '');
+  const phone = String(data.phoneNumber ?? data.phone_number ?? data.phone ?? '');
   const status = data.status === 'inactive' || data.status === 'lost' ? data.status : 'active';
   return {
     id: doc.id,
@@ -55,10 +55,10 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
 
 export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
   const data = doc.data();
-  const name = String(data.name ?? data.full_name ?? 'Unnamed member');
+  const name = String(data.fullName ?? data.name ?? data.full_name ?? 'Unnamed member');
   const role = String(data.role ?? 'freelancer');
   const accessRole = role === 'team' ? 'freelancer' : role;
-  const jobTitle = String(data.job_title ?? data.jobTitle ?? 'Team member');
+  const jobTitle = String(data.jobTitle ?? data.job_title ?? 'Team member');
   return {
     id: doc.id,
     userId: doc.id,
@@ -73,7 +73,7 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
     email: String(data.email ?? ''),
     assignedProjectId: typeof data.assignedProjectId === 'string' ? data.assignedProjectId : null,
     status: data.status === 'inactive' || data.status === 'lost' ? data.status : 'active',
-    is_active: data.is_active !== false,
+    is_active: data.isActive !== false && data.is_active !== false,
     createdAt: data.createdAt as TeamMember['createdAt'],
     created_at: data.createdAt as TeamMember['created_at'],
     updatedAt: data.updatedAt as TeamMember['updatedAt'],

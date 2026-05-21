@@ -10,14 +10,16 @@ import {
   type User,
 } from 'firebase/auth';
 import {
+  deleteField,
   doc,
   getDoc,
   serverTimestamp,
   setDoc,
-  type Timestamp,
 } from 'firebase/firestore';
 import { requireFirebase } from '@/src/firebase/requireFirebase';
 import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { isFirebasePermissionError, logFirebaseError } from '@/src/lib/firebase-errors';
 
 const normalizeEmail = (email?: string | null) => (email ?? '').trim().toLowerCase();
 
@@ -37,35 +39,47 @@ const nameFromEmail = (email: string) =>
     .map(part => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
     .join(' ') || 'User';
 
+const legacyUserFieldDeletes = {
+  id: deleteField(),
+  name: deleteField(),
+  full_name: deleteField(),
+  first_name: deleteField(),
+  last_name: deleteField(),
+  recovery_email: deleteField(),
+  phone_number: deleteField(),
+  company_name: deleteField(),
+  created_at: deleteField(),
+  updated_at: deleteField(),
+  feature_access: deleteField(),
+  is_active: deleteField(),
+  job_title: deleteField(),
+};
+
 const profileFromSnapshot = (user: User, data: Record<string, unknown>): AuthProfile => {
   const email = normalizeEmail(user.email || String(data.email ?? ''));
-  const name = String(data.name ?? data.full_name ?? user.displayName ?? nameFromEmail(email));
+  const fullName = String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email));
   const role = roleFromValue(data.role);
 
   return {
     id: user.uid,
     uid: user.uid,
     email: String(data.email ?? email),
-    name,
-    fullName: name,
+    fullName,
     role,
     staffRole: role === 'client' ? undefined : role,
     needsPasswordChange: typeof data.needsPasswordChange === 'boolean' ? data.needsPasswordChange : false,
     createdAt: data.createdAt as AuthProfile['createdAt'],
-    created_at: data.created_at as Timestamp | undefined,
-    updated_at: data.updated_at as Timestamp | undefined,
-    full_name: name,
-    first_name: typeof data.first_name === 'string' ? data.first_name : undefined,
-    last_name: typeof data.last_name === 'string' ? data.last_name : undefined,
-    recovery_email: typeof data.recovery_email === 'string' ? data.recovery_email : undefined,
+    updatedAt: data.updatedAt as AuthProfile['updatedAt'],
+    firstName: typeof data.firstName === 'string' ? data.firstName : typeof data.first_name === 'string' ? data.first_name : undefined,
+    lastName: typeof data.lastName === 'string' ? data.lastName : typeof data.last_name === 'string' ? data.last_name : undefined,
+    recoveryEmail: typeof data.recoveryEmail === 'string' ? data.recoveryEmail : typeof data.recovery_email === 'string' ? data.recovery_email : undefined,
     gender: typeof data.gender === 'string' ? data.gender : undefined,
-    phone_number: typeof data.phone_number === 'string' ? data.phone_number : undefined,
-    company_name: typeof data.company_name === 'string' ? data.company_name : undefined,
-    job_title: typeof data.job_title === 'string' ? data.job_title : undefined,
-    jobTitle: typeof data.job_title === 'string' ? data.job_title : undefined,
+    phoneNumber: typeof data.phoneNumber === 'string' ? data.phoneNumber : typeof data.phone_number === 'string' ? data.phone_number : undefined,
+    companyName: typeof data.companyName === 'string' ? data.companyName : typeof data.company_name === 'string' ? data.company_name : undefined,
+    jobTitle: typeof data.jobTitle === 'string' ? data.jobTitle : typeof data.job_title === 'string' ? data.job_title : undefined,
     newsletterPreferences: typeof data.newsletterPreferences === 'boolean' ? data.newsletterPreferences : false,
-    feature_access: data.feature_access as AuthProfile['feature_access'],
-    is_active: typeof data.is_active === 'boolean' ? data.is_active : undefined,
+    featureAccess: (data.featureAccess ?? data.feature_access) as AuthProfile['featureAccess'],
+    isActive: typeof data.isActive === 'boolean' ? data.isActive : typeof data.is_active === 'boolean' ? data.is_active : undefined,
     status: data.status as AuthProfile['status'],
   };
 };
@@ -97,26 +111,89 @@ export const authService = {
     const snapshot = await getDoc(profileRef);
 
     if (!snapshot.exists()) {
-      throw new Error('No app profile exists for this Firebase user.');
+      throw new Error(FEEDBACK_MESSAGES.auth.noProfile);
     }
 
     const data = snapshot.data();
     if (typeof data.needsPasswordChange !== 'boolean') {
       const email = normalizeEmail(user.email || String(data.email ?? ''));
-      const name = String(data.name ?? data.full_name ?? user.displayName ?? nameFromEmail(email));
-      await setDoc(
-        profileRef,
-        {
-          uid: typeof data.uid === 'string' ? data.uid : user.uid,
-          name,
-          email: normalizeEmail(String(data.email ?? email)),
-          role: roleFromValue(data.role),
-          needsPasswordChange: false,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true },
-      );
+      const fullName = String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email));
+      try {
+        await setDoc(
+          profileRef,
+          {
+            uid: typeof data.uid === 'string' ? data.uid : user.uid,
+            fullName,
+            email: normalizeEmail(String(data.email ?? email)),
+            role: roleFromValue(data.role),
+            needsPasswordChange: false,
+            updatedAt: serverTimestamp(),
+            ...legacyUserFieldDeletes,
+          },
+          { merge: true },
+        );
+      } catch (error) {
+        logFirebaseError('auth.loadProfile.migrateNeedsPasswordChange', error);
+        if (!isFirebasePermissionError(error)) throw error;
+      }
       return profileFromSnapshot(user, { ...data, needsPasswordChange: false });
+    }
+
+    const hasLegacyFields = [
+      'id',
+      'name',
+      'full_name',
+      'first_name',
+      'last_name',
+      'recovery_email',
+      'phone_number',
+      'company_name',
+      'created_at',
+      'updated_at',
+      'feature_access',
+      'is_active',
+      'job_title',
+    ].some(key => key in data);
+
+    if (data.needsPasswordChange === false && (typeof data.fullName !== 'string' || hasLegacyFields)) {
+      const email = normalizeEmail(user.email || String(data.email ?? ''));
+      const fullName = String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email));
+      try {
+        await setDoc(
+          profileRef,
+          {
+            uid: typeof data.uid === 'string' ? data.uid : user.uid,
+            fullName,
+            email: normalizeEmail(String(data.email ?? email)),
+            role: roleFromValue(data.role),
+            needsPasswordChange: false,
+            firstName: data.firstName ?? data.first_name ?? '',
+            lastName: data.lastName ?? data.last_name ?? '',
+            recoveryEmail: data.recoveryEmail ?? data.recovery_email ?? '',
+            gender: data.gender ?? '',
+            phoneNumber: data.phoneNumber ?? data.phone_number ?? '',
+            companyName: data.companyName ?? data.company_name ?? '',
+            jobTitle: data.jobTitle ?? data.job_title ?? '',
+            newsletterPreferences: data.newsletterPreferences ?? false,
+            featureAccess: data.featureAccess ?? data.feature_access ?? {},
+            isActive: typeof data.isActive === 'boolean'
+              ? data.isActive
+              : typeof data.is_active === 'boolean'
+                ? data.is_active
+                : true,
+            status: data.status ?? 'active',
+            createdAt: data.createdAt ?? serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            ...legacyUserFieldDeletes,
+          },
+          { merge: true },
+        );
+
+        return this.loadProfile(user);
+      } catch (error) {
+        logFirebaseError('auth.loadProfile.migrateLegacyFields', error);
+        if (!isFirebasePermissionError(error)) throw error;
+      }
     }
 
     return profileFromSnapshot(user, data);
@@ -143,27 +220,28 @@ export const authService = {
   async completeRequiredPasswordChange(password: string): Promise<AuthProfile> {
     const { auth, db } = requireFirebase();
     const user = auth.currentUser;
-    if (!user) throw new Error('You need to be signed in to change your password.');
+    if (!user) throw new Error(FEEDBACK_MESSAGES.auth.signedOutPasswordChange);
 
     const profileRef = doc(db, 'users', user.uid);
     const snapshot = await getDoc(profileRef);
-    if (!snapshot.exists()) throw new Error('No app profile exists for this Firebase user.');
+    if (!snapshot.exists()) throw new Error(FEEDBACK_MESSAGES.auth.noProfile);
 
     await updatePassword(user, password);
 
     const existing = snapshot.data();
     const email = normalizeEmail(String(existing.email ?? user.email ?? ''));
-    const name = String(existing.name ?? existing.full_name ?? user.displayName ?? nameFromEmail(email));
+    const fullName = String(existing.fullName ?? existing.full_name ?? existing.name ?? user.displayName ?? nameFromEmail(email));
 
     await setDoc(
       profileRef,
       {
         uid: typeof existing.uid === 'string' ? existing.uid : user.uid,
-        name,
+        fullName,
         email,
         role: roleFromValue(existing.role),
         needsPasswordChange: false,
         updatedAt: serverTimestamp(),
+        ...legacyUserFieldDeletes,
       },
       { merge: true },
     );
@@ -174,44 +252,50 @@ export const authService = {
   async updateCurrentProfile(input: AuthProfileUpdateInput): Promise<AuthProfile> {
     const { auth, db } = requireFirebase();
     const user = auth.currentUser;
-    if (!user) throw new Error('You need to be signed in to update your profile.');
+    if (!user) throw new Error(FEEDBACK_MESSAGES.auth.signedOutProfileUpdate);
 
     const email = input.email?.trim().toLowerCase();
-    const name = (input.name ?? input.fullName ?? input.full_name)?.trim();
+    const fullName = input.fullName?.trim();
     const snapshot = await getDoc(doc(db, 'users', user.uid));
-    if (!snapshot.exists()) throw new Error('No app profile exists for this Firebase user.');
+    if (!snapshot.exists()) throw new Error(FEEDBACK_MESSAGES.auth.noProfile);
 
     const existing = snapshot.data();
     const currentEmail = normalizeEmail(String(existing.email ?? user.email ?? ''));
-    const nextName = name || String(existing.name ?? existing.full_name ?? user.displayName ?? nameFromEmail(currentEmail));
+    const nextFullName = fullName || String(existing.fullName ?? existing.full_name ?? existing.name ?? user.displayName ?? nameFromEmail(currentEmail));
 
-    if (name) await firebaseUpdateProfile(user, { displayName: name });
+    if (fullName) await firebaseUpdateProfile(user, { displayName: fullName });
     if (email && email !== currentEmail) {
-      throw new Error('Email changes are restricted by Firestore rules. Update the primary email through an admin workflow.');
+      throw new Error(FEEDBACK_MESSAGES.auth.emailChangeRestricted);
     }
 
     await setDoc(
       doc(db, 'users', user.uid),
       {
         uid: typeof existing.uid === 'string' ? existing.uid : user.uid,
-        name: nextName,
+        fullName: nextFullName,
         email: currentEmail,
         role: roleFromValue(existing.role),
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
-        full_name: nextName,
-        first_name: input.first_name?.trim() ?? existing.first_name ?? '',
-        last_name: input.last_name?.trim() ?? existing.last_name ?? '',
-        recovery_email: input.recovery_email?.trim().toLowerCase() ?? existing.recovery_email ?? '',
+        firstName: input.firstName?.trim() ?? existing.firstName ?? existing.first_name ?? '',
+        lastName: input.lastName?.trim() ?? existing.lastName ?? existing.last_name ?? '',
+        recoveryEmail: input.recoveryEmail?.trim().toLowerCase() ?? existing.recoveryEmail ?? existing.recovery_email ?? '',
         gender: input.gender ?? existing.gender ?? '',
-        phone_number: input.phone_number?.trim() ?? existing.phone_number ?? '',
-        company_name: input.company_name?.trim() ?? existing.company_name ?? '',
-        job_title: (input.job_title ?? input.jobTitle)?.trim() ?? existing.job_title ?? '',
+        phoneNumber: input.phoneNumber?.trim() ?? existing.phoneNumber ?? existing.phone_number ?? '',
+        companyName: input.companyName?.trim() ?? existing.companyName ?? existing.company_name ?? '',
+        jobTitle: input.jobTitle?.trim() ?? existing.jobTitle ?? existing.job_title ?? '',
         newsletterPreferences: input.newsletterPreferences ?? existing.newsletterPreferences ?? false,
-        feature_access: existing.feature_access ?? {},
-        is_active: typeof existing.is_active === 'boolean' ? existing.is_active : true,
+        featureAccess: input.featureAccess ?? existing.featureAccess ?? existing.feature_access ?? {},
+        isActive: typeof input.isActive === 'boolean'
+          ? input.isActive
+          : typeof existing.isActive === 'boolean'
+            ? existing.isActive
+            : typeof existing.is_active === 'boolean'
+              ? existing.is_active
+              : true,
         status: existing.status ?? 'active',
         createdAt: existing.createdAt ?? serverTimestamp(),
         updatedAt: serverTimestamp(),
+        ...legacyUserFieldDeletes,
       },
       { merge: true },
     );

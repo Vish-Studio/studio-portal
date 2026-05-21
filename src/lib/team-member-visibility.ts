@@ -11,8 +11,7 @@ export const isCurrentTeamMember = (
   const memberEmail = member.email?.trim().toLowerCase();
 
   return (
-    member.id === profile.teamId ||
-    member.id === profile.teamMemberId ||
+    member.id === profile.uid ||
     member.userId === profile.uid ||
     (!!profileEmail && memberEmail === profileEmail)
   );

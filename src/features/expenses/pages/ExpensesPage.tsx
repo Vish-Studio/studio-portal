@@ -3,11 +3,12 @@ import { useForm } from 'react-hook-form';
 import { ArrowDownLeft, ArrowUpRight, CalendarDays, Plus, WalletCards } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Avatar, Button, ButtonIcon, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { useTeamStore } from '@/src/features/team';
 import { useExpenseStore, type ExpenseInput } from '../stores/expenseStore';
 import { ExpenseRecordCard, ExpenseRecordDetailsSidebar, ExpenseRecordRow } from '../components/expense-record-item';
@@ -71,7 +72,7 @@ const defaultFormValues: ExpenseFormValues = {
 };
 
 export default function ExpensesPage() {
-  const { searchQuery } = useUIStore();
+  const { searchQuery, showToast } = useUIStore();
   const { members } = useTeamStore();
   const { expenses, addExpense, updateExpense, removeExpense } = useExpenseStore();
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
@@ -82,6 +83,7 @@ export default function ExpensesPage() {
   const [editingRecord, setEditingRecord] = useState<Expense | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<Expense | null>(null);
   const [deleteRecord, setDeleteRecord] = useState<Expense | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -147,6 +149,7 @@ export default function ExpensesPage() {
 
   const openAdd = () => {
     setEditingRecord(null);
+    setSubmitError(null);
     reset(defaultFormValues);
     setSidebarOpen(true);
   };
@@ -154,6 +157,7 @@ export default function ExpensesPage() {
   const openEdit = (record: Expense) => {
     setEditingRecord(record);
     setSelectedRecord(null);
+    setSubmitError(null);
     reset({
       type: record.type,
       category: record.category,
@@ -169,10 +173,25 @@ export default function ExpensesPage() {
   };
 
   const onSubmit = async (data: ExpenseFormValues) => {
-    const input = toExpenseInput(data);
-    if (editingRecord) await updateExpense(editingRecord.id, input);
-    else await addExpense(input);
-    setSidebarOpen(false);
+    setSubmitError(null);
+    try {
+      const input = toExpenseInput(data);
+      if (editingRecord) await updateExpense(editingRecord.id, input);
+      else await addExpense(input);
+      setSidebarOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : FEEDBACK_MESSAGES.sidebar.recordSaveFailed;
+      setSubmitError(message);
+      showToast({
+        status: 'error',
+        title: editingRecord ? FEEDBACK_MESSAGES.sidebar.recordUpdateToast : FEEDBACK_MESSAGES.sidebar.recordCreateToast,
+        message,
+      });
+    }
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   const confirmDelete = async () => {
@@ -300,8 +319,13 @@ export default function ExpensesPage() {
         description={editingRecord ? editingRecord.title : 'Track company expenses and project income.'}
         width="md"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormSidebarError
+              title={editingRecord ? FEEDBACK_MESSAGES.sidebar.recordUpdateFailed : FEEDBACK_MESSAGES.sidebar.recordCreateFailed}
+              message={submitError}
+            />
+
             <div className="grid grid-cols-2 gap-3">
               <FormField label="Type" required>
                 <Select {...register('type', { required: true })}>
@@ -320,7 +344,7 @@ export default function ExpensesPage() {
 
             <FormField label="Title" required error={errors.title?.message}>
               <TextInput
-                {...register('title', { required: 'Title is required' })}
+                {...register('title', { required: FEEDBACK_MESSAGES.validation.titleRequired })}
                 placeholder={selectedType === 'income' ? 'Project payment' : 'Team salary'}
                 hasError={!!errors.title}
               />

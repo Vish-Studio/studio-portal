@@ -5,6 +5,8 @@ import { authService } from '../services/authService';
 export type { AuthProfile, AuthRole } from '@/src/types/auth';
 import type { AuthProfile, AuthProfileUpdateInput } from '@/src/types/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { firebaseErrorMessage, logFirebaseError } from '@/src/lib/firebase-errors';
 
 interface AuthState {
   user: User | null;
@@ -23,19 +25,6 @@ interface AuthState {
   initAuthListener: () => () => void;
 }
 
-const firebaseErrorMessage = (error: unknown) => {
-  if (!(error instanceof Error)) return 'Unable to complete the request. Please try again.';
-  if (error.message.includes('auth/invalid-credential')) return 'Invalid email or password.';
-  if (error.message.includes('auth/operation-not-allowed')) return 'Email/password sign-in is not enabled in Firebase Authentication.';
-  if (error.message.includes('auth/user-not-found')) return 'No user found with this email.';
-  if (error.message.includes('auth/wrong-password')) return 'Invalid email or password.';
-  if (error.message.includes('auth/too-many-requests')) return 'Too many attempts. Try again later.';
-  if (error.message.includes('auth/invalid-email')) return 'Enter a valid email address.';
-  if (error.message.includes('auth/requires-recent-login')) return 'Please sign out and sign in again before changing your email.';
-  if (error.message.includes('auth/email-already-in-use')) return 'This email is already used by another account.';
-  return error.message;
-};
-
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   profile: null,
@@ -52,6 +41,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: credential.user, profile, role: profile.role, loading: false, ready: true });
       return profile;
     } catch (error) {
+      logFirebaseError('auth.signIn', error);
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });
       throw new Error(message);
@@ -64,6 +54,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await authService.sendPasswordReset(email);
       set({ loading: false });
     } catch (error) {
+      logFirebaseError('auth.sendPasswordReset', error);
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });
       throw new Error(message);
@@ -74,6 +65,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       return await authService.verifyPasswordReset(code);
     } catch (error) {
+      logFirebaseError('auth.verifyPasswordReset', error);
       const message = firebaseErrorMessage(error);
       set({ error: message });
       throw new Error(message);
@@ -86,6 +78,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       await authService.confirmPasswordReset(code, password);
       set({ loading: false });
     } catch (error) {
+      logFirebaseError('auth.confirmPasswordReset', error);
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });
       throw new Error(message);
@@ -97,13 +90,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const profile = await runOperationWithFeedback({
         loadingLabel: 'Updating password',
-        successTitle: 'Password updated',
-        errorTitle: 'Unable to update password',
+        successTitle: FEEDBACK_MESSAGES.auth.passwordUpdated,
+        errorTitle: FEEDBACK_MESSAGES.auth.updatePasswordFailed,
         action: () => authService.completeRequiredPasswordChange(password),
       });
       set({ profile, role: profile.role, loading: false });
       return profile;
     } catch (error) {
+      logFirebaseError('auth.completeRequiredPasswordChange', error);
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });
       throw new Error(message);
@@ -115,13 +109,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const profile = await runOperationWithFeedback({
         loadingLabel: 'Updating profile',
-        successTitle: 'Profile updated',
-        errorTitle: 'Unable to update profile',
+        successTitle: FEEDBACK_MESSAGES.auth.profileUpdated,
+        errorTitle: FEEDBACK_MESSAGES.auth.updateProfileFailed,
         action: () => authService.updateCurrentProfile(updates),
       });
       set({ profile, role: profile.role, loading: false });
       return profile;
     } catch (error) {
+      logFirebaseError('auth.updateProfile', error);
       const message = firebaseErrorMessage(error);
       set({ loading: false, error: message });
       throw new Error(message);
@@ -151,6 +146,7 @@ export const useAuthStore = create<AuthState>((set) => ({
         const profile = await authService.loadProfile(user);
         set({ user, profile, role: profile.role, loading: false, ready: true, error: null });
       } catch (error) {
+        logFirebaseError('auth.initAuthListener.loadProfile', error);
         const message = firebaseErrorMessage(error);
         set({ user, profile: null, role: null, loading: false, ready: true, error: message });
       }

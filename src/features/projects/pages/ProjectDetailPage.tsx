@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, Check, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import FormSidebar, { FormSidebarActions, FormSidebarFooter } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, FormSidebarFooter, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import IconPicker from '@/src/features/projects/components/icon-picker/icon-picker';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import ProjectHeroCard from '../components/project-hero-card/project-hero-card';
@@ -20,6 +20,8 @@ import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useClientsStore } from '@/src/features/clients';
 import { useDiscoveryStore } from '@/src/features/discovery';
 import { useAuthStore } from '@/src/features/auth';
+import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
 import { TEMPLATES } from '@/src/features/templates';
 
@@ -45,6 +47,7 @@ const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { projects, updateProject, updatePhase, insertPhase, removePhase, completePhase, movePhase, setActivePhase } = useProjectsStore();
+  const showToast = useUIStore(state => state.showToast);
   const { clients }  = useClientsStore();
   const { members }  = useTeamStore();
   const { tasks, removeTask } = useTasksStore();
@@ -71,6 +74,8 @@ const ProjectDetail = () => {
   const [phaseFlag, setPhaseFlag]               = useState(false);
   const [newPhaseTitle, setNewPhaseTitle]       = useState('');
   const [newPhaseIcon, setNewPhaseIcon]         = useState('flag');
+  const [submitError, setSubmitError]           = useState<string | null>(null);
+  const [phaseSubmitError, setPhaseSubmitError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting, isDirty } } = useForm<ProjectFormValues>();
   const watchedService = watch('service');
@@ -123,6 +128,7 @@ const ProjectDetail = () => {
 
   const openMobileEdit = () => {
     openEdit();
+    setSubmitError(null);
     setEditSidebarOpen(true);
   };
 
@@ -135,6 +141,7 @@ const ProjectDetail = () => {
   };
 
   const handleClientSelect = (clientId: string) => {
+    setSubmitError(null);
     setSelectedClientId(clientId);
   };
 
@@ -143,21 +150,40 @@ const ProjectDetail = () => {
   };
 
   const onSubmit = async (data: ProjectFormValues) => {
-    await updateProject(project.id, {
-      name:              data.name,
-      service:           data.service,
-      package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
-      status:            data.status,
-      timeline:          data.timeline,
-      clientId:          selectedClientId,
-      assignedMemberIds: selectedMemberIds,
-    });
-    reset(data);
-    setIsEditing(false);
-    setEditSidebarOpen(false);
+    if (!selectedClientId) {
+      const message = FEEDBACK_MESSAGES.sidebar.projectClientRequired;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.projectClientRequiredTitle, message });
+      return;
+    }
+
+    setSubmitError(null);
+    try {
+      await updateProject(project.id, {
+        name:              data.name,
+        service:           data.service,
+        package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
+        status:            data.status,
+        timeline:          data.timeline,
+        clientId:          selectedClientId,
+        assignedMemberIds: selectedMemberIds,
+      });
+      reset(data);
+      setIsEditing(false);
+      setEditSidebarOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : FEEDBACK_MESSAGES.sidebar.projectUpdateToast;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.projectUpdateToast, message });
+    }
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   const openPhaseEdit = (phase: Phase) => {
+    setPhaseSubmitError(null);
     setInsertAfterIdx(null);
     setEditingPhaseId(phase.id);
     setPhaseTitle(phase.title);
@@ -169,7 +195,11 @@ const ProjectDetail = () => {
   };
 
   const savePhaseEdit = () => {
-    if (!editingPhaseId || !phaseTitle.trim()) return;
+    if (!editingPhaseId) return;
+    if (!phaseTitle.trim()) {
+      setPhaseSubmitError(FEEDBACK_MESSAGES.sidebar.phaseTitleRequired);
+      return;
+    }
     const updates = {
       title: phaseTitle.trim(), icon: phaseIcon,
       targetDate: phaseDate.trim() || undefined, description: phaseDesc.trim() || undefined,
@@ -183,6 +213,7 @@ const ProjectDetail = () => {
   };
 
   const openInsert = (afterIndex: number) => {
+    setPhaseSubmitError(null);
     setEditingPhaseId(null);
     setInsertAfterIdx(afterIndex);
     setNewPhaseTitle('');
@@ -190,7 +221,10 @@ const ProjectDetail = () => {
   };
 
   const confirmInsert = () => {
-    if (!newPhaseTitle.trim()) return;
+    if (!newPhaseTitle.trim()) {
+      setPhaseSubmitError(FEEDBACK_MESSAGES.sidebar.phaseTitleRequired);
+      return;
+    }
     insertPhase(project.id, insertAfterIdx!, {
       id: `ph_${Date.now()}`, title: newPhaseTitle.trim(), icon: newPhaseIcon,
       status: 'pending', requiresClientAction: false, clientCompleted: false,
@@ -231,7 +265,7 @@ const ProjectDetail = () => {
               ) : <ButtonIcon iconName="edit" label="Edit project details" clickHandler={openEdit} />
             }
           >
-            <form id="project-edit-form" onSubmit={handleSubmit(onSubmit)} className="px-4 md:px-6 py-4 md:py-5 space-y-4">
+            <form id="project-edit-form" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="px-4 md:px-6 py-4 md:py-5 space-y-4">
               <FormField label="Project Name" required={isEditing} error={errors.name?.message}>
                 <input {...register('name', { required: isEditing ? 'Required' : false })} disabled={!isEditing} className={fieldCls(!!errors.name)} />
               </FormField>
@@ -466,8 +500,10 @@ const ProjectDetail = () => {
         description={project.name}
         width="md"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="project-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="project-detail-sidebar-form flex min-h-0 flex-1 flex-col">
           <div className="project-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormSidebarError title={FEEDBACK_MESSAGES.sidebar.projectUpdateFailed} message={submitError} />
+
             <FormField label="Project Name" required error={errors.name?.message}>
               <input {...register('name', { required: 'Required' })} className={inputCls(!!errors.name)} />
             </FormField>
@@ -503,7 +539,7 @@ const ProjectDetail = () => {
               <input {...register('timeline')} className={inputCls(false)} />
             </FormField>
 
-            <FormField label="Client">
+            <FormField label="Client" error={!selectedClientId && submitError ? 'Client is required' : undefined}>
               <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={handleClientSelect} />
             </FormField>
 
@@ -520,7 +556,6 @@ const ProjectDetail = () => {
             onCancel={cancelEdit}
             isSubmitting={isSubmitting}
             isDirty={hasProjectChanges}
-            disabled={!selectedClientId}
             submitLabel="Save"
           />
         </form>
@@ -535,6 +570,11 @@ const ProjectDetail = () => {
       >
         <div className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            <FormSidebarError
+              title={editingPhase ? FEEDBACK_MESSAGES.sidebar.phaseUpdateFailed : FEEDBACK_MESSAGES.sidebar.phaseCreateFailed}
+              message={phaseSubmitError}
+            />
+
             {editingPhase ? (
               <>
                 <div className="rounded-2xl bg-(--color-surface) border border-gray-100 p-4 flex items-center gap-3">
@@ -552,7 +592,14 @@ const ProjectDetail = () => {
                 </FormField>
 
                 <FormField label="Title" required>
-                  <input value={phaseTitle} onChange={e => setPhaseTitle(e.target.value)} className={inputCls(!phaseTitle.trim())} />
+                  <input
+                    value={phaseTitle}
+                    onChange={e => {
+                      setPhaseSubmitError(null);
+                      setPhaseTitle(e.target.value);
+                    }}
+                    className={inputCls(!phaseTitle.trim())}
+                  />
                 </FormField>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -620,7 +667,15 @@ const ProjectDetail = () => {
                   <IconPicker value={newPhaseIcon} onChange={setNewPhaseIcon} />
                 </FormField>
                 <FormField label="Title" required>
-                  <input value={newPhaseTitle} onChange={e => setNewPhaseTitle(e.target.value)} placeholder="e.g. Client approval" className={inputCls(!newPhaseTitle.trim())} />
+                  <input
+                    value={newPhaseTitle}
+                    onChange={e => {
+                      setPhaseSubmitError(null);
+                      setNewPhaseTitle(e.target.value);
+                    }}
+                    placeholder="e.g. Client approval"
+                    className={inputCls(!newPhaseTitle.trim())}
+                  />
                 </FormField>
               </>
             )}

@@ -12,6 +12,7 @@ import {
 } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import type { AuthProfileUpdateInput } from '@/src/types/auth';
 
 type SettingsSection = 'profile' | 'email' | 'password' | 'newsletters';
@@ -56,13 +57,13 @@ export default function AccountSettings() {
   const [resettingPassword, setResettingPassword] = useState(false);
   const [form, setForm] = useState<AuthProfileUpdateInput>({
     email: '',
-    full_name: '',
-    first_name: '',
-    last_name: '',
-    phone_number: '',
+    fullName: '',
+    firstName: '',
+    lastName: '',
+    phoneNumber: '',
     jobTitle: '',
-    company_name: '',
-    recovery_email: '',
+    companyName: '',
+    recoveryEmail: '',
     gender: '',
     newsletterPreferences: false,
   });
@@ -72,13 +73,13 @@ export default function AccountSettings() {
 
     setForm({
       email: profile.email ?? '',
-      full_name: profile.full_name ?? '',
-      first_name: profile.first_name ?? '',
-      last_name: profile.last_name ?? '',
-      phone_number: profile.phone_number ?? '',
+      fullName: profile.fullName ?? '',
+      firstName: profile.firstName ?? '',
+      lastName: profile.lastName ?? '',
+      phoneNumber: profile.phoneNumber ?? '',
       jobTitle: profile.jobTitle ?? '',
-      company_name: profile.company_name ?? '',
-      recovery_email: profile.recovery_email ?? '',
+      companyName: profile.companyName ?? '',
+      recoveryEmail: profile.recoveryEmail ?? '',
       gender: profile.gender ?? '',
       newsletterPreferences: profile.newsletterPreferences ?? false,
     });
@@ -100,13 +101,13 @@ export default function AccountSettings() {
     await updateProfile({
       ...form,
       email: form.email?.trim().toLowerCase(),
-      full_name: form.full_name?.trim(),
-      first_name: form.first_name?.trim(),
-      last_name: form.last_name?.trim(),
-      phone_number: form.phone_number?.trim(),
+      fullName: form.fullName?.trim(),
+      firstName: form.firstName?.trim(),
+      lastName: form.lastName?.trim(),
+      phoneNumber: form.phoneNumber?.trim(),
       jobTitle: form.jobTitle?.trim(),
-      company_name: form.company_name?.trim(),
-      recovery_email: form.recovery_email?.trim().toLowerCase(),
+      companyName: form.companyName?.trim(),
+      recoveryEmail: form.recoveryEmail?.trim().toLowerCase(),
       gender: form.gender,
       newsletterPreferences: !!form.newsletterPreferences,
     });
@@ -122,14 +123,14 @@ export default function AccountSettings() {
       await sendPasswordReset(email);
       showToast({
         status: 'success',
-        title: 'Reset email sent',
-        message: `We sent password reset instructions to ${email}.`,
+        title: FEEDBACK_MESSAGES.auth.resetEmailSentTitle,
+        message: FEEDBACK_MESSAGES.auth.resetEmailSent(email),
       });
     } catch (error) {
       showToast({
         status: 'error',
-        title: 'Unable to send reset email',
-        message: error instanceof Error ? error.message : 'Try again in a moment.',
+        title: FEEDBACK_MESSAGES.auth.resetEmailFailed,
+        message: error instanceof Error ? error.message : FEEDBACK_MESSAGES.common.tryAgain,
       });
     } finally {
       setResettingPassword(false);
@@ -140,13 +141,13 @@ export default function AccountSettings() {
     profile: (
       <div className="account-settings-profile grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField label="Full name">
-          <TextInput value={form.full_name ?? ''} onChange={event => updateForm('full_name', event.target.value)} />
+          <TextInput value={form.fullName ?? ''} onChange={event => updateForm('fullName', event.target.value)} />
         </FormField>
         <FormField label="First name">
-          <TextInput value={form.first_name ?? ''} onChange={event => updateForm('first_name', event.target.value)} />
+          <TextInput value={form.firstName ?? ''} onChange={event => updateForm('firstName', event.target.value)} />
         </FormField>
         <FormField label="Last name">
-          <TextInput value={form.last_name ?? ''} onChange={event => updateForm('last_name', event.target.value)} />
+          <TextInput value={form.lastName ?? ''} onChange={event => updateForm('lastName', event.target.value)} />
         </FormField>
         <FormField label="Role or title">
           <TextInput value={form.jobTitle ?? ''} onChange={event => updateForm('jobTitle', event.target.value)} />
@@ -161,10 +162,10 @@ export default function AccountSettings() {
           </Select>
         </FormField>
         <FormField label="Phone number">
-          <TextInput value={form.phone_number ?? ''} onChange={event => updateForm('phone_number', event.target.value)} />
+          <TextInput value={form.phoneNumber ?? ''} onChange={event => updateForm('phoneNumber', event.target.value)} />
         </FormField>
         <FormField label="Company">
-          <TextInput value={form.company_name ?? ''} onChange={event => updateForm('company_name', event.target.value)} />
+          <TextInput value={form.companyName ?? ''} onChange={event => updateForm('companyName', event.target.value)} />
         </FormField>
       </div>
     ),
@@ -174,7 +175,7 @@ export default function AccountSettings() {
           <TextInput type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} />
         </FormField>
         <FormField label="Recovery email">
-          <TextInput type="email" value={form.recovery_email ?? ''} onChange={event => updateForm('recovery_email', event.target.value)} />
+          <TextInput type="email" value={form.recoveryEmail ?? ''} onChange={event => updateForm('recoveryEmail', event.target.value)} />
         </FormField>
       </div>
     ),

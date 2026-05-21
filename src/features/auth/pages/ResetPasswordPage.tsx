@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { ArrowLeft, Check, Eye, EyeOff, KeyRound, ShieldAlert } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { useAuthStore } from '../stores/authStore';
 
 interface ResetPasswordFormValues {
@@ -68,7 +69,7 @@ export default function ResetPasswordPage() {
       await confirmPasswordReset(oobCode, values.password);
       setStatus('success');
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Unable to reset password.');
+      setSubmitError(error instanceof Error ? error.message : FEEDBACK_MESSAGES.auth.resetPasswordFailed);
     }
   };
 
@@ -159,7 +160,7 @@ export default function ResetPasswordPage() {
                   You can sign in now
                 </h2>
                 <p className="mt-2 text-sm font-medium leading-6 text-gray-400">
-                  Your password was updated successfully. Use the new password the next time you sign in.
+                  {FEEDBACK_MESSAGES.auth.resetPasswordSuccess}
                 </p>
                 <Link
                   to="/sign-in"

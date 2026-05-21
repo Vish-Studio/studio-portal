@@ -5,7 +5,7 @@ import { format } from 'date-fns';
 import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { ProjectCard } from '@/src/features/projects';
 import ClientDetailCard from '../components/client-detail-card/client-detail-card';
 import { useClientsStore } from '../stores/clientStore';
@@ -14,6 +14,8 @@ import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TextInput } from '@/src/shared/components';
+import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -39,12 +41,14 @@ const DISABLED_SELECT_CLS =
 const ClientDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { clients, subscribeClients, updateClient } = useClientsStore();
+  const showToast = useUIStore(state => state.showToast);
   const { projects: allProjects } = useProjectsStore();
   const { members } = useTeamStore();
   const client = clients.find(c => c.id === id);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => subscribeClients(), [subscribeClients]);
 
@@ -86,10 +90,21 @@ const ClientDetail = () => {
 
   const onSubmit = async (data: ClientFormValues) => {
     if (!client) return;
-    await updateClient(client.id, data);
-    reset(data);
-    setIsEditing(false);
-    setEditSidebarOpen(false);
+    setSubmitError(null);
+    try {
+      await updateClient(client.id, data);
+      reset(data);
+      setIsEditing(false);
+      setEditSidebarOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : FEEDBACK_MESSAGES.sidebar.clientUpdateToast;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.clientUpdateToast, message });
+    }
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   const handleCancel = () => {
@@ -102,6 +117,7 @@ const ClientDetail = () => {
     });
     setIsEditing(false);
     setEditSidebarOpen(false);
+    setSubmitError(null);
   };
 
   const openEdit = () => {
@@ -113,6 +129,7 @@ const ClientDetail = () => {
       status: client.status,
     });
     setIsEditing(true);
+    setSubmitError(null);
   };
 
   const openMobileEdit = () => {
@@ -124,6 +141,7 @@ const ClientDetail = () => {
       status: client?.status ?? 'active',
     });
     setIsEditing(true);
+    setSubmitError(null);
     setEditSidebarOpen(true);
   };
 
@@ -194,7 +212,7 @@ const ClientDetail = () => {
             >
               <form
                 id="client-edit-form"
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
                 className="px-4 md:px-6 py-4 md:py-5 space-y-4"
               >
                 <FormField label="Full Name" required={isEditing} error={errors.fullName?.message}>
@@ -326,8 +344,10 @@ const ClientDetail = () => {
           title="Edit Client"
           description={client.fullName}
         >
-          <form onSubmit={handleSubmit(onSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+          <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="client-detail-sidebar-form flex min-h-0 flex-1 flex-col">
             <div className="client-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+              <FormSidebarError title={FEEDBACK_MESSAGES.sidebar.clientUpdateFailed} message={submitError} />
+
               <FormField label="Full Name" required error={errors.fullName?.message}>
                 <TextInput
                   {...register('fullName', { required: 'Name is required' })}

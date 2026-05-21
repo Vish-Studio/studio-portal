@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { Briefcase, CheckSquare, Mail, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { ProjectCard } from '@/src/features/projects';
 import TeamDetailCard from '../components/team-detail-card/team-detail-card';
@@ -14,6 +14,8 @@ import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/features/auth';
+import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import type { TeamAccessRole } from '../types';
 import TeamDetailTaskRow from '../components/team-detail-task-row/team-detail-task-row';
 
@@ -31,11 +33,13 @@ const fieldCls = (hasError: boolean) =>
 export default function TeamDetail() {
   const { id } = useParams<{ id: string }>();
   const { members, loading, subscribeMembers, updateMember } = useTeamStore();
+  const showToast = useUIStore(state => state.showToast);
   const profile = useAuthStore(state => state.profile);
   const { projects } = useProjectsStore();
   const { tasks } = useTasksStore();
   const [isEditing, setIsEditing] = useState(false);
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const isSuperAdmin = profile?.role === 'superadmin';
   const canManageTeam = profile?.role === 'superadmin' || profile?.role === 'admin';
 
@@ -105,12 +109,26 @@ export default function TeamDetail() {
   const onSubmit = async (data: TeamMemberFormValues) => {
     if (!member || !canEditMember) return;
     if (!isSuperAdmin && data.accessRole === 'superadmin') {
-      throw new Error('Only a superadmin can assign the superadmin role.');
+      const message = FEEDBACK_MESSAGES.sidebar.superadminRequired;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.memberSaveToast, message });
+      return;
     }
-    await updateMember(member.id, data);
-    reset(data);
-    setIsEditing(false);
-    setEditSidebarOpen(false);
+    setSubmitError(null);
+    try {
+      await updateMember(member.id, data);
+      reset(data);
+      setIsEditing(false);
+      setEditSidebarOpen(false);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : FEEDBACK_MESSAGES.sidebar.memberUpdateToast;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.memberUpdateToast, message });
+    }
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   const handleCancel = () => {
@@ -122,6 +140,7 @@ export default function TeamDetail() {
     });
     setIsEditing(false);
     setEditSidebarOpen(false);
+    setSubmitError(null);
   };
 
   const openEdit = () => {
@@ -133,6 +152,7 @@ export default function TeamDetail() {
       email: member.email,
     });
     setIsEditing(true);
+    setSubmitError(null);
   };
 
   const openMobileEdit = () => {
@@ -144,6 +164,7 @@ export default function TeamDetail() {
       email: member.email,
     });
     setIsEditing(true);
+    setSubmitError(null);
     setEditSidebarOpen(true);
   };
 
@@ -208,7 +229,7 @@ export default function TeamDetail() {
           >
             <form
               id="team-edit-form"
-              onSubmit={handleSubmit(onSubmit)}
+              onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
               className="team-detail-form space-y-4 px-4 py-4 md:px-6 md:py-5"
             >
               <FormField label="Full Name" required={isEditing} error={errors.name?.message}>
@@ -372,8 +393,10 @@ export default function TeamDetail() {
         title="Edit Team Member"
         description={member.name}
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="team-detail-sidebar-form flex min-h-0 flex-1 flex-col">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="team-detail-sidebar-form flex min-h-0 flex-1 flex-col">
           <div className="team-detail-sidebar-fields flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormSidebarError title={FEEDBACK_MESSAGES.sidebar.memberUpdateDetailFailed} message={submitError} />
+
             <FormField label="Full Name" required error={errors.name?.message}>
               <TextInput
                 {...register('name', { required: 'Name is required' })}

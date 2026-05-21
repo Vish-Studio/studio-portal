@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { AlertTriangle, CheckCircle2, CheckSquare, ListTodo, Timer } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { isPast, parseISO } from 'date-fns';
 import UserLayout from '@/src/layouts/UserLayout';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Button, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
@@ -13,6 +13,7 @@ import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
 import { useTasksStore } from '../stores/taskStore';
 import { useProjectsStore } from '@/src/features/projects';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 
 const CURRENT_CLIENT_ID = 'c1';
@@ -69,6 +70,7 @@ const UserTasks = () => {
   const [editingTask,   setEditingTask]   = useState<Task | null>(null);
   const [confirmTask,   setConfirmTask]   = useState<Task | null>(null);
   const [detailTask,    setDetailTask]    = useState<Task | null>(null);
+  const [submitError,   setSubmitError]   = useState<string | null>(null);
 
   const { register, handleSubmit, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<TaskFormValues>({
@@ -116,6 +118,7 @@ const UserTasks = () => {
   // ── Sidebar helpers ──
   const openAdd = () => {
     setEditingTask(null);
+    setSubmitError(null);
     reset({
       title: '', description: '',
       projectId: myProjects[0]?.id ?? '',
@@ -127,6 +130,7 @@ const UserTasks = () => {
 
   const openEdit = (task: Task) => {
     setEditingTask(task);
+    setSubmitError(null);
     reset({
       title:       task.title,
       description: task.description ?? '',
@@ -139,6 +143,7 @@ const UserTasks = () => {
   };
 
   const onSubmit = (data: TaskFormValues) => {
+    setSubmitError(null);
     const payload: Partial<Omit<Task, 'id' | 'createdAt'>> = {
       title:       data.title,
       description: data.description || undefined,
@@ -155,6 +160,10 @@ const UserTasks = () => {
       addTask({ id: `tk_${Date.now()}`, createdAt: Date.now(), ...payload } as Task);
     }
     setSidebarOpen(false);
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   return (
@@ -288,12 +297,16 @@ const UserTasks = () => {
         description={editingTask ? `Editing "${editingTask.title}"` : 'Add a task to one of your projects.'}
         width="md"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+            <FormSidebarError
+              title={editingTask ? FEEDBACK_MESSAGES.sidebar.taskUpdateFailed : FEEDBACK_MESSAGES.sidebar.taskCreateFailed}
+              message={submitError}
+            />
 
             <FormField label="Task Title" required error={errors.title?.message}>
               <TextInput
-                {...register('title', { required: 'Title is required' })}
+                {...register('title', { required: FEEDBACK_MESSAGES.validation.titleRequired })}
                 placeholder="e.g. Review design mockups"
                 hasError={!!errors.title}
               />

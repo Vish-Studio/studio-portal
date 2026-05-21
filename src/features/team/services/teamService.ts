@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteField,
   deleteDoc,
   doc,
   getDoc,
@@ -65,15 +66,14 @@ export const teamService = {
 
     await setDoc(doc(db, 'users', user.uid), {
       uid: user.uid,
-      name,
+      fullName: name,
       email,
       role,
       needsPasswordChange: true,
-      full_name: name,
-      job_title: position,
+      jobTitle: position,
       assignedProjectId: input.assignedProjectId ?? null,
       status: 'active',
-      is_active: true,
+      isActive: true,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -102,11 +102,11 @@ export const teamService = {
     const role = input.accessRole
       ? input.accessRole === 'team' ? 'freelancer' : input.accessRole
       : String(existing.role ?? 'freelancer');
-    const nextName = name || String(existing.name ?? existing.full_name ?? 'Unnamed member');
+    const nextName = name || String(existing.fullName ?? existing.name ?? existing.full_name ?? 'Unnamed member');
     const nextEmail = email || String(existing.email ?? '');
     const nextPosition = position !== undefined
       ? position
-      : String(existing.job_title ?? existing.jobTitle ?? 'Team member');
+      : String(existing.jobTitle ?? existing.job_title ?? 'Team member');
     const nextStatus = existing.status === 'inactive' || existing.status === 'lost'
       ? existing.status
       : 'active';
@@ -115,16 +115,22 @@ export const teamService = {
       userRef,
       {
         uid: typeof existing.uid === 'string' ? existing.uid : id,
-        name: nextName,
-        full_name: nextName,
+        fullName: nextName,
         email: nextEmail,
         role,
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
-        job_title: nextPosition,
+        jobTitle: nextPosition,
         status: nextStatus,
-        is_active: existing.is_active !== false,
+        isActive: existing.isActive !== false && existing.is_active !== false,
         createdAt: existing.createdAt ?? serverTimestamp(),
         updatedAt: serverTimestamp(),
+        id: deleteField(),
+        name: deleteField(),
+        full_name: deleteField(),
+        job_title: deleteField(),
+        is_active: deleteField(),
+        created_at: deleteField(),
+        updated_at: deleteField(),
       },
       { merge: true },
     );
@@ -144,7 +150,7 @@ export const teamService = {
     const { db } = requireFirebase();
     const userSnapshot = await getDoc(doc(db, 'users', memberId));
     const userData = userSnapshot.exists() ? userSnapshot.data() : {};
-    const position = String(userData.job_title ?? userData.jobTitle ?? 'Team member');
+    const position = String(userData.jobTitle ?? userData.job_title ?? 'Team member');
 
     await setDoc(
       doc(db, 'users', memberId),

@@ -1,5 +1,6 @@
 import React, { FunctionComponent, ReactNode, useEffect } from 'react';
 import { X } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import Button from '../button/button';
 
 export type SidebarWidth = 'sm' | 'md' | 'lg';
@@ -119,6 +120,42 @@ export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
       {children}
     </div>
   );
+}
+
+export function FormSidebarError({
+  title = FEEDBACK_MESSAGES.common.unableToSave,
+  message,
+}: {
+  title?: string;
+  message: string | null;
+}) {
+  if (!message) return null;
+
+  return (
+    <div className="form-sidebar-error rounded-[16px] border border-red-100 bg-red-50 px-4 py-3" role="alert">
+      <p className="type-label font-semibold text-red-700">{title}</p>
+      <p className="type-muted mt-1 text-red-600">{message}</p>
+    </div>
+  );
+}
+
+const getNestedErrorMessage = (value: unknown): string | null => {
+  if (!value || typeof value !== 'object') return null;
+  if ('message' in value && typeof value.message === 'string') return value.message;
+
+  for (const child of Object.values(value as Record<string, unknown>)) {
+    const message = getNestedErrorMessage(child);
+    if (message) return message;
+  }
+
+  return null;
+};
+
+export function getFormErrorMessage(
+  errors: Record<string, unknown>,
+  fallback = FEEDBACK_MESSAGES.common.fixHighlightedFields,
+) {
+  return getNestedErrorMessage(errors) ?? fallback;
 }
 
 export function FormSidebarActions({

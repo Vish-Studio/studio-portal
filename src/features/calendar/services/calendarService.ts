@@ -146,7 +146,7 @@ const toFirestoreEvent = ({ event, date, profile }: CalendarEventInput) => {
     callLink: event.callLink?.trim() ?? '',
     description: event.description?.trim() ?? '',
     createdById: profile.uid,
-    createdByName: profile.full_name ?? profile.fullName ?? profile.name,
+    createdByName: profile.fullName,
     createdByRole: profile.role,
     invitees,
     projectId: category === 'project' ? event.projectId ?? '' : '',

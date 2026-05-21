@@ -8,6 +8,7 @@ import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
 import { useAuthStore } from '@/src/features/auth';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { getAllowedCalendarCategories } from '../../services/calendarService';
 
 interface ScheduleListProps {
@@ -85,7 +86,7 @@ export default function ScheduleList({ date }: ScheduleListProps) {
         closeForm();
       }
     } catch (error) {
-      setActionError(error instanceof Error ? error.message : 'Unable to delete this calendar event.');
+      setActionError(error instanceof Error ? error.message : FEEDBACK_MESSAGES.sidebar.scheduleDeleteFailed);
     }
   };
 

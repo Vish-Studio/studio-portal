@@ -6,6 +6,7 @@ import { AppLoader } from '@/src/app/components/loading';
 import { defaultRouteForRole } from '@/src/auth/roleAccess';
 import { Button, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { useAuthStore } from '../stores/authStore';
 
 interface ChangePasswordFormValues {
@@ -71,7 +72,7 @@ export default function ChangePasswordPage() {
       const allowedPrefix = updatedProfile.role === 'client' ? '/user' : '/admin';
       navigate(fromPath.startsWith(allowedPrefix) ? fromPath : defaultPath, { replace: true });
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Unable to update password.');
+      setSubmitError(error instanceof Error ? error.message : FEEDBACK_MESSAGES.auth.updatePasswordFailed);
     }
   };
 

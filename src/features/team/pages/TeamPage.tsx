@@ -4,13 +4,14 @@ import { useForm } from 'react-hook-form';
 import { ShieldCheck, UserRoundCheck, UserRoundX, Users } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Button, Checkbox, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
 import type { TeamAccessRole, TeamMember } from '../types';
 import TeamMemberListItem, { type TeamMemberListItemData } from '../components/team-member-list-item/team-member-list-item';
@@ -53,7 +54,7 @@ export default function Team() {
     removeMember,
     assignMember,
   } = useTeamStore();
-  const { searchQuery } = useUIStore();
+  const { searchQuery, showToast } = useUIStore();
   const profile = useAuthStore(state => state.profile);
   const isSuperAdmin = profile?.role === 'superadmin';
   const canManageTeam = profile?.role === 'superadmin' || profile?.role === 'admin';
@@ -170,7 +171,9 @@ export default function Team() {
   const onSubmit = async (data: MemberFormValues) => {
     if (!canManageTeam) return;
     if (!isSuperAdmin && data.accessRole === 'superadmin') {
-      setSubmitError('Only a superadmin can assign the superadmin role.');
+      const message = FEEDBACK_MESSAGES.sidebar.superadminRequired;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.memberSaveToast, message });
       return;
     }
     setSubmitError(null);
@@ -197,8 +200,18 @@ export default function Team() {
         }
       }
     } catch (err: unknown) {
-      setSubmitError((err as Error).message ?? 'Something went wrong. Please try again.');
+      const message = (err as Error).message ?? 'Something went wrong. Please try again.';
+      setSubmitError(message);
+      showToast({
+        status: 'error',
+        title: editingMember ? FEEDBACK_MESSAGES.sidebar.memberUpdateToast : FEEDBACK_MESSAGES.sidebar.memberCreateToast,
+        message,
+      });
     }
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   const handleDelete = async () => {
@@ -316,14 +329,12 @@ export default function Team() {
         title={editingMember ? 'Edit Member' : 'Add Team Member'}
         description={editingMember ? `Editing ${editingMember.name}` : 'New members start unassigned.'}
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex flex-col flex-1 min-h-0">
           <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-            {submitError && (
-              <div className="rounded-[16px] border border-red-100 bg-red-50 px-4 py-3">
-                <p className="type-label font-semibold text-red-700">Failed to create member</p>
-                <p className="type-muted mt-1 text-red-600">{submitError}</p>
-              </div>
-            )}
+            <FormSidebarError
+              title={editingMember ? FEEDBACK_MESSAGES.sidebar.memberUpdateFailed : FEEDBACK_MESSAGES.sidebar.memberCreateFailed}
+              message={submitError}
+            />
 
             {temporaryAccess ? (
               <div className="team-temporary-access rounded-[18px] border border-green-100 bg-green-50 p-4">

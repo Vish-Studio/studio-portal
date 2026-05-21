@@ -43,15 +43,12 @@ service cloud.firestore {
     }
 
     // users/{uid} — identity document keyed by Firebase Auth UID.
-    // New schema fields: uid, name, email, role, needsPasswordChange
-    // Extended/legacy fields are also accepted for backward compatibility.
+    // Canonical user schema uses camelCase fields only.
     match /users/{userId} {
 
       function isValidUser(data) {
-        // Require the new schema fields.
-        // 'superadmin' accepted alongside 'admin' for existing accounts.
         return data.uid   is string &&
-               data.name  is string && data.name.size() > 0 && data.name.size() <= 120 &&
+               data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 120 &&
                data.email is string && data.email.size() > 0 && data.email.size() <= 255 &&
                data.role  in ['admin', 'superadmin', 'team', 'client', 'freelancer'] &&
                data.needsPasswordChange is bool;

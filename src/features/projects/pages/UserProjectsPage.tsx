@@ -6,13 +6,14 @@ import Fab from '@/src/shared/components/button-fab/button-fab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Button, MaterialIcon, TextInput } from '@/src/shared/components';
-import FormSidebar, { FormSidebarActions } from '@/src/shared/components/form-sidebar/form-sidebar';
+import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import FormField from '@/src/shared/components/form-field/form-field';
 import Select from '@/src/shared/components/select/select';
 import Option from '@/src/shared/components/select/option';
 import ConfirmDialog from '@/src/shared/components/confirm-dialog/confirm-dialog';
 import { ProjectCard, ProjectCardMini } from '@/src/features/projects';
 import { makeNewProject, useProjectsStore } from '@/src/features/projects';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { useTasksStore } from '@/src/features/tasks';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '@/src/features/projects';
@@ -47,6 +48,7 @@ export default function UserProjectsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<ClientProject | null>(null);
   const [confirmProject, setConfirmProject] = useState<ClientProject | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<ProjectFormValues>({
@@ -88,12 +90,14 @@ export default function UserProjectsPage() {
 
   const openAdd = () => {
     setEditingProject(null);
+    setSubmitError(null);
     reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' });
     setSidebarOpen(true);
   };
 
   const openEdit = (project: ClientProject) => {
     setEditingProject(project);
+    setSubmitError(null);
     reset({
       name: project.name,
       service: project.service,
@@ -105,6 +109,7 @@ export default function UserProjectsPage() {
   };
 
   const onSubmit = (data: ProjectFormValues) => {
+    setSubmitError(null);
     const payload = {
       name: data.name,
       service: data.service,
@@ -117,6 +122,10 @@ export default function UserProjectsPage() {
     if (editingProject) updateProject(editingProject.id, payload);
     else addProject(makeNewProject(payload));
     setSidebarOpen(false);
+  };
+
+  const onInvalidSubmit = (invalidErrors: unknown) => {
+    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
   };
 
   const clientActionFor = (project: ClientProject) => {
@@ -214,8 +223,13 @@ export default function UserProjectsPage() {
       </div>
 
       <FormSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} title={editingProject ? 'Edit Project' : 'New Project'} description={editingProject ? `Editing ${editingProject.name}` : `Adding a project for ${currentClient?.fullName ?? 'client'}`} width="md">
-        <form onSubmit={handleSubmit(onSubmit)} className="flex min-h-0 flex-1 flex-col">
+        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-5 overflow-y-auto px-6 py-6">
+            <FormSidebarError
+              title={editingProject ? FEEDBACK_MESSAGES.sidebar.projectUpdateFailed : FEEDBACK_MESSAGES.sidebar.projectCreateFailed}
+              message={submitError}
+            />
+
             <FormField label="Project Name" required error={errors.name?.message}>
               <TextInput {...register('name', { required: 'Project name is required' })} placeholder="e.g. Brand Refresh" hasError={!!errors.name} />
             </FormField>

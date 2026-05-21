@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { ArrowLeft, MailCheck } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
+import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
 import { useAuthStore } from '../stores/authStore';
 
 interface ForgotPasswordFormValues {
@@ -32,7 +33,7 @@ export default function ForgotPasswordPage() {
       await sendPasswordReset(values.email);
       setSentTo(values.email);
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'Unable to send reset email.');
+      setSubmitError(error instanceof Error ? error.message : FEEDBACK_MESSAGES.auth.resetEmailFailed);
     }
   };
 
