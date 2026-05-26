@@ -48,3 +48,40 @@ export const Icons: StoryObj = {
     </div>
   ),
 };
+
+export const Filled: StoryObj = {
+  render: () => (
+    <div className="flex items-center gap-4">
+      {['home', 'person', 'calendar_month', 'check_circle', 'error'].map(name => (
+        <div key={name} className="flex flex-col items-center gap-1">
+          <MaterialIcon name={name} size={28} fill />
+          <span className="w-20 truncate text-center text-[10px] text-gray-400">{name}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+export const AppIconSet: StoryObj = {
+  render: () => {
+    const icons = [
+      'home', 'calendar_month', 'group', 'work', 'task_alt', 'chat_bubble',
+      'credit_card', 'description', 'request_quote', 'dashboard', 'settings',
+      'search', 'notifications', 'person', 'edit_note', 'delete', 'add',
+      'close', 'event', 'schedule', 'link', 'payments', 'receipt_long',
+      'contract', 'design_services', 'rocket_launch', 'fact_check', 'route',
+      'warning', 'priority_high', 'visibility', 'open_in_new',
+    ];
+
+    return (
+      <div className="grid max-w-4xl grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8">
+        {icons.map(name => (
+          <div key={name} className="flex min-w-0 flex-col items-center gap-1 rounded-xl border border-gray-100 bg-white p-3">
+            <MaterialIcon name={name} size={22} />
+            <span className="w-full truncate text-center text-[10px] font-medium text-gray-400">{name}</span>
+          </div>
+        ))}
+      </div>
+    );
+  },
+};

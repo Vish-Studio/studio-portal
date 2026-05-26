@@ -136,13 +136,6 @@ export default function EventDetailsModal({ event, onClose, onEdit, onDelete }: 
         </div>
 
         <FormSidebarFooter>
-          <Button
-            onClick={onClose}
-            variant="secondary"
-            className="flex-1"
-          >
-            Close
-          </Button>
           {onDelete && (
             <Button
               onClick={onDelete}
