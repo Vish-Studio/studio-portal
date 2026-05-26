@@ -1,6 +1,6 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

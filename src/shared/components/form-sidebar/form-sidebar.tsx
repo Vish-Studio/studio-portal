@@ -1,6 +1,6 @@
 import React, { FunctionComponent, ReactNode, useEffect } from 'react';
 import { X } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import Button from '../button/button';
 
 export type SidebarWidth = 'sm' | 'md' | 'lg';

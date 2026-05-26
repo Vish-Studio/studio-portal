@@ -39,21 +39,10 @@
       }
 
       function canWriteCalendarCategory(data) {
-        return (
+        return isManager() || (
           data.category == 'team' &&
-          currentRole() in ['admin', 'superadmin', 'freelancer', 'team'] &&
+          currentRole() in ['freelancer', 'team'] &&
           data.get('clientId', '') == ''
-        ) || (
-          data.category == 'client' &&
-          isManager() &&
-          data.get('clientId', '') is string &&
-          data.get('clientId', '').size() > 0 &&
-          data.invitees.hasOnly([request.auth.uid, data.get('clientId', '')])
-        ) || (
-          data.category == 'project' &&
-          isManager() &&
-          data.get('projectId', '') is string &&
-          data.get('projectId', '').size() > 0
         );
       }
 

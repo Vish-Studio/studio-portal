@@ -62,6 +62,7 @@ export const FEEDBACK_MESSAGES = {
     scheduleCreateFailed: 'Failed to create schedule',
     scheduleUpdateFailed: 'Failed to update schedule',
     scheduleSaveToast: 'Unable to save schedule',
+    scheduleLoadToast: 'Unable to load schedule',
     scheduleTitleRequired: 'Title is required.',
     scheduleProfileRequired: 'You need a profile before saving calendar events.',
     scheduleSaveFailed: 'Unable to save this calendar event.',

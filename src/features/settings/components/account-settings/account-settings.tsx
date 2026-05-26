@@ -12,7 +12,7 @@ import {
 } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { AuthProfileUpdateInput } from '@/src/types/auth';
 
 type SettingsSection = 'profile' | 'email' | 'password' | 'newsletters';

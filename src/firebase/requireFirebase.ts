@@ -1,5 +1,5 @@
 import { auth, db, isFirebaseConfigured } from './config';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 export const requireFirebase = () => {
   if (!auth || !db || !isFirebaseConfigured) {

@@ -13,7 +13,7 @@ import Option from '@/src/shared/components/select/option';
 import ConfirmDialog from '@/src/shared/components/confirm-dialog/confirm-dialog';
 import { ProjectCard, ProjectCardMini } from '@/src/features/projects';
 import { makeNewProject, useProjectsStore } from '@/src/features/projects';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useTasksStore } from '@/src/features/tasks';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '@/src/features/projects';

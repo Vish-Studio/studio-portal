@@ -12,7 +12,7 @@ import {
 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, Checkbox, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 import type { AuthRole } from '@/src/types/auth';
 

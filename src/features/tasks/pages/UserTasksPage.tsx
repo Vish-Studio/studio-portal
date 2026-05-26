@@ -13,7 +13,7 @@ import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
 import { useTasksStore } from '../stores/taskStore';
 import { useProjectsStore } from '@/src/features/projects';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 
 const CURRENT_CLIENT_ID = 'c1';

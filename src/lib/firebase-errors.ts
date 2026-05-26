@@ -1,4 +1,4 @@
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 type FirebaseLikeError = {
   code?: unknown;

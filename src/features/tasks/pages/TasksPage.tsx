@@ -17,7 +17,7 @@ import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 
 // ─── Tab config ───────────────────────────────────────────────────────────────

@@ -10,7 +10,7 @@ import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { Button, Checkbox, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import { useClientsStore } from '../stores/clientStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { Client, ClientStatus } from '../types';
 import ClientListItem from '../components/client-list-item/client-list-item';
 import { generateTemporaryPassword } from '@/src/lib/temporary-password';

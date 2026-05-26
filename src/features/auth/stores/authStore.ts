@@ -5,7 +5,7 @@ import { authService } from '../services/authService';
 export type { AuthProfile, AuthRole } from '@/src/types/auth';
 import type { AuthProfile, AuthProfileUpdateInput } from '@/src/types/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { firebaseErrorMessage, logFirebaseError } from '@/src/lib/firebase-errors';
 
 interface AuthState {

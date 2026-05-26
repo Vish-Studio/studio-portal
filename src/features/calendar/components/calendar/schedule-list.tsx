@@ -8,7 +8,7 @@ import EventDetailsModal from '../schedule/event-details-modal';
 import { EVENT_TYPE_CONFIG } from '../schedule/event-types';
 import type { ScheduleEvent } from '../schedule/event-types';
 import { useAuthStore } from '@/src/features/auth';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { getAllowedCalendarCategories } from '../../services/calendarService';
 
 interface ScheduleListProps {
@@ -32,7 +32,6 @@ export default function ScheduleList({ date }: ScheduleListProps) {
   const addEvent = useCalendarStore((state) => state.addEvent);
   const editEvent = useCalendarStore((state) => state.editEvent);
   const removeEvent = useCalendarStore((state) => state.removeEvent);
-  const storeError = useCalendarStore((state) => state.error);
   const profile = useAuthStore(state => state.profile);
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
@@ -121,9 +120,9 @@ export default function ScheduleList({ date }: ScheduleListProps) {
           </div>
         </div>
 
-        {(actionError || storeError) && (
+        {actionError && (
           <div className="schedule-list-error mb-4 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-xs font-semibold text-red-600">
-            {actionError || storeError}
+            {actionError}
           </div>
         )}
 

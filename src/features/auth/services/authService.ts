@@ -18,7 +18,7 @@ import {
 } from 'firebase/firestore';
 import { requireFirebase } from '@/src/firebase/requireFirebase';
 import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { isFirebasePermissionError, logFirebaseError } from '@/src/lib/firebase-errors';
 
 const normalizeEmail = (email?: string | null) => (email ?? '').trim().toLowerCase();

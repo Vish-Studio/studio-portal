@@ -6,7 +6,7 @@ import { AppLoader } from '@/src/app/components/loading';
 import { defaultRouteForRole } from '@/src/auth/roleAccess';
 import { Button, FormField, TextInput } from '@/src/shared/components';
 import { isFirebaseConfigured } from '@/src/firebase/config';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 
 interface ChangePasswordFormValues {

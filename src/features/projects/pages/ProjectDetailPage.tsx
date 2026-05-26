@@ -21,7 +21,7 @@ import { useClientsStore } from '@/src/features/clients';
 import { useDiscoveryStore } from '@/src/features/discovery';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
 import { TEMPLATES } from '@/src/features/templates';
 

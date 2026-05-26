@@ -19,7 +19,7 @@ import { useClientsStore } from '@/src/features/clients';
 import { useTeamStore } from '@/src/features/team';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { getAllowedCalendarCategories } from '../../services/calendarService';
 import { cn } from '@/src/lib/utils';
 

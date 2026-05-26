@@ -15,7 +15,7 @@ import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { TeamAccessRole } from '../types';
 import TeamDetailTaskRow from '../components/team-detail-task-row/team-detail-task-row';
 

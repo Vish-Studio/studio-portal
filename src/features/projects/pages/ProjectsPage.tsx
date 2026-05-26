@@ -15,7 +15,7 @@ import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '../types';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 interface ProjectFormValues {
   name: string;

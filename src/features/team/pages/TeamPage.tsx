@@ -11,7 +11,7 @@ import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
 import type { TeamAccessRole, TeamMember } from '../types';
 import TeamMemberListItem, { type TeamMemberListItemData } from '../components/team-member-list-item/team-member-list-item';

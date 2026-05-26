@@ -8,7 +8,7 @@ import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { Avatar, Button, ButtonIcon, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useTeamStore } from '@/src/features/team';
 import { useExpenseStore, type ExpenseInput } from '../stores/expenseStore';
 import { ExpenseRecordCard, ExpenseRecordDetailsSidebar, ExpenseRecordRow } from '../components/expense-record-item';

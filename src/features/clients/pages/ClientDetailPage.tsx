@@ -15,7 +15,7 @@ import { useProjectsStore } from '@/src/features/projects';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
-import { FEEDBACK_MESSAGES } from '@/src/app/feedbackMessages';
+import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -2,6 +2,9 @@ import { create } from "zustand";
 import type { ScheduleEvent } from "../components/schedule/event-types";
 import type { AuthProfile } from "@/src/types/auth";
 import { calendarService, groupCalendarEventsByDate } from "../services/calendarService";
+import { firebaseErrorMessage, logFirebaseError } from "@/src/lib/firebase-errors";
+import { useUIStore } from "@/src/app/stores/uiStore";
+import { FEEDBACK_MESSAGES } from "@/src/app/messages";
 
 interface CalendarState {
   customEvents: Record<string, ScheduleEvent[]>;
@@ -28,7 +31,16 @@ export const useCalendarStore = create<CalendarState>((set) => ({
         loading: false,
         error: null,
       }),
-      error => set({ customEvents: {}, loading: false, error: error.message }),
+      error => {
+        const message = firebaseErrorMessage(error);
+        logFirebaseError('calendar.subscribeToEvents', error);
+        useUIStore.getState().showToast({
+          status: 'error',
+          title: FEEDBACK_MESSAGES.sidebar.scheduleLoadToast,
+          message,
+        });
+        set({ customEvents: {}, loading: false, error: message });
+      },
     );
   },
 
