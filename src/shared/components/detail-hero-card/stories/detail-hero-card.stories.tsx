@@ -74,3 +74,41 @@ export const NoFooter: StoryObj = {
     </div>
   ),
 };
+
+export const FullWidthSummary: StoryObj = {
+  render: () => (
+    <div className="w-[980px] max-w-[calc(100vw-48px)]">
+      <DetailHeroCard>
+        <DetailHeroCard.Hero>
+          <DetailHeroCard.Glow />
+          <div className="w-14 h-14 rounded-2xl bg-sky-500 flex items-center justify-center text-2xl font-black text-white mb-4">
+            I
+          </div>
+          <h2 className="text-xl font-bold text-white">ikigai Learning</h2>
+          <p className="text-sm text-gray-400 mt-0.5">Website · Essentials</p>
+          <p className="text-[11px] text-gray-600 mt-3">Started May 27, 2026</p>
+        </DetailHeroCard.Hero>
+
+        <DetailHeroCard.Section className="space-y-3">
+          <DetailHeroCard.IconRow icon={<Mail size={12} className="text-gray-400" />}>
+            <span className="text-sm text-gray-300">client@ikigai.com</span>
+          </DetailHeroCard.IconRow>
+          <DetailHeroCard.IconRow icon={<Phone size={12} className="text-gray-400" />}>
+            <span className="text-sm text-gray-300">8 week timeline</span>
+          </DetailHeroCard.IconRow>
+        </DetailHeroCard.Section>
+
+        <DetailHeroCard.Stats>
+          <DetailHeroCard.Stat label="Progress" icon={<Briefcase size={11} />} value="72%" sub="6/9 phases" />
+          <DetailHeroCard.Stat
+            label="Budget"
+            icon={<TrendingUp size={11} />}
+            value="$12k"
+            sub="$8k paid"
+            valueStyle={{ color: 'var(--color-accent-lime)' }}
+          />
+        </DetailHeroCard.Stats>
+      </DetailHeroCard>
+    </div>
+  ),
+};

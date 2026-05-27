@@ -1,15 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, CheckSquare, Mail, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { ProjectCard } from '@/src/features/projects';
 import TeamDetailCard from '../components/team-detail-card/team-detail-card';
-import StatCard from '@/src/shared/components/stat-card/stat-card';
-import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TextInput } from '@/src/shared/components';
+import { Breadcrumb, Button, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
@@ -25,10 +23,6 @@ interface TeamMemberFormValues {
   accessRole: TeamAccessRole;
   email: string;
 }
-
-const fieldCls = (hasError: boolean) =>
-  inputCls(hasError) +
-  ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:shadow-none disabled:focus:ring-0 disabled:focus:bg-transparent';
 
 export default function TeamDetail() {
   const { id } = useParams<{ id: string }>();
@@ -57,7 +51,6 @@ export default function TeamDetail() {
 
   const currentProjects = memberProjects.filter(project => project.status !== 'completed');
   const pastProjects = memberProjects.filter(project => project.status === 'completed');
-
   const assignedTasks = useMemo(() => {
     if (!member) return [];
     return tasks
@@ -69,9 +62,6 @@ export default function TeamDetail() {
   const roleOptions = isSuperAdmin
     ? (['freelancer', 'admin', 'superadmin'] as TeamAccessRole[])
     : (['freelancer', 'admin'] as TeamAccessRole[]);
-
-  const openTasks = assignedTasks.filter(task => task.status !== 'completed');
-  const completedTasks = assignedTasks.filter(task => task.status === 'completed');
 
   const {
     register,
@@ -153,6 +143,7 @@ export default function TeamDetail() {
     });
     setIsEditing(true);
     setSubmitError(null);
+    setEditSidebarOpen(true);
   };
 
   const openMobileEdit = () => {
@@ -188,121 +179,28 @@ export default function TeamDetail() {
 
   return (
     <DashboardLayout>
-      <div className="team-detail flex flex-1 flex-col gap-4 md:gap-10">
+      <div className="team-detail flex flex-1 flex-col gap-4 md:gap-7">
         <Breadcrumb
           previousLink="/admin/team"
           previousPageName="Team"
           currentPageName={member.name}
+          action={
+            canEditMember ? (
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={openEdit}
+                iconLeft={<Pencil size={14} />}
+                className="hidden md:inline-flex"
+              >
+                Edit member
+              </Button>
+            ) : null
+          }
         />
 
-        <div className="team-detail-overview grid grid-cols-1 gap-4 md:grid-cols-2">
-          <TeamDetailCard member={member} projects={memberProjects} tasks={assignedTasks} />
-
-          <CardContent
-            iconName="badge"
-            title="Team Details"
-            variant="white"
-            className="hidden md:flex"
-            action={
-              isEditing ? (
-                <div className="team-detail-actions flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="team-detail-cancel rounded-lg px-3 py-1.5 text-[12px] font-semibold text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-800"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    form="team-edit-form"
-                    type="submit"
-                    disabled={isSubmitting || (!isDirty && !hasMemberChanges)}
-                    className="team-detail-save rounded-lg bg-(--color-ink) px-3 py-1.5 text-[12px] font-semibold text-white transition-colors hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {isSubmitting ? 'Saving...' : 'Save'}
-                  </button>
-                </div>
-              ) : (
-                canEditMember ? <ButtonIcon iconName="edit" clickHandler={openEdit} /> : null
-              )
-            }
-          >
-            <form
-              id="team-edit-form"
-              onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
-              className="team-detail-form space-y-4 px-4 py-4 md:px-6 md:py-5"
-            >
-              <FormField label="Full Name" required={isEditing} error={errors.name?.message}>
-                <input
-                  {...register('name', { required: isEditing ? 'Name is required' : false })}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.name)}
-                />
-              </FormField>
-
-              <FormField label="Role" required={isEditing} error={errors.role?.message}>
-                <input
-                  {...register('role', { required: isEditing ? 'Role is required' : false })}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.role)}
-                />
-              </FormField>
-
-              <FormField label="Access Role" required={isEditing} error={errors.accessRole?.message}>
-                <Select
-                  {...register('accessRole', { required: isEditing ? 'Access role is required' : false })}
-                  disabled={!isEditing}
-                  hasError={!!errors.accessRole}
-                  className="disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0"
-                >
-                  {roleOptions.map(role => (
-                    <Option key={role} value={role}>
-                      {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Freelancer'}
-                    </Option>
-                  ))}
-                </Select>
-              </FormField>
-
-              <FormField label="Email" required={isEditing} error={errors.email?.message}>
-                <input
-                  type="email"
-                  {...register('email', {
-                    required: isEditing ? 'Email is required' : false,
-                    pattern: isEditing
-                      ? { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' }
-                      : undefined,
-                  })}
-                  disabled={!isEditing}
-                  className={fieldCls(!!errors.email)}
-                />
-              </FormField>
-            </form>
-          </CardContent>
-        </div>
-
-        <div className="team-detail-stats grid grid-cols-2 gap-3 xl:grid-cols-3">
-          <StatCard size="sm" variant="lime"
-            icon={<Briefcase size={18} />}
-            label="Current Projects"
-            value={currentProjects.length}
-            badge={`${pastProjects.length} past`}
-            badgeLabel="completed projects"
-          />
-          <StatCard size="sm" variant="surface"
-            icon={<CheckSquare size={18} />}
-            label="Open Tasks"
-            value={openTasks.length}
-            badge={`${completedTasks.length} done`}
-            badgeLabel="assigned tasks"
-          />
-          <StatCard size="sm" variant="white"
-            icon={<Mail size={18} />}
-            label="Contact"
-            value={<span className="text-xl">{member.email ? 'Ready' : 'Missing'}</span>}
-            badge={member.role}
-            badgeLabel="team role"
-          />
-        </div>
+        <TeamDetailCard member={member} projects={memberProjects} tasks={assignedTasks} />
 
         <section className="team-detail-section">
           <div className="team-detail-section-header mb-4 flex items-end justify-between gap-3">

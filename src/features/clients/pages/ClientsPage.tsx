@@ -200,7 +200,7 @@ export default function Clients() {
 
   return (
     <DashboardLayout title="Clients">
-      <div className="flex flex-col gap-3 w-full mx-auto py-6 md:py-10">
+      <div className="flex flex-col gap-4 md:gap-6 pt-6 pb-10">
         <div className="clients-stats grid gap-3 grid-cols-2 xl:grid-cols-4">
           <StatCard
             size="sm"

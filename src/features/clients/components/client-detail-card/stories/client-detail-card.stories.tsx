@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ClientDetailCard from '../client-detail-card';
-import { DEMO_CLIENTS } from '@/src/data/seed';
+import { DEMO_CLIENTS, DEMO_PROJECTS } from '@/src/data/seed';
 
 const meta = {
   title: 'Admin/ClientDetailCard',
@@ -22,6 +22,18 @@ export const InactiveClient: Story = {
 
 export const LostClient: Story = {
   args: { client: DEMO_CLIENTS[3] }, // Tony Nguyen — lost
+};
+
+export const FullWidthDetail: StoryObj = {
+  render: () => {
+    const client = DEMO_CLIENTS[0];
+
+    return (
+      <div className="w-[980px] max-w-[calc(100vw-48px)]">
+        <ClientDetailCard client={client} projects={DEMO_PROJECTS.filter(project => project.clientId === client.id)} />
+      </div>
+    );
+  },
 };
 
 export const AllClients: StoryObj = {

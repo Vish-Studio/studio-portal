@@ -21,11 +21,11 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
       <DetailHeroCard.Hero>
         <div aria-hidden="true" className={`absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-15 pointer-events-none blur-2xl ${accent.bar}`} />
 
-        <div className={`w-12 h-12 rounded-2xl ${accent.bg} flex items-center justify-center mb-4 shadow-md`}>
-          <MaterialIcon name={accent.icon} size={22} className={accent.iconText} />
+        <div className={`mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] ${accent.bg} shadow-[0_18px_40px_rgba(0,0,0,0.28)] ring-1 ring-white/15`}>
+          <MaterialIcon name={accent.icon} size={26} className={accent.iconText} />
         </div>
 
-        <h2 className="text-xl font-bold text-white leading-tight">{project.name}</h2>
+        <h2 className="text-2xl font-black leading-tight text-white">{project.name}</h2>
 
         <div className="flex items-center gap-2 mt-2 flex-wrap">
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${accent.badgeBg} ${accent.badgeText}`}>{accent.label}</span>

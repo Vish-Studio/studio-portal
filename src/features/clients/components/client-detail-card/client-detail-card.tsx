@@ -3,17 +3,17 @@ import { Briefcase, Building2, Mail, Phone, TrendingUp } from '@/src/shared/comp
 import { format } from 'date-fns';
 import { DetailHeroCard } from '@/src/shared/components';
 import { avatarColor, ClientStatusBadge } from '@/src/shared/components';
-import { DEMO_PROJECTS } from '@/src/data/seed';
 import type { Client } from '../../types';
+import type { ClientProject } from '@/src/features/projects';
 
 interface Props {
   className?: string;
   client: Client;
+  projects?: ClientProject[];
 }
 
-const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) => {
+const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, projects = [] }) => {
   const avatarBg     = avatarColor(client.id ?? client.fullName);
-  const projects     = DEMO_PROJECTS.filter(p => p.clientId === client.id);
   const activeCount  = projects.filter(p => p.status === 'active').length;
   const totalAgreed  = projects.reduce((s, p) => s + p.agreedPayment, 0);
   const totalPaid    = projects.reduce((s, p) => s + p.paidPayment, 0);
@@ -27,14 +27,14 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) 
 
         {/* Letter avatar */}
         <div
-          className={`client-detail-card-avatar w-14 h-14 rounded-2xl ${avatarBg} flex items-center justify-center text-2xl font-black text-white mb-4 shadow-lg`}
+          className={`client-detail-card-avatar mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${avatarBg} text-2xl font-black text-white shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}
         >
           {client.fullName.charAt(0).toUpperCase()}
         </div>
 
-        <h2 className="text-xl font-bold text-white leading-tight">{client.fullName}</h2>
+        <h2 className="text-[26px] font-black leading-tight text-white">{client.fullName}</h2>
         {client.companyName && (
-          <p className="text-sm text-gray-400 mt-0.5">{client.companyName}</p>
+          <p className="mt-1 text-sm font-medium text-gray-400">{client.companyName}</p>
         )}
         <div className="mt-2.5">
           <ClientStatusBadge status={client.status} />
@@ -84,15 +84,14 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) 
           sub={`$${totalPaid.toLocaleString()} paid`}
           valueStyle={{ color: 'var(--color-accent-lime)' }}
         />
-      </DetailHeroCard.Stats>
-
-      {/* ── Balance footer ── */}
-      {totalRemaining > 0 && (
-        <DetailHeroCard.Footer
-          label="Outstanding balance"
-          value={<span className="text-sm font-bold text-amber-400">${totalRemaining.toLocaleString()}</span>}
+        <DetailHeroCard.Stat
+          label="Balance"
+          icon={<TrendingUp size={11} />}
+          value={totalRemaining > 0 ? `$${(totalRemaining / 1000).toFixed(0)}k` : 'Settled'}
+          sub={totalRemaining > 0 ? 'outstanding' : 'fully paid'}
+          valueClassName={totalRemaining > 0 ? 'text-amber-400' : 'text-green-400'}
         />
-      )}
+      </DetailHeroCard.Stats>
     </DetailHeroCard>
   );
 };

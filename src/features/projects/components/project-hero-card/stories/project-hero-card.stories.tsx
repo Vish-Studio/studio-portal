@@ -28,6 +28,14 @@ export const SoftwarePremium: Story = {
   args: { project: DEMO_PROJECTS[5] }, // Dashboard Analytics — software · premium
 };
 
+export const FullWidthDetail: StoryObj = {
+  render: () => (
+    <div className="w-[980px] max-w-[calc(100vw-48px)]">
+      <ProjectHeroCard project={DEMO_PROJECTS[2]} />
+    </div>
+  ),
+};
+
 export const AllServices: StoryObj = {
   render: () => (
     <div className="flex flex-wrap gap-4 justify-center">

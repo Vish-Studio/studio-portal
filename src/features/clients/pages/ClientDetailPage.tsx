@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { format } from 'date-fns';
 import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { ProjectCard } from '@/src/features/projects';
 import ClientDetailCard from '../components/client-detail-card/client-detail-card';
@@ -13,7 +11,7 @@ import type { ClientStatus } from '../types';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import { Breadcrumb, Button, ButtonIcon, FormField, inputCls, Option, Select, TextInput } from '@/src/shared/components';
+import { Breadcrumb, Button, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
@@ -26,15 +24,6 @@ interface ClientFormValues {
   phone: string;
   status: ClientStatus;
 }
-
-// ─── Disabled-aware input class ───────────────────────────────────────────────
-
-const fieldCls = (hasError: boolean) =>
-  inputCls(hasError) +
-  ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:shadow-none disabled:focus:ring-0 disabled:focus:bg-transparent';
-
-const DISABLED_SELECT_CLS =
-  'disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none disabled:focus:ring-0';
 
 // ─── Client Detail Page ───────────────────────────────────────────────────────
 
@@ -130,6 +119,7 @@ const ClientDetail = () => {
     });
     setIsEditing(true);
     setSubmitError(null);
+    setEditSidebarOpen(true);
   };
 
   const openMobileEdit = () => {
@@ -167,146 +157,52 @@ const ClientDetail = () => {
   const totalAgreed = projects.reduce((s, p) => s + p.agreedPayment, 0);
   const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
   const totalRemaining = totalAgreed - totalPaid;
-
   return (
     <DashboardLayout>
-      <div className="flex-1 flex flex-col gap-4 md:gap-10">
+      <div className="flex-1 flex flex-col gap-4 md:gap-7">
         <Breadcrumb
           previousLink="/admin/clients"
           previousPageName="Clients"
-          currentPageName={client.fullName} />
-
-        {/* Client detail */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 ">
-          <ClientDetailCard client={client} />
-
-          {!editSidebarOpen && (
-            <CardContent
-              iconName="manage_accounts"
-              title="Client Details"
-              variant="white"
-              className="hidden md:flex"
-              action={
-                isEditing ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="text-[12px] font-semibold text-gray-500 hover:text-gray-800 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      form="client-edit-form"
-                      type="submit"
-                      disabled={isSubmitting || (!isDirty && !hasClientChanges)}
-                      className="text-[12px] font-semibold text-white bg-(--color-ink) hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg transition-colors"
-                    >
-                      {isSubmitting ? 'Saving...' : 'Save'}
-                    </button>
-                  </div>
-                ) : (
-                  <ButtonIcon iconName="edit" clickHandler={openEdit} />
-                )
-              }
+          currentPageName={client.fullName}
+          action={
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={openEdit}
+              iconLeft={<Pencil size={14} />}
+              className="hidden md:inline-flex"
             >
-              <form
-                id="client-edit-form"
-                onSubmit={handleSubmit(onSubmit, onInvalidSubmit)}
-                className="px-4 md:px-6 py-4 md:py-5 space-y-4"
-              >
-                <FormField label="Full Name" required={isEditing} error={errors.fullName?.message}>
-                  <input
-                    {...register('fullName', { required: isEditing ? 'Name is required' : false })}
-                    disabled={!isEditing}
-                    className={fieldCls(!!errors.fullName)}
-                  />
-                </FormField>
+              Edit client
+            </Button>
+          }
+        />
 
-                <FormField label="Company Name" error={errors.companyName?.message}>
-                  <input
-                    {...register('companyName')}
-                    disabled={!isEditing}
-                    className={fieldCls(!!errors.companyName)}
-                  />
-                </FormField>
-
-                <FormField label="Email Address" required={isEditing} error={errors.email?.message}>
-                  <input
-                    type="email"
-                    {...register('email', {
-                      required: isEditing ? 'Email is required' : false,
-                      pattern: isEditing
-                        ? { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Enter a valid email' }
-                        : undefined,
-                    })}
-                    disabled={!isEditing}
-                    className={fieldCls(!!errors.email)}
-                  />
-                </FormField>
-
-                <FormField label="Phone Number" error={errors.phone?.message}>
-                  <input
-                    type="tel"
-                    {...register('phone', {
-                      pattern: isEditing
-                        ? { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' }
-                        : undefined,
-                    })}
-                    disabled={!isEditing}
-                    className={fieldCls(!!errors.phone)}
-                  />
-                </FormField>
-
-                <FormField label="Status" required={isEditing} error={errors.status?.message}>
-                  <Select
-                    {...register('status', { required: isEditing })}
-                    disabled={!isEditing}
-                    hasError={!!errors.status}
-                    className={DISABLED_SELECT_CLS}
-                  >
-                    <Option value="active">Active</Option>
-                    <Option value="inactive">Inactive</Option>
-                    <Option value="lost">Lost</Option>
-                  </Select>
-                </FormField>
-
-                {isEditing && (
-                  <p className="text-[11px] text-gray-400">
-                    Member since{' '}
-                    {client.createdAt?.toDate
-                      ? format(client.createdAt.toDate(), 'MMM d, yyyy')
-                      : '-'}
-                  </p>
-                )}
-              </form>
-            </CardContent>
-          )}
-        </div>
+        <ClientDetailCard client={client} projects={projects} />
 
 
         {/* Projects detail*/}
-        <div className="grid grid-cols-1 lg:grid-cols-1 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-1">
           <div className="lg-col-span-2">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-(--color-ink)">Projects</h2>
-              <div className="flex flex-col items-end gap-1">
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {projects.length} project{projects.length !== 1 ? 's' : ''} &middot; {activeCount} active
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-(--color-ink)">Projects</h2>
+                <p className="text-xs font-medium text-gray-400">
+                  {projects.length} project{projects.length !== 1 ? 's' : ''} · {activeCount} active
                 </p>
-                {projects.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-semibold text-gray-400">
-                      ${totalPaid.toLocaleString()} collected
-                    </span>
-                    {totalRemaining > 0 && (
-                      <span className="text-[11px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                        ${totalRemaining.toLocaleString()} outstanding
-                      </span>
-                    )}
-                  </div>
-                )}
               </div>
+              {projects.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                  <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-semibold text-gray-500">
+                    ${totalPaid.toLocaleString()} collected
+                  </span>
+                  {totalRemaining > 0 && (
+                    <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-600">
+                      ${totalRemaining.toLocaleString()} outstanding
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             {projects.length === 0 ? (
@@ -330,12 +226,7 @@ const ClientDetail = () => {
         </div>
       </div>
 
-      <Fab
-        icon={Pencil}
-        ariaLabel="Edit client"
-        onClick={openMobileEdit}
-        className="md:hidden"
-      />
+      <Fab icon={Pencil} ariaLabel="Edit client" onClick={openMobileEdit} className="md:hidden" />
 
       {editSidebarOpen && (
         <FormSidebar

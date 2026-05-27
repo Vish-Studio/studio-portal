@@ -1,15 +1,14 @@
 import { useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, Check, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, Check, CheckSquare, Pencil, Trash2, Users, WalletCards } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarActions, FormSidebarError, FormSidebarFooter, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import IconPicker from '@/src/features/projects/components/icon-picker/icon-picker';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import ProjectHeroCard from '../components/project-hero-card/project-hero-card';
 import ProjectTimeline from '../components/project-timeline/project-timeline';
-import { Avatar, AvatarStack, Breadcrumb, Button, ButtonIcon, ConfirmDialog, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
+import { Avatar, Breadcrumb, Button, ConfirmDialog, DetailHeroCard, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
 import { ClientPicker } from '@/src/features/clients';
 import { MemberPicker } from '@/src/shared/components';
 import { TaskDetailModal, TaskRow, useTasksStore, type Task, type TaskStatus } from '@/src/features/tasks';
@@ -18,21 +17,14 @@ import { useProjectsStore } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
 import { useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useClientsStore } from '@/src/features/clients';
-import { useDiscoveryStore } from '@/src/features/discovery';
-import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
-import { getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
+import { getPhaseProgress, getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
 import { TEMPLATES } from '@/src/features/templates';
 
 interface ProjectFormValues {
   name: string; service: ServiceType; package: PackageType | ''; status: 'active' | 'paused' | 'completed'; timeline: string;
 }
-
-const fieldCls = (hasError: boolean) =>
-  inputCls(hasError) + ' disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:shadow-none disabled:focus:ring-0';
-
-const DISABLED_SELECT_CLS = 'disabled:bg-transparent disabled:border-transparent disabled:px-0 disabled:py-1 disabled:cursor-default disabled:text-gray-900 disabled:appearance-none disabled:shadow-none';
 
 type TaskFilter = 'all' | TaskStatus;
 const TASK_FILTER_LABELS: Record<TaskFilter, string> = {
@@ -95,15 +87,13 @@ const ProjectDetail = () => {
     );
   }
 
-  const profile        = useAuthStore(s => s.profile);
-  const { getDiscovery } = useDiscoveryStore();
-  const discovery      = getDiscovery(project.id);
-  const discoveryStatus = discovery?.status ?? 'not_started';
-
   const accent         = getProjectAccent(project.service, project.package);
   const projectMembers = members.filter(m => project.assignedMemberIds?.includes(m.id));
+  const client         = clients.find(c => c.id === project.clientId);
+  const activePhase    = project.phases.find(phase => phase.status === 'active') ?? project.phases.find(phase => phase.status === 'pending');
+  const donePhaseCount = project.phases.filter(phase => phase.status === 'done').length;
+  const projectProgress = getPhaseProgress(project.phases);
   const remaining      = project.agreedPayment - project.paidPayment;
-  const selectedClient = clients.find(c => c.id === (isEditing ? selectedClientId : project.clientId));
   const hasPickerChanges = isEditing && (
     selectedClientId !== project.clientId ||
     !sameStringSet(selectedMemberIds, project.assignedMemberIds ?? [])
@@ -117,19 +107,21 @@ const ProjectDetail = () => {
     return [...filtered].sort((a, b) => b.createdAt - a.createdAt);
   }, [tasks, id, taskFilter]);
 
-  const allProjectTaskCount = useMemo(() => tasks.filter(t => t.projectId === id).length, [tasks, id]);
+  const allProjectTasks = useMemo(() => tasks.filter(t => t.projectId === id), [tasks, id]);
+  const allProjectTaskCount = allProjectTasks.length;
+  const openProjectTaskCount = allProjectTasks.filter(task => task.status !== 'completed').length;
 
   const openEdit = () => {
     reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
+    setSubmitError(null);
     setIsEditing(true);
+    setEditSidebarOpen(true);
   };
 
   const openMobileEdit = () => {
     openEdit();
-    setSubmitError(null);
-    setEditSidebarOpen(true);
   };
 
   const cancelEdit = () => {
@@ -247,152 +239,91 @@ const ProjectDetail = () => {
     <DashboardLayout title={project.name}>
       <div className="flex flex-col gap-4 pb-12">
 
-        <Breadcrumb previousLink="/admin/projects" previousPageName="Projects" currentPageName={project.name} />
+        <Breadcrumb
+          previousLink="/admin/projects"
+          previousPageName="Projects"
+          currentPageName={project.name}
+          action={
+            <Button
+              type="button"
+              size="sm"
+              variant="secondary"
+              onClick={openEdit}
+              iconLeft={<Pencil size={14} />}
+              className="hidden md:inline-flex"
+            >
+              Edit project
+            </Button>
+          }
+        />
 
-        {/* Hero + Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <ProjectHeroCard project={project} />
-
-          <CardContent iconName="edit_note" title="Project Details" className="hidden overflow-visible md:flex"
-            action={
-              isEditing ? (
-                <div className="flex items-center gap-2">
-                  <Button type="button" variant="ghost" size="sm" onClick={cancelEdit}>Cancel</Button>
-                  <Button form="project-edit-form" type="submit" size="sm" disabled={isSubmitting || !hasProjectChanges} loading={isSubmitting}>
-                    {isSubmitting ? 'Saving…' : 'Save'}
-                  </Button>
-                </div>
-              ) : <ButtonIcon iconName="edit" label="Edit project details" clickHandler={openEdit} />
-            }
-          >
-            <form id="project-edit-form" onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="px-4 md:px-6 py-4 md:py-5 space-y-4">
-              <FormField label="Project Name" required={isEditing} error={errors.name?.message}>
-                <input {...register('name', { required: isEditing ? 'Required' : false })} disabled={!isEditing} className={fieldCls(!!errors.name)} />
-              </FormField>
-              <FormField label="Service" required={isEditing}>
-                <Select {...register('service', { required: isEditing })} disabled={!isEditing} className={DISABLED_SELECT_CLS}>
-                  {(Object.entries(SERVICE_META) as [ServiceType, typeof SERVICE_META[ServiceType]][]).map(([key, meta]) => (
-                    <Option key={key} value={key}>{meta.label}</Option>
-                  ))}
-                </Select>
-              </FormField>
-              {(isEditing ? hasPackages : ['website', 'software'].includes(project.service)) && (
-                <FormField label="Package">
-                  <Select {...register('package')} disabled={!isEditing} className={DISABLED_SELECT_CLS}>
-                    <Option value="">— None —</Option>
-                    <Option value="essentials">Essentials</Option>
-                    <Option value="growth">Growth</Option>
-                    <Option value="premium">Premium</Option>
-                  </Select>
-                </FormField>
-              )}
-              <FormField label="Status" required={isEditing}>
-                <Select {...register('status', { required: isEditing })} disabled={!isEditing} className={DISABLED_SELECT_CLS}>
-                  <Option value="active">Active</Option>
-                  <Option value="paused">Paused</Option>
-                  <Option value="completed">Completed</Option>
-                </Select>
-              </FormField>
-              <FormField label="Timeline">
-                <input {...register('timeline')} disabled={!isEditing} className={fieldCls(false)} />
-              </FormField>
-              <FormField label="Client">
-                {isEditing ? (
-                  <ClientPicker clients={clients} selectedId={selectedClientId} onSelect={handleClientSelect} />
-                ) : (
-                  <div className="py-1">
-                    {selectedClient ? (
-                      <div className="flex items-center gap-2">
-                        <Avatar name={selectedClient.fullName} id={selectedClient.id} size="sm" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{selectedClient.fullName}</p>
-                          {selectedClient.companyName && <p className="text-xs text-gray-400">{selectedClient.companyName}</p>}
-                        </div>
-                      </div>
-                    ) : <span className="text-sm text-gray-400">—</span>}
-                  </div>
-                )}
-              </FormField>
-              <FormField label="Assigned Team">
-                {isEditing ? (
-                  <MemberPicker members={members} selectedIds={selectedMemberIds} onToggle={handleMemberToggle} />
-                ) : (
-                  <div className="py-1">
-                    {projectMembers.length > 0
-                      ? <AvatarStack members={projectMembers.map(m => ({ name: m.name, id: m.id }))} size="sm" limit={3} />
-                      : <span className="text-sm text-gray-400">No team assigned</span>
-                    }
-                  </div>
-                )}
-              </FormField>
-            </form>
-          </CardContent>
-        </div>
-
-        {/* Discovery Brief */}
-        {(() => {
-          const canFill = false || profile?.role === 'admin' || profile?.role === 'team' || profile?.role === 'client';
-          const isLocked = discoveryStatus === 'submitted' && profile?.role !== 'admin';
-
-          const statusConfig = {
-            not_started: { label: 'Not started', icon: 'edit_note', cls: 'text-gray-400 bg-gray-100', dot: 'bg-gray-300' },
-            draft:       { label: 'Draft saved',  icon: 'draft',     cls: 'text-amber-700 bg-amber-100', dot: 'bg-amber-400' },
-            submitted:   { label: 'Submitted',    icon: 'check_circle', cls: 'text-green-700 bg-green-100', dot: 'bg-green-500' },
-          } as const;
-          const s = statusConfig[discoveryStatus];
-
-          return (
-            <div className="flex items-center justify-between gap-4 bg-white border border-gray-200 rounded-2xl px-5 py-4 shadow-sm">
-              <div className="flex items-center gap-4 min-w-0">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                  discoveryStatus === 'submitted' ? 'bg-green-50 text-green-600' :
-                  discoveryStatus === 'draft'     ? 'bg-amber-50 text-amber-600' :
-                                                   'bg-gray-50 text-gray-400'
-                }`}>
-                  <MaterialIcon name={s.icon} size={20} />
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2.5">
-                    <h3 className="text-sm font-bold text-gray-900">Discovery Brief</h3>
-                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2.5 py-1 rounded-full ${s.cls}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${s.dot}`} />
-                      {s.label}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {discoveryStatus === 'not_started'
-                      ? `Service-specific requirements questionnaire for ${project.service.replace('-', ' ')}`
-                      : discoveryStatus === 'draft'
-                        ? 'Brief is saved as a draft — submit when ready'
-                        : `Brief submitted${discovery?.submittedAt ? ` on ${new Date(discovery.submittedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}`
-                    }
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {isLocked ? (
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/admin/projects/${id}/discovery`)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
-                  >
-                    <MaterialIcon name="visibility" size={14} />
-                    View brief
-                  </button>
-                ) : canFill ? (
-                  <button
-                    type="button"
-                    onClick={() => navigate(`/admin/projects/${id}/discovery`)}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-xs font-bold text-white bg-gray-900 hover:bg-gray-700 rounded-xl transition-colors"
-                  >
-                    <MaterialIcon name={discoveryStatus === 'not_started' ? 'edit_note' : 'edit'} size={14} />
-                    {discoveryStatus === 'not_started' ? 'Fill brief' : 'Edit brief'}
-                  </button>
-                ) : null}
-              </div>
+        <DetailHeroCard className="project-detail-card">
+          <DetailHeroCard.Hero>
+            <DetailHeroCard.Glow className={accent.bar} />
+            <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${accent.bg} shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}>
+              <MaterialIcon name={accent.icon} size={24} className={accent.iconText} />
             </div>
-          );
-        })()}
+            <h2 className="truncate text-[26px] font-black leading-tight text-white">{project.name}</h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${accent.badgeBg} ${accent.badgeText}`}>{accent.label}</span>
+              <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                project.status === 'active' ? 'bg-green-100 text-green-700' :
+                project.status === 'paused' ? 'bg-amber-100 text-amber-700' :
+                                              'bg-gray-100 text-gray-700'
+              }`}>
+                {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+              </span>
+            </div>
+            <p className="mt-3 text-[11px] text-gray-600">
+              Started {new Date(project.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </p>
+          </DetailHeroCard.Hero>
+
+          <DetailHeroCard.Section className="space-y-3">
+            <DetailHeroCard.IconRow icon={<MaterialIcon name="flag" size={13} className="text-gray-400" />}>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Current step</p>
+                <p className="truncate text-sm font-bold text-gray-300">{activePhase ? activePhase.title : 'No active step'}</p>
+              </div>
+            </DetailHeroCard.IconRow>
+            <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={13} className="text-gray-400" />}>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
+                <p className="truncate text-sm font-bold text-gray-300">{project.timeline || 'No timeline set'}</p>
+              </div>
+            </DetailHeroCard.IconRow>
+            {client && (
+              <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
+                  <p className="truncate text-sm font-bold text-gray-300">{client.fullName}</p>
+                </div>
+              </DetailHeroCard.IconRow>
+            )}
+          </DetailHeroCard.Section>
+
+          <DetailHeroCard.Stats>
+            <DetailHeroCard.Stat
+              label="Tasks"
+              icon={<CheckSquare size={11} />}
+              value={allProjectTaskCount}
+              sub={`${openProjectTaskCount} open`}
+            />
+            <DetailHeroCard.Stat
+              label="Team"
+              icon={<Users size={11} />}
+              value={projectMembers.length}
+              sub={`${project.assignedMemberIds?.length ?? 0} assigned`}
+            />
+            <DetailHeroCard.Stat
+              label="Price"
+              icon={<WalletCards size={11} />}
+              value={`$${project.agreedPayment.toLocaleString()}`}
+              sub={`${projectProgress}% complete · ${donePhaseCount}/${project.phases.length} steps`}
+              valueStyle={{ color: 'var(--color-accent-lime)' }}
+            />
+          </DetailHeroCard.Stats>
+        </DetailHeroCard>
 
         <ProjectTimeline
           project={project}
@@ -408,12 +339,36 @@ const ProjectDetail = () => {
           onMovePhase={(phaseId, direction) => movePhase(project.id, phaseId, direction)}
           onDeletePhase={setDeletePhaseId}
           onCreateDefaultPhase={(phase, afterIndex) => insertPhase(project.id, afterIndex, phase)}
-          onOpenDiscovery={() => navigate(`/admin/projects/${id}/discovery`)}
-          discoveryStatus={discoveryStatus}
         />
 
-        {/* Team & Financials */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px] xl:items-start">
+          <CardContent iconName="task_alt" title="Tasks"
+            action={
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-gray-400">{allProjectTaskCount} total</span>
+                <Select value={taskFilter} onChange={e => setTaskFilter(e.target.value as TaskFilter)} className="text-[11px] font-semibold text-gray-600 bg-gray-100 border-0 rounded-lg px-2.5 py-1.5 pr-6 cursor-pointer">
+                  {(Object.keys(TASK_FILTER_LABELS) as TaskFilter[]).map(k => <Option key={k} value={k}>{TASK_FILTER_LABELS[k]}</Option>)}
+                </Select>
+              </div>
+            }
+          >
+            {projectTasks.length === 0 ? (
+              <div className="px-6 py-8 flex flex-col items-center gap-2 text-center">
+                <MaterialIcon name="task_alt" size={22} className="text-gray-200" />
+                <p className="text-xs font-semibold text-gray-400">
+                  {allProjectTaskCount === 0 ? 'No tasks for this project yet.' : 'No tasks match this filter.'}
+                </p>
+              </div>
+            ) : (
+              <div className="px-4 md:px-6 py-4 flex flex-col gap-2">
+                {projectTasks.map(task => (
+                  <TaskRow key={task.id} task={task} showProject={false} showStatus onClick={() => setDetailTask(task)} onDelete={() => setConfirmTask(task)} />
+                ))}
+              </div>
+            )}
+          </CardContent>
+
+          <div className="grid grid-cols-1 gap-4">
           <CardContent iconName="group" title="Assigned Team">
             {projectMembers.length === 0 ? (
               <div className="px-4 md:px-6 py-4"><p className="text-sm text-gray-400">No team members assigned.</p></div>
@@ -451,34 +406,8 @@ const ProjectDetail = () => {
               )}
             </div>
           </CardContent>
+          </div>
         </div>
-
-        {/* Tasks */}
-        <CardContent iconName="task_alt" title="Tasks"
-          action={
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-semibold text-gray-400">{allProjectTaskCount} total</span>
-              <Select value={taskFilter} onChange={e => setTaskFilter(e.target.value as TaskFilter)} className="text-[11px] font-semibold text-gray-600 bg-gray-100 border-0 rounded-lg px-2.5 py-1.5 pr-6 cursor-pointer">
-                {(Object.keys(TASK_FILTER_LABELS) as TaskFilter[]).map(k => <Option key={k} value={k}>{TASK_FILTER_LABELS[k]}</Option>)}
-              </Select>
-            </div>
-          }
-        >
-          {projectTasks.length === 0 ? (
-            <div className="px-6 py-8 flex flex-col items-center gap-2 text-center">
-              <MaterialIcon name="task_alt" size={22} className="text-gray-200" />
-              <p className="text-xs font-semibold text-gray-400">
-                {allProjectTaskCount === 0 ? 'No tasks for this project yet.' : 'No tasks match this filter.'}
-              </p>
-            </div>
-          ) : (
-            <div className="px-4 md:px-6 py-4 flex flex-col gap-2">
-              {projectTasks.map(task => (
-                <TaskRow key={task.id} task={task} showProject={false} showStatus onClick={() => setDetailTask(task)} onDelete={() => setConfirmTask(task)} />
-              ))}
-            </div>
-          )}
-        </CardContent>
 
       </div>
 
