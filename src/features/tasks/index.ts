@@ -4,6 +4,5 @@ export { default as TaskDetailModal } from './components/task-detail-modal/task-
 export { default as TasksOverview } from './components/tasks-overview/tasks-overview';
 export { default as TasksPage } from './pages/TasksPage';
 export { default as UserTasksPage } from './pages/UserTasksPage';
-export { useTasksStore } from './stores/taskStore';
+export { canCreateTask, canDeleteTask, useTasksStore } from './stores/taskStore';
 export type { Task, TaskPriority, TaskStatus } from './types';
-

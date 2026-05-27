@@ -12,12 +12,15 @@ import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
 import { MemberPicker } from '@/src/shared/components';
-import { useTasksStore } from '../stores/taskStore';
+import { canCreateTask, canDeleteTask, useTasksStore } from '../stores/taskStore';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
+import { useAuthStore } from '@/src/features/auth';
+import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
+import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 
 // ─── Tab config ───────────────────────────────────────────────────────────────
@@ -65,8 +68,9 @@ interface TaskFormValues {
 // ─── Tasks Page ───────────────────────────────────────────────────────────────
 
 const Tasks = () => {
-  const { searchQuery } = useUIStore();
-  const { tasks, addTask, updateTask, removeTask } = useTasksStore();
+  const { searchQuery, showToast } = useUIStore();
+  const profile = useAuthStore(state => state.profile);
+  const { tasks, loading, error, addTask, updateTask, removeTask } = useTasksStore();
   const { projects } = useProjectsStore();
   const { members } = useTeamStore();
   const { clients } = useClientsStore();
@@ -91,6 +95,9 @@ const Tasks = () => {
   const selectedProjectId = watch('projectId');
   const selectedProject = projects.find(project => project.id === selectedProjectId);
   const selectedClient = clients.find(client => client.id === selectedProject?.clientId);
+  const canCreate = canCreateTask(profile?.role);
+  const canDelete = canDeleteTask(profile?.role);
+  const canEdit = canCreate;
   const hasTaskFormChanges = isDirty || (
     editingTask
       ? !sameStringSet(selectedMemberIds, editingTask.assigneeIds ?? []) || assignToClient !== Boolean(editingTask.clientAssigneeId)
@@ -144,6 +151,14 @@ const Tasks = () => {
 
   // ── Sidebar helpers ──
   const openAdd = () => {
+    if (!canCreate) {
+      showToast({
+        status: 'error',
+        title: FEEDBACK_MESSAGES.sidebar.taskCreateFailed,
+        message: FEEDBACK_MESSAGES.sidebar.taskCreateNotAllowed,
+      });
+      return;
+    }
     setEditingTask(null);
     reset({
       title: '', description: '', projectId: '',
@@ -157,6 +172,7 @@ const Tasks = () => {
   };
 
   const openEdit = (task: Task) => {
+    if (!canEdit) return;
     setEditingTask(task);
     reset({
       title: task.title,
@@ -172,9 +188,16 @@ const Tasks = () => {
     setSidebarOpen(true);
   };
 
-  const onSubmit = (data: TaskFormValues) => {
+  const onSubmit = async (data: TaskFormValues) => {
     setSubmitError(null);
+    const project = projects.find(item => item.id === data.projectId);
+    if (!project) {
+      setSubmitError('Select a project');
+      return;
+    }
+
     const payload: Partial<Omit<Task, 'id' | 'createdAt'>> = {
+      clientId: project.clientId,
       title: data.title,
       description: data.description || undefined,
       projectId: data.projectId,
@@ -182,16 +205,30 @@ const Tasks = () => {
       priority: data.priority,
       dueDate: data.dueDate || undefined,
       assigneeIds: selectedMemberIds.length ? selectedMemberIds : undefined,
-      clientAssigneeId: assignToClient ? selectedProject?.clientId : undefined,
+      clientAssigneeId: assignToClient ? project.clientId : '',
       updatedAt: Date.now(),
     };
 
-    if (editingTask) {
-      updateTask(editingTask.id, payload);
-    } else {
-      addTask({ id: `tk_${Date.now()}`, createdAt: Date.now(), ...payload } as Task);
+    try {
+      if (editingTask) {
+        await runOperationWithFeedback({
+          loadingLabel: 'Updating task',
+          successTitle: FEEDBACK_MESSAGES.sidebar.taskUpdateSuccess,
+          errorTitle: FEEDBACK_MESSAGES.sidebar.taskUpdateFailed,
+          action: () => updateTask(editingTask.id, payload),
+        });
+      } else {
+        await runOperationWithFeedback({
+          loadingLabel: 'Creating task',
+          successTitle: FEEDBACK_MESSAGES.sidebar.taskCreateSuccess,
+          errorTitle: FEEDBACK_MESSAGES.sidebar.taskCreateFailed,
+          action: () => addTask({ id: `tk_${Date.now()}`, createdAt: Date.now(), ...payload } as Task),
+        });
+      }
+      setSidebarOpen(false);
+    } catch (error) {
+      setSubmitError(firebaseErrorMessage(error));
     }
-    setSidebarOpen(false);
   };
 
   const onInvalidSubmit = (invalidErrors: unknown) => {
@@ -260,13 +297,23 @@ const Tasks = () => {
             onSortChange={key => setSortKey(key as SortKey)}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            actionLabel="Add Task"
-            onAction={openAdd}
+            actionLabel={canCreate ? 'Add Task' : undefined}
+            onAction={canCreate ? openAdd : undefined}
           />
         </div>
 
         {/* ── Content ── */}
-        {filtered.length === 0 ? (
+        {error.tasks && (
+          <div className="rounded-[16px] border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {error.tasks}
+          </div>
+        )}
+
+        {loading.tasks && !tasks.length ? (
+          <div className="bg-white border border-gray-100 rounded-[18px] py-16 text-center">
+            <p className="type-card-title text-gray-500">Loading tasks...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-[18px] py-16 flex flex-col items-center gap-3 text-center">
             <CheckSquare size={26} className="text-gray-200" />
             <p className="text-sm font-semibold text-gray-400">
@@ -281,8 +328,8 @@ const Tasks = () => {
                 task={task}
                 showStatus={activeTab === 'all'}
                 onClick={() => setDetailTask(task)}
-                onEdit={() => openEdit(task)}
-                onDelete={() => setConfirmTask(task)}
+                onEdit={canEdit ? () => openEdit(task) : undefined}
+                onDelete={canDelete ? () => setConfirmTask(task) : undefined}
               />
             ))}
           </div>
@@ -294,8 +341,8 @@ const Tasks = () => {
                 task={task}
                 showStatus={activeTab === 'all'}
                 onClick={() => setDetailTask(task)}
-                onEdit={() => openEdit(task)}
-                onDelete={() => setConfirmTask(task)}
+                onEdit={canEdit ? () => openEdit(task) : undefined}
+                onDelete={canDelete ? () => setConfirmTask(task) : undefined}
               />
             ))}
           </div>
@@ -304,15 +351,15 @@ const Tasks = () => {
       </div>
 
       {/* ── Mobile FAB ── */}
-      <Fab onClick={openAdd} ariaLabel="Add task" />
+      {canCreate && <Fab onClick={openAdd} ariaLabel="Add task" />}
 
       {/* ── Task detail modal ── */}
       {detailTask && (
         <TaskDetailModal
           task={detailTask}
           onClose={() => setDetailTask(null)}
-          onEdit={() => { setDetailTask(null); openEdit(detailTask); }}
-          onDelete={() => { setDetailTask(null); setConfirmTask(detailTask); }}
+          onEdit={canEdit ? () => { setDetailTask(null); openEdit(detailTask); } : undefined}
+          onDelete={canDelete ? () => { setDetailTask(null); setConfirmTask(detailTask); } : undefined}
         />
       )}
 
@@ -323,7 +370,21 @@ const Tasks = () => {
         message={confirmTask ? `"${confirmTask.title}" will be permanently removed.` : ''}
         confirmLabel="Delete"
         variant="danger"
-        onConfirm={() => { if (confirmTask) removeTask(confirmTask.id); setConfirmTask(null); }}
+        onConfirm={async () => {
+          try {
+            if (confirmTask) {
+              await runOperationWithFeedback({
+                loadingLabel: 'Deleting task',
+                successTitle: FEEDBACK_MESSAGES.sidebar.taskDeleteSuccess,
+                errorTitle: FEEDBACK_MESSAGES.sidebar.taskDeleteFailed,
+                action: () => removeTask(confirmTask.id),
+              });
+            }
+            setConfirmTask(null);
+          } catch {
+            // runOperationWithFeedback already logs and shows the toast.
+          }
+        }}
         onCancel={() => setConfirmTask(null)}
       />
 

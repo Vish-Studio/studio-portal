@@ -147,14 +147,22 @@ export const phaseDocToPhase = (doc: QueryDocumentSnapshot): Phase => {
 
 export const taskDocToTask = (doc: QueryDocumentSnapshot): Task => {
   const data = doc.data();
+  const status = data.status === 'review' ? 'to-test' : data.status === 'done' ? 'completed' : data.status === 'in-progress' ? 'in-progress' : data.completed === true ? 'completed' : 'todo';
+  const priority = data.priority === 'high' || data.priority === 'low' ? data.priority : 'medium';
   return {
     id: doc.id,
+    clientId: typeof data.clientId === 'string' ? data.clientId : undefined,
     title: String(data.title ?? 'Untitled task'),
     description: String(data.description ?? ''),
     projectId: String(data.projectId ?? ''),
-    status: data.status === 'review' ? 'to-test' : data.status === 'done' ? 'completed' : data.status === 'in-progress' ? 'in-progress' : 'todo',
-    priority: 'medium',
-    assigneeIds: data.assignedToId ? [String(data.assignedToId)] : [],
+    status,
+    priority,
+    assigneeIds: Array.isArray(data.assigneeIds)
+      ? data.assigneeIds.map(String)
+      : data.assignedToId ? [String(data.assignedToId)] : [],
+    clientAssigneeId: typeof data.clientAssigneeId === 'string'
+      ? data.clientAssigneeId
+      : data.visibleToClient === true && typeof data.clientId === 'string' ? data.clientId : undefined,
     dueDate: toDateInput(data.dueDate),
     createdAt: toMillis(data.createdAt),
     updatedAt: toMillis(data.updatedAt ?? data.createdAt),

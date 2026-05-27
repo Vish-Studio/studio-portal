@@ -32,7 +32,13 @@ export function FirestoreStreams() {
             ? { teamId: profile.uid }
             : undefined,
       ),
-      subscribeToTasks(),
+      subscribeToTasks(
+        profile.role === 'client'
+          ? { clientId: profile.uid }
+          : profile.role === 'team' || profile.role === 'freelancer'
+            ? { assigneeId: profile.uid }
+            : undefined,
+      ),
       subscribeToDocuments(),
       subscribeToCalendarEvents(profile),
     ];

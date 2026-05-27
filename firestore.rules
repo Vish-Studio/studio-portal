@@ -183,27 +183,60 @@ service cloud.firestore {
 
     // tasks: admin-assigned and client-visible tasks.
     match /tasks/{taskId} {
-      function isValidTask(data) {
-        return data.keys().hasAll(['clientId', 'title', 'completed', 'createdAt']) &&
-               data.clientId is string && data.clientId.size() <= 128 &&
-               data.title is string && data.title.size() <= 200 &&
-               data.completed is bool &&
-               data.createdAt is timestamp;
+      function isTaskClient(data) {
+        return currentRole() == 'client' && data.clientId == request.auth.uid;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
+      function isAssignedToTask(data) {
+        return request.auth.uid in data.get('assigneeIds', []);
+      }
 
-      allow create: if isAdmin() && isValidId(taskId) && isValidTask(incoming()) &&
+      function canCreateTask() {
+        return currentRole() in ['admin', 'superadmin', 'freelancer'];
+      }
+
+      function canUpdateTask(data) {
+        return isManager() || (currentRole() == 'freelancer' && isAssignedToTask(data));
+      }
+
+      function isValidTask(data) {
+        return data.keys().hasAll(['clientId', 'projectId', 'title', 'status', 'priority', 'completed', 'createdAt', 'updatedAt']) &&
+               data.clientId is string && data.clientId.size() <= 128 &&
+               data.projectId is string && data.projectId.size() <= 128 &&
+               data.title is string && data.title.size() <= 200 &&
+               (data.get('description', '') is string) && data.get('description', '').size() <= 2000 &&
+               data.status in ['todo', 'in-progress', 'review', 'done'] &&
+               data.priority in ['low', 'medium', 'high'] &&
+               data.completed is bool &&
+               (data.get('assigneeIds', []) is list) && data.get('assigneeIds', []).size() <= 50 &&
+               (data.get('assignedToId', '') is string) && data.get('assignedToId', '').size() <= 128 &&
+               (data.get('clientAssigneeId', '') is string) && data.get('clientAssigneeId', '').size() <= 128 &&
+               (data.get('visibleToClient', false) is bool) &&
+               (!('dueDate' in data) || data.dueDate == null || data.dueDate is timestamp) &&
+               data.createdAt is timestamp &&
+               data.updatedAt is timestamp;
+      }
+
+      allow get: if isSignedIn() && (isManager() || isTaskClient(existing()) || isAssignedToTask(existing()));
+      allow list: if isSignedIn() && (isManager() || isTaskClient(resource.data) || isAssignedToTask(resource.data));
+
+      allow create: if isSignedIn() &&
+                      canCreateTask() &&
+                      isValidId(taskId) && isValidTask(incoming()) &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
-                      incoming().createdAt == request.time;
+                      incoming().createdAt == request.time &&
+                      incoming().updatedAt == request.time;
 
       allow update: if isSignedIn() && isValidId(taskId) && isValidTask(incoming()) &&
                       incoming().createdAt == existing().createdAt &&
                       incoming().clientId == existing().clientId &&
-                      (isAdmin() || (request.auth.uid == existing().clientId && incoming().diff(existing()).affectedKeys().hasOnly(['completed'])));
+                      incoming().updatedAt == request.time &&
+                      (
+                        canUpdateTask(existing()) ||
+                        (isTaskClient(existing()) && incoming().diff(existing()).affectedKeys().hasOnly(['completed', 'status', 'updatedAt']))
+                      );
 
-      allow delete: if isAdmin();
+      allow delete: if isManager();
     }
 
     // expenses: internal admin-only accounting data.

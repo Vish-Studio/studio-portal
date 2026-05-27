@@ -1,22 +1,16 @@
 import { useState, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
 import { AlertTriangle, CheckCircle2, CheckSquare, ListTodo, Timer } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { isPast, parseISO } from 'date-fns';
 import UserLayout from '@/src/layouts/UserLayout';
-import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
-import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { Button, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
 import { useTasksStore } from '../stores/taskStore';
 import { useProjectsStore } from '@/src/features/projects';
-import { FEEDBACK_MESSAGES } from '@/src/app/messages';
-import type { Task, TaskStatus, TaskPriority } from '../types';
-
-const CURRENT_CLIENT_ID = 'c1';
+import type { Task, TaskStatus } from '../types';
+import { useAuthStore } from '@/src/features/auth';
 
 // ─── Tab config (mirrors admin Tasks) ────────────────────────────────────────
 
@@ -42,40 +36,24 @@ const EMPTY_MSG: Record<FilterKey, string> = {
   completed:    'No completed tasks yet.',
 };
 
-interface TaskFormValues {
-  title: string;
-  description: string;
-  projectId: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: string;
-}
-
 // ─── UserTasks page ───────────────────────────────────────────────────────────
 
 const UserTasks = () => {
-  const { tasks, addTask, updateTask, removeTask } = useTasksStore();
+  const { tasks, loading, error } = useTasksStore();
+  const profile = useAuthStore(state => state.profile);
   const { projects } = useProjectsStore();
+  const currentClientId = profile?.uid ?? '';
 
   // User's projects only
-  const myProjects   = projects.filter(p => p.clientId === CURRENT_CLIENT_ID);
+  const myProjects   = projects.filter(p => p.clientId === currentClientId);
   const myProjectIds = new Set(myProjects.map(p => p.id));
-  const myTasks      = tasks.filter(t => t.clientAssigneeId === CURRENT_CLIENT_ID && myProjectIds.has(t.projectId));
+  const myTasks      = tasks.filter(t => (t.clientId === currentClientId || t.clientAssigneeId === currentClientId) && myProjectIds.has(t.projectId));
 
   const [activeTab,     setActiveTab]     = useState<FilterKey>('all');
   const [viewMode,      setViewMode]      = useState<'grid' | 'list'>('grid');
   const [sortKey,       setSortKey]       = useState<SortKey>('updated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [sidebarOpen,   setSidebarOpen]   = useState(false);
-  const [editingTask,   setEditingTask]   = useState<Task | null>(null);
-  const [confirmTask,   setConfirmTask]   = useState<Task | null>(null);
   const [detailTask,    setDetailTask]    = useState<Task | null>(null);
-  const [submitError,   setSubmitError]   = useState<string | null>(null);
-
-  const { register, handleSubmit, reset, formState: { errors, isDirty, isSubmitting } } =
-    useForm<TaskFormValues>({
-      defaultValues: { title: '', description: '', projectId: '', status: 'todo', priority: 'medium', dueDate: '' },
-    });
 
   // ── Counts ──
   const counts = useMemo(() => ({
@@ -114,57 +92,6 @@ const UserTasks = () => {
       return sortDirection === 'asc' ? result : -result;
     });
   }, [myTasks, activeTab, sortKey, sortDirection]);
-
-  // ── Sidebar helpers ──
-  const openAdd = () => {
-    setEditingTask(null);
-    setSubmitError(null);
-    reset({
-      title: '', description: '',
-      projectId: myProjects[0]?.id ?? '',
-      status: activeTab === 'all' ? 'todo' : activeTab as TaskStatus,
-      priority: 'medium', dueDate: '',
-    });
-    setSidebarOpen(true);
-  };
-
-  const openEdit = (task: Task) => {
-    setEditingTask(task);
-    setSubmitError(null);
-    reset({
-      title:       task.title,
-      description: task.description ?? '',
-      projectId:   task.projectId,
-      status:      task.status,
-      priority:    task.priority,
-      dueDate:     task.dueDate ?? '',
-    });
-    setSidebarOpen(true);
-  };
-
-  const onSubmit = (data: TaskFormValues) => {
-    setSubmitError(null);
-    const payload: Partial<Omit<Task, 'id' | 'createdAt'>> = {
-      title:       data.title,
-      description: data.description || undefined,
-      projectId:   data.projectId,
-      status:      data.status,
-      priority:    data.priority,
-      dueDate:     data.dueDate || undefined,
-      clientAssigneeId: CURRENT_CLIENT_ID,
-      updatedAt:   Date.now(),
-    };
-    if (editingTask) {
-      updateTask(editingTask.id, payload);
-    } else {
-      addTask({ id: `tk_${Date.now()}`, createdAt: Date.now(), ...payload } as Task);
-    }
-    setSidebarOpen(false);
-  };
-
-  const onInvalidSubmit = (invalidErrors: unknown) => {
-    setSubmitError(getFormErrorMessage(invalidErrors as Record<string, unknown>));
-  };
 
   return (
     <UserLayout title="Tasks">
@@ -224,13 +151,21 @@ const UserTasks = () => {
             onSortChange={key => setSortKey(key as SortKey)}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            actionLabel="Add Task"
-            onAction={openAdd}
           />
         </div>
 
         {/* Content */}
-        {filtered.length === 0 ? (
+        {error.tasks && (
+          <div className="rounded-[16px] border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {error.tasks}
+          </div>
+        )}
+
+        {loading.tasks && !myTasks.length ? (
+          <div className="bg-white border border-gray-100 rounded-[18px] py-16 text-center">
+            <p className="type-card-title text-gray-500">Loading tasks...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-[18px] py-16 flex flex-col items-center gap-3 text-center">
             <CheckSquare size={26} className="text-gray-200" />
             <p className="text-sm font-semibold text-gray-400">{EMPTY_MSG[activeTab]}</p>
@@ -243,8 +178,6 @@ const UserTasks = () => {
                 task={task}
                 showStatus={activeTab === 'all'}
                 onClick={() => setDetailTask(task)}
-                onEdit={() => openEdit(task)}
-                onDelete={() => setConfirmTask(task)}
               />
             ))}
           </div>
@@ -256,8 +189,6 @@ const UserTasks = () => {
                 task={task}
                 showStatus={activeTab === 'all'}
                 onClick={() => setDetailTask(task)}
-                onEdit={() => openEdit(task)}
-                onDelete={() => setConfirmTask(task)}
               />
             ))}
           </div>
@@ -265,107 +196,14 @@ const UserTasks = () => {
 
       </div>
 
-      {/* Mobile FAB */}
-      <Fab onClick={openAdd} ariaLabel="Add task" />
-
       {/* Task detail modal */}
       {detailTask && (
         <TaskDetailModal
           task={detailTask}
           onClose={() => setDetailTask(null)}
-          onEdit={() => { setDetailTask(null); openEdit(detailTask); }}
-          onDelete={() => { setDetailTask(null); setConfirmTask(detailTask); }}
         />
       )}
 
-      {/* Delete confirmation */}
-      <ConfirmDialog
-        isOpen={!!confirmTask}
-        title="Delete task"
-        message={confirmTask ? `"${confirmTask.title}" will be permanently removed.` : ''}
-        confirmLabel="Delete"
-        variant="danger"
-        onConfirm={() => { if (confirmTask) removeTask(confirmTask.id); setConfirmTask(null); }}
-        onCancel={() => setConfirmTask(null)}
-      />
-
-      {/* Add / Edit Sidebar */}
-      <FormSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        title={editingTask ? 'Edit Task' : 'New Task'}
-        description={editingTask ? `Editing "${editingTask.title}"` : 'Add a task to one of your projects.'}
-        width="md"
-      >
-        <form onSubmit={handleSubmit(onSubmit, onInvalidSubmit)} className="flex flex-col flex-1 min-h-0">
-          <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
-            <FormSidebarError
-              title={editingTask ? FEEDBACK_MESSAGES.sidebar.taskUpdateFailed : FEEDBACK_MESSAGES.sidebar.taskCreateFailed}
-              message={submitError}
-            />
-
-            <FormField label="Task Title" required error={errors.title?.message}>
-              <TextInput
-                {...register('title', { required: FEEDBACK_MESSAGES.validation.titleRequired })}
-                placeholder="e.g. Review design mockups"
-                hasError={!!errors.title}
-              />
-            </FormField>
-
-            <FormField label="Description" error={errors.description?.message}>
-              <TextArea
-                {...register('description')}
-                rows={3}
-                placeholder="Optional details or context..."
-              />
-            </FormField>
-
-            {/* Project selector — only user's projects */}
-            <FormField label="Project" required error={errors.projectId?.message}>
-              <Select
-                {...register('projectId', { required: 'Select a project' })}
-                hasError={!!errors.projectId}
-              >
-                <Option value="">— Select project —</Option>
-                {myProjects.map(p => (
-                  <Option key={p.id} value={p.id}>{p.name}</Option>
-                ))}
-              </Select>
-            </FormField>
-
-            <div className="grid grid-cols-2 gap-3">
-              <FormField label="Status" error={errors.status?.message}>
-                <Select {...register('status')} hasError={!!errors.status}>
-                  <Option value="todo">Todo</Option>
-                  <Option value="in-progress">In Progress</Option>
-                  <Option value="to-test">To Test</Option>
-                  <Option value="completed">Completed</Option>
-                </Select>
-              </FormField>
-
-              <FormField label="Priority" error={errors.priority?.message}>
-                <Select {...register('priority')} hasError={!!errors.priority}>
-                  <Option value="high">High</Option>
-                  <Option value="medium">Medium</Option>
-                  <Option value="low">Low</Option>
-                </Select>
-              </FormField>
-            </div>
-
-            <FormField label="Due Date" error={errors.dueDate?.message}>
-              <DatePicker {...register('dueDate')} hasError={!!errors.dueDate} />
-            </FormField>
-
-          </div>
-
-          <FormSidebarActions
-            onCancel={() => setSidebarOpen(false)}
-            isSubmitting={isSubmitting}
-            isDirty={isDirty}
-            submitLabel={editingTask ? 'Save Changes' : 'Add Task'}
-          />
-        </form>
-      </FormSidebar>
     </UserLayout>
   );
 };
