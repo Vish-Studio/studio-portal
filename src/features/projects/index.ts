@@ -6,6 +6,7 @@ export { default as ProjectDetailPage } from './pages/ProjectDetailPage';
 export { default as ProjectsPage } from './pages/ProjectsPage';
 export { default as UserProjectsPage } from './pages/UserProjectsPage';
 export {
+  canCreateProject,
   getPhaseIndex,
   makeNewProject,
   useProjectsStore,

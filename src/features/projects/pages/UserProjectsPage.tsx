@@ -12,13 +12,15 @@ import Select from '@/src/shared/components/select/select';
 import Option from '@/src/shared/components/select/option';
 import ConfirmDialog from '@/src/shared/components/confirm-dialog/confirm-dialog';
 import { ProjectCard, ProjectCardMini } from '@/src/features/projects';
-import { makeNewProject, useProjectsStore } from '@/src/features/projects';
+import { canCreateProject, makeNewProject, useProjectsStore } from '@/src/features/projects';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useTasksStore } from '@/src/features/tasks';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '@/src/features/projects';
-
-const CURRENT_CLIENT_ID = 'c1';
+import { useAuthStore } from '@/src/features/auth';
+import { useUIStore } from '@/src/app/stores/uiStore';
+import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
+import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
 
 interface ProjectFormValues {
   name: string;
@@ -35,11 +37,14 @@ const getPendingClientPhase = (project: ClientProject) =>
   project.phases.find(phase => phase.status === 'active' && phase.requiresClientAction && !phase.clientCompleted);
 
 export default function UserProjectsPage() {
-  const { projects, addProject, updateProject, removeProject, completePhase } = useProjectsStore();
+  const { projects, loading, error, addProject, updateProject, removeProject, completePhase } = useProjectsStore();
+  const profile = useAuthStore(state => state.profile);
+  const showToast = useUIStore(state => state.showToast);
   const { tasks } = useTasksStore();
   const { clients } = useClientsStore();
-  const currentClient = clients.find(client => client.id === CURRENT_CLIENT_ID);
-  const myProjects = projects.filter(project => project.clientId === CURRENT_CLIENT_ID);
+  const currentClientId = profile?.uid ?? '';
+  const currentClient = clients.find(client => client.id === currentClientId);
+  const myProjects = projects.filter(project => project.clientId === currentClientId);
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -57,6 +62,7 @@ export default function UserProjectsPage() {
 
   const watchedService = watch('service');
   const hasPackages = watchedService === 'website' || watchedService === 'software';
+  const canCreate = canCreateProject(profile?.role);
 
   const tabCounts = useMemo(() => ({
     all: myProjects.length,
@@ -89,6 +95,14 @@ export default function UserProjectsPage() {
   const pendingActions = myProjects.filter(project => getPendingClientPhase(project)).length;
 
   const openAdd = () => {
+    if (!canCreate) {
+      showToast({
+        status: 'error',
+        title: FEEDBACK_MESSAGES.sidebar.projectCreateFailed,
+        message: FEEDBACK_MESSAGES.sidebar.projectCreateNotAllowed,
+      });
+      return;
+    }
     setEditingProject(null);
     setSubmitError(null);
     reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' });
@@ -108,7 +122,14 @@ export default function UserProjectsPage() {
     setSidebarOpen(true);
   };
 
-  const onSubmit = (data: ProjectFormValues) => {
+  const onSubmit = async (data: ProjectFormValues) => {
+    if (!currentClientId) {
+      const message = FEEDBACK_MESSAGES.auth.noProfile;
+      setSubmitError(message);
+      showToast({ status: 'error', title: FEEDBACK_MESSAGES.sidebar.projectCreateFailed, message });
+      return;
+    }
+
     setSubmitError(null);
     const payload = {
       name: data.name,
@@ -116,12 +137,29 @@ export default function UserProjectsPage() {
       package: hasPackages && data.package ? (data.package as PackageType) : undefined,
       status: data.status,
       timeline: data.timeline,
-      clientId: CURRENT_CLIENT_ID,
+      clientId: currentClientId,
     };
 
-    if (editingProject) updateProject(editingProject.id, payload);
-    else addProject(makeNewProject(payload));
-    setSidebarOpen(false);
+    try {
+      if (editingProject) {
+        await runOperationWithFeedback({
+          loadingLabel: 'Updating project',
+          successTitle: FEEDBACK_MESSAGES.sidebar.projectUpdateSuccess,
+          errorTitle: FEEDBACK_MESSAGES.sidebar.projectUpdateFailed,
+          action: () => updateProject(editingProject.id, payload),
+        });
+      } else {
+        await runOperationWithFeedback({
+          loadingLabel: 'Creating project',
+          successTitle: FEEDBACK_MESSAGES.sidebar.projectCreateSuccess,
+          errorTitle: FEEDBACK_MESSAGES.sidebar.projectCreateFailed,
+          action: () => addProject(makeNewProject(payload)),
+        });
+      }
+      setSidebarOpen(false);
+    } catch (error) {
+      setSubmitError(firebaseErrorMessage(error));
+    }
   };
 
   const onInvalidSubmit = (invalidErrors: unknown) => {
@@ -172,19 +210,29 @@ export default function UserProjectsPage() {
             onSortChange={key => setSortKey(key as SortKey)}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            actionLabel="Add Project"
-            onAction={openAdd}
+            actionLabel={canCreate ? 'Add Project' : undefined}
+            onAction={canCreate ? openAdd : undefined}
             className="min-w-0 flex-1"
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {error.projects && (
+          <div className="rounded-[16px] border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {error.projects}
+          </div>
+        )}
+
+        {loading.projects && !myProjects.length ? (
+          <div className="flex flex-col items-center gap-3 rounded-[18px] border border-gray-100 bg-white py-16 text-center">
+            <p className="text-sm font-semibold text-gray-500">Loading projects...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center gap-3 rounded-[18px] border border-gray-100 bg-white py-16 text-center">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-(--color-surface)">
               <Briefcase size={20} className="text-gray-300" />
             </div>
             <p className="text-sm font-semibold text-gray-500">No projects found</p>
-            <Button type="button" variant="ghost" size="sm" onClick={openAdd} className="mt-1">Add your first project</Button>
+            {canCreate && <Button type="button" variant="ghost" size="sm" onClick={openAdd} className="mt-1">Add your first project</Button>}
           </div>
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -269,7 +317,7 @@ export default function UserProjectsPage() {
         </form>
       </FormSidebar>
 
-      <Fab onClick={openAdd} ariaLabel="Add project" />
+      {canCreate && <Fab onClick={openAdd} ariaLabel="Add project" />}
 
       <ConfirmDialog
         isOpen={!!confirmProject}
@@ -277,7 +325,21 @@ export default function UserProjectsPage() {
         message={confirmProject ? `"${confirmProject.name}" will be permanently removed. This cannot be undone.` : ''}
         confirmLabel="Delete"
         variant="danger"
-        onConfirm={() => { if (confirmProject) removeProject(confirmProject.id); setConfirmProject(null); }}
+        onConfirm={async () => {
+          try {
+            if (confirmProject) {
+              await runOperationWithFeedback({
+                loadingLabel: 'Deleting project',
+                successTitle: FEEDBACK_MESSAGES.sidebar.projectDeleteSuccess,
+                errorTitle: FEEDBACK_MESSAGES.sidebar.projectDeleteFailed,
+                action: () => removeProject(confirmProject.id),
+              });
+            }
+            setConfirmProject(null);
+          } catch {
+            // runOperationWithFeedback already logs and shows the toast.
+          }
+        }}
         onCancel={() => setConfirmProject(null)}
       />
     </UserLayout>

@@ -24,9 +24,32 @@ const toDateInput = (value: unknown) => {
 };
 
 const phaseStatus = (status: unknown): PhaseStatus => {
+  if (status === 'done') return 'done';
   if (status === 'completed') return 'done';
   if (status === 'active') return 'active';
   return 'pending';
+};
+
+const isServiceType = (value: unknown): value is ClientProject['service'] =>
+  value === 'website' || value === 'software' || value === 'mobile-app' || value === 'branding' || value === 'logo-design';
+
+const isPackageType = (value: unknown): value is NonNullable<ClientProject['package']> =>
+  value === 'essentials' || value === 'growth' || value === 'premium';
+
+const rawPhaseToPhase = (raw: unknown, index: number): Phase | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const data = raw as Record<string, unknown>;
+  return {
+    id: String(data.id ?? `ph_${index}`),
+    title: String(data.title ?? data.name ?? 'Phase'),
+    icon: String(data.icon ?? 'radio_button_checked'),
+    status: phaseStatus(data.status),
+    requiresClientAction: data.requiresClientAction === true,
+    clientCompleted: data.clientCompleted === true || data.status === 'completed',
+    targetDate: typeof data.targetDate === 'string' ? data.targetDate : toDateInput(data.endDate),
+    description: typeof data.description === 'string' ? data.description : undefined,
+    phaseAmount: typeof data.phaseAmount === 'number' ? data.phaseAmount : undefined,
+  };
 };
 
 export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
@@ -92,14 +115,19 @@ export const projectDocToClientProject = (
   return {
     id: doc.id,
     clientId: String(data.clientId ?? ''),
-    name: String(data.title ?? 'Untitled project'),
+    name: String(data.name ?? data.title ?? 'Untitled project'),
     status,
-    phases: phases.length ? phases : buildDefaultPhases(0),
-    agreedPayment: 0,
-    paidPayment: 0,
-    timeline: '',
+    phases: phases.length
+      ? phases
+      : Array.isArray(data.phases)
+        ? data.phases.map(rawPhaseToPhase).filter((phase): phase is Phase => Boolean(phase))
+        : buildDefaultPhases(0),
+    agreedPayment: typeof data.agreedPayment === 'number' ? data.agreedPayment : 0,
+    paidPayment: typeof data.paidPayment === 'number' ? data.paidPayment : 0,
+    timeline: String(data.timeline ?? ''),
     startedAt: toMillis(data.createdAt),
-    service: 'software',
+    service: isServiceType(data.service) ? data.service : 'software',
+    package: isPackageType(data.package) ? data.package : undefined,
     assignedMemberIds: Array.isArray(data.assignedTeamIds) ? data.assignedTeamIds.map(String) : [],
   };
 };

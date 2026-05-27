@@ -1,5 +1,13 @@
     // projects: client work and process state.
     match /projects/{projectId} {
+      function isProjectClient(data) {
+        return currentRole() == 'client' && data.clientId == request.auth.uid;
+      }
+
+      function isAssignedToProject(data) {
+        return request.auth.uid in data.get('assignedTeamIds', []);
+      }
+
       function isValidProject(data) {
         return data.keys().hasAll(['clientId', 'name', 'phase', 'createdAt', 'updatedAt']) &&
                data.clientId is string && data.clientId.size() <= 128 &&
@@ -12,18 +20,22 @@
                data.updatedAt is timestamp;
       }
 
-      allow get: if isSignedIn() && (isAdmin() || existing().clientId == request.auth.uid);
-      allow list: if isSignedIn() && (isAdmin() || resource.data.clientId == request.auth.uid);
+      allow get: if isSignedIn() && (isManager() || isProjectClient(existing()) || isAssignedToProject(existing()));
+      allow list: if isSignedIn() && (isManager() || isProjectClient(resource.data) || isAssignedToProject(resource.data));
 
-      allow create: if isAdmin() && isValidId(projectId) && isValidProject(incoming()) &&
+      allow create: if isSignedIn() &&
+                      (isManager() || isProjectClient(incoming())) &&
+                      isValidId(projectId) && isValidProject(incoming()) &&
                       exists(/databases/$(database)/documents/clients/$(incoming().clientId)) &&
                       incoming().createdAt == request.time &&
                       incoming().updatedAt == request.time;
 
-      allow update: if isAdmin() && isValidId(projectId) && isValidProject(incoming()) &&
+      allow update: if isSignedIn() &&
+                      (isManager() || isProjectClient(existing())) &&
+                      isValidId(projectId) && isValidProject(incoming()) &&
                       incoming().createdAt == existing().createdAt &&
                       incoming().clientId == existing().clientId &&
                       incoming().updatedAt == request.time;
 
-      allow delete: if isAdmin();
+      allow delete: if isSignedIn() && (isManager() || isProjectClient(existing()));
     }

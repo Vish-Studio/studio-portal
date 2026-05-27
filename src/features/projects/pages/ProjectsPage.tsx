@@ -10,12 +10,15 @@ import { Button, ConfirmDialog, FormField, Option, Select, TextInput } from '@/s
 import ProjectCard, { ProjectCardMini } from '../components/project-card/project-card';
 import { ClientPicker } from '@/src/features/clients';
 import { MemberPicker } from '@/src/shared/components';
-import { useProjectsStore, makeNewProject } from '../stores/projectStore';
+import { useProjectsStore, makeNewProject, canCreateProject } from '../stores/projectStore';
 import { useTeamStore } from '@/src/features/team';
 import { useClientsStore } from '@/src/features/clients';
 import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, type PackageType } from '../types';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
+import { useAuthStore } from '@/src/features/auth';
+import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
+import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
 
 interface ProjectFormValues {
   name: string;
@@ -33,7 +36,8 @@ const sameStringSet = (left: string[] = [], right: string[] = []) => (
 
 const Projects = () => {
   const { searchQuery, showToast } = useUIStore();
-  const { projects, addProject, updateProject, removeProject } = useProjectsStore();
+  const { projects, loading, error, addProject, updateProject, removeProject } = useProjectsStore();
+  const profile = useAuthStore(state => state.profile);
   const { members } = useTeamStore();
   const { clients } = useClientsStore();
 
@@ -55,6 +59,8 @@ const Projects = () => {
 
   const watchedService = watch('service');
   const hasPackages = watchedService === 'website' || watchedService === 'software';
+  const canCreate = canCreateProject(profile?.role);
+  const canManage = profile?.role === 'superadmin' || profile?.role === 'admin';
   const hasProjectFormChanges = isDirty || (
     editingProject
       ? selectedClientId !== editingProject.clientId || !sameStringSet(selectedMemberIds, editingProject.assignedMemberIds ?? [])
@@ -100,6 +106,14 @@ const Projects = () => {
     : 0;
 
   const openAdd = () => {
+    if (!canCreate) {
+      showToast({
+        status: 'error',
+        title: FEEDBACK_MESSAGES.sidebar.projectCreateFailed,
+        message: FEEDBACK_MESSAGES.sidebar.projectCreateNotAllowed,
+      });
+      return;
+    }
     setEditingProject(null);
     reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' });
     setSelectedClientId('');
@@ -117,7 +131,7 @@ const Projects = () => {
     setSidebarOpen(true);
   };
 
-  const onSubmit = (data: ProjectFormValues) => {
+  const onSubmit = async (data: ProjectFormValues) => {
     if (!selectedClientId) {
       const message = FEEDBACK_MESSAGES.sidebar.projectClientRequired;
       setSubmitError(message);
@@ -134,12 +148,26 @@ const Projects = () => {
       clientId: selectedClientId,
       assignedMemberIds: selectedMemberIds,
     };
-    if (editingProject) {
-      updateProject(editingProject.id, payload);
-    } else {
-      addProject(makeNewProject(payload));
+    try {
+      if (editingProject) {
+        await runOperationWithFeedback({
+          loadingLabel: 'Updating project',
+          successTitle: FEEDBACK_MESSAGES.sidebar.projectUpdateSuccess,
+          errorTitle: FEEDBACK_MESSAGES.sidebar.projectUpdateFailed,
+          action: () => updateProject(editingProject.id, payload),
+        });
+      } else {
+        await runOperationWithFeedback({
+          loadingLabel: 'Creating project',
+          successTitle: FEEDBACK_MESSAGES.sidebar.projectCreateSuccess,
+          errorTitle: FEEDBACK_MESSAGES.sidebar.projectCreateFailed,
+          action: () => addProject(makeNewProject(payload)),
+        });
+      }
+      setSidebarOpen(false);
+    } catch (error) {
+      setSubmitError(firebaseErrorMessage(error));
     }
-    setSidebarOpen(false);
   };
 
   const onInvalidSubmit = (invalidErrors: unknown) => {
@@ -172,12 +200,22 @@ const Projects = () => {
             onSortChange={key => setSortKey(key as SortKey)}
             sortDirection={sortDirection}
             onSortDirectionChange={setSortDirection}
-            actionLabel="Add Project"
-            onAction={openAdd}
+            actionLabel={canCreate ? 'Add Project' : undefined}
+            onAction={canCreate ? openAdd : undefined}
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {error.projects && (
+          <div className="rounded-[16px] border border-red-100 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+            {error.projects}
+          </div>
+        )}
+
+        {loading.projects && !projects.length ? (
+          <div className="bg-white border border-gray-100 rounded-[18px] py-16 text-center">
+            <p className="type-card-title text-gray-500">Loading projects...</p>
+          </div>
+        ) : filtered.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-[18px] py-16 flex flex-col items-center gap-3 text-center">
             <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
               <Briefcase size={20} className="text-gray-300" />
@@ -188,10 +226,10 @@ const Projects = () => {
         ) : viewMode === 'grid' ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             {filtered.map(p => (
-              <ProjectCard key={p.id} project={p} allMembers={members} variant="surface" actions={[
+              <ProjectCard key={p.id} project={p} allMembers={members} variant="surface" actions={canManage ? [
                 { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
                 { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => setConfirmProject(p), variant: 'danger' },
-              ]} />
+              ] : []} />
             ))}
           </div>
         ) : (
@@ -200,10 +238,10 @@ const Projects = () => {
               <span>Project</span><span className="text-right">Progress</span><span className="text-right">Budget</span><span className="text-right">Remaining</span><span /><span className="text-right">Status</span><span />
             </div>
             {filtered.map(p => (
-              <ProjectCardMini key={p.id} project={p} allMembers={members} actions={[
+              <ProjectCardMini key={p.id} project={p} allMembers={members} actions={canManage ? [
                 { label: 'Edit project', icon: <Pencil size={14} />, onClick: () => openEdit(p) },
                 { label: 'Delete project', icon: <Trash2 size={14} />, onClick: () => setConfirmProject(p), variant: 'danger' },
-              ]} />
+              ] : []} />
             ))}
           </div>
         )}
@@ -271,11 +309,25 @@ const Projects = () => {
       </FormSidebar>
 
       <ConfirmDialog isOpen={!!confirmProject} title="Delete project" message={confirmProject ? `"${confirmProject.name}" will be permanently removed. This cannot be undone.` : ''} confirmLabel="Delete" variant="danger"
-        onConfirm={() => { if (confirmProject) removeProject(confirmProject.id); setConfirmProject(null); }}
+        onConfirm={async () => {
+          try {
+            if (confirmProject) {
+              await runOperationWithFeedback({
+                loadingLabel: 'Deleting project',
+                successTitle: FEEDBACK_MESSAGES.sidebar.projectDeleteSuccess,
+                errorTitle: FEEDBACK_MESSAGES.sidebar.projectDeleteFailed,
+                action: () => removeProject(confirmProject.id),
+              });
+            }
+            setConfirmProject(null);
+          } catch {
+            // runOperationWithFeedback already logs and shows the toast.
+          }
+        }}
         onCancel={() => setConfirmProject(null)}
       />
 
-      <Fab onClick={openAdd} ariaLabel="Add project" />
+      {canCreate && <Fab onClick={openAdd} ariaLabel="Add project" />}
     </DashboardLayout>
   );
 };
