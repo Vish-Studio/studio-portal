@@ -51,18 +51,13 @@ export function FirestoreStreams() {
       setClients([{
         id: profile.uid,
         userId: profile.uid,
-        user_id: profile.uid,
         fullName: profile.fullName,
-        full_name: profile.fullName,
         email: profile.email,
         companyName: profile.companyName ?? '',
-        company_name: profile.companyName ?? '',
         phone: profile.phoneNumber ?? '',
-        phone_number: profile.phoneNumber ?? '',
         role: 'client',
         status: profile.status === 'inactive' || profile.status === 'lost' ? profile.status : 'active',
         createdAt: profile.createdAt,
-        created_at: profile.createdAt,
       }]);
     }
 

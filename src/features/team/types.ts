@@ -6,33 +6,19 @@ export interface TeamMember {
   id: string;
   /** Display name — primary field used by UI components */
   name:       string;
-  /** Legacy snake_case alias; kept for Firestore compatibility */
-  full_name?: string;
-  first_name?: string;
-  last_name?:  string;
-  user_id?:   string | null;
   userId?:    string | null;
   role:       string;   // job title / position
-  job_title?: string;
   accessRole?: TeamAccessRole;
   email:       string;
   phone?:      string;
-  phone_number?: string;
   isOnline?:   boolean;
-  is_online?:  boolean;
   lastOnlineAt?: { toMillis: () => number; toDate: () => Date } | number | string;
-  last_online_at?: { toMillis: () => number; toDate: () => Date } | number | string;
   salaryAmount?: number;
-  salary_amount?: number;
   salaryType?: TeamSalaryType;
-  salary_type?: TeamSalaryType;
   assignedProjectId: string | null;
   status?:     TeamWorkStatus | "active" | "inactive" | "lost";
-  is_active?:  boolean;
   createdAt?:  { toMillis: () => number; toDate: () => Date };
-  created_at?: { toMillis: () => number; toDate: () => Date };
   updatedAt?:  { toMillis: () => number; toDate: () => Date };
-  updated_at?: { toMillis: () => number; toDate: () => Date };
 }
 
 export interface TeamProject {

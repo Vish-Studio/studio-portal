@@ -50,12 +50,12 @@ const CARET_POS: Record<TooltipSide, string> = {
 
 const VARIANT_BUBBLE: Record<TooltipVariant, string> = {
   default: 'bg-gray-900 text-white',
-  sidebar: 'bg-[var(--color-sidebar-active)] border border-white/10 text-white',
+  sidebar: 'bg-[var(--color-ink)] border border-white/10 text-white',
 };
 
 const VARIANT_CARET: Record<TooltipVariant, string> = {
   default: 'bg-gray-900',
-  sidebar: 'bg-[var(--color-sidebar-active)]',
+  sidebar: 'bg-[var(--color-ink)]',
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────

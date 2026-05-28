@@ -29,8 +29,6 @@ interface ClientFormValues {
   industry: string;
   location: string;
   companySize: string;
-  isOnline: boolean;
-  lastOnlineAt: string;
   status: ClientStatus;
   generatePassword: boolean;
   temporaryPassword: string;
@@ -83,8 +81,6 @@ export default function Clients() {
       industry: '',
       location: '',
       companySize: '',
-      isOnline: false,
-      lastOnlineAt: '',
       status: 'active',
       generatePassword: true,
       temporaryPassword: generateTemporaryPassword(),
@@ -147,8 +143,6 @@ export default function Clients() {
       industry: '',
       location: '',
       companySize: '',
-      isOnline: false,
-      lastOnlineAt: '',
       status: 'active',
       generatePassword: true,
       temporaryPassword: generateTemporaryPassword(),
@@ -169,8 +163,6 @@ export default function Clients() {
       industry: client.industry ?? '',
       location: client.location ?? '',
       companySize: client.companySize ?? '',
-      isOnline: client.isOnline === true,
-      lastOnlineAt: typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client.status,
       generatePassword: false,
       temporaryPassword: '',
@@ -197,6 +189,10 @@ export default function Clients() {
             companyName: '',
             email: '',
             phone: '',
+            website: '',
+            industry: '',
+            location: '',
+            companySize: '',
             status: 'active',
             generatePassword: true,
             temporaryPassword: generateTemporaryPassword(),
@@ -419,18 +415,6 @@ export default function Clients() {
               </FormField>
               <FormField label="Company Size" error={errors.companySize?.message}>
                 <TextInput {...register('companySize')} placeholder="e.g. 11-50 employees" hasError={!!errors.companySize} />
-              </FormField>
-            </div>
-
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <FormField label="Online Status">
-                <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
-                  <Option value="false">Offline</Option>
-                  <Option value="true">Online</Option>
-                </Select>
-              </FormField>
-              <FormField label="Last Online">
-                <TextInput {...register('lastOnlineAt')} type="datetime-local" />
               </FormField>
             </div>
 

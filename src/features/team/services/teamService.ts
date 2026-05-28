@@ -23,8 +23,6 @@ export interface TeamMemberInput {
   accessRole: TeamAccessRole;
   email: string;
   phone?: string;
-  isOnline?: boolean;
-  lastOnlineAt?: string;
   salaryAmount?: number;
   salaryType?: TeamSalaryType;
   status?: TeamWorkStatus;
@@ -112,8 +110,8 @@ export const teamService = {
       needsPasswordChange: true,
       jobTitle: position,
       phoneNumber: phone,
-      isOnline: input.isOnline === true,
-      lastOnlineAt: input.lastOnlineAt || '',
+      isOnline: false,
+      lastOnlineAt: '',
       salaryAmount,
       salaryType,
       assignedProjectId: input.assignedProjectId ?? null,
@@ -176,8 +174,6 @@ export const teamService = {
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
         jobTitle: nextPosition,
         phoneNumber: phone !== undefined ? phone : String(existing.phoneNumber ?? existing.phone_number ?? ''),
-        isOnline: input.isOnline !== undefined ? input.isOnline : existing.isOnline === true,
-        lastOnlineAt: input.lastOnlineAt !== undefined ? input.lastOnlineAt : String(existing.lastOnlineAt ?? existing.last_online_at ?? ''),
         salaryAmount,
         salaryType,
         status: nextWorkStatus,

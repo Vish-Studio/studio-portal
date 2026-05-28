@@ -135,15 +135,66 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
 
     set({ loading: true });
+    let activeUid: string | null = null;
+    let cleanupPresenceListeners: (() => void) | null = null;
 
-    return authService.onAuthStateChanged(async (user) => {
+    const clearPresence = () => {
+      cleanupPresenceListeners?.();
+      cleanupPresenceListeners = null;
+      if (activeUid) {
+        void authService.setPresence(activeUid, false).catch(error => {
+          logFirebaseError('auth.presence.offline', error);
+        });
+      }
+      activeUid = null;
+    };
+
+    const setupPresence = (uid: string) => {
+      if (activeUid === uid) return;
+      clearPresence();
+      activeUid = uid;
+
+      const markOnline = () => {
+        void authService.setPresence(uid, true).catch(error => {
+          logFirebaseError('auth.presence.online', error);
+        });
+      };
+      const markOffline = () => {
+        void authService.setPresence(uid, false).catch(error => {
+          logFirebaseError('auth.presence.offline', error);
+        });
+      };
+      const handleVisibility = () => {
+        if (document.visibilityState === 'visible') markOnline();
+        else markOffline();
+      };
+
+      markOnline();
+
+      if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+        window.addEventListener('online', markOnline);
+        window.addEventListener('offline', markOffline);
+        window.addEventListener('beforeunload', markOffline);
+        document.addEventListener('visibilitychange', handleVisibility);
+        cleanupPresenceListeners = () => {
+          window.removeEventListener('online', markOnline);
+          window.removeEventListener('offline', markOffline);
+          window.removeEventListener('beforeunload', markOffline);
+          document.removeEventListener('visibilitychange', handleVisibility);
+        };
+      }
+    };
+
+    const unsubscribe = authService.onAuthStateChanged(async (user) => {
       if (!user) {
+        clearPresence();
         set({ user: null, profile: null, role: null, loading: false, ready: true });
         return;
       }
 
       try {
         const profile = await authService.loadProfile(user);
+        setupPresence(user.uid);
         set({ user, profile, role: profile.role, loading: false, ready: true, error: null });
       } catch (error) {
         logFirebaseError('auth.initAuthListener.loadProfile', error);
@@ -151,5 +202,10 @@ export const useAuthStore = create<AuthState>((set) => ({
         set({ user, profile: null, role: null, loading: false, ready: true, error: message });
       }
     });
+
+    return () => {
+      clearPresence();
+      unsubscribe();
+    };
   },
 }));

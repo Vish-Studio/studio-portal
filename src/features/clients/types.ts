@@ -11,34 +11,26 @@ export interface Client {
   /** Firebase Auth UID — Firestore doc ID in /clients and /users */
   id:          string;
   userId?:     string | null;
-  user_id?:    string | null;
   /** From /clients/{uid}.companyName */
   companyName: string;
-  company_name?: string;
   /**
    * Display name — sourced from /users/{uid}.name at read time.
    * Used by all existing UI components.
    */
   fullName:    string;
-  full_name?:  string;
   /** From /users/{uid}.email */
   email:       string;
   /** Optional legacy / UI-compat fields — not stored in the new Firestore schema */
   role?:       "client";
   phone?:      string;
-  phone_number?: string;
   website?:    string;
   industry?:   string;
   location?:   string;
   companySize?: string;
-  company_size?: string;
   isOnline?:   boolean;
-  is_online?:  boolean;
   lastOnlineAt?: { toMillis: () => number; toDate: () => Date } | number | string;
-  last_online_at?: { toMillis: () => number; toDate: () => Date } | number | string;
   status?:     ClientStatus;
   createdAt?:  { toMillis: () => number; toDate: () => Date };
-  created_at?: { toMillis: () => number; toDate: () => Date };
 }
 
 /** Kept for backward compat with existing UI filter tabs and dropdowns. */

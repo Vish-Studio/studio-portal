@@ -30,8 +30,6 @@ interface MemberFormValues {
   accessRole: TeamAccessRole;
   email: string;
   phone: string;
-  isOnline: boolean;
-  lastOnlineAt: string;
   salaryAmount: number;
   salaryType: TeamSalaryType;
   status: TeamWorkStatus;
@@ -96,8 +94,6 @@ export default function Team() {
       accessRole: 'freelancer',
       email: '',
       phone: '',
-      isOnline: false,
-      lastOnlineAt: '',
       salaryAmount: 0,
       salaryType: 'monthly',
       status: 'working',
@@ -160,8 +156,6 @@ export default function Team() {
       accessRole: 'freelancer',
       email: '',
       phone: '',
-      isOnline: false,
-      lastOnlineAt: '',
       salaryAmount: 0,
       salaryType: 'monthly',
       status: 'working',
@@ -182,8 +176,6 @@ export default function Team() {
       accessRole: member.accessRole ?? 'freelancer',
       email: member.email,
       phone: member.phone ?? '',
-      isOnline: member.isOnline === true,
-      lastOnlineAt: typeof member.lastOnlineAt === 'string' ? member.lastOnlineAt : '',
       salaryAmount: member.salaryAmount ?? 0,
       salaryType: member.salaryType ?? 'monthly',
       status: member.status === 'fired' || member.status === 'on-leave' ? member.status : 'working',
@@ -220,8 +212,6 @@ export default function Team() {
             accessRole: 'freelancer',
             email: '',
             phone: '',
-            isOnline: false,
-            lastOnlineAt: '',
             salaryAmount: 0,
             salaryType: 'monthly',
             status: 'working',
@@ -446,17 +436,7 @@ export default function Team() {
                   <Option value="fired">Fired</Option>
                 </Select>
               </FormField>
-              <FormField label="Online Status">
-                <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
-                  <Option value="false">Offline</Option>
-                  <Option value="true">Online</Option>
-                </Select>
-              </FormField>
             </div>
-
-            <FormField label="Last Online">
-              <TextInput {...register('lastOnlineAt')} type="datetime-local" />
-            </FormField>
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <FormField label="Salary Amount" error={errors.salaryAmount?.message}>

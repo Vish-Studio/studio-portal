@@ -66,27 +66,19 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
   return {
     id: doc.id,
     userId: doc.id,
-    user_id: doc.id,
     fullName: name,
-    full_name: name,
     email: String(data.email ?? ''),
     companyName,
-    company_name: companyName,
     phone,
-    phone_number: phone,
     website: String(data.website ?? ''),
     industry: String(data.industry ?? ''),
     location: String(data.location ?? ''),
     companySize,
-    company_size: companySize,
     isOnline: data.isOnline === true || data.is_online === true,
-    is_online: data.isOnline === true || data.is_online === true,
     lastOnlineAt: data.lastOnlineAt as Client['lastOnlineAt'],
-    last_online_at: data.lastOnlineAt as Client['last_online_at'],
     role: 'client',
     status,
     createdAt: data.createdAt as Client['createdAt'],
-    created_at: data.createdAt as Client['created_at'],
   };
 };
 
@@ -103,32 +95,21 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
   return {
     id: doc.id,
     userId: doc.id,
-    user_id: doc.id,
     name,
-    full_name: name,
     role: jobTitle,
-    job_title: jobTitle,
     accessRole: (accessRole === 'superadmin' || accessRole === 'admin' || accessRole === 'freelancer')
       ? accessRole
       : 'freelancer',
     email: String(data.email ?? ''),
     phone: String(data.phoneNumber ?? data.phone_number ?? data.phone ?? ''),
-    phone_number: String(data.phoneNumber ?? data.phone_number ?? data.phone ?? ''),
     isOnline: data.isOnline === true || data.is_online === true,
-    is_online: data.isOnline === true || data.is_online === true,
     lastOnlineAt: data.lastOnlineAt as TeamMember['lastOnlineAt'],
-    last_online_at: data.lastOnlineAt as TeamMember['last_online_at'],
     salaryAmount,
-    salary_amount: salaryAmount,
     salaryType,
-    salary_type: salaryType,
     assignedProjectId: typeof data.assignedProjectId === 'string' ? data.assignedProjectId : null,
     status,
-    is_active: status === 'working' && data.isActive !== false && data.is_active !== false,
     createdAt: data.createdAt as TeamMember['createdAt'],
-    created_at: data.createdAt as TeamMember['created_at'],
     updatedAt: data.updatedAt as TeamMember['updatedAt'],
-    updated_at: data.updatedAt as TeamMember['updated_at'],
   };
 };
 

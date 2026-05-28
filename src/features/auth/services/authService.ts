@@ -97,7 +97,25 @@ export const authService = {
 
   async signOut() {
     const { auth } = requireFirebase();
+    if (auth.currentUser) {
+      await this.setPresence(auth.currentUser.uid, false).catch(error => {
+        logFirebaseError('auth.signOut.setPresence', error);
+      });
+    }
     await signOut(auth);
+  },
+
+  async setPresence(uid: string, isOnline: boolean) {
+    const { db } = requireFirebase();
+    await setDoc(
+      doc(db, 'users', uid),
+      {
+        isOnline,
+        lastOnlineAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true },
+    );
   },
 
   onAuthStateChanged(callback: (user: User | null) => void) {

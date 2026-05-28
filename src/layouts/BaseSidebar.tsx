@@ -54,7 +54,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
     const showIconBadge = hasBadge && (!isExpanded || isMobile);
     const showRowBadge = hasBadge && isExpanded && !isMobile;
     const btnClass = isActive
-      ? `bg-(--color-sidebar-active) text-white shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-10 h-10 rounded-[14px] justify-center lg:w-12 lg:h-12 lg:rounded-[16px]'}`
+      ? `bg-(--color-accent-lime) text-(--color-ink) shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-10 h-10 rounded-[14px] justify-center lg:w-12 lg:h-12 lg:rounded-[16px]'}`
       : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-10 h-10 rounded-[14px] justify-center hover:bg-white/5 lg:w-12 lg:h-12 lg:rounded-[16px]'}`;
 
     const content = (
@@ -86,7 +86,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
 
     return (
       <div key={item.label} className="sidebar-item-wrap flex justify-center">
-        <Tooltip content={item.label} side="right" variant="sidebar">
+        <Tooltip className='bg-(--color-ink)' content={item.label} side="right" variant="sidebar">
           <Link to={item.path} className={`sidebar-item ${btnClass}`}>
             {content}
           </Link>

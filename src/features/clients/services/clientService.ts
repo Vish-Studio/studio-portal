@@ -27,8 +27,6 @@ export interface ClientInput {
   industry?: string;
   location?: string;
   companySize?: string;
-  isOnline?: boolean;
-  lastOnlineAt?: string;
   status?: Client['status'];
   temporaryPassword?: string;
 }
@@ -87,8 +85,8 @@ export const clientsService = {
       industry,
       location,
       companySize,
-      isOnline: input.isOnline === true,
-      lastOnlineAt: input.lastOnlineAt || '',
+      isOnline: false,
+      lastOnlineAt: '',
       status,
       isActive: status === 'active',
       createdAt: serverTimestamp(),
@@ -142,8 +140,6 @@ export const clientsService = {
         industry: industry !== undefined ? industry : String(existing.industry ?? ''),
         location: location !== undefined ? location : String(existing.location ?? ''),
         companySize: companySize !== undefined ? companySize : String(existing.companySize ?? existing.company_size ?? ''),
-        isOnline: updates.isOnline !== undefined ? updates.isOnline : existing.isOnline === true,
-        lastOnlineAt: updates.lastOnlineAt !== undefined ? updates.lastOnlineAt : String(existing.lastOnlineAt ?? existing.last_online_at ?? ''),
         status: nextStatus,
         isActive: nextStatus === 'active',
         createdAt: existing.createdAt ?? serverTimestamp(),

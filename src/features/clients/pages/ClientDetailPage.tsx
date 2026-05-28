@@ -26,8 +26,6 @@ interface ClientFormValues {
   industry: string;
   location: string;
   companySize: string;
-  isOnline: boolean;
-  lastOnlineAt: string;
   status: ClientStatus;
 }
 
@@ -63,8 +61,6 @@ const ClientDetail = () => {
       industry: '',
       location: '',
       companySize: '',
-      isOnline: false,
-      lastOnlineAt: '',
       status: 'active',
     },
   });
@@ -79,8 +75,6 @@ const ClientDetail = () => {
     watchedClientForm.industry !== (client.industry ?? '') ||
     watchedClientForm.location !== (client.location ?? '') ||
     watchedClientForm.companySize !== (client.companySize ?? '') ||
-    watchedClientForm.isOnline !== (client.isOnline === true) ||
-    watchedClientForm.lastOnlineAt !== (typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '') ||
     watchedClientForm.status !== client.status
   );
 
@@ -95,8 +89,6 @@ const ClientDetail = () => {
       industry: client.industry ?? '',
       location: client.location ?? '',
       companySize: client.companySize ?? '',
-      isOnline: client.isOnline === true,
-      lastOnlineAt: typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client.status,
     });
   }, [client, isEditing, reset]);
@@ -130,8 +122,6 @@ const ClientDetail = () => {
       industry: client?.industry ?? '',
       location: client?.location ?? '',
       companySize: client?.companySize ?? '',
-      isOnline: client?.isOnline === true,
-      lastOnlineAt: typeof client?.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client?.status ?? 'active',
     });
     setIsEditing(false);
@@ -149,8 +139,6 @@ const ClientDetail = () => {
       industry: client.industry ?? '',
       location: client.location ?? '',
       companySize: client.companySize ?? '',
-      isOnline: client.isOnline === true,
-      lastOnlineAt: typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client.status,
     });
     setIsEditing(true);
@@ -168,8 +156,6 @@ const ClientDetail = () => {
       industry: client?.industry ?? '',
       location: client?.location ?? '',
       companySize: client?.companySize ?? '',
-      isOnline: client?.isOnline === true,
-      lastOnlineAt: typeof client?.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client?.status ?? 'active',
     });
     setIsEditing(true);
@@ -327,18 +313,6 @@ const ClientDetail = () => {
                 </FormField>
                 <FormField label="Company Size" error={errors.companySize?.message}>
                   <TextInput {...register('companySize')} hasError={!!errors.companySize} />
-                </FormField>
-              </div>
-
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                <FormField label="Online Status">
-                  <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
-                    <Option value="false">Offline</Option>
-                    <Option value="true">Online</Option>
-                  </Select>
-                </FormField>
-                <FormField label="Last Online">
-                  <TextInput {...register('lastOnlineAt')} type="datetime-local" />
                 </FormField>
               </div>
 
