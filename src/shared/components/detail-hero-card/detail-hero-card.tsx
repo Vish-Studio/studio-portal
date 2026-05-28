@@ -86,7 +86,7 @@ const Section: FunctionComponent<{ children: React.ReactNode; className?: string
 const IconRow: FunctionComponent<{ icon: React.ReactNode; children: React.ReactNode }> = ({
   icon, children,
 }) => (
-  <div className="detail-hero-card-icon-row flex min-w-0 max-w-full items-center gap-3 rounded-[18px] px-3.5 py-3.5 pl-0">
+  <div className="detail-hero-card-icon-row flex min-w-0 max-w-full items-center gap-3 rounded-[18px] px-3.5 py-2 pl-0">
     <div
       className="detail-hero-card-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-[13px] text-gray-500"
       style={ICON_BG}
