@@ -23,6 +23,12 @@ export interface ClientInput {
   email: string;
   companyName?: string;
   phone?: string;
+  website?: string;
+  industry?: string;
+  location?: string;
+  companySize?: string;
+  isOnline?: boolean;
+  lastOnlineAt?: string;
   status?: Client['status'];
   temporaryPassword?: string;
 }
@@ -53,6 +59,10 @@ export const clientsService = {
     const name = (input.name ?? input.fullName ?? '').trim();
     const companyName = input.companyName?.trim() ?? '';
     const phone = input.phone?.trim() ?? '';
+    const website = input.website?.trim() ?? '';
+    const industry = input.industry?.trim() ?? '';
+    const location = input.location?.trim() ?? '';
+    const companySize = input.companySize?.trim() ?? '';
     const status = input.status ?? 'active';
     const temporaryPassword = input.temporaryPassword?.trim();
 
@@ -73,6 +83,12 @@ export const clientsService = {
       needsPasswordChange: true,
       companyName,
       phoneNumber: phone,
+      website,
+      industry,
+      location,
+      companySize,
+      isOnline: input.isOnline === true,
+      lastOnlineAt: input.lastOnlineAt || '',
       status,
       isActive: status === 'active',
       createdAt: serverTimestamp(),
@@ -81,6 +97,10 @@ export const clientsService = {
     await setDoc(doc(db, 'clients', user.uid), {
       id: user.uid,
       companyName,
+      website,
+      industry,
+      location,
+      companySize,
     });
 
     return { id: user.uid, email, temporaryPassword };
@@ -100,6 +120,10 @@ export const clientsService = {
     const email = updates.email?.trim().toLowerCase();
     const companyName = updates.companyName?.trim();
     const phone = updates.phone?.trim();
+    const website = updates.website?.trim();
+    const industry = updates.industry?.trim();
+    const location = updates.location?.trim();
+    const companySize = updates.companySize?.trim();
     const nextName = name || String(existing.fullName ?? existing.name ?? existing.full_name ?? 'Unnamed client');
     const nextEmail = email || String(existing.email ?? '');
     const nextStatus = updates.status ?? (existing.status === 'inactive' || existing.status === 'lost' ? existing.status : 'active');
@@ -114,6 +138,12 @@ export const clientsService = {
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
         companyName: companyName !== undefined ? companyName : String(existing.companyName ?? existing.company_name ?? ''),
         phoneNumber: phone !== undefined ? phone : String(existing.phoneNumber ?? existing.phone_number ?? ''),
+        website: website !== undefined ? website : String(existing.website ?? ''),
+        industry: industry !== undefined ? industry : String(existing.industry ?? ''),
+        location: location !== undefined ? location : String(existing.location ?? ''),
+        companySize: companySize !== undefined ? companySize : String(existing.companySize ?? existing.company_size ?? ''),
+        isOnline: updates.isOnline !== undefined ? updates.isOnline : existing.isOnline === true,
+        lastOnlineAt: updates.lastOnlineAt !== undefined ? updates.lastOnlineAt : String(existing.lastOnlineAt ?? existing.last_online_at ?? ''),
         status: nextStatus,
         isActive: nextStatus === 'active',
         createdAt: existing.createdAt ?? serverTimestamp(),
@@ -123,6 +153,9 @@ export const clientsService = {
         full_name: deleteField(),
         company_name: deleteField(),
         phone_number: deleteField(),
+        company_size: deleteField(),
+        is_online: deleteField(),
+        last_online_at: deleteField(),
         is_active: deleteField(),
         created_at: deleteField(),
         updated_at: deleteField(),
@@ -130,8 +163,15 @@ export const clientsService = {
       { merge: true },
     );
 
-    if (companyName !== undefined) {
-      await setDoc(doc(db, 'clients', id), { id, companyName }, { merge: true });
+    if (companyName !== undefined || website !== undefined || industry !== undefined || location !== undefined || companySize !== undefined) {
+      await setDoc(doc(db, 'clients', id), {
+        id,
+        ...(companyName !== undefined ? { companyName } : {}),
+        ...(website !== undefined ? { website } : {}),
+        ...(industry !== undefined ? { industry } : {}),
+        ...(location !== undefined ? { location } : {}),
+        ...(companySize !== undefined ? { companySize } : {}),
+      }, { merge: true });
     }
   },
 

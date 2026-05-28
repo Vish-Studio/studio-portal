@@ -22,6 +22,12 @@ interface ClientFormValues {
   companyName: string;
   email: string;
   phone: string;
+  website: string;
+  industry: string;
+  location: string;
+  companySize: string;
+  isOnline: boolean;
+  lastOnlineAt: string;
   status: ClientStatus;
 }
 
@@ -53,6 +59,12 @@ const ClientDetail = () => {
       companyName: '',
       email: '',
       phone: '',
+      website: '',
+      industry: '',
+      location: '',
+      companySize: '',
+      isOnline: false,
+      lastOnlineAt: '',
       status: 'active',
     },
   });
@@ -63,6 +75,12 @@ const ClientDetail = () => {
     watchedClientForm.companyName !== (client.companyName ?? '') ||
     watchedClientForm.email !== client.email ||
     watchedClientForm.phone !== (client.phone ?? '') ||
+    watchedClientForm.website !== (client.website ?? '') ||
+    watchedClientForm.industry !== (client.industry ?? '') ||
+    watchedClientForm.location !== (client.location ?? '') ||
+    watchedClientForm.companySize !== (client.companySize ?? '') ||
+    watchedClientForm.isOnline !== (client.isOnline === true) ||
+    watchedClientForm.lastOnlineAt !== (typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '') ||
     watchedClientForm.status !== client.status
   );
 
@@ -73,6 +91,12 @@ const ClientDetail = () => {
       companyName: client.companyName ?? '',
       email: client.email,
       phone: client.phone ?? '',
+      website: client.website ?? '',
+      industry: client.industry ?? '',
+      location: client.location ?? '',
+      companySize: client.companySize ?? '',
+      isOnline: client.isOnline === true,
+      lastOnlineAt: typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client.status,
     });
   }, [client, isEditing, reset]);
@@ -102,6 +126,12 @@ const ClientDetail = () => {
       companyName: client?.companyName ?? '',
       email: client?.email ?? '',
       phone: client?.phone ?? '',
+      website: client?.website ?? '',
+      industry: client?.industry ?? '',
+      location: client?.location ?? '',
+      companySize: client?.companySize ?? '',
+      isOnline: client?.isOnline === true,
+      lastOnlineAt: typeof client?.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client?.status ?? 'active',
     });
     setIsEditing(false);
@@ -115,6 +145,12 @@ const ClientDetail = () => {
       companyName: client.companyName ?? '',
       email: client.email,
       phone: client.phone ?? '',
+      website: client.website ?? '',
+      industry: client.industry ?? '',
+      location: client.location ?? '',
+      companySize: client.companySize ?? '',
+      isOnline: client.isOnline === true,
+      lastOnlineAt: typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client.status,
     });
     setIsEditing(true);
@@ -128,6 +164,12 @@ const ClientDetail = () => {
       companyName: client?.companyName ?? '',
       email: client?.email ?? '',
       phone: client?.phone ?? '',
+      website: client?.website ?? '',
+      industry: client?.industry ?? '',
+      location: client?.location ?? '',
+      companySize: client?.companySize ?? '',
+      isOnline: client?.isOnline === true,
+      lastOnlineAt: typeof client?.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client?.status ?? 'active',
     });
     setIsEditing(true);
@@ -270,6 +312,35 @@ const ClientDetail = () => {
                   hasError={!!errors.phone}
                 />
               </FormField>
+
+              <FormField label="Website" error={errors.website?.message}>
+                <TextInput type="url" {...register('website')} hasError={!!errors.website} />
+              </FormField>
+
+              <FormField label="Industry" error={errors.industry?.message}>
+                <TextInput {...register('industry')} hasError={!!errors.industry} />
+              </FormField>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <FormField label="Location" error={errors.location?.message}>
+                  <TextInput {...register('location')} hasError={!!errors.location} />
+                </FormField>
+                <FormField label="Company Size" error={errors.companySize?.message}>
+                  <TextInput {...register('companySize')} hasError={!!errors.companySize} />
+                </FormField>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <FormField label="Online Status">
+                  <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
+                    <Option value="false">Offline</Option>
+                    <Option value="true">Online</Option>
+                  </Select>
+                </FormField>
+                <FormField label="Last Online">
+                  <TextInput {...register('lastOnlineAt')} type="datetime-local" />
+                </FormField>
+              </div>
 
               <FormField label="Status" required error={errors.status?.message}>
                 <Select {...register('status', { required: true })} hasError={!!errors.status}>

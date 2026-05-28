@@ -27,6 +27,15 @@ export interface Client {
   role?:       "client";
   phone?:      string;
   phone_number?: string;
+  website?:    string;
+  industry?:   string;
+  location?:   string;
+  companySize?: string;
+  company_size?: string;
+  isOnline?:   boolean;
+  is_online?:  boolean;
+  lastOnlineAt?: { toMillis: () => number; toDate: () => Date } | number | string;
+  last_online_at?: { toMillis: () => number; toDate: () => Date } | number | string;
   status?:     ClientStatus;
   createdAt?:  { toMillis: () => number; toDate: () => Date };
   created_at?: { toMillis: () => number; toDate: () => Date };

@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Briefcase, Building2, Mail, Phone, TrendingUp } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
-import { DetailHeroCard } from '@/src/shared/components';
+import { DetailHeroCard, MaterialIcon } from '@/src/shared/components';
 import { avatarColor, ClientStatusBadge } from '@/src/shared/components';
 import type { Client } from '../../types';
 import type { ClientProject } from '@/src/features/projects';
@@ -11,6 +11,15 @@ interface Props {
   client: Client;
   projects?: ClientProject[];
 }
+
+const formatOnlineStatus = (client: Client) => {
+  if (client.isOnline) return 'Online now';
+  const value = client.lastOnlineAt;
+  if (!value) return 'Last online unknown';
+  if (typeof value === 'string') return value ? `Last online ${value.replace('T', ' ')}` : 'Last online unknown';
+  if (typeof value === 'number') return `Last online ${format(value, 'MMM d, yyyy')}`;
+  return `Last online ${format(value.toDate(), 'MMM d, yyyy')}`;
+};
 
 const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, projects = [] }) => {
   const avatarBg     = avatarColor(client.id ?? client.fullName);
@@ -67,6 +76,29 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
             <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.companyName}</span>
           </DetailHeroCard.IconRow>
         )}
+        {client.website && (
+          <DetailHeroCard.IconRow icon={<MaterialIcon name="language" size={12} className="text-gray-400" />}>
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.website}</span>
+          </DetailHeroCard.IconRow>
+        )}
+        {client.industry && (
+          <DetailHeroCard.IconRow icon={<MaterialIcon name="category" size={12} className="text-gray-400" />}>
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.industry}</span>
+          </DetailHeroCard.IconRow>
+        )}
+        {client.location && (
+          <DetailHeroCard.IconRow icon={<MaterialIcon name="location_on" size={12} className="text-gray-400" />}>
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.location}</span>
+          </DetailHeroCard.IconRow>
+        )}
+        {client.companySize && (
+          <DetailHeroCard.IconRow icon={<MaterialIcon name="groups" size={12} className="text-gray-400" />}>
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.companySize}</span>
+          </DetailHeroCard.IconRow>
+        )}
+        <DetailHeroCard.IconRow icon={<MaterialIcon name={client.isOnline ? 'radio_button_checked' : 'schedule'} size={12} className={client.isOnline ? 'text-green-500' : 'text-gray-400'} />}>
+          <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{formatOnlineStatus(client)}</span>
+        </DetailHeroCard.IconRow>
       </DetailHeroCard.Section>
 
       {/* ── Stats ── */}

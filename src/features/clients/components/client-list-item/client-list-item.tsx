@@ -47,6 +47,11 @@ export default function ClientListItem({ client, onOpen, onEdit, onDelete }: Cli
         <div className="client-list-item-contact min-w-0">
           <p className="client-list-item-email type-label truncate text-gray-600">{client.email}</p>
           <RecordMeta items={[{ label: client.phone || 'No phone', icon: 'call' }]} className="client-list-item-phone mt-1" />
+          <div className="mt-3 flex flex-wrap gap-2">
+            {client.industry && <span className="type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">{client.industry}</span>}
+            {client.location && <span className="type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">{client.location}</span>}
+            {client.isOnline && <span className="type-count rounded-lg bg-green-50 px-2 py-1 text-green-700">Online</span>}
+          </div>
         </div>
     </CardListItem>
   );

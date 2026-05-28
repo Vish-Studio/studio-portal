@@ -13,7 +13,7 @@ import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { withoutCurrentTeamMember } from '@/src/lib/team-member-visibility';
-import type { TeamAccessRole, TeamMember } from '../types';
+import type { TeamAccessRole, TeamMember, TeamSalaryType, TeamWorkStatus } from '../types';
 import TeamMemberListItem, { type TeamMemberListItemData } from '../components/team-member-list-item/team-member-list-item';
 import AssignProjectModal from '../components/assign-project-modal/assign-project-modal';
 import { generateTemporaryPassword } from '@/src/lib/temporary-password';
@@ -29,6 +29,12 @@ interface MemberFormValues {
   role: string;
   accessRole: TeamAccessRole;
   email: string;
+  phone: string;
+  isOnline: boolean;
+  lastOnlineAt: string;
+  salaryAmount: number;
+  salaryType: TeamSalaryType;
+  status: TeamWorkStatus;
   generatePassword: boolean;
   temporaryPassword: string;
 }
@@ -89,6 +95,12 @@ export default function Team() {
       role: '',
       accessRole: 'freelancer',
       email: '',
+      phone: '',
+      isOnline: false,
+      lastOnlineAt: '',
+      salaryAmount: 0,
+      salaryType: 'monthly',
+      status: 'working',
       generatePassword: true,
       temporaryPassword: generateTemporaryPassword(),
     },
@@ -123,7 +135,8 @@ export default function Team() {
       list = list.filter(m =>
         m.name.toLowerCase().includes(q) ||
         m.email.toLowerCase().includes(q) ||
-        m.role.toLowerCase().includes(q),
+        m.role.toLowerCase().includes(q) ||
+        (m.phone ?? '').includes(q),
       );
     }
     return list
@@ -146,6 +159,12 @@ export default function Team() {
       role: '',
       accessRole: 'freelancer',
       email: '',
+      phone: '',
+      isOnline: false,
+      lastOnlineAt: '',
+      salaryAmount: 0,
+      salaryType: 'monthly',
+      status: 'working',
       generatePassword: true,
       temporaryPassword: generateTemporaryPassword(),
     });
@@ -162,6 +181,12 @@ export default function Team() {
       role: member.role,
       accessRole: member.accessRole ?? 'freelancer',
       email: member.email,
+      phone: member.phone ?? '',
+      isOnline: member.isOnline === true,
+      lastOnlineAt: typeof member.lastOnlineAt === 'string' ? member.lastOnlineAt : '',
+      salaryAmount: member.salaryAmount ?? 0,
+      salaryType: member.salaryType ?? 'monthly',
+      status: member.status === 'fired' || member.status === 'on-leave' ? member.status : 'working',
       generatePassword: false,
       temporaryPassword: '',
     });
@@ -194,6 +219,12 @@ export default function Team() {
             role: '',
             accessRole: 'freelancer',
             email: '',
+            phone: '',
+            isOnline: false,
+            lastOnlineAt: '',
+            salaryAmount: 0,
+            salaryType: 'monthly',
+            status: 'working',
             generatePassword: true,
             temporaryPassword: generateTemporaryPassword(),
           });
@@ -395,6 +426,56 @@ export default function Team() {
                 hasError={!!errors.email}
               />
             </FormField>
+
+            <FormField label="Phone Number" error={errors.phone?.message}>
+              <TextInput
+                {...register('phone', {
+                  pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
+                })}
+                type="tel"
+                placeholder="+230 5818 8684"
+                hasError={!!errors.phone}
+              />
+            </FormField>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Work Status" required error={errors.status?.message}>
+                <Select {...register('status', { required: 'Status is required' })} hasError={!!errors.status}>
+                  <Option value="working">Working</Option>
+                  <Option value="on-leave">On leave</Option>
+                  <Option value="fired">Fired</Option>
+                </Select>
+              </FormField>
+              <FormField label="Online Status">
+                <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
+                  <Option value="false">Offline</Option>
+                  <Option value="true">Online</Option>
+                </Select>
+              </FormField>
+            </div>
+
+            <FormField label="Last Online">
+              <TextInput {...register('lastOnlineAt')} type="datetime-local" />
+            </FormField>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Salary Amount" error={errors.salaryAmount?.message}>
+                <TextInput
+                  {...register('salaryAmount', { valueAsNumber: true, min: { value: 0, message: 'Salary cannot be negative' } })}
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0"
+                  hasError={!!errors.salaryAmount}
+                />
+              </FormField>
+              <FormField label="Salary Type">
+                <Select {...register('salaryType')}>
+                  <Option value="monthly">Per month</Option>
+                  <Option value="per-project">Per project</Option>
+                </Select>
+              </FormField>
+            </div>
 
             {!editingMember ? (
               <div className="team-password-section rounded-[18px] border border-gray-100 bg-(--color-surface-alt) p-4">

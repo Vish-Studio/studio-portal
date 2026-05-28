@@ -28,6 +28,7 @@ export default function TeamMemberListItem({
 }: TeamMemberListItemProps) {
   const colors = getMemberColors(member.id);
   const assigned = Boolean(member.assignedProjectId);
+  const workStatus = member.status === 'fired' ? 'Fired' : member.status === 'on-leave' ? 'On leave' : 'Working';
 
   return (
     <CardListItem
@@ -71,6 +72,21 @@ export default function TeamMemberListItem({
           <span className={`team-member-list-item-access type-count rounded-lg px-2 py-1 ${member.accessRole === 'admin' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
             {member.accessRole ?? 'freelancer'}
           </span>
+          <span className={`team-member-list-item-status type-count rounded-lg px-2 py-1 ${
+            member.status === 'fired' ? 'bg-red-50 text-red-600' : member.status === 'on-leave' ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'
+          }`}>
+            {workStatus}
+          </span>
+          {member.phone && (
+            <span className="team-member-list-item-phone type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">
+              {member.phone}
+            </span>
+          )}
+          {(member.salaryAmount ?? 0) > 0 && (
+            <span className="team-member-list-item-salary type-count rounded-lg bg-(--color-accent-lime) px-2 py-1 text-(--color-ink)">
+              ${member.salaryAmount?.toLocaleString()} / {member.salaryType === 'per-project' ? 'project' : 'month'}
+            </span>
+          )}
         </div>
         <div className="team-member-list-item-assignment flex min-w-0 items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2.5">
           <StatusIcon status={assigned ? 'active' : 'inactive'} />

@@ -26,6 +26,9 @@ interface ProjectFormValues {
   package: PackageType | '';
   status: 'active' | 'paused' | 'completed';
   timeline: string;
+  startDate: string;
+  endDate: string;
+  budget: number;
 }
 
 type SortKey = 'updated' | 'name';
@@ -54,7 +57,7 @@ const Projects = () => {
 
   const { register, handleSubmit, watch, reset, formState: { errors, isDirty, isSubmitting } } =
     useForm<ProjectFormValues>({
-      defaultValues: { name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' },
+      defaultValues: { name: '', service: 'website', package: 'essentials', status: 'active', timeline: '', startDate: new Date().toISOString().slice(0, 10), endDate: '', budget: 0 },
     });
 
   const watchedService = watch('service');
@@ -115,7 +118,7 @@ const Projects = () => {
       return;
     }
     setEditingProject(null);
-    reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '' });
+    reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '', startDate: new Date().toISOString().slice(0, 10), endDate: '', budget: 0 });
     setSelectedClientId('');
     setSelectedMemberIds([]);
     setSubmitError(null);
@@ -124,7 +127,7 @@ const Projects = () => {
 
   const openEdit = (project: ClientProject) => {
     setEditingProject(project);
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
+    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
     setSubmitError(null);
@@ -145,6 +148,9 @@ const Projects = () => {
       package: hasPackages && data.package ? (data.package as PackageType) : undefined,
       status: data.status,
       timeline: data.timeline,
+      startDate: data.startDate,
+      endDate: data.endDate || undefined,
+      agreedPayment: Number(data.budget ?? 0),
       clientId: selectedClientId,
       assignedMemberIds: selectedMemberIds,
     };
@@ -284,6 +290,24 @@ const Projects = () => {
             </FormField>
             <FormField label="Timeline" error={errors.timeline?.message}>
               <TextInput {...register('timeline')} placeholder="e.g. Q3 2026" hasError={!!errors.timeline} />
+            </FormField>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Start Date" required error={errors.startDate?.message}>
+                <TextInput {...register('startDate', { required: 'Start date is required' })} type="date" hasError={!!errors.startDate} />
+              </FormField>
+              <FormField label="End Date" error={errors.endDate?.message}>
+                <TextInput {...register('endDate')} type="date" hasError={!!errors.endDate} />
+              </FormField>
+            </div>
+            <FormField label="Budget / Price Agreed" error={errors.budget?.message}>
+              <TextInput
+                {...register('budget', { valueAsNumber: true, min: { value: 0, message: 'Budget cannot be negative' } })}
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0"
+                hasError={!!errors.budget}
+              />
             </FormField>
             <FormField label="Client" required error={!selectedClientId && submitError ? 'Client is required' : undefined}>
               <ClientPicker

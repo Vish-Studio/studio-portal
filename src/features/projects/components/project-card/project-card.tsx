@@ -72,7 +72,8 @@ const ProjectCard = ({
     >
         <div className="project-card-info mb-3 flex flex-wrap items-center gap-2">
           <span className="project-card-value type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">${(project.agreedPayment / 1000).toFixed(0)}k</span>
-          <span className="project-card-timeline type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">{project.timeline}</span>
+          <span className="project-card-timeline type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">{project.timeline || 'No timeline'}</span>
+          {project.endDate && <span className="project-card-end-date type-count rounded-lg bg-gray-100 px-2 py-1 text-gray-500">Ends {formatRecordDate(project.endDate)}</span>}
           {remaining === 0 && <span className="project-card-settled type-count rounded-lg bg-green-50 px-2 py-1 text-green-600">Settled</span>}
         </div>
         <div className="project-card-assignment mb-3 flex min-w-0 items-center justify-between gap-2 rounded-2xl bg-gray-50 px-3 py-2.5" onClick={e => e.stopPropagation()}>

@@ -14,7 +14,7 @@ import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
-import type { TeamAccessRole } from '../types';
+import type { TeamAccessRole, TeamSalaryType, TeamWorkStatus } from '../types';
 import TeamDetailTaskRow from '../components/team-detail-task-row/team-detail-task-row';
 
 interface TeamMemberFormValues {
@@ -22,6 +22,12 @@ interface TeamMemberFormValues {
   role: string;
   accessRole: TeamAccessRole;
   email: string;
+  phone: string;
+  isOnline: boolean;
+  lastOnlineAt: string;
+  salaryAmount: number;
+  salaryType: TeamSalaryType;
+  status: TeamWorkStatus;
 }
 
 export default function TeamDetail() {
@@ -75,6 +81,12 @@ export default function TeamDetail() {
       role: '',
       accessRole: 'freelancer',
       email: '',
+      phone: '',
+      isOnline: false,
+      lastOnlineAt: '',
+      salaryAmount: 0,
+      salaryType: 'monthly',
+      status: 'working',
     },
   });
 
@@ -83,7 +95,13 @@ export default function TeamDetail() {
     watchedMemberForm.name !== member.name ||
     watchedMemberForm.role !== member.role ||
     watchedMemberForm.accessRole !== (member.accessRole ?? 'freelancer') ||
-    watchedMemberForm.email !== member.email
+    watchedMemberForm.email !== member.email ||
+    watchedMemberForm.phone !== (member.phone ?? '') ||
+    watchedMemberForm.isOnline !== (member.isOnline === true) ||
+    watchedMemberForm.lastOnlineAt !== (typeof member.lastOnlineAt === 'string' ? member.lastOnlineAt : '') ||
+    watchedMemberForm.salaryAmount !== (member.salaryAmount ?? 0) ||
+    watchedMemberForm.salaryType !== (member.salaryType ?? 'monthly') ||
+    watchedMemberForm.status !== (member.status === 'fired' || member.status === 'on-leave' ? member.status : 'working')
   );
 
   useEffect(() => {
@@ -93,6 +111,12 @@ export default function TeamDetail() {
       role: member.role,
       accessRole: member.accessRole ?? 'freelancer',
       email: member.email,
+      phone: member.phone ?? '',
+      isOnline: member.isOnline === true,
+      lastOnlineAt: typeof member.lastOnlineAt === 'string' ? member.lastOnlineAt : '',
+      salaryAmount: member.salaryAmount ?? 0,
+      salaryType: member.salaryType ?? 'monthly',
+      status: member.status === 'fired' || member.status === 'on-leave' ? member.status : 'working',
     });
   }, [member, isEditing, reset]);
 
@@ -127,6 +151,12 @@ export default function TeamDetail() {
       role: member?.role ?? '',
       accessRole: member?.accessRole ?? 'freelancer',
       email: member?.email ?? '',
+      phone: member?.phone ?? '',
+      isOnline: member?.isOnline === true,
+      lastOnlineAt: typeof member?.lastOnlineAt === 'string' ? member.lastOnlineAt : '',
+      salaryAmount: member?.salaryAmount ?? 0,
+      salaryType: member?.salaryType ?? 'monthly',
+      status: member?.status === 'fired' || member?.status === 'on-leave' ? member.status : 'working',
     });
     setIsEditing(false);
     setEditSidebarOpen(false);
@@ -140,6 +170,12 @@ export default function TeamDetail() {
       role: member.role,
       accessRole: member.accessRole ?? 'freelancer',
       email: member.email,
+      phone: member.phone ?? '',
+      isOnline: member.isOnline === true,
+      lastOnlineAt: typeof member.lastOnlineAt === 'string' ? member.lastOnlineAt : '',
+      salaryAmount: member.salaryAmount ?? 0,
+      salaryType: member.salaryType ?? 'monthly',
+      status: member.status === 'fired' || member.status === 'on-leave' ? member.status : 'working',
     });
     setIsEditing(true);
     setSubmitError(null);
@@ -153,6 +189,12 @@ export default function TeamDetail() {
       role: member.role,
       accessRole: member.accessRole ?? 'freelancer',
       email: member.email,
+      phone: member.phone ?? '',
+      isOnline: member.isOnline === true,
+      lastOnlineAt: typeof member.lastOnlineAt === 'string' ? member.lastOnlineAt : '',
+      salaryAmount: member.salaryAmount ?? 0,
+      salaryType: member.salaryType ?? 'monthly',
+      status: member.status === 'fired' || member.status === 'on-leave' ? member.status : 'working',
     });
     setIsEditing(true);
     setSubmitError(null);
@@ -332,6 +374,54 @@ export default function TeamDetail() {
                 hasError={!!errors.email}
               />
             </FormField>
+
+            <FormField label="Phone Number" error={errors.phone?.message}>
+              <TextInput
+                type="tel"
+                {...register('phone', {
+                  pattern: { value: /^[+\d\s\-()+.]{7,20}$/, message: 'Enter a valid phone number' },
+                })}
+                hasError={!!errors.phone}
+              />
+            </FormField>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Work Status" required error={errors.status?.message}>
+                <Select {...register('status', { required: 'Status is required' })} hasError={!!errors.status}>
+                  <Option value="working">Working</Option>
+                  <Option value="on-leave">On leave</Option>
+                  <Option value="fired">Fired</Option>
+                </Select>
+              </FormField>
+              <FormField label="Online Status">
+                <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
+                  <Option value="false">Offline</Option>
+                  <Option value="true">Online</Option>
+                </Select>
+              </FormField>
+            </div>
+
+            <FormField label="Last Online">
+              <TextInput {...register('lastOnlineAt')} type="datetime-local" />
+            </FormField>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Salary Amount" error={errors.salaryAmount?.message}>
+                <TextInput
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  {...register('salaryAmount', { valueAsNumber: true, min: { value: 0, message: 'Salary cannot be negative' } })}
+                  hasError={!!errors.salaryAmount}
+                />
+              </FormField>
+              <FormField label="Salary Type">
+                <Select {...register('salaryType')}>
+                  <Option value="monthly">Per month</Option>
+                  <Option value="per-project">Per project</Option>
+                </Select>
+              </FormField>
+            </div>
           </div>
 
           <FormSidebarActions

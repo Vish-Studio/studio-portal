@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
-import { Briefcase, CheckSquare, Mail, TrendingUp, UserRound } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, CheckSquare, Mail, Phone, TrendingUp, UserRound } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
-import { DetailHeroCard } from '@/src/shared/components';
+import { DetailHeroCard, MaterialIcon } from '@/src/shared/components';
 import { getMemberColors, type TeamMember } from '../../types';
 import type { ClientProject } from '@/src/features/projects';
 import type { Task } from '@/src/features/tasks';
@@ -12,6 +12,15 @@ interface TeamDetailCardProps {
   projects: ClientProject[];
   tasks: Task[];
 }
+
+const formatOnlineStatus = (member: TeamMember) => {
+  if (member.isOnline) return 'Online now';
+  const value = member.lastOnlineAt;
+  if (!value) return 'Last online unknown';
+  if (typeof value === 'string') return value ? `Last online ${value.replace('T', ' ')}` : 'Last online unknown';
+  if (typeof value === 'number') return `Last online ${format(value, 'MMM d, yyyy')}`;
+  return `Last online ${format(value.toDate(), 'MMM d, yyyy')}`;
+};
 
 const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
   className = '',
@@ -37,7 +46,7 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
         <h2 className="team-detail-card-name max-w-full truncate text-[26px] font-black leading-tight text-white">{member.name}</h2>
         <p className="team-detail-card-role mt-1 max-w-full truncate text-sm font-medium text-gray-400">{member.role}</p>
         <p className="team-detail-card-access mt-2 inline-flex self-start rounded-[6px] bg-white/8 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-white/50">
-          {member.accessRole ?? 'freelancer'}
+          {member.status === 'fired' ? 'fired' : member.status === 'on-leave' ? 'on leave' : member.accessRole ?? 'freelancer'}
         </p>
         <p className="team-detail-card-date mt-3 text-[11px] text-gray-600">
           Team member since{' '}
@@ -52,6 +61,26 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
         <DetailHeroCard.IconRow icon={<UserRound size={12} className="text-gray-400" />}>
           <span className="team-detail-card-position min-w-0 truncate text-sm font-semibold text-(--color-ink)">{member.role}</span>
         </DetailHeroCard.IconRow>
+        {member.phone && (
+          <DetailHeroCard.IconRow icon={<Phone size={12} className="text-gray-400" />}>
+            <span className="team-detail-card-phone min-w-0 truncate text-sm font-semibold text-(--color-ink)">{member.phone}</span>
+          </DetailHeroCard.IconRow>
+        )}
+        <DetailHeroCard.IconRow icon={<MaterialIcon name={member.isOnline ? 'radio_button_checked' : 'schedule'} size={12} className={member.isOnline ? 'text-green-500' : 'text-gray-400'} />}>
+          <span className="team-detail-card-online min-w-0 truncate text-sm font-semibold text-(--color-ink)">{formatOnlineStatus(member)}</span>
+        </DetailHeroCard.IconRow>
+        <DetailHeroCard.IconRow icon={<MaterialIcon name="work_history" size={12} className="text-gray-400" />}>
+          <span className="team-detail-card-status min-w-0 truncate text-sm font-semibold text-(--color-ink)">
+            {member.status === 'fired' ? 'Fired' : member.status === 'on-leave' ? 'On leave' : 'Working'}
+          </span>
+        </DetailHeroCard.IconRow>
+        {(member.salaryAmount ?? 0) > 0 && (
+          <DetailHeroCard.IconRow icon={<MaterialIcon name="payments" size={12} className="text-gray-400" />}>
+            <span className="team-detail-card-salary min-w-0 truncate text-sm font-semibold text-(--color-ink)">
+              ${member.salaryAmount?.toLocaleString()} / {member.salaryType === 'per-project' ? 'project' : 'month'}
+            </span>
+          </DetailHeroCard.IconRow>
+        )}
       </DetailHeroCard.Section>
 
       <DetailHeroCard.Stats>

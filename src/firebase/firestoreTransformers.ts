@@ -9,6 +9,10 @@ import type { AuthRole } from '@/src/types/auth';
 
 const toMillis = (value: unknown) => {
   if (typeof value === 'number') return value;
+  if (typeof value === 'string') {
+    const parsed = Date.parse(value);
+    return Number.isNaN(parsed) ? Date.now() : parsed;
+  }
   if (value && typeof (value as Timestamp).toMillis === 'function') return (value as Timestamp).toMillis();
   if (value instanceof Date) return value.getTime();
   return Date.now();
@@ -58,6 +62,7 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
   const companyName = String(data.companyName ?? data.company_name ?? '');
   const phone = String(data.phoneNumber ?? data.phone_number ?? data.phone ?? '');
   const status = data.status === 'inactive' || data.status === 'lost' ? data.status : 'active';
+  const companySize = String(data.companySize ?? data.company_size ?? '');
   return {
     id: doc.id,
     userId: doc.id,
@@ -69,6 +74,15 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
     company_name: companyName,
     phone,
     phone_number: phone,
+    website: String(data.website ?? ''),
+    industry: String(data.industry ?? ''),
+    location: String(data.location ?? ''),
+    companySize,
+    company_size: companySize,
+    isOnline: data.isOnline === true || data.is_online === true,
+    is_online: data.isOnline === true || data.is_online === true,
+    lastOnlineAt: data.lastOnlineAt as Client['lastOnlineAt'],
+    last_online_at: data.lastOnlineAt as Client['last_online_at'],
     role: 'client',
     status,
     createdAt: data.createdAt as Client['createdAt'],
@@ -82,6 +96,10 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
   const role = String(data.role ?? 'freelancer');
   const accessRole = role === 'team' ? 'freelancer' : role;
   const jobTitle = String(data.jobTitle ?? data.job_title ?? 'Team member');
+  const rawStatus = data.workStatus ?? data.status;
+  const status = rawStatus === 'fired' ? 'fired' : rawStatus === 'on-leave' ? 'on-leave' : 'working';
+  const salaryType = data.salaryType === 'per-project' || data.salary_type === 'per-project' ? 'per-project' : 'monthly';
+  const salaryAmount = Number(data.salaryAmount ?? data.salary_amount ?? 0);
   return {
     id: doc.id,
     userId: doc.id,
@@ -94,9 +112,19 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
       ? accessRole
       : 'freelancer',
     email: String(data.email ?? ''),
+    phone: String(data.phoneNumber ?? data.phone_number ?? data.phone ?? ''),
+    phone_number: String(data.phoneNumber ?? data.phone_number ?? data.phone ?? ''),
+    isOnline: data.isOnline === true || data.is_online === true,
+    is_online: data.isOnline === true || data.is_online === true,
+    lastOnlineAt: data.lastOnlineAt as TeamMember['lastOnlineAt'],
+    last_online_at: data.lastOnlineAt as TeamMember['last_online_at'],
+    salaryAmount,
+    salary_amount: salaryAmount,
+    salaryType,
+    salary_type: salaryType,
     assignedProjectId: typeof data.assignedProjectId === 'string' ? data.assignedProjectId : null,
-    status: data.status === 'inactive' || data.status === 'lost' ? data.status : 'active',
-    is_active: data.isActive !== false && data.is_active !== false,
+    status,
+    is_active: status === 'working' && data.isActive !== false && data.is_active !== false,
     createdAt: data.createdAt as TeamMember['createdAt'],
     created_at: data.createdAt as TeamMember['created_at'],
     updatedAt: data.updatedAt as TeamMember['updatedAt'],
@@ -122,10 +150,12 @@ export const projectDocToClientProject = (
       : Array.isArray(data.phases)
         ? data.phases.map(rawPhaseToPhase).filter((phase): phase is Phase => Boolean(phase))
         : buildDefaultPhases(0),
-    agreedPayment: typeof data.agreedPayment === 'number' ? data.agreedPayment : 0,
+    agreedPayment: typeof data.agreedPayment === 'number' ? data.agreedPayment : typeof data.budget === 'number' ? data.budget : 0,
     paidPayment: typeof data.paidPayment === 'number' ? data.paidPayment : 0,
     timeline: String(data.timeline ?? ''),
-    startedAt: toMillis(data.createdAt),
+    startedAt: toMillis(data.startedAt ?? data.startDate ?? data.createdAt),
+    startDate: toDateInput(data.startDate ?? data.startedAt ?? data.createdAt),
+    endDate: toDateInput(data.endDate),
     service: isServiceType(data.service) ? data.service : 'software',
     package: isPackageType(data.package) ? data.package : undefined,
     assignedMemberIds: Array.isArray(data.assignedTeamIds) ? data.assignedTeamIds.map(String) : [],

@@ -39,7 +39,10 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
           </p>
         )}
 
-        <p className="text-[11px] text-gray-600 mt-1.5">Started {format(project.startedAt, 'MMM d, yyyy')}</p>
+        <p className="text-[11px] text-gray-600 mt-1.5">
+          Started {format(project.startedAt, 'MMM d, yyyy')}
+          {project.endDate ? ` · Ends ${format(new Date(project.endDate), 'MMM d, yyyy')}` : ''}
+        </p>
       </DetailHeroCard.Hero>
 
       {(client || project.timeline) && (
@@ -55,6 +58,14 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
           {project.timeline && (
             <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={12} className="text-gray-400" />}>
               <span className="min-w-0 truncate text-sm font-bold text-(--color-ink)">{project.timeline}</span>
+            </DetailHeroCard.IconRow>
+          )}
+          {(project.startDate || project.endDate) && (
+            <DetailHeroCard.IconRow icon={<MaterialIcon name="event" size={12} className="text-gray-400" />}>
+              <span className="min-w-0 truncate text-sm font-bold text-(--color-ink)">
+                {project.startDate ?? format(project.startedAt, 'yyyy-MM-dd')}
+                {project.endDate ? ` - ${project.endDate}` : ' - No end date'}
+              </span>
             </DetailHeroCard.IconRow>
           )}
         </DetailHeroCard.Section>

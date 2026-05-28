@@ -1,4 +1,6 @@
 export type TeamAccessRole = "superadmin" | "admin" | "freelancer" | "team";
+export type TeamWorkStatus = "working" | "fired" | "on-leave";
+export type TeamSalaryType = "monthly" | "per-project";
 
 export interface TeamMember {
   id: string;
@@ -14,8 +16,18 @@ export interface TeamMember {
   job_title?: string;
   accessRole?: TeamAccessRole;
   email:       string;
+  phone?:      string;
+  phone_number?: string;
+  isOnline?:   boolean;
+  is_online?:  boolean;
+  lastOnlineAt?: { toMillis: () => number; toDate: () => Date } | number | string;
+  last_online_at?: { toMillis: () => number; toDate: () => Date } | number | string;
+  salaryAmount?: number;
+  salary_amount?: number;
+  salaryType?: TeamSalaryType;
+  salary_type?: TeamSalaryType;
   assignedProjectId: string | null;
-  status?:     "active" | "inactive" | "lost";
+  status?:     TeamWorkStatus | "active" | "inactive" | "lost";
   is_active?:  boolean;
   createdAt?:  { toMillis: () => number; toDate: () => Date };
   created_at?: { toMillis: () => number; toDate: () => Date };

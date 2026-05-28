@@ -136,6 +136,8 @@ export interface ClientProject {
   paidPayment: number;
   timeline: string;
   startedAt: number;
+  startDate?: string;
+  endDate?: string;
   service: ServiceType;
   package?: PackageType;
   assignedMemberIds?: string[];

@@ -25,6 +25,12 @@ interface ClientFormValues {
   companyName: string;
   email: string;
   phone: string;
+  website: string;
+  industry: string;
+  location: string;
+  companySize: string;
+  isOnline: boolean;
+  lastOnlineAt: string;
   status: ClientStatus;
   generatePassword: boolean;
   temporaryPassword: string;
@@ -73,6 +79,12 @@ export default function Clients() {
       companyName: '',
       email: '',
       phone: '',
+      website: '',
+      industry: '',
+      location: '',
+      companySize: '',
+      isOnline: false,
+      lastOnlineAt: '',
       status: 'active',
       generatePassword: true,
       temporaryPassword: generateTemporaryPassword(),
@@ -107,6 +119,8 @@ export default function Clients() {
         c.fullName.toLowerCase().includes(q) ||
         c.email.toLowerCase().includes(q) ||
         (c.companyName ?? '').toLowerCase().includes(q) ||
+        (c.industry ?? '').toLowerCase().includes(q) ||
+        (c.location ?? '').toLowerCase().includes(q) ||
         (c.phone ?? '').includes(q),
       );
     }
@@ -129,6 +143,12 @@ export default function Clients() {
       companyName: '',
       email: '',
       phone: '',
+      website: '',
+      industry: '',
+      location: '',
+      companySize: '',
+      isOnline: false,
+      lastOnlineAt: '',
       status: 'active',
       generatePassword: true,
       temporaryPassword: generateTemporaryPassword(),
@@ -145,6 +165,12 @@ export default function Clients() {
       companyName: client.companyName ?? '',
       email: client.email,
       phone: client.phone ?? '',
+      website: client.website ?? '',
+      industry: client.industry ?? '',
+      location: client.location ?? '',
+      companySize: client.companySize ?? '',
+      isOnline: client.isOnline === true,
+      lastOnlineAt: typeof client.lastOnlineAt === 'string' ? client.lastOnlineAt : '',
       status: client.status,
       generatePassword: false,
       temporaryPassword: '',
@@ -373,6 +399,40 @@ export default function Clients() {
                 hasError={!!errors.phone}
               />
             </FormField>
+
+            <FormField label="Website" error={errors.website?.message}>
+              <TextInput
+                {...register('website')}
+                type="url"
+                placeholder="https://company.com"
+                hasError={!!errors.website}
+              />
+            </FormField>
+
+            <FormField label="Industry" error={errors.industry?.message}>
+              <TextInput {...register('industry')} placeholder="e.g. Education Technology" hasError={!!errors.industry} />
+            </FormField>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Location" error={errors.location?.message}>
+                <TextInput {...register('location')} placeholder="e.g. Port Louis, Mauritius" hasError={!!errors.location} />
+              </FormField>
+              <FormField label="Company Size" error={errors.companySize?.message}>
+                <TextInput {...register('companySize')} placeholder="e.g. 11-50 employees" hasError={!!errors.companySize} />
+              </FormField>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Online Status">
+                <Select {...register('isOnline', { setValueAs: value => value === 'true' })}>
+                  <Option value="false">Offline</Option>
+                  <Option value="true">Online</Option>
+                </Select>
+              </FormField>
+              <FormField label="Last Online">
+                <TextInput {...register('lastOnlineAt')} type="datetime-local" />
+              </FormField>
+            </div>
 
             <FormField label="Status" required error={errors.status?.message}>
               <Select

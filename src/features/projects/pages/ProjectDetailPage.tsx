@@ -23,7 +23,7 @@ import { getPhaseProgress, getProjectAccent, SERVICE_META, type ServiceType, typ
 import { TEMPLATES } from '@/src/features/templates';
 
 interface ProjectFormValues {
-  name: string; service: ServiceType; package: PackageType | ''; status: 'active' | 'paused' | 'completed'; timeline: string;
+  name: string; service: ServiceType; package: PackageType | ''; status: 'active' | 'paused' | 'completed'; timeline: string; startDate: string; endDate: string; budget: number;
 }
 
 type TaskFilter = 'all' | TaskStatus;
@@ -112,7 +112,7 @@ const ProjectDetail = () => {
   const openProjectTaskCount = allProjectTasks.filter(task => task.status !== 'completed').length;
 
   const openEdit = () => {
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
+    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
     setSubmitError(null);
@@ -125,7 +125,7 @@ const ProjectDetail = () => {
   };
 
   const cancelEdit = () => {
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline });
+    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
     setIsEditing(false);
@@ -157,6 +157,9 @@ const ProjectDetail = () => {
         package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
         status:            data.status,
         timeline:          data.timeline,
+        startDate:         data.startDate,
+        endDate:           data.endDate || undefined,
+        agreedPayment:     Number(data.budget ?? 0),
         clientId:          selectedClientId,
         assignedMemberIds: selectedMemberIds,
       });
@@ -276,6 +279,7 @@ const ProjectDetail = () => {
             </div>
             <p className="mt-3 text-[11px] text-gray-600">
               Started {new Date(project.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {project.endDate ? ` · Ends ${new Date(project.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
             </p>
           </DetailHeroCard.Hero>
 
@@ -290,6 +294,15 @@ const ProjectDetail = () => {
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
                 <p className="truncate text-sm font-bold text-(--color-ink)">{project.timeline || 'No timeline set'}</p>
+              </div>
+            </DetailHeroCard.IconRow>
+            <DetailHeroCard.IconRow icon={<MaterialIcon name="event" size={13} className="text-gray-400" />}>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Dates</p>
+                <p className="truncate text-sm font-bold text-(--color-ink)">
+                  {project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10)}
+                  {project.endDate ? ` - ${project.endDate}` : ' - No end date'}
+                </p>
               </div>
             </DetailHeroCard.IconRow>
             {client && (
@@ -472,6 +485,25 @@ const ProjectDetail = () => {
 
             <FormField label="Timeline">
               <input {...register('timeline')} className={inputCls(false)} />
+            </FormField>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <FormField label="Start Date" required error={errors.startDate?.message}>
+                <input {...register('startDate', { required: 'Start date is required' })} type="date" className={inputCls(!!errors.startDate)} />
+              </FormField>
+              <FormField label="End Date" error={errors.endDate?.message}>
+                <input {...register('endDate')} type="date" className={inputCls(!!errors.endDate)} />
+              </FormField>
+            </div>
+
+            <FormField label="Budget / Price Agreed" error={errors.budget?.message}>
+              <input
+                {...register('budget', { valueAsNumber: true, min: { value: 0, message: 'Budget cannot be negative' } })}
+                type="number"
+                min="0"
+                step="0.01"
+                className={inputCls(!!errors.budget)}
+              />
             </FormField>
 
             <FormField label="Client" error={!selectedClientId && submitError ? 'Client is required' : undefined}>

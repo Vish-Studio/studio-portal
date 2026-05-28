@@ -69,7 +69,11 @@ const projectToCreateDoc = (project: ClientProject, role: AuthRole) => ({
   service: project.service,
   ...(project.package ? { package: project.package } : {}),
   timeline: project.timeline,
+  startDate: project.startDate || new Date(project.startedAt).toISOString().slice(0, 10),
+  startedAt: project.startDate || new Date(project.startedAt).toISOString().slice(0, 10),
+  ...(project.endDate ? { endDate: project.endDate } : {}),
   agreedPayment: project.agreedPayment,
+  budget: project.agreedPayment,
   paidPayment: project.paidPayment,
   remainingPayment: Math.max(project.agreedPayment - project.paidPayment, 0),
   assignedTeamIds: project.assignedMemberIds ?? [],
@@ -90,8 +94,12 @@ const projectUpdatesToDoc = (updates: Partial<Omit<ClientProject, "id">>) => ({
   ...(updates.service !== undefined ? { service: updates.service } : {}),
   ...(updates.package !== undefined ? { package: updates.package } : {}),
   ...(updates.timeline !== undefined ? { timeline: updates.timeline } : {}),
+  ...(updates.startDate !== undefined
+    ? { startDate: updates.startDate, startedAt: updates.startDate }
+    : {}),
+  ...(updates.endDate !== undefined ? { endDate: updates.endDate } : {}),
   ...(updates.agreedPayment !== undefined
-    ? { agreedPayment: updates.agreedPayment }
+    ? { agreedPayment: updates.agreedPayment, budget: updates.agreedPayment }
     : {}),
   ...(updates.paidPayment !== undefined
     ? { paidPayment: updates.paidPayment }
@@ -335,17 +343,22 @@ export const makeNewProject = (overrides: {
   package?: PackageType;
   status: "active" | "paused" | "completed";
   timeline: string;
+  startDate?: string;
+  endDate?: string;
+  agreedPayment?: number;
   clientId: string;
   assignedMemberIds?: string[];
   activePhaseIndex?: number;
 }): ClientProject => {
-  const { activePhaseIndex = 0, ...rest } = overrides;
+  const { activePhaseIndex = 0, agreedPayment = 0, startDate, endDate, ...rest } = overrides;
   return {
     id: `p_${Date.now()}`,
     phases: buildDefaultPhases(activePhaseIndex),
-    agreedPayment: 0,
+    agreedPayment,
     paidPayment: 0,
-    startedAt: Date.now(),
+    startedAt: startDate ? new Date(startDate).getTime() : Date.now(),
+    startDate: startDate ?? new Date().toISOString().slice(0, 10),
+    endDate,
     ...rest,
   };
 };
