@@ -32,9 +32,9 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
           {client.fullName.charAt(0).toUpperCase()}
         </div>
 
-        <h2 className="text-[26px] font-black leading-tight text-white">{client.fullName}</h2>
+        <h2 className="max-w-full truncate text-[26px] font-black leading-tight text-white">{client.fullName}</h2>
         {client.companyName && (
-          <p className="mt-1 text-sm font-medium text-gray-400">{client.companyName}</p>
+          <p className="mt-1 max-w-full truncate text-sm font-medium text-gray-400">{client.companyName}</p>
         )}
         <div className="mt-2.5">
           <ClientStatusBadge status={client.status} />
@@ -53,18 +53,18 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
       </DetailHeroCard.Hero>
 
       {/* ── Contact info ── */}
-      <DetailHeroCard.Section className="space-y-3">
+      <DetailHeroCard.Section title="Contact & Info" icon={<Building2 size={15} />}>
         <DetailHeroCard.IconRow icon={<Mail size={12} className="text-gray-400" />}>
-          <span className="text-sm text-gray-300 truncate">{client.email}</span>
+          <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.email}</span>
         </DetailHeroCard.IconRow>
         {client.phone && (
           <DetailHeroCard.IconRow icon={<Phone size={12} className="text-gray-400" />}>
-            <span className="text-sm text-gray-300">{client.phone}</span>
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.phone}</span>
           </DetailHeroCard.IconRow>
         )}
         {client.companyName && (
           <DetailHeroCard.IconRow icon={<Building2 size={12} className="text-gray-400" />}>
-            <span className="text-sm text-gray-300 truncate">{client.companyName}</span>
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.companyName}</span>
           </DetailHeroCard.IconRow>
         )}
       </DetailHeroCard.Section>
@@ -76,6 +76,8 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
           icon={<Briefcase size={11} />}
           value={projects.length}
           sub={`${activeCount} active`}
+          trendData={[1, Math.max(1, projects.length - 1), projects.length, activeCount + 1, projects.length + activeCount]}
+          trendVariant={activeCount > 0 ? 'positive' : 'neutral'}
         />
         <DetailHeroCard.Stat
           label="Value"
@@ -83,6 +85,8 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
           value={`$${(totalAgreed / 1000).toFixed(0)}k`}
           sub={`$${totalPaid.toLocaleString()} paid`}
           valueStyle={{ color: 'var(--color-accent-lime)' }}
+          trendData={[0, totalPaid * 0.35, totalPaid * 0.58, totalPaid * 0.78, totalAgreed]}
+          trendVariant="accent"
         />
         <DetailHeroCard.Stat
           label="Balance"
@@ -90,6 +94,8 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
           value={totalRemaining > 0 ? `$${(totalRemaining / 1000).toFixed(0)}k` : 'Settled'}
           sub={totalRemaining > 0 ? 'outstanding' : 'fully paid'}
           valueClassName={totalRemaining > 0 ? 'text-amber-400' : 'text-green-400'}
+          trendData={totalRemaining > 0 ? [totalAgreed, totalAgreed * 0.72, totalAgreed * 0.58, totalRemaining] : [8, 6, 3, 0]}
+          trendVariant={totalRemaining > 0 ? 'warning' : 'positive'}
         />
       </DetailHeroCard.Stats>
     </DetailHeroCard>

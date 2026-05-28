@@ -67,7 +67,7 @@ export default function ChatBox({
               <ButtonIcon
                 iconName="add"
                 label="Start new chat"
-                className="h-10 w-10 rounded-full bg-(--color-ink) text-white hover:bg-black hover:text-white"
+                className="h-10 w-10 rounded-full bg-(--color-ink)! text-white hover:bg-black hover:text-white"
                 clickHandler={onStartChat}
               />
             )}

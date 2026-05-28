@@ -263,7 +263,7 @@ const ProjectDetail = () => {
             <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${accent.bg} shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}>
               <MaterialIcon name={accent.icon} size={24} className={accent.iconText} />
             </div>
-            <h2 className="truncate text-[26px] font-black leading-tight text-white">{project.name}</h2>
+            <h2 className="max-w-full truncate text-[26px] font-black leading-tight text-white">{project.name}</h2>
             <div className="mt-2 flex flex-wrap items-center gap-2">
               <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${accent.badgeBg} ${accent.badgeText}`}>{accent.label}</span>
               <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
@@ -279,24 +279,24 @@ const ProjectDetail = () => {
             </p>
           </DetailHeroCard.Hero>
 
-          <DetailHeroCard.Section className="space-y-3">
+          <DetailHeroCard.Section title="Project Details" icon={<MaterialIcon name="fact_check" size={16} />}>
             <DetailHeroCard.IconRow icon={<MaterialIcon name="flag" size={13} className="text-gray-400" />}>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Current step</p>
-                <p className="truncate text-sm font-bold text-gray-300">{activePhase ? activePhase.title : 'No active step'}</p>
+                <p className="truncate text-sm font-bold text-(--color-ink)">{activePhase ? activePhase.title : 'No active step'}</p>
               </div>
             </DetailHeroCard.IconRow>
             <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={13} className="text-gray-400" />}>
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
-                <p className="truncate text-sm font-bold text-gray-300">{project.timeline || 'No timeline set'}</p>
+                <p className="truncate text-sm font-bold text-(--color-ink)">{project.timeline || 'No timeline set'}</p>
               </div>
             </DetailHeroCard.IconRow>
             {client && (
               <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
-                  <p className="truncate text-sm font-bold text-gray-300">{client.fullName}</p>
+                  <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
                 </div>
               </DetailHeroCard.IconRow>
             )}
@@ -308,12 +308,16 @@ const ProjectDetail = () => {
               icon={<CheckSquare size={11} />}
               value={allProjectTaskCount}
               sub={`${openProjectTaskCount} open`}
+              trendData={[0, openProjectTaskCount, allProjectTaskCount, Math.max(allProjectTaskCount, openProjectTaskCount + 1)]}
+              trendVariant={openProjectTaskCount > 0 ? 'warning' : 'neutral'}
             />
             <DetailHeroCard.Stat
               label="Team"
               icon={<Users size={11} />}
               value={projectMembers.length}
               sub={`${project.assignedMemberIds?.length ?? 0} assigned`}
+              trendData={[0, Math.max(1, projectMembers.length - 1), projectMembers.length, projectMembers.length + 1]}
+              trendVariant={projectMembers.length > 0 ? 'positive' : 'neutral'}
             />
             <DetailHeroCard.Stat
               label="Price"
@@ -321,6 +325,8 @@ const ProjectDetail = () => {
               value={`$${project.agreedPayment.toLocaleString()}`}
               sub={`${projectProgress}% complete · ${donePhaseCount}/${project.phases.length} steps`}
               valueStyle={{ color: 'var(--color-accent-lime)' }}
+              trendData={[0, project.paidPayment * 0.35, project.paidPayment, project.agreedPayment]}
+              trendVariant="accent"
             />
           </DetailHeroCard.Stats>
         </DetailHeroCard>

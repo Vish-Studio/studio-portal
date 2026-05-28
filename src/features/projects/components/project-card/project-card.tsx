@@ -55,9 +55,9 @@ const ProjectCard = ({
       item={project}
       onOpen={() => navigate(resolveDetailPath(detailPath, project))}
       title={project.name}
-      subTitle={`${accent.label}${client ? ` - ${client.fullName}` : ''}`}
+      subTitle={`${accent.label}`}
       actions={actions}
-      className={`project-card flex flex-col rounded-[16px] border border-gray-200 bg-white transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 ${className}`}
+      className={`project-card flex flex-col rounded-[16px] border border-gray-200 bg-white hover:border-(--color-ink) transition-all duration-150 ${className}`}
       headerClassName="project-card-header"
       contentClassName="project-card-body"
       footerClassName="project-card-footer"

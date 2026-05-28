@@ -63,6 +63,7 @@ export { default as TextInput, type TextInputProps } from './text-input/text-inp
 export { default as Toggle } from './toggle/toggle';
 export { default as Toast, type ToastProps, type ToastStatus } from './toast/toast';
 export { default as Tooltip, type TooltipProps, type TooltipSide, type TooltipVariant } from './tooltip/tooltip';
+export { default as TrendSparkline, type TrendSparklineProps, type TrendSparklineVariant } from './trend-sparkline/trend-sparkline';
 export * from './confirm-dialog/confirm-dialog';
 export * from './dropdown-menu/dropdown-menu';
 export * from './form-sidebar/form-sidebar';

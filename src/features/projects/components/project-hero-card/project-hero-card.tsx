@@ -35,7 +35,7 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
         {activePhase && project.status === 'active' && (
           <p className="text-[11px] text-gray-500 mt-2 flex items-center gap-1">
             <MaterialIcon name="radio_button_checked" size={10} className="text-gray-500" />
-            Currently in <span className="text-gray-300 font-medium">{activePhase.title}</span>
+            Currently in <span className="font-medium text-gray-300">{activePhase.title}</span>
           </p>
         )}
 
@@ -43,18 +43,18 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
       </DetailHeroCard.Hero>
 
       {(client || project.timeline) && (
-        <DetailHeroCard.Section className="space-y-3">
+        <DetailHeroCard.Section title="Project Details" icon={<MaterialIcon name="fact_check" size={16} />}>
           {client && (
             <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
               <div className="min-w-0">
-                <p className="text-sm text-gray-300 truncate">{client.fullName}</p>
+                <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
                 {client.companyName && <p className="text-[11px] text-gray-500 truncate">{client.companyName}</p>}
               </div>
             </DetailHeroCard.IconRow>
           )}
           {project.timeline && (
             <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={12} className="text-gray-400" />}>
-              <span className="text-sm text-gray-300">{project.timeline}</span>
+              <span className="min-w-0 truncate text-sm font-bold text-(--color-ink)">{project.timeline}</span>
             </DetailHeroCard.IconRow>
           )}
         </DetailHeroCard.Section>
@@ -67,12 +67,16 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
           value={`${progress}%`}
           sub={`${doneCount}/${project.phases.length} phases`}
           valueStyle={{ color: 'var(--color-accent-lime)' }}
+          trendData={[0, Math.max(8, progress * 0.35), Math.max(18, progress * 0.68), progress]}
+          trendVariant="accent"
         />
         <DetailHeroCard.Stat
           label="Budget"
           icon={<MaterialIcon name="payments" size={11} />}
           value={`$${(project.agreedPayment / 1000).toFixed(0)}k`}
           sub={`$${project.paidPayment.toLocaleString()} paid`}
+          trendData={[0, project.paidPayment * 0.4, project.paidPayment, project.agreedPayment]}
+          trendVariant={remaining > 0 ? 'warning' : 'positive'}
         />
       </DetailHeroCard.Stats>
 

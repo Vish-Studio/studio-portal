@@ -59,7 +59,7 @@ export default function CardListItem<T = unknown>({
       tabIndex={interactive ? 0 : undefined}
       onClick={interactive ? handleOpen : undefined}
       onKeyDown={handleKeyDown}
-      className={`card-list-item rounded-[18px] border border-gray-200 bg-white text-left transition-colors hover:bg-gray-50 ${interactive ? 'cursor-pointer' : ''} ${className}`}
+      className={`card-list-item rounded-[18px] border border-gray-200 bg-white text-left transition-colors ${interactive ? 'cursor-pointer' : ''} ${className}`}
     >
       <div className={`card-list-item-header flex min-w-0 items-start justify-between gap-3 p-4 pb-3 ${headerClassName}`}>
         <div className="card-list-item-heading flex min-w-0 items-start gap-3">

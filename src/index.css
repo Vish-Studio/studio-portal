@@ -115,7 +115,7 @@ body {
 /* ─── App-specific color tokens ──────────────────────────────────── */
 :root {
   /* Layout */
-  --color-body-bg: #e2e5e2;
+  --color-body-bg: #ffffff;
   --color-body-text: #131416;
 
   /* Surface / panel backgrounds */

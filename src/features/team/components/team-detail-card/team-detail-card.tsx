@@ -34,8 +34,8 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
           {member.name.charAt(0).toUpperCase()}
         </div>
 
-        <h2 className="team-detail-card-name text-[26px] font-black leading-tight text-white">{member.name}</h2>
-        <p className="team-detail-card-role mt-1 text-sm font-medium text-gray-400">{member.role}</p>
+        <h2 className="team-detail-card-name max-w-full truncate text-[26px] font-black leading-tight text-white">{member.name}</h2>
+        <p className="team-detail-card-role mt-1 max-w-full truncate text-sm font-medium text-gray-400">{member.role}</p>
         <p className="team-detail-card-access mt-2 inline-flex self-start rounded-[6px] bg-white/8 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-white/50">
           {member.accessRole ?? 'freelancer'}
         </p>
@@ -45,12 +45,12 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
         </p>
       </DetailHeroCard.Hero>
 
-      <DetailHeroCard.Section className="space-y-3">
+      <DetailHeroCard.Section title="Member Info" icon={<UserRound size={15} />}>
         <DetailHeroCard.IconRow icon={<Mail size={12} className="text-gray-400" />}>
-          <span className="team-detail-card-email truncate text-sm text-gray-300">{member.email}</span>
+          <span className="team-detail-card-email min-w-0 truncate text-sm font-semibold text-(--color-ink)">{member.email}</span>
         </DetailHeroCard.IconRow>
         <DetailHeroCard.IconRow icon={<UserRound size={12} className="text-gray-400" />}>
-          <span className="team-detail-card-position truncate text-sm text-gray-300">{member.role}</span>
+          <span className="team-detail-card-position min-w-0 truncate text-sm font-semibold text-(--color-ink)">{member.role}</span>
         </DetailHeroCard.IconRow>
       </DetailHeroCard.Section>
 
@@ -60,6 +60,8 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
           icon={<Briefcase size={11} />}
           value={projects.length}
           sub={`${activeProjects} current`}
+          trendData={[0, Math.max(1, activeProjects), projects.length, projects.length + activeProjects]}
+          trendVariant={activeProjects > 0 ? 'positive' : 'neutral'}
         />
         <DetailHeroCard.Stat
           label="Tasks"
@@ -67,12 +69,16 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
           value={openTasks}
           sub={`${completedTasks} completed`}
           valueStyle={{ color: 'var(--color-accent-lime)' }}
+          trendData={[tasks.length, openTasks + completedTasks * 0.6, openTasks + 1, openTasks]}
+          trendVariant={openTasks > completedTasks ? 'warning' : 'accent'}
         />
         <DetailHeroCard.Stat
           label="Value"
           icon={<TrendingUp size={11} />}
           value={`$${(totalProjectValue / 1000).toFixed(0)}k`}
           sub={member.accessRole ?? 'freelancer'}
+          trendData={[0, totalProjectValue * 0.35, totalProjectValue * 0.68, totalProjectValue]}
+          trendVariant="positive"
         />
       </DetailHeroCard.Stats>
     </DetailHeroCard>
