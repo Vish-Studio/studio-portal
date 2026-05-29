@@ -8,7 +8,7 @@ import FormSidebar, { FormSidebarActions, FormSidebarError, FormSidebarFooter, g
 import IconPicker from '@/src/features/projects/components/icon-picker/icon-picker';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import ProjectTimeline from '../components/project-timeline/project-timeline';
-import { Avatar, Breadcrumb, Button, ConfirmDialog, DetailHeroCard, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
+import { Avatar, Breadcrumb, Button, ConfirmDialog, DETAIL_COVER_IMAGES, DetailHeroCard, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
 import { ClientPicker } from '@/src/features/clients';
 import { MemberPicker } from '@/src/shared/components';
 import { TaskDetailModal, TaskRow, useTasksStore, type Task, type TaskStatus } from '@/src/features/tasks';
@@ -75,7 +75,7 @@ const ProjectDetail = () => {
 
   if (!project) {
     return (
-      <DashboardLayout title="Project">
+    <DashboardLayout title="Project Detail">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
             <Briefcase size={20} className="text-gray-400" />
@@ -239,7 +239,7 @@ const ProjectDetail = () => {
     : Boolean(newPhaseTitle.trim());
 
   return (
-    <DashboardLayout title={project.name}>
+    <DashboardLayout title="Project Detail">
       <div className="flex flex-col gap-4 pb-12">
 
         <Breadcrumb
@@ -261,78 +261,88 @@ const ProjectDetail = () => {
         />
 
         <DetailHeroCard className="project-detail-card">
-          <DetailHeroCard.Hero>
-            <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${accent.bg} shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}>
-              <MaterialIcon name={accent.icon} size={24} className={accent.iconText} />
+          <DetailHeroCard.Hero title={project.name} coverImage={DETAIL_COVER_IMAGES.project}>
+            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
+              <div className="min-w-0">
+                <div className={`relative z-20 mb-4 -mt-12 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white ${accent.bg}`}>
+                  <MaterialIcon name={accent.icon} size={34} className={accent.iconText} />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${accent.badgeBg} ${accent.badgeText}`}>{accent.label}</span>
+                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                    project.status === 'active' ? 'bg-green-100 text-green-700' :
+                    project.status === 'paused' ? 'bg-amber-100 text-amber-700' :
+                                                  'bg-gray-100 text-gray-700'
+                  }`}>
+                    {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+                  </span>
+                </div>
+                <p className="mt-3 text-[11px] font-semibold text-gray-400">
+                  Started {new Date(project.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  {project.endDate ? ` · Ends ${new Date(project.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
+                </p>
+              </div>
+
+              <div className="grid gap-3 pt-6 sm:grid-cols-2 lg:pt-5">
+                <DetailHeroCard.IconRow icon={<MaterialIcon name="flag" size={13} className="text-gray-400" />}>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Current step</p>
+                    <p className="truncate text-sm font-bold text-(--color-ink)">{activePhase ? activePhase.title : 'No active step'}</p>
+                  </div>
+                </DetailHeroCard.IconRow>
+                <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={13} className="text-gray-400" />}>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
+                    <p className="truncate text-sm font-bold text-(--color-ink)">{project.timeline || 'No timeline set'}</p>
+                  </div>
+                </DetailHeroCard.IconRow>
+                {client && (
+                  <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
+                      <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
+                    </div>
+                  </DetailHeroCard.IconRow>
+                )}
+                <DetailHeroCard.IconRow icon={<MaterialIcon name="payments" size={13} className="text-gray-400" />}>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Budget</p>
+                    <p className="truncate text-sm font-bold text-(--color-ink)">${project.agreedPayment.toLocaleString()}</p>
+                  </div>
+                </DetailHeroCard.IconRow>
+              </div>
             </div>
-            <h2 className="max-w-full truncate text-[26px] font-black leading-tight text-white">{project.name}</h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${accent.badgeBg} ${accent.badgeText}`}>{accent.label}</span>
-              <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                project.status === 'active' ? 'bg-green-100 text-green-700' :
-                project.status === 'paused' ? 'bg-amber-100 text-amber-700' :
-                                              'bg-gray-100 text-gray-700'
-              }`}>
-                {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-              </span>
-            </div>
-            <p className="mt-3 text-[11px] text-gray-600">
-              Started {new Date(project.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-              {project.endDate ? ` · Ends ${new Date(project.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
-            </p>
           </DetailHeroCard.Hero>
 
-          <DetailHeroCard.Section title="Project Details" icon={<MaterialIcon name="fact_check" size={16} />}>
-            <DetailHeroCard.IconRow icon={<MaterialIcon name="flag" size={13} className="text-gray-400" />}>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Current step</p>
-                <p className="truncate text-sm font-bold text-(--color-ink)">{activePhase ? activePhase.title : 'No active step'}</p>
-              </div>
-            </DetailHeroCard.IconRow>
-            <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={13} className="text-gray-400" />}>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
-                <p className="truncate text-sm font-bold text-(--color-ink)">{project.timeline || 'No timeline set'}</p>
-              </div>
-            </DetailHeroCard.IconRow>
-            {client && (
-              <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
-                <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
-                  <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
-                </div>
-              </DetailHeroCard.IconRow>
-            )}
-          </DetailHeroCard.Section>
-
-          <DetailHeroCard.Stats>
-            <DetailHeroCard.Stat
-              label="Tasks"
-              icon={<CheckSquare size={11} />}
-              value={allProjectTaskCount}
-              sub={`${openProjectTaskCount} open`}
-              trendData={[0, openProjectTaskCount, allProjectTaskCount, Math.max(allProjectTaskCount, openProjectTaskCount + 1)]}
-              trendVariant={openProjectTaskCount > 0 ? 'warning' : 'neutral'}
-            />
-            <DetailHeroCard.Stat
-              label="Team"
-              icon={<Users size={11} />}
-              value={projectMembers.length}
-              sub={`${project.assignedMemberIds?.length ?? 0} assigned`}
-              trendData={[0, Math.max(1, projectMembers.length - 1), projectMembers.length, projectMembers.length + 1]}
-              trendVariant={projectMembers.length > 0 ? 'positive' : 'neutral'}
-            />
-            <DetailHeroCard.Stat
-              label="Price"
-              icon={<WalletCards size={11} />}
-              value={`$${project.agreedPayment.toLocaleString()}`}
-              sub={`${projectProgress}% complete · ${donePhaseCount}/${project.phases.length} steps`}
-              valueStyle={{ color: 'var(--color-accent-lime)' }}
-              trendData={[0, project.paidPayment * 0.35, project.paidPayment, project.agreedPayment]}
-              trendVariant="accent"
-            />
-          </DetailHeroCard.Stats>
         </DetailHeroCard>
+
+        <DetailHeroCard.Stats>
+          <DetailHeroCard.Stat
+            label="Tasks"
+            icon={<CheckSquare size={11} />}
+            value={allProjectTaskCount}
+            sub={`${openProjectTaskCount} open`}
+            trendData={[0, openProjectTaskCount, allProjectTaskCount, Math.max(allProjectTaskCount, openProjectTaskCount + 1)]}
+            trendVariant={openProjectTaskCount > 0 ? 'warning' : 'neutral'}
+          />
+          <DetailHeroCard.Stat
+            label="Team"
+            icon={<Users size={11} />}
+            value={projectMembers.length}
+            sub={`${project.assignedMemberIds?.length ?? 0} assigned`}
+            trendData={[0, Math.max(1, projectMembers.length - 1), projectMembers.length, projectMembers.length + 1]}
+            trendVariant={projectMembers.length > 0 ? 'positive' : 'neutral'}
+          />
+          <DetailHeroCard.Stat
+            label="Price"
+            icon={<WalletCards size={11} />}
+            value={`$${project.agreedPayment.toLocaleString()}`}
+            sub={`${projectProgress}% complete · ${donePhaseCount}/${project.phases.length} steps`}
+            valueStyle={{ color: 'var(--color-accent-lime)' }}
+            trendData={[0, project.paidPayment * 0.35, project.paidPayment, project.agreedPayment]}
+            trendVariant="accent"
+          />
+        </DetailHeroCard.Stats>
 
         <ProjectTimeline
           project={project}

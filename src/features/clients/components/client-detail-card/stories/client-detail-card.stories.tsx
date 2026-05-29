@@ -1,7 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import ClientDetailCard from '../client-detail-card';
 import type { Client } from '../../../types';
-import { buildDefaultPhases, type ClientProject } from '@/src/features/projects';
 
 const createdAt = (date: string) => ({
   toDate: () => new Date(date),
@@ -28,51 +27,6 @@ const fakeInactiveClient: Client = {
   createdAt: createdAt('2026-02-12'),
 };
 
-const fakeProjects: ClientProject[] = [
-  {
-    id: 'project-website',
-    clientId: fakeClient.id,
-    name: 'Learning Platform',
-    status: 'active',
-    phases: buildDefaultPhases(4),
-    agreedPayment: 12000,
-    paidPayment: 9000,
-    timeline: 'Q3 2026',
-    startedAt: new Date('2026-05-27').getTime(),
-    service: 'website',
-    package: 'essentials',
-    assignedMemberIds: ['member-1', 'member-2'],
-  },
-  {
-    id: 'project-mobile',
-    clientId: fakeClient.id,
-    name: 'Mobile Learning App',
-    status: 'active',
-    phases: buildDefaultPhases(2),
-    agreedPayment: 8500,
-    paidPayment: 4000,
-    timeline: 'Q4 2026',
-    startedAt: new Date('2026-05-28').getTime(),
-    service: 'mobile-app',
-    package: 'growth',
-    assignedMemberIds: ['member-2'],
-  },
-  {
-    id: 'project-brand',
-    clientId: fakeClient.id,
-    name: 'Brand Guidelines',
-    status: 'completed',
-    phases: buildDefaultPhases(9),
-    agreedPayment: 4000,
-    paidPayment: 4000,
-    timeline: 'May 2026',
-    startedAt: new Date('2026-04-02').getTime(),
-    service: 'branding',
-    package: 'premium',
-    assignedMemberIds: ['member-1'],
-  },
-];
-
 const meta = {
   title: 'Features/Clients/Components/ClientDetailCard',
   component: ClientDetailCard,
@@ -96,26 +50,23 @@ type Story = StoryObj<typeof meta>;
 export const ActiveWithProjects: Story = {
   args: {
     client: fakeClient,
-    projects: fakeProjects,
   },
 };
 
 export const InactiveWithoutProjects: Story = {
   args: {
     client: fakeInactiveClient,
-    projects: [],
   },
 };
 
 export const MultipleStates: Story = {
   args: {
     client: fakeClient,
-    projects: fakeProjects,
   },
   render: () => (
     <div className="grid gap-6">
-      <ClientDetailCard client={fakeClient} projects={fakeProjects} />
-      <ClientDetailCard client={fakeInactiveClient} projects={[]} />
+      <ClientDetailCard client={fakeClient} />
+      <ClientDetailCard client={fakeInactiveClient} />
     </div>
   ),
 };

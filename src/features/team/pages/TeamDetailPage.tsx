@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, CheckSquare, Pencil, TrendingUp } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import { ProjectCard } from '@/src/features/projects';
 import TeamDetailCard from '../components/team-detail-card/team-detail-card';
-import { Breadcrumb, Button, FormField, Option, Select, TextInput } from '@/src/shared/components';
+import { Breadcrumb, Button, DetailHeroCard, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
@@ -63,6 +63,9 @@ export default function TeamDetail() {
   }, [member, tasks]);
 
   const canEditMember = !!member && canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin');
+  const openTasks = assignedTasks.filter(task => task.status !== 'completed').length;
+  const completedTasks = assignedTasks.length - openTasks;
+  const totalProjectValue = memberProjects.reduce((sum, project) => sum + project.agreedPayment, 0);
   const roleOptions = isSuperAdmin
     ? (['freelancer', 'admin', 'superadmin'] as TeamAccessRole[])
     : (['freelancer', 'admin'] as TeamAccessRole[]);
@@ -189,7 +192,7 @@ export default function TeamDetail() {
 
   if (!member) {
     return (
-      <DashboardLayout title="Team">
+      <DashboardLayout title="Team Detail">
         <div className="team-detail-empty flex flex-col items-center justify-center gap-4 py-24">
           <div className="team-detail-empty-icon flex h-12 w-12 items-center justify-center rounded-full bg-(--color-surface)">
             <Briefcase size={20} className="text-gray-400" />
@@ -206,7 +209,7 @@ export default function TeamDetail() {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Team Detail">
       <div className="team-detail flex flex-1 flex-col gap-4 md:gap-7">
         <Breadcrumb
           previousLink="/admin/team"
@@ -228,7 +231,35 @@ export default function TeamDetail() {
           }
         />
 
-        <TeamDetailCard member={member} projects={memberProjects} tasks={assignedTasks} />
+        <TeamDetailCard member={member} />
+
+        <DetailHeroCard.Stats>
+          <DetailHeroCard.Stat
+            label="Projects"
+            icon={<Briefcase size={11} />}
+            value={memberProjects.length}
+            sub={`${currentProjects.length} current`}
+            trendData={[0, Math.max(1, currentProjects.length), memberProjects.length, memberProjects.length + currentProjects.length]}
+            trendVariant={currentProjects.length > 0 ? 'positive' : 'neutral'}
+          />
+          <DetailHeroCard.Stat
+            label="Tasks"
+            icon={<CheckSquare size={11} />}
+            value={openTasks}
+            sub={`${completedTasks} completed`}
+            valueStyle={{ color: 'var(--color-accent-lime)' }}
+            trendData={[assignedTasks.length, openTasks + completedTasks * 0.6, openTasks + 1, openTasks]}
+            trendVariant={openTasks > completedTasks ? 'warning' : 'accent'}
+          />
+          <DetailHeroCard.Stat
+            label="Value"
+            icon={<TrendingUp size={11} />}
+            value={`$${(totalProjectValue / 1000).toFixed(0)}k`}
+            sub={member.accessRole ?? 'freelancer'}
+            trendData={[0, totalProjectValue * 0.35, totalProjectValue * 0.68, totalProjectValue]}
+            trendVariant="positive"
+          />
+        </DetailHeroCard.Stats>
 
         <section className="team-detail-section">
           <div className="team-detail-section-header mb-4 flex items-end justify-between gap-3">

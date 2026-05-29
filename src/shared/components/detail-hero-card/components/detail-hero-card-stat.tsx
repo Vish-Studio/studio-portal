@@ -18,7 +18,7 @@ const DetailHeroCardStat: FunctionComponent<DetailHeroCardStatProps> = ({
 
   return (
     <div
-      className={`detail-hero-card-stat relative min-h-[112px] min-w-0 overflow-hidden rounded-[18px] border border-gray-200 p-5 sm:pr-20 xl:min-h-[68px] xl:p-4 xl:pr-24 ${className}`}
+      className={`detail-hero-card-stat relative min-h-[112px] min-w-0 overflow-hidden rounded-[18px] border border-gray-200 p-5 sm:pr-20 ${className}`}
       style={DETAIL_STAT_VARIANTS[trendVariant]}
     >
       <div className="detail-hero-card-stat-header mb-3 flex items-center gap-3 xl:mb-2">

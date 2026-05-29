@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, Pencil } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, Pencil, TrendingUp } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { ProjectCard } from '@/src/features/projects';
@@ -11,7 +11,7 @@ import type { ClientStatus } from '../types';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import { Breadcrumb, Button, FormField, Option, Select, TextInput } from '@/src/shared/components';
+import { Breadcrumb, Button, DetailHeroCard, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
@@ -166,7 +166,7 @@ const ClientDetail = () => {
   // ── Not found ──
   if (!client) {
     return (
-      <DashboardLayout title="Client">
+      <DashboardLayout title="Client Detail">
         <div className="flex flex-col items-center justify-center py-24 gap-4">
           <div className="w-12 h-12 rounded-full bg-(--color-surface) flex items-center justify-center">
             <Briefcase size={20} className="text-gray-400" />
@@ -186,7 +186,7 @@ const ClientDetail = () => {
   const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
   const totalRemaining = totalAgreed - totalPaid;
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Client Detail">
       <div className="flex-1 flex flex-col gap-4 md:gap-7">
         <Breadcrumb
           previousLink="/admin/clients"
@@ -206,7 +206,36 @@ const ClientDetail = () => {
           }
         />
 
-        <ClientDetailCard client={client} projects={projects} />
+        <ClientDetailCard client={client} />
+
+        <DetailHeroCard.Stats>
+          <DetailHeroCard.Stat
+            label="Projects"
+            icon={<Briefcase size={11} />}
+            value={projects.length}
+            sub={`${activeCount} active`}
+            trendData={[1, Math.max(1, projects.length - 1), projects.length, activeCount + 1, projects.length + activeCount]}
+            trendVariant={activeCount > 0 ? 'positive' : 'neutral'}
+          />
+          <DetailHeroCard.Stat
+            label="Value"
+            icon={<TrendingUp size={11} />}
+            value={`$${(totalAgreed / 1000).toFixed(0)}k`}
+            sub={`$${totalPaid.toLocaleString()} paid`}
+            valueStyle={{ color: 'var(--color-accent-lime)' }}
+            trendData={[0, totalPaid * 0.35, totalPaid * 0.58, totalPaid * 0.78, totalAgreed]}
+            trendVariant="accent"
+          />
+          <DetailHeroCard.Stat
+            label="Balance"
+            icon={<TrendingUp size={11} />}
+            value={totalRemaining > 0 ? `$${(totalRemaining / 1000).toFixed(0)}k` : 'Settled'}
+            sub={totalRemaining > 0 ? 'outstanding' : 'fully paid'}
+            valueClassName={totalRemaining > 0 ? 'text-amber-400' : 'text-green-400'}
+            trendData={totalRemaining > 0 ? [totalAgreed, totalAgreed * 0.72, totalAgreed * 0.58, totalRemaining] : [8, 6, 3, 0]}
+            trendVariant={totalRemaining > 0 ? 'warning' : 'positive'}
+          />
+        </DetailHeroCard.Stats>
 
 
         {/* Projects detail*/}

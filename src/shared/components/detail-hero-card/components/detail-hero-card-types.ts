@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { TrendSparklineVariant } from '../../trend-sparkline/trend-sparkline';
 
-export type DetailHeroCardHeroVariant = 'ink' | 'flat';
+export type DetailCardHeroVariant = 'ink' | 'flat';
 export type DetailHeroCardSectionVariant = 'default' | 'subtle';
 export type DetailHeroCardStatVariant = TrendSparklineVariant;
 
@@ -10,10 +10,12 @@ export interface DetailHeroCardRootProps {
   className?: string;
 }
 
-export interface DetailHeroCardHeroProps {
+export interface DetailCardHeroProps {
   children: ReactNode;
   className?: string;
-  variant?: DetailHeroCardHeroVariant;
+  coverImage?: string;
+  title?: ReactNode;
+  variant?: DetailCardHeroVariant;
 }
 
 export interface DetailHeroCardSectionProps {

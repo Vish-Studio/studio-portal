@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import type {
-  DetailHeroCardHeroVariant,
+  DetailCardHeroVariant,
   DetailHeroCardSectionVariant,
   DetailHeroCardStatVariant,
 } from './detail-hero-card-types';
@@ -10,8 +10,8 @@ export const DETAIL_HERO_ICON_STYLE = {
   boxShadow: 'none',
 } as const;
 
-export const DETAIL_HERO_VARIANTS: Record<DetailHeroCardHeroVariant, string> = {
-  ink: 'border-white/10 bg-[linear-gradient(135deg,#111216_0%,#0b0d10_58%,#16232d_100%)] text-white shadow-[0_18px_42px_rgba(13,16,20,0.10)]',
+export const DETAIL_HERO_VARIANTS: Record<DetailCardHeroVariant, string> = {
+  ink: 'border-gray-200 bg-white text-(--color-ink) shadow-none',
   flat: 'border-gray-200 bg-white text-(--color-ink) shadow-none',
 };
 
