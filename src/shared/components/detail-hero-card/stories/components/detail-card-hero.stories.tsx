@@ -28,7 +28,7 @@ export const Ink: Story = {
   render: args => (
     <div className="w-[360px]">
       <DetailCardHero {...args} title="Ikigai Learning" coverImage={DETAIL_COVER_IMAGES.client}>
-        <div className="-mt-14 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-cyan-500 text-4xl font-black text-white">
+        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 bg-(--color-ink) text-4xl font-black text-white">
           I
         </div>
         <p className="mt-1 max-w-full truncate text-sm font-semibold text-gray-500">Education Technology</p>
@@ -45,7 +45,7 @@ export const Flat: Story = {
   render: args => (
     <div className="w-[360px]">
       <DetailCardHero {...args} title="Studio Portal" coverImage={DETAIL_COVER_IMAGES.project}>
-        <div className="-mt-14 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-(--color-accent-lime) text-4xl font-black text-(--color-ink)">
+        <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 bg-(--color-accent-lime) text-4xl font-black text-(--color-ink)">
           S
         </div>
         <p className="mt-1 max-w-full truncate text-sm font-medium text-gray-500">Software · Premium</p>

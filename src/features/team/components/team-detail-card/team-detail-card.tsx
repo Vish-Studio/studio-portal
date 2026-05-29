@@ -29,7 +29,7 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
       <DetailHeroCard.Hero title={member.name} coverImage={DETAIL_COVER_IMAGES.team}>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
           <div className="min-w-0">
-            <div className={`team-detail-card-avatar relative z-20 -mt-12 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white ${colors.bg} text-4xl font-black text-white`}>
+            <div className={`team-detail-card-avatar mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 ${colors.bg} text-4xl font-black text-white`}>
               {member.name.charAt(0).toUpperCase()}
             </div>
 

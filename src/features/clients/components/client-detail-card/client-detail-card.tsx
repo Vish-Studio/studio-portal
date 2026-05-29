@@ -29,7 +29,7 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
           <div className="min-w-0">
             <div
-              className={`client-detail-card-avatar relative z-20 -mt-12 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white ${avatarBg} text-4xl font-black text-white`}
+              className={`client-detail-card-avatar mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 ${avatarBg} text-4xl font-black text-white`}
             >
               {client.fullName.charAt(0).toUpperCase()}
             </div>

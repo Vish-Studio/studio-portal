@@ -14,9 +14,10 @@ const SIZE: Record<AvatarSize, { box: string; text: string; border: string }> = 
 // ─── Deterministic colour from any string seed ────────────────────────────────
 
 const PALETTE = [
-  'bg-violet-500', 'bg-blue-500',    'bg-emerald-500',
-  'bg-orange-500', 'bg-pink-500',    'bg-cyan-500',
-  'bg-amber-500',  'bg-rose-500',    'bg-indigo-500',
+  'bg-(--color-ink)',
+  'bg-slate-700',
+  'bg-zinc-700',
+  'bg-lime-700',
 ];
 
 export const avatarColor = (seed: string): string =>

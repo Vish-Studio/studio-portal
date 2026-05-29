@@ -33,18 +33,10 @@ export const AVATAR_COLORS: Record<
   string,
   { bg: string; text: string; header: string }
 > = {
-  a: { bg: "bg-violet-500", text: "text-violet-600", header: "bg-violet-100" },
-  b: { bg: "bg-blue-500", text: "text-blue-600", header: "bg-blue-100" },
-  c: {
-    bg: "bg-emerald-500",
-    text: "text-emerald-600",
-    header: "bg-emerald-100",
-  },
-  d: { bg: "bg-orange-500", text: "text-orange-600", header: "bg-orange-100" },
-  e: { bg: "bg-pink-500", text: "text-pink-600", header: "bg-pink-100" },
-  f: { bg: "bg-cyan-500", text: "text-cyan-600", header: "bg-cyan-100" },
-  g: { bg: "bg-amber-500", text: "text-amber-600", header: "bg-amber-100" },
-  h: { bg: "bg-rose-500", text: "text-rose-600", header: "bg-rose-100" },
+  a: { bg: "bg-(--color-ink)", text: "text-(--color-ink)", header: "bg-gray-100" },
+  b: { bg: "bg-slate-700", text: "text-slate-700", header: "bg-slate-100" },
+  c: { bg: "bg-zinc-700", text: "text-zinc-700", header: "bg-zinc-100" },
+  d: { bg: "bg-lime-700", text: "text-lime-700", header: "bg-lime-100" },
 };
 
 const COLOR_KEYS = Object.keys(AVATAR_COLORS);

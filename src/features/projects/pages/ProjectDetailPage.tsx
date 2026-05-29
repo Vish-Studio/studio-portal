@@ -264,7 +264,7 @@ const ProjectDetail = () => {
           <DetailHeroCard.Hero title={project.name} coverImage={DETAIL_COVER_IMAGES.project}>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
               <div className="min-w-0">
-                <div className={`relative z-20 mb-4 -mt-12 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white ${accent.bg}`}>
+                <div className={`mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 ${accent.bg}`}>
                   <MaterialIcon name={accent.icon} size={34} className={accent.iconText} />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">

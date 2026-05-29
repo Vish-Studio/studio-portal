@@ -27,7 +27,7 @@ const DetailCardHero: FunctionComponent<DetailCardHeroProps> = ({
         </h2>
       )}
     </div>
-    <div className="detail-card-hero-body relative z-10 overflow-visible px-5 pb-6 sm:px-7">
+    <div className="detail-card-hero-body relative z-10 overflow-visible px-5 pt-7 pb-6 sm:px-7 sm:pt-8">
       {children}
     </div>
   </div>

@@ -29,7 +29,7 @@ const ClientDetailMock = ({ className = 'w-[1040px] max-w-[calc(100vw-48px)]' }:
       <DetailHeroCard.Hero title="Ikigai Learning" coverImage={DETAIL_COVER_IMAGES.client}>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
           <div className="min-w-0">
-            <div className="-mt-14 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-cyan-500 text-4xl font-black text-white">
+            <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 bg-(--color-ink) text-4xl font-black text-white">
               I
             </div>
             <p className="mt-1 max-w-full truncate text-sm font-semibold text-gray-500">Education Technology</p>
@@ -95,7 +95,7 @@ export const EmptyStats: Story = {
         <DetailHeroCard.Hero title="New Account" coverImage={DETAIL_COVER_IMAGES.client}>
           <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
             <div className="min-w-0">
-              <div className="-mt-14 mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-gray-700 text-4xl font-black text-white">
+              <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 bg-gray-700 text-4xl font-black text-white">
                 N
               </div>
               <p className="mt-1 text-sm font-semibold text-gray-500">No projects yet</p>
