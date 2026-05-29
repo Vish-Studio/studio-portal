@@ -262,7 +262,6 @@ const ProjectDetail = () => {
 
         <DetailHeroCard className="project-detail-card">
           <DetailHeroCard.Hero>
-            <DetailHeroCard.Glow className={accent.bar} />
             <div className={`mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${accent.bg} shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}>
               <MaterialIcon name={accent.icon} size={24} className={accent.iconText} />
             </div>
@@ -294,15 +293,6 @@ const ProjectDetail = () => {
               <div className="min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
                 <p className="truncate text-sm font-bold text-(--color-ink)">{project.timeline || 'No timeline set'}</p>
-              </div>
-            </DetailHeroCard.IconRow>
-            <DetailHeroCard.IconRow icon={<MaterialIcon name="event" size={13} className="text-gray-400" />}>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Dates</p>
-                <p className="truncate text-sm font-bold text-(--color-ink)">
-                  {project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10)}
-                  {project.endDate ? ` - ${project.endDate}` : ' - No end date'}
-                </p>
               </div>
             </DetailHeroCard.IconRow>
             {client && (

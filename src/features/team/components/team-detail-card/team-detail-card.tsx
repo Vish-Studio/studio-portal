@@ -37,8 +37,6 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
   return (
     <DetailHeroCard className={`team-detail-card ${className}`}>
       <DetailHeroCard.Hero>
-        <DetailHeroCard.Glow />
-
         <div className={`team-detail-card-avatar mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${colors.bg} text-2xl font-black text-white shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}>
           {member.name.charAt(0).toUpperCase()}
         </div>
@@ -57,9 +55,6 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
       <DetailHeroCard.Section title="Member Info" icon={<UserRound size={15} />}>
         <DetailHeroCard.IconRow icon={<Mail size={12} className="text-gray-400" />}>
           <span className="team-detail-card-email min-w-0 truncate text-sm font-semibold text-(--color-ink)">{member.email}</span>
-        </DetailHeroCard.IconRow>
-        <DetailHeroCard.IconRow icon={<UserRound size={12} className="text-gray-400" />}>
-          <span className="team-detail-card-position min-w-0 truncate text-sm font-semibold text-(--color-ink)">{member.role}</span>
         </DetailHeroCard.IconRow>
         {member.phone && (
           <DetailHeroCard.IconRow icon={<Phone size={12} className="text-gray-400" />}>

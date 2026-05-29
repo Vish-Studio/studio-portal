@@ -19,8 +19,6 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
   return (
     <DetailHeroCard className={className}>
       <DetailHeroCard.Hero>
-        <div aria-hidden="true" className={`absolute -top-10 -right-10 w-44 h-44 rounded-full opacity-15 pointer-events-none blur-2xl ${accent.bar}`} />
-
         <div className={`mb-5 flex h-16 w-16 items-center justify-center rounded-[22px] ${accent.bg} shadow-[0_18px_40px_rgba(0,0,0,0.28)] ring-1 ring-white/15`}>
           <MaterialIcon name={accent.icon} size={26} className={accent.iconText} />
         </div>
@@ -58,14 +56,6 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
           {project.timeline && (
             <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={12} className="text-gray-400" />}>
               <span className="min-w-0 truncate text-sm font-bold text-(--color-ink)">{project.timeline}</span>
-            </DetailHeroCard.IconRow>
-          )}
-          {(project.startDate || project.endDate) && (
-            <DetailHeroCard.IconRow icon={<MaterialIcon name="event" size={12} className="text-gray-400" />}>
-              <span className="min-w-0 truncate text-sm font-bold text-(--color-ink)">
-                {project.startDate ?? format(project.startedAt, 'yyyy-MM-dd')}
-                {project.endDate ? ` - ${project.endDate}` : ' - No end date'}
-              </span>
             </DetailHeroCard.IconRow>
           )}
         </DetailHeroCard.Section>

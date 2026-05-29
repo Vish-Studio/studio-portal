@@ -26,7 +26,6 @@ const ClientDetailMock = ({ className = 'w-[1040px] max-w-[calc(100vw-48px)]' }:
   <div className={className}>
     <DetailHeroCard>
       <DetailHeroCard.Hero>
-        <DetailHeroCard.Glow />
         <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] bg-cyan-500 text-2xl font-black text-white shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15">
           I
         </div>
@@ -91,7 +90,6 @@ export const EmptyStats: Story = {
     <div className="w-[1040px] max-w-[calc(100vw-48px)]">
       <DetailHeroCard>
         <DetailHeroCard.Hero>
-          <DetailHeroCard.Glow />
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] bg-gray-700 text-2xl font-black text-white">
             N
           </div>

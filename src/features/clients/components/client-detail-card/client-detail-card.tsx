@@ -32,8 +32,6 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
     <DetailHeroCard className={`client-detail-card ${className}`}>
       {/* ── Hero ── */}
       <DetailHeroCard.Hero>
-        <DetailHeroCard.Glow />
-
         {/* Letter avatar */}
         <div
           className={`client-detail-card-avatar mb-4 flex h-14 w-14 items-center justify-center rounded-[20px] ${avatarBg} text-2xl font-black text-white shadow-[0_14px_32px_rgba(0,0,0,0.24)] ring-1 ring-white/15`}
@@ -69,11 +67,6 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client, pr
         {client.phone && (
           <DetailHeroCard.IconRow icon={<Phone size={12} className="text-gray-400" />}>
             <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.phone}</span>
-          </DetailHeroCard.IconRow>
-        )}
-        {client.companyName && (
-          <DetailHeroCard.IconRow icon={<Building2 size={12} className="text-gray-400" />}>
-            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.companyName}</span>
           </DetailHeroCard.IconRow>
         )}
         {client.website && (

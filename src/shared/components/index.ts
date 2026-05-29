@@ -17,7 +17,26 @@ export { default as CardContent } from './card-content/card-content';
 export { default as Checkbox } from './checkbox/checkbox';
 export { default as ConfirmDialog } from './confirm-dialog/confirm-dialog';
 export { default as DatePicker } from './date-picker/date-picker';
-export { default as DetailHeroCard } from './detail-hero-card/detail-hero-card';
+export {
+  default as DetailHeroCard,
+  DetailHeroCardFooter,
+  DetailHeroCardHero,
+  DetailHeroCardIconRow,
+  DetailHeroCardRoot,
+  DetailHeroCardSection,
+  DetailHeroCardStat,
+  DetailHeroCardStats,
+  type DetailHeroCardFooterProps,
+  type DetailHeroCardHeroProps,
+  type DetailHeroCardHeroVariant,
+  type DetailHeroCardIconRowProps,
+  type DetailHeroCardRootProps,
+  type DetailHeroCardSectionProps,
+  type DetailHeroCardSectionVariant,
+  type DetailHeroCardStatProps,
+  type DetailHeroCardStatVariant,
+  type DetailHeroCardStatsProps,
+} from './detail-hero-card/detail-hero-card';
 export { default as DropdownMenu } from './dropdown-menu/dropdown-menu';
 export { default as ListItemRow, type ListItemRowProps } from './list-item-row/list-item-row';
 export {
