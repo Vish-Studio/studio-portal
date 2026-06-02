@@ -15,6 +15,7 @@ import {
 import { requireFirebase } from '@/src/firebase/requireFirebase';
 import { userProvisioningService } from '@/src/features/auth/services/userProvisioningService';
 import { userDocToTeamMember } from '@/src/firebase/firestoreTransformers';
+import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
 import type { TeamAccessRole, TeamMember, TeamSalaryType, TeamWorkStatus } from '../types';
 
 export interface TeamMemberInput {
@@ -117,6 +118,7 @@ export const teamService = {
       assignedProjectId: input.assignedProjectId ?? null,
       status,
       workStatus: status,
+      avatarColor: randomAvatarTone(),
       isActive: status === 'working',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -178,6 +180,7 @@ export const teamService = {
         salaryType,
         status: nextWorkStatus,
         workStatus: nextWorkStatus,
+        avatarColor: typeof existing.avatarColor === 'string' ? existing.avatarColor : randomAvatarTone(),
         isActive: nextWorkStatus === 'working',
         createdAt: existing.createdAt ?? serverTimestamp(),
         updatedAt: serverTimestamp(),

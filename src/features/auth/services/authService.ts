@@ -20,6 +20,7 @@ import { requireFirebase } from '@/src/firebase/requireFirebase';
 import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { isFirebasePermissionError, logFirebaseError } from '@/src/lib/firebase-errors';
+import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
 
 const normalizeEmail = (email?: string | null) => (email ?? '').trim().toLowerCase();
 
@@ -77,6 +78,7 @@ const profileFromSnapshot = (user: User, data: Record<string, unknown>): AuthPro
     phoneNumber: typeof data.phoneNumber === 'string' ? data.phoneNumber : typeof data.phone_number === 'string' ? data.phone_number : undefined,
     companyName: typeof data.companyName === 'string' ? data.companyName : typeof data.company_name === 'string' ? data.company_name : undefined,
     jobTitle: typeof data.jobTitle === 'string' ? data.jobTitle : typeof data.job_title === 'string' ? data.job_title : undefined,
+    avatarColor: typeof data.avatarColor === 'string' ? data.avatarColor : undefined,
     newsletterPreferences: typeof data.newsletterPreferences === 'boolean' ? data.newsletterPreferences : false,
     featureAccess: (data.featureAccess ?? data.feature_access) as AuthProfile['featureAccess'],
     isActive: typeof data.isActive === 'boolean' ? data.isActive : typeof data.is_active === 'boolean' ? data.is_active : undefined,
@@ -192,6 +194,7 @@ export const authService = {
             phoneNumber: data.phoneNumber ?? data.phone_number ?? '',
             companyName: data.companyName ?? data.company_name ?? '',
             jobTitle: data.jobTitle ?? data.job_title ?? '',
+            avatarColor: typeof data.avatarColor === 'string' ? data.avatarColor : randomAvatarTone(),
             newsletterPreferences: data.newsletterPreferences ?? false,
             featureAccess: data.featureAccess ?? data.feature_access ?? {},
             isActive: typeof data.isActive === 'boolean'
@@ -301,6 +304,7 @@ export const authService = {
         phoneNumber: input.phoneNumber?.trim() ?? existing.phoneNumber ?? existing.phone_number ?? '',
         companyName: input.companyName?.trim() ?? existing.companyName ?? existing.company_name ?? '',
         jobTitle: input.jobTitle?.trim() ?? existing.jobTitle ?? existing.job_title ?? '',
+        avatarColor: typeof existing.avatarColor === 'string' ? existing.avatarColor : randomAvatarTone(),
         newsletterPreferences: input.newsletterPreferences ?? existing.newsletterPreferences ?? false,
         featureAccess: input.featureAccess ?? existing.featureAccess ?? existing.feature_access ?? {},
         isActive: typeof input.isActive === 'boolean'

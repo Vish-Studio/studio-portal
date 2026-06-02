@@ -15,6 +15,7 @@ import {
 import { requireFirebase } from '@/src/firebase/requireFirebase';
 import { userProvisioningService } from '@/src/features/auth/services/userProvisioningService';
 import { userDocToClient } from '@/src/firebase/firestoreTransformers';
+import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
 import type { Client } from '../types';
 
 export interface ClientInput {
@@ -88,6 +89,7 @@ export const clientsService = {
       isOnline: false,
       lastOnlineAt: '',
       status,
+      avatarColor: randomAvatarTone(),
       isActive: status === 'active',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -141,6 +143,7 @@ export const clientsService = {
         location: location !== undefined ? location : String(existing.location ?? ''),
         companySize: companySize !== undefined ? companySize : String(existing.companySize ?? existing.company_size ?? ''),
         status: nextStatus,
+        avatarColor: typeof existing.avatarColor === 'string' ? existing.avatarColor : randomAvatarTone(),
         isActive: nextStatus === 'active',
         createdAt: existing.createdAt ?? serverTimestamp(),
         updatedAt: serverTimestamp(),

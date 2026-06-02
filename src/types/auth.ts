@@ -25,6 +25,7 @@ export interface AuthProfile {
   companyName?: string;
   updatedAt?: Timestamp;
   jobTitle?: string;
+  avatarColor?: string;
 }
 
 export interface AuthProfileUpdateInput {

@@ -1,8 +1,8 @@
 import { FunctionComponent } from 'react';
 import { Mail, Phone } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
-import { DETAIL_COVER_IMAGES, DetailHeroCard, MaterialIcon } from '@/src/shared/components';
-import { getMemberColors, type TeamMember } from '../../types';
+import { Avatar, DETAIL_COVER_IMAGES, DetailHeroCard, MaterialIcon } from '@/src/shared/components';
+import type { TeamMember } from '../../types';
 
 interface TeamDetailCardProps {
   className?: string;
@@ -22,16 +22,18 @@ const TeamDetailCard: FunctionComponent<TeamDetailCardProps> = ({
   className = '',
   member,
 }) => {
-  const colors = getMemberColors(member.id);
-
   return (
     <DetailHeroCard className={`team-detail-card ${className}`}>
       <DetailHeroCard.Hero title={member.name} coverImage={DETAIL_COVER_IMAGES.team}>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
           <div className="min-w-0">
-            <div className={`team-detail-card-avatar mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 ${colors.bg} text-4xl font-black text-white`}>
-              {member.name.charAt(0).toUpperCase()}
-            </div>
+            <Avatar
+              name={member.name}
+              id={member.id}
+              color={member.avatarColor}
+              size="xl"
+              className="team-detail-card-avatar mb-4 border-4 border-gray-100"
+            />
 
             <p className="team-detail-card-role mt-1 max-w-full truncate text-sm font-semibold text-gray-500">{member.role}</p>
             <p className="team-detail-card-access mt-2 inline-flex self-start rounded-[6px] bg-gray-100 px-2 py-1 text-[11px] font-bold uppercase tracking-wider text-gray-500">

@@ -63,6 +63,7 @@ export default function ChatWorkspace({ mode, currentClientId = '' }: ChatWorksp
       name: client.fullName,
       meta: client.companyName || client.email,
       email: client.email,
+      avatarColor: client.avatarColor,
     })),
     [clients],
   );
@@ -74,6 +75,7 @@ export default function ChatWorkspace({ mode, currentClientId = '' }: ChatWorksp
       name: member.name,
       meta: member.role,
       email: member.email,
+      avatarColor: member.avatarColor,
     })),
     [profile, teamMembers],
   );

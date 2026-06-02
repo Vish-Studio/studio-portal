@@ -1,6 +1,6 @@
 import { Briefcase, UserCheck } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { Modal } from '@/src/shared/components';
-import { getMemberColors, type TeamMember, type TeamProject } from '../../types';
+import { Avatar, Modal } from '@/src/shared/components';
+import type { TeamMember, TeamProject } from '../../types';
 
 interface AssignProjectModalProps {
   member: TeamMember;
@@ -10,8 +10,6 @@ interface AssignProjectModalProps {
 }
 
 export default function AssignProjectModal({ member, projects, onClose, onAssign }: AssignProjectModalProps) {
-  const colors = getMemberColors(member.id);
-
   return (
     <Modal
       variant="dialog"
@@ -20,9 +18,13 @@ export default function AssignProjectModal({ member, projects, onClose, onAssign
       title="Assign Project"
       description={member.name}
       headerIcon={
-        <div className={`assign-project-modal-avatar flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${colors.bg} text-base font-bold text-white`}>
-          {member.name.charAt(0)}
-        </div>
+        <Avatar
+          name={member.name}
+          id={member.id}
+          color={member.avatarColor}
+          size="lg"
+          className="assign-project-modal-avatar h-10 w-10 rounded-xl text-base"
+        />
       }
     >
       <div className="assign-project-modal-list flex max-h-80 flex-col gap-1.5 overflow-y-auto px-4 pb-4">

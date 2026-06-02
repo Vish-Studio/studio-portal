@@ -297,7 +297,7 @@ const ProjectDetail = () => {
                   </div>
                 </DetailHeroCard.IconRow>
                 {client && (
-                  <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
+                  <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} color={client.avatarColor} size="xs" />}>
                     <div className="min-w-0">
                       <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
                       <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
@@ -395,7 +395,7 @@ const ProjectDetail = () => {
               <div className="px-4 md:px-6 py-4 flex flex-col gap-3">
                 {projectMembers.map(m => (
                   <div key={m.id} className="flex items-center gap-3">
-                    <Avatar name={m.name} id={m.id} size="sm" />
+                    <Avatar name={m.name} id={m.id} color={m.avatarColor} size="sm" />
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-gray-900 truncate">{m.name}</p>
                       <p className="text-xs text-gray-400">{m.role}</p>

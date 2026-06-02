@@ -37,7 +37,7 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
     <div ref={ref} className={`client-picker relative flex flex-col gap-1.5 ${isOpen ? 'z-[300]' : ''}`}>
       {selected ? (
         <div className="client-picker-selected flex items-center gap-2.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5">
-          <Avatar name={selected.fullName} id={selected.id} size="sm" />
+          <Avatar name={selected.fullName} id={selected.id} color={selected.avatarColor} size="sm" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-gray-900 truncate">{selected.fullName}</p>
             {selected.companyName && (
@@ -72,7 +72,7 @@ const ClientPicker: FunctionComponent<ClientPickerProps> = ({ clients, selectedI
                   onClick={() => { onSelect(c.id); setQuery(''); }}
                   className="client-picker-option w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
                 >
-                  <Avatar name={c.fullName} id={c.id} size="sm" />
+                  <Avatar name={c.fullName} id={c.id} color={c.avatarColor} size="sm" />
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{c.fullName}</p>
                     {c.companyName && <p className="text-xs text-gray-400">{c.companyName}</p>}

@@ -36,7 +36,7 @@ const TaskCard: FunctionComponent<TaskCardProps> = ({
   const clientAssignee = clients.find(client => client.id === task.clientAssigneeId);
   const assignees = members
     .filter(m => task.assigneeIds?.includes(m.id))
-    .map(m => ({ name: m.name, id: m.id }));
+    .map(m => ({ name: m.name, id: m.id, color: m.avatarColor }));
 
   const due = task.dueDate ? parseISO(task.dueDate) : null;
   const overdue = due && isPast(due) && task.status !== 'completed';

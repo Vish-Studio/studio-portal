@@ -1,7 +1,7 @@
 import { Briefcase, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { CardListItem, formatRecordDate, RecordMeta, StatusBadge } from '@/src/shared/components';
+import { Avatar, CardListItem, formatRecordDate, RecordMeta, StatusBadge } from '@/src/shared/components';
 import StatusIcon from '@/src/shared/components/status-icon/status-icon';
-import { getMemberColors, type TeamMember, type TeamProject } from '../../types';
+import type { TeamMember, TeamProject } from '../../types';
 
 export type TeamMemberListItemData = TeamMember & { project?: TeamProject };
 
@@ -26,7 +26,6 @@ export default function TeamMemberListItem({
   onAssign,
   onDelete,
 }: TeamMemberListItemProps) {
-  const colors = getMemberColors(member.id);
   const assigned = Boolean(member.assignedProjectId);
   const workStatus = member.status === 'fired' ? 'Fired' : member.status === 'on-leave' ? 'On leave' : 'Working';
 
@@ -37,9 +36,13 @@ export default function TeamMemberListItem({
       title={member.name}
       subTitle={<p className="team-member-list-item-email type-muted truncate text-gray-400">{member.email || 'No email'}</p>}
       icon={(
-        <div className={`team-member-list-item-avatar flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${colors.bg} text-xs font-bold text-white`}>
-          {member.name.charAt(0)}
-        </div>
+        <Avatar
+          name={member.name}
+          id={member.id}
+          color={member.avatarColor}
+          size="lg"
+          className="team-member-list-item-avatar h-10 w-10 rounded-2xl text-xs"
+        />
       )}
       actions={[
         ...(canEdit

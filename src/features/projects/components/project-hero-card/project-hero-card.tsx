@@ -41,7 +41,7 @@ const ProjectHeroCard: FunctionComponent<Props> = ({ project, className = '' }) 
 
           <div className="grid gap-3 pt-6 sm:grid-cols-2 lg:pt-5">
             {client && (
-              <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} size="xs" />}>
+              <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} color={client.avatarColor} size="xs" />}>
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
                   <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>

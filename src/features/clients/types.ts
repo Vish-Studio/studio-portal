@@ -30,6 +30,7 @@ export interface Client {
   isOnline?:   boolean;
   lastOnlineAt?: { toMillis: () => number; toDate: () => Date } | number | string;
   status?:     ClientStatus;
+  avatarColor?: string;
   createdAt?:  { toMillis: () => number; toDate: () => Date };
 }
 

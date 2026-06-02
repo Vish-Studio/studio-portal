@@ -43,7 +43,7 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
         <div className="member-picker-selected flex flex-wrap gap-1.5">
           {selected.map(m => (
             <div key={m.id} className="member-picker-chip flex items-center gap-1.5 bg-gray-100 rounded-full pl-1 pr-2 py-1">
-              <Avatar name={m.name} id={m.id} size="xs" />
+              <Avatar name={m.name} id={m.id} color={m.avatarColor} size="xs" />
               <span className="text-xs font-medium text-gray-700 leading-none">
                 {m.name.split(' ')[0]}
               </span>
@@ -79,7 +79,7 @@ const MemberPicker: FunctionComponent<MemberPickerProps> = ({ members, selectedI
                 onClick={() => { onToggle(m.id); setQuery(''); }}
                 className="member-picker-option w-full flex items-center gap-2.5 px-3 py-2.5 hover:bg-gray-50 transition-colors text-left"
               >
-                <Avatar name={m.name} id={m.id} size="sm" />
+                <Avatar name={m.name} id={m.id} color={m.avatarColor} size="sm" />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{m.name}</p>
                   <p className="text-xs text-gray-400">{m.role}</p>

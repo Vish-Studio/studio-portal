@@ -46,7 +46,7 @@ const ProjectsOverview = ({ projects, members, limit = 4 }: ProjectsOverviewProp
 
             const projectMembers: AvatarStackMember[] = members
               .filter(m => project.assignedMemberIds?.includes(m.id))
-              .map(m => ({ name: m.name, id: m.id }));
+              .map(m => ({ name: m.name, id: m.id, color: m.avatarColor }));
 
             return (
               <button

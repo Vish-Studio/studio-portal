@@ -1,8 +1,8 @@
 import { FunctionComponent } from 'react';
 import { Mail, Phone } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
-import { DETAIL_COVER_IMAGES, DetailHeroCard, MaterialIcon } from '@/src/shared/components';
-import { avatarColor, ClientStatusBadge } from '@/src/shared/components';
+import { Avatar, DETAIL_COVER_IMAGES, DetailHeroCard, MaterialIcon } from '@/src/shared/components';
+import { ClientStatusBadge } from '@/src/shared/components';
 import type { Client } from '../../types';
 
 interface Props {
@@ -20,19 +20,19 @@ const formatOnlineStatus = (client: Client) => {
 };
 
 const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) => {
-  const avatarBg     = avatarColor(client.id ?? client.fullName);
-
   return (
     <DetailHeroCard className={`client-detail-card ${className}`}>
       {/* ── Hero ── */}
       <DetailHeroCard.Hero title={client.fullName} coverImage={DETAIL_COVER_IMAGES.client}>
         <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
           <div className="min-w-0">
-            <div
-              className={`client-detail-card-avatar mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 ${avatarBg} text-4xl font-black text-white`}
-            >
-              {client.fullName.charAt(0).toUpperCase()}
-            </div>
+            <Avatar
+              name={client.fullName}
+              id={client.id}
+              color={client.avatarColor}
+              size="xl"
+              className="client-detail-card-avatar mb-4 border-4 border-gray-100"
+            />
 
             {client.companyName && (
               <p className="mt-1 max-w-full truncate text-sm font-semibold text-gray-500">{client.companyName}</p>

@@ -11,7 +11,7 @@ export const calcProgress = (project: ClientProject) => {
 };
 
 const toStackMembers = (members: TeamMember[]): AvatarStackMember[] =>
-  members.map(m => ({ name: m.name, id: m.id }));
+  members.map(m => ({ name: m.name, id: m.id, color: m.avatarColor }));
 
 export interface ProjectCardProps {
   project: ClientProject;

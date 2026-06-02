@@ -88,7 +88,7 @@ export default function NewChatSidebar({
                     onClick={() => onSelectParticipant(participant)}
                     className="new-chat-sidebar-item flex w-full min-w-0 items-center gap-3 rounded-xl px-3 py-3 text-left transition-colors hover:bg-(--color-surface-alt)"
                   >
-                    <Avatar name={participant.name} id={participant.id} size="md" />
+                    <Avatar name={participant.name} id={participant.id} color={participant.avatarColor} size="md" />
                     <div className="min-w-0 flex-1">
                       <p className="type-card-title truncate text-(--color-ink)">{participant.name}</p>
                       <p className="type-muted mt-0.5 truncate text-gray-400">{participant.meta}</p>

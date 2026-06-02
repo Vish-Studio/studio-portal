@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
-import { CardListItem, ClientStatusBadge, formatRecordDate, RecordMeta } from '@/src/shared/components';
-import type { Client, ClientStatus } from '../../types';
+import { Avatar, CardListItem, ClientStatusBadge, formatRecordDate, RecordMeta } from '@/src/shared/components';
+import type { Client } from '../../types';
 
 interface ClientListItemProps {
   client: Client;
@@ -8,12 +8,6 @@ interface ClientListItemProps {
   onEdit: (client: Client) => void;
   onDelete: (client: Client) => void;
 }
-
-const STATUS_COLOR: Record<ClientStatus, string> = {
-  active: 'bg-green',
-  inactive: 'bg-amber-400',
-  lost: 'bg-red-400',
-};
 
 export default function ClientListItem({ client, onOpen, onEdit, onDelete }: ClientListItemProps) {
   return (
@@ -23,9 +17,13 @@ export default function ClientListItem({ client, onOpen, onEdit, onDelete }: Cli
       title={client.fullName}
       subTitle={<RecordMeta items={[{ label: client.companyName || 'No company', icon: 'business' }]} className="client-list-item-company" />}
       icon={(
-        <div className={`client-list-item-avatar flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${STATUS_COLOR[client.status]} text-xs font-bold text-white`}>
-          {client.fullName.charAt(0).toUpperCase()}
-        </div>
+        <Avatar
+          name={client.fullName}
+          id={client.id}
+          color={client.avatarColor}
+          size="lg"
+          className="client-list-item-avatar h-10 w-10 rounded-2xl text-xs"
+        />
       )}
       actions={[
         { label: 'Edit client', icon: <Pencil size={14} />, onClick: () => onEdit(client) },

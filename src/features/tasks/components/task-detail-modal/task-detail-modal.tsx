@@ -137,7 +137,7 @@ export default function TaskDetailModal({ task, onClose, onEdit, onDelete }: Tas
                 <div className="flex flex-col gap-3">
                   {assignees.map(member => (
                     <div key={member.id} className="flex items-center gap-2.5">
-                      <Avatar name={member.name} id={member.id} size="sm" />
+                      <Avatar name={member.name} id={member.id} color={member.avatarColor} size="sm" />
                       <div className="min-w-0">
                         <p className="truncate text-sm font-bold text-(--color-ink)">{member.name}</p>
                         <p className="text-xs font-medium text-gray-400">{member.role}</p>

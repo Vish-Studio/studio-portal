@@ -124,7 +124,7 @@ export default function ChatBox({
                 )}
               >
                 <div className="relative shrink-0">
-                  <Avatar name={participant.name} id={participant.id} size="lg" />
+                  <Avatar name={participant.name} id={participant.id} color={participant.avatarColor} size="lg" />
                   {unread > 0 && (
                     <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full border-2 border-white bg-(--color-accent-lime)" />
                   )}

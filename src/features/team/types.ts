@@ -17,6 +17,7 @@ export interface TeamMember {
   salaryType?: TeamSalaryType;
   assignedProjectId: string | null;
   status?:     TeamWorkStatus | "active" | "inactive" | "lost";
+  avatarColor?: string;
   createdAt?:  { toMillis: () => number; toDate: () => Date };
   updatedAt?:  { toMillis: () => number; toDate: () => Date };
 }

@@ -420,7 +420,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                                   : 'border-transparent bg-white text-gray-600 hover:border-gray-200'
                               }`}
                             >
-                              <Avatar name={member.name} id={member.id} size="xs" />
+                              <Avatar name={member.name} id={member.id} color={member.avatarColor} size="xs" />
                               {member.name.split(' ')[0]}
                             </button>
                           );

@@ -1,12 +1,15 @@
 export { default as Avatar } from './avatar/avatar';
 export {
   AvatarStack,
+  avatarTone,
   avatarColor,
   getInitials,
+  randomAvatarTone,
   type AvatarProps,
   type AvatarSize,
   type AvatarStackMember,
   type AvatarStackProps,
+  type AvatarTone,
 } from './avatar/avatar';
 export { default as Button } from './button/button';
 export { default as ButtonFab } from './button-fab/button-fab';

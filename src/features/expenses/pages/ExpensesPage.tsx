@@ -382,7 +382,7 @@ export default function ExpensesPage() {
                 {selectedMember && (
                   <div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-gray-50 px-3 py-2.5">
                     <div className="flex min-w-0 items-center gap-2">
-                      <Avatar name={selectedMember.name} id={selectedMember.id} size="sm" />
+                      <Avatar name={selectedMember.name} id={selectedMember.id} color={selectedMember.avatarColor} size="sm" />
                       <div className="min-w-0">
                         <p className="type-card-title truncate text-gray-900">{selectedMember.name}</p>
                         <p className="type-muted truncate text-gray-400">{selectedMember.role}</p>

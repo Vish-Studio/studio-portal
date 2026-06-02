@@ -6,6 +6,7 @@ export interface ChatParticipant {
   name: string;
   meta: string;
   email?: string;
+  avatarColor?: string;
 }
 
 export const formatChatTime = (timestamp: number) =>

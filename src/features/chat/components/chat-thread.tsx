@@ -55,7 +55,12 @@ export default function ChatThread({
                     <ArrowLeft size={17} />
                   </button>
                 )}
-                <Avatar name={mode === 'admin' ? participant.name : ADMIN_NAME} id={participant.id} size="lg" />
+                <Avatar
+                  name={mode === 'admin' ? participant.name : ADMIN_NAME}
+                  id={participant.id}
+                  color={mode === 'admin' ? participant.avatarColor : undefined}
+                  size="lg"
+                />
                 <div className="min-w-0">
                   <h2 className="type-card-title truncate text-(--color-ink)">
                     {mode === 'admin' ? participant.name : ADMIN_NAME}

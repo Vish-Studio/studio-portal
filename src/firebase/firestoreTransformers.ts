@@ -78,6 +78,7 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
     lastOnlineAt: data.lastOnlineAt as Client['lastOnlineAt'],
     role: 'client',
     status,
+    avatarColor: typeof data.avatarColor === 'string' ? data.avatarColor : undefined,
     createdAt: data.createdAt as Client['createdAt'],
   };
 };
@@ -108,6 +109,7 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
     salaryType,
     assignedProjectId: typeof data.assignedProjectId === 'string' ? data.assignedProjectId : null,
     status,
+    avatarColor: typeof data.avatarColor === 'string' ? data.avatarColor : undefined,
     createdAt: data.createdAt as TeamMember['createdAt'],
     updatedAt: data.updatedAt as TeamMember['updatedAt'],
   };

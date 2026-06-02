@@ -163,7 +163,7 @@ export default function UserProfileSettings() {
       <section className="user-profile-settings-title-card rounded-[18px] bg-(--color-surface-alt) p-5 md:p-6">
         <div className="user-profile-settings-title-content flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="user-profile-settings-title-left flex items-center gap-4">
-            <Avatar name={profile.fullName || profile.email} id={profile.uid} size="lg" />
+            <Avatar name={profile.fullName || profile.email} id={profile.uid} color={profile.avatarColor} size="lg" />
             <div className="user-profile-settings-title-copy min-w-0">
               <p className="type-eyebrow text-gray-400">Account profile</p>
               <h2 className="type-page-title mt-1 text-(--color-ink)">Manage your profile</h2>
