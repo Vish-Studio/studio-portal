@@ -1,5 +1,5 @@
 import { MaterialIcon, Modal } from '@/src/shared/components';
-import { TEMPLATES } from '../../templates';
+import { useDocumentTemplatesStore } from '../../stores/documentTemplatesStore';
 
 interface Props {
   /** Phase title shown in the modal header */
@@ -9,6 +9,8 @@ interface Props {
 }
 
 export default function AssignTemplateModal({ phaseTitle, onConfirm, onCancel }: Props) {
+  const templates = useDocumentTemplatesStore(state => state.getActiveTemplates());
+
   return (
     <Modal
       onClose={onCancel}
@@ -18,7 +20,7 @@ export default function AssignTemplateModal({ phaseTitle, onConfirm, onCancel }:
     >
       <div className="px-6 pb-6 pt-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {TEMPLATES.map(tpl => (
+        {templates.map(tpl => (
           <button
             key={tpl.slug}
             type="button"

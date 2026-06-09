@@ -141,6 +141,7 @@ export const projectDocToClientProject = (
     endDate: toDateInput(data.endDate),
     service: isServiceType(data.service) ? data.service : 'software',
     package: isPackageType(data.package) ? data.package : undefined,
+    pricingPackageId: typeof data.pricingPackageId === 'string' ? data.pricingPackageId : undefined,
     assignedMemberIds: Array.isArray(data.assignedTeamIds) ? data.assignedTeamIds.map(String) : [],
   };
 };

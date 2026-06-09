@@ -68,6 +68,7 @@ const projectToCreateDoc = (project: ClientProject, role: AuthRole) => ({
   status: projectStatusToFirestore(project.status),
   service: project.service,
   ...(project.package ? { package: project.package } : {}),
+  ...(project.pricingPackageId ? { pricingPackageId: project.pricingPackageId } : {}),
   timeline: project.timeline,
   startDate: project.startDate || new Date(project.startedAt).toISOString().slice(0, 10),
   startedAt: project.startDate || new Date(project.startedAt).toISOString().slice(0, 10),
@@ -93,6 +94,7 @@ const projectUpdatesToDoc = (updates: Partial<Omit<ClientProject, "id">>) => ({
     : {}),
   ...(updates.service !== undefined ? { service: updates.service } : {}),
   ...(updates.package !== undefined ? { package: updates.package } : {}),
+  ...(updates.pricingPackageId !== undefined ? { pricingPackageId: updates.pricingPackageId } : {}),
   ...(updates.timeline !== undefined ? { timeline: updates.timeline } : {}),
   ...(updates.startDate !== undefined
     ? { startDate: updates.startDate, startedAt: updates.startDate }
@@ -341,6 +343,7 @@ export const makeNewProject = (overrides: {
   name: string;
   service: ServiceType;
   package?: PackageType;
+  pricingPackageId?: string;
   status: "active" | "paused" | "completed";
   timeline: string;
   startDate?: string;

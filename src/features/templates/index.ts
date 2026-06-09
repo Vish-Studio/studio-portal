@@ -11,7 +11,13 @@ export { default as ProjectProposalTemplatePage } from './pages/template-preview
 export { default as QuotationTemplatePage } from './pages/template-previews/QuotationTemplatePage';
 export { default as TemplateEditorPage } from './pages/TemplateEditorPage';
 export { default as TemplatesPage } from './pages/TemplatesPage';
+export { DEFAULT_DOCUMENT_TEMPLATES, useDocumentTemplatesStore } from './stores/documentTemplatesStore';
 export { useTemplateAssignmentsStore } from './stores/templateAssignmentsStore';
+export { DEFAULT_PRICING_PACKAGES, formatPricingAmount, usePricingPackagesStore } from './stores/pricingPackagesStore';
+export { TEMPLATE_COLLECTION_PATHS, useQuestionnaireTemplatesStore } from './stores/questionnaireTemplatesStore';
 export { TEMPLATES } from './templates';
 export * from './templateBlocks';
+export type { DocumentTemplate } from './stores/documentTemplatesStore';
+export type { PricingBilling, PricingPackage, PricingTemplateKind } from './stores/pricingPackagesStore';
+export type { QuestionnaireTemplate } from './stores/questionnaireTemplatesStore';
 export type { TemplateAssignment } from './stores/templateAssignmentsStore';

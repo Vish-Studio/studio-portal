@@ -6,10 +6,10 @@ import BlockEditorPanel from '../components/editor/block-editor-panel';
 import AddBlockMenu from '../components/editor/add-block-menu';
 import ConfirmDialog from '@/src/shared/components/confirm-dialog/confirm-dialog';
 import { useTemplateAssignmentsStore } from '../stores/templateAssignmentsStore';
+import { useDocumentTemplatesStore } from '../stores/documentTemplatesStore';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
 import { getDefaultBlocks } from '../templateBlocks';
-import { TEMPLATES } from '../templates';
 import ProjectTemplateDocument from '../components/document/project-template-document';
 import type { BlockType, TemplateBlock } from '../templateBlocks';
 
@@ -28,6 +28,7 @@ export default function TemplateEditorPage() {
   const { projects }                                         = useProjectsStore();
   const { clients }                                          = useClientsStore();
   const { assignments, addAssignment, updateAssignment }     = useTemplateAssignmentsStore();
+  const templateDefs                                         = useDocumentTemplatesStore(state => state.templates);
 
   const project = projects.find(p => p.id === projectId);
   const client = project ? clients.find(c => c.id === project.clientId) : null;
@@ -36,11 +37,11 @@ export default function TemplateEditorPage() {
   const isNew   = assignmentId === 'new';
   const phaseKey  = searchParams.get('phase');
   const templateSlug = searchParams.get('template') ?? 'contract';
-  const tplMeta  = TEMPLATES.find(t => t.slug === templateSlug);
+  const tplMeta  = templateDefs.find(t => t.slug === templateSlug);
 
   const existing = isNew ? null : assignments.find(a => a.id === assignmentId);
   const currentTemplateSlug = existing?.templateSlug ?? templateSlug;
-  const currentTplMeta = TEMPLATES.find(t => t.slug === currentTemplateSlug);
+  const currentTplMeta = templateDefs.find(t => t.slug === currentTemplateSlug);
 
   // ── Local block state ──
   const [blocks,       setBlocks]       = useState<TemplateBlock[]>([]);

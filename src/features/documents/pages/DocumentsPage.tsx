@@ -6,10 +6,9 @@ import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import { MaterialIcon } from '@/src/shared/components';
 import { useDocumentsStore } from '../stores/documentStore';
-import { useTemplateAssignmentsStore } from '@/src/features/templates';
+import { useDocumentTemplatesStore, useTemplateAssignmentsStore } from '@/src/features/templates';
 import { useProjectsStore } from '@/src/features/projects';
 import { useClientsStore } from '@/src/features/clients';
-import { TEMPLATES } from '@/src/features/templates';
 import DocumentListItem, {
   DOC_TYPE_ICON,
   DOC_TYPE_LABEL,
@@ -25,6 +24,7 @@ export default function DocumentsPage() {
   const navigate = useNavigate();
   const { documents }   = useDocumentsStore();
   const { assignments } = useTemplateAssignmentsStore();
+  const templateDefs = useDocumentTemplatesStore(state => state.templates);
   const { projects }    = useProjectsStore();
   const { clients }     = useClientsStore();
 
@@ -64,7 +64,7 @@ export default function DocumentsPage() {
 
       const phase   = project.phases.find(ph => ph.id === a.phaseKey);
       const client  = clients.find(c => c.id === project.clientId);
-      const tpl     = TEMPLATES.find(t => t.slug === a.templateSlug);
+      const tpl     = templateDefs.find(t => t.slug === a.templateSlug);
 
       let status: DocStatus = 'pending';
       if (phase) {
@@ -97,7 +97,7 @@ export default function DocumentsPage() {
 
     // Sort most recent first
     return entries.sort((a, b) => b.date - a.date);
-  }, [documents, assignments, projects, clients]);
+  }, [documents, assignments, projects, clients, templateDefs]);
 
   // ── Tab counts ────────────────────────────────────────────────────────────
 

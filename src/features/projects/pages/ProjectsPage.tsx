@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { Briefcase, CheckCircle, TrendingUp, Layers, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
@@ -19,11 +19,13 @@ import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '@/src/features/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
 import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
+import { formatPricingAmount, usePricingPackagesStore } from '@/src/features/templates';
 
 interface ProjectFormValues {
   name: string;
   service: ServiceType;
   package: PackageType | '';
+  pricingPackageId: string;
   status: 'active' | 'paused' | 'completed';
   timeline: string;
   startDate: string;
@@ -37,12 +39,21 @@ const sameStringSet = (left: string[] = [], right: string[] = []) => (
   left.length === right.length && left.every(value => right.includes(value))
 );
 
+const inferPackageType = (name: string): PackageType | undefined => {
+  const value = name.toLowerCase();
+  if (value.includes('premium')) return 'premium';
+  if (value.includes('growth')) return 'growth';
+  if (value.includes('essential') || value.includes('starter')) return 'essentials';
+  return undefined;
+};
+
 const Projects = () => {
   const { searchQuery, showToast } = useUIStore();
   const { projects, loading, error, addProject, updateProject, removeProject } = useProjectsStore();
   const profile = useAuthStore(state => state.profile);
   const { members } = useTeamStore();
   const { clients } = useClientsStore();
+  const pricingPackages = usePricingPackagesStore(state => state.packages);
 
   const [activeTab, setActiveTab] = useState('all');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
@@ -61,7 +72,12 @@ const Projects = () => {
     });
 
   const watchedService = watch('service');
-  const hasPackages = watchedService === 'website' || watchedService === 'software';
+  const watchedPricingPackageId = watch('pricingPackageId');
+  const availablePackages = useMemo(
+    () => pricingPackages.filter(item => item.service === watchedService && item.kind === 'package' && item.isActive).sort((a, b) => a.price - b.price),
+    [pricingPackages, watchedService],
+  );
+  const selectedPricingPackage = pricingPackages.find(item => item.id === watchedPricingPackageId);
   const canCreate = canCreateProject(profile?.role);
   const canManage = profile?.role === 'superadmin' || profile?.role === 'admin';
   const hasProjectFormChanges = isDirty || (
@@ -108,6 +124,27 @@ const Projects = () => {
     ? Math.round(projects.reduce((s, p) => s + getPhaseProgress(p.phases), 0) / projects.length)
     : 0;
 
+  useEffect(() => {
+    if (!watchedPricingPackageId) return;
+    if (watchedPricingPackageId === 'custom') {
+      if (watch('package')) reset({ ...watch(), package: '' }, { keepDirty: true });
+      return;
+    }
+    if (!selectedPricingPackage || selectedPricingPackage.service !== watchedService) {
+      reset({ ...watch(), pricingPackageId: 'custom', package: '', budget: watch('budget') ?? 0 });
+      return;
+    }
+
+    const legacyPackage = inferPackageType(selectedPricingPackage.name);
+    reset({
+      ...watch(),
+      pricingPackageId: selectedPricingPackage.id,
+      package: legacyPackage ?? '',
+      budget: selectedPricingPackage.price,
+      timeline: watch('timeline') || selectedPricingPackage.timeline || '',
+    }, { keepDirty: true });
+  }, [reset, selectedPricingPackage, watch, watchedPricingPackageId, watchedService]);
+
   const openAdd = () => {
     if (!canCreate) {
       showToast({
@@ -118,7 +155,18 @@ const Projects = () => {
       return;
     }
     setEditingProject(null);
-    reset({ name: '', service: 'website', package: 'essentials', status: 'active', timeline: '', startDate: new Date().toISOString().slice(0, 10), endDate: '', budget: 0 });
+    const firstPackage = pricingPackages.find(item => item.service === 'website' && item.isActive);
+    reset({
+      name: '',
+      service: 'website',
+      package: firstPackage ? inferPackageType(firstPackage.name) ?? '' : '',
+      pricingPackageId: firstPackage?.id ?? 'custom',
+      status: 'active',
+      timeline: firstPackage?.timeline ?? '',
+      startDate: new Date().toISOString().slice(0, 10),
+      endDate: '',
+      budget: firstPackage?.price ?? 0,
+    });
     setSelectedClientId('');
     setSelectedMemberIds([]);
     setSubmitError(null);
@@ -127,7 +175,7 @@ const Projects = () => {
 
   const openEdit = (project: ClientProject) => {
     setEditingProject(project);
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
+    reset({ name: project.name, service: project.service, package: project.package ?? '', pricingPackageId: project.pricingPackageId ?? 'custom', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
     setSubmitError(null);
@@ -145,7 +193,8 @@ const Projects = () => {
     const payload = {
       name: data.name,
       service: data.service,
-      package: hasPackages && data.package ? (data.package as PackageType) : undefined,
+      package: data.package ? (data.package as PackageType) : undefined,
+      pricingPackageId: data.pricingPackageId === 'custom' ? undefined : data.pricingPackageId,
       status: data.status,
       timeline: data.timeline,
       startDate: data.startDate,
@@ -272,15 +321,17 @@ const Projects = () => {
                 ))}
               </Select>
             </FormField>
-            {hasPackages && (
-              <FormField label="Package" required error={errors.package?.message}>
-                <Select {...register('package', { required: hasPackages })} hasError={!!errors.package}>
-                  <Option value="essentials">Essentials</Option>
-                  <Option value="growth">Growth</Option>
-                  <Option value="premium">Premium</Option>
-                </Select>
-              </FormField>
-            )}
+            <FormField label="Pricing Package" required error={errors.pricingPackageId?.message}>
+              <Select {...register('pricingPackageId', { required: true })} hasError={!!errors.pricingPackageId}>
+                <Option value="custom">Custom pricing</Option>
+                {availablePackages.map(item => (
+                  <Option key={item.id} value={item.id}>{item.name} - {formatPricingAmount(item)}</Option>
+                ))}
+              </Select>
+              {selectedPricingPackage && watchedPricingPackageId !== 'custom' && (
+                <p className="mt-2 text-xs font-medium text-gray-400">{selectedPricingPackage.summary}</p>
+              )}
+            </FormField>
             <FormField label="Status" required error={errors.status?.message}>
               <Select {...register('status', { required: true })} hasError={!!errors.status}>
                 <Option value="active">Active</Option>
@@ -306,6 +357,8 @@ const Projects = () => {
                 min="0"
                 step="0.01"
                 placeholder="0"
+                readOnly={watchedPricingPackageId !== 'custom'}
+                className={watchedPricingPackageId !== 'custom' ? 'cursor-not-allowed opacity-70' : ''}
                 hasError={!!errors.budget}
               />
             </FormField>

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Check, ChevronDown, ChevronUp, Eye, Pencil, Plus, Trash2, UserRound } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { MaterialIcon, RowActionsMenu } from '@/src/shared/components';
 import { DEFAULT_PHASE_DEFS, getPhaseProgress, type ClientProject, type Phase } from '../../types';
-import { TEMPLATES, type TemplateAssignment } from '@/src/features/templates';
+import { useDocumentTemplatesStore, type TemplateAssignment } from '@/src/features/templates';
 
 interface ProjectTimelineProps {
   project: ClientProject;
@@ -148,7 +148,8 @@ function PhaseDetailCard({
 }) {
   const isActive    = phase.status === 'active';
   const isDone      = phase.status === 'done';
-  const tplMeta     = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
+  const templateDefs = useDocumentTemplatesStore.getState().templates;
+  const tplMeta     = assignment ? templateDefs.find(t => t.slug === assignment.templateSlug) : null;
   const allocated = project.phases.reduce((s, p) => s + (p.phaseAmount ?? 0), 0);
 
   const iconBg = isDone
@@ -346,6 +347,7 @@ export default function ProjectTimeline({
   onCreateDefaultPhase,
 }: ProjectTimelineProps) {
   const phases = project.phases;
+  const templateDefs = useDocumentTemplatesStore(state => state.templates);
   const doneCount = phases.filter(p => p.status === 'done').length;
   const progress = getPhaseProgress(phases);
 
@@ -485,7 +487,7 @@ export default function ProjectTimeline({
           const isActive = phase.status === 'active';
           const isDone = phase.status === 'done';
           const assignment = getPhaseAssignment(project.id, phase.id);
-          const tplMeta = assignment ? TEMPLATES.find(t => t.slug === assignment.templateSlug) : null;
+          const tplMeta = assignment ? templateDefs.find(t => t.slug === assignment.templateSlug) : null;
           const allocated = phase.phaseAmount != null && phase.phaseAmount > 0;
           const cfg = statusConfig[phase.status];
 

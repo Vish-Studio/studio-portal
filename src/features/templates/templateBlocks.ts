@@ -113,8 +113,19 @@ export function getDefaultBlocks(slug: string): TemplateBlock[] {
     case 'overdue-invoice':  return overdueInvoiceBlocks();
     case 'project-proposal': return projectProposalBlocks();
     case 'quotation':        return quotationBlocks();
-    default:                 return [];
+    default:                 return genericDocumentBlocks();
   }
+}
+
+function genericDocumentBlocks(): TemplateBlock[] {
+  return [
+    { id: newId(), type: 'heading', content: 'Overview' },
+    { id: newId(), type: 'paragraph', content: 'Use this section to outline the purpose, scope, and important details for this document.' },
+    { id: newId(), type: 'divider' },
+    { id: newId(), type: 'heading', content: 'Details' },
+    { id: newId(), type: 'bullet-list', items: ['Add the first key point.', 'Add the second key point.', 'Add the third key point.'] },
+    { id: newId(), type: 'divider' },
+  ];
 }
 
 function contractBlocks(): TemplateBlock[] {

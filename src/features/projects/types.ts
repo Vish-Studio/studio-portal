@@ -140,5 +140,6 @@ export interface ClientProject {
   endDate?: string;
   service: ServiceType;
   package?: PackageType;
+  pricingPackageId?: string;
   assignedMemberIds?: string[];
 }

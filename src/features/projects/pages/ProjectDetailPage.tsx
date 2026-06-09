@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Briefcase, Check, CheckSquare, Pencil, Trash2, Users, WalletCards } from '@/src/shared/components/material-icon/material-lucide-icons';
@@ -20,10 +20,10 @@ import { useClientsStore } from '@/src/features/clients';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { getPhaseProgress, getProjectAccent, SERVICE_META, type ServiceType, type PackageType, type Phase, type PhaseStatus } from '../types';
-import { TEMPLATES } from '@/src/features/templates';
+import { formatPricingAmount, useDocumentTemplatesStore, usePricingPackagesStore } from '@/src/features/templates';
 
 interface ProjectFormValues {
-  name: string; service: ServiceType; package: PackageType | ''; status: 'active' | 'paused' | 'completed'; timeline: string; startDate: string; endDate: string; budget: number;
+  name: string; service: ServiceType; package: PackageType | ''; pricingPackageId: string; status: 'active' | 'paused' | 'completed'; timeline: string; startDate: string; endDate: string; budget: number;
 }
 
 type TaskFilter = 'all' | TaskStatus;
@@ -35,6 +35,14 @@ const sameStringSet = (left: string[] = [], right: string[] = []) => (
   left.length === right.length && left.every(value => right.includes(value))
 );
 
+const inferPackageType = (name: string): PackageType | undefined => {
+  const value = name.toLowerCase();
+  if (value.includes('premium')) return 'premium';
+  if (value.includes('growth')) return 'growth';
+  if (value.includes('essential') || value.includes('starter')) return 'essentials';
+  return undefined;
+};
+
 const ProjectDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -42,6 +50,8 @@ const ProjectDetail = () => {
   const showToast = useUIStore(state => state.showToast);
   const { clients }  = useClientsStore();
   const { members }  = useTeamStore();
+  const pricingPackages = usePricingPackagesStore(state => state.packages);
+  const documentTemplates = useDocumentTemplatesStore(state => state.templates);
   const { tasks, removeTask } = useTasksStore();
   const { getPhaseAssignment, removeAssignment } = useTemplateAssignmentsStore();
   const project = projects.find(p => p.id === id);
@@ -71,7 +81,12 @@ const ProjectDetail = () => {
 
   const { register, handleSubmit, watch, reset, formState: { errors, isSubmitting, isDirty } } = useForm<ProjectFormValues>();
   const watchedService = watch('service');
-  const hasPackages    = watchedService === 'website' || watchedService === 'software';
+  const watchedPricingPackageId = watch('pricingPackageId');
+  const availablePackages = useMemo(
+    () => pricingPackages.filter(item => item.service === watchedService && item.kind === 'package' && item.isActive).sort((a, b) => a.price - b.price),
+    [pricingPackages, watchedService],
+  );
+  const selectedPricingPackage = pricingPackages.find(item => item.id === watchedPricingPackageId);
 
   if (!project) {
     return (
@@ -100,6 +115,26 @@ const ProjectDetail = () => {
   );
   const hasProjectChanges = isDirty || hasPickerChanges;
 
+  useEffect(() => {
+    if (!watchedPricingPackageId) return;
+    if (watchedPricingPackageId === 'custom') {
+      if (watch('package')) reset({ ...watch(), package: '' }, { keepDirty: true });
+      return;
+    }
+    if (!selectedPricingPackage || selectedPricingPackage.service !== watchedService) {
+      reset({ ...watch(), pricingPackageId: 'custom', package: '', budget: watch('budget') ?? 0 });
+      return;
+    }
+
+    reset({
+      ...watch(),
+      pricingPackageId: selectedPricingPackage.id,
+      package: inferPackageType(selectedPricingPackage.name) ?? '',
+      budget: selectedPricingPackage.price,
+      timeline: watch('timeline') || selectedPricingPackage.timeline || '',
+    }, { keepDirty: true });
+  }, [reset, selectedPricingPackage, watch, watchedPricingPackageId, watchedService]);
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const projectTasks = useMemo(() => {
     const base     = tasks.filter(t => t.projectId === id);
@@ -112,7 +147,7 @@ const ProjectDetail = () => {
   const openProjectTaskCount = allProjectTasks.filter(task => task.status !== 'completed').length;
 
   const openEdit = () => {
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
+    reset({ name: project.name, service: project.service, package: project.package ?? '', pricingPackageId: project.pricingPackageId ?? 'custom', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
     setSubmitError(null);
@@ -125,7 +160,7 @@ const ProjectDetail = () => {
   };
 
   const cancelEdit = () => {
-    reset({ name: project.name, service: project.service, package: project.package ?? '', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
+    reset({ name: project.name, service: project.service, package: project.package ?? '', pricingPackageId: project.pricingPackageId ?? 'custom', status: project.status, timeline: project.timeline, startDate: project.startDate ?? new Date(project.startedAt).toISOString().slice(0, 10), endDate: project.endDate ?? '', budget: project.agreedPayment });
     setSelectedClientId(project.clientId);
     setSelectedMemberIds(project.assignedMemberIds ?? []);
     setIsEditing(false);
@@ -154,7 +189,8 @@ const ProjectDetail = () => {
       await updateProject(project.id, {
         name:              data.name,
         service:           data.service,
-        package:           hasPackages && data.package ? (data.package as PackageType) : undefined,
+        package:           data.package ? (data.package as PackageType) : undefined,
+        pricingPackageId:  data.pricingPackageId === 'custom' ? undefined : data.pricingPackageId,
         status:            data.status,
         timeline:          data.timeline,
         startDate:         data.startDate,
@@ -464,16 +500,17 @@ const ProjectDetail = () => {
               </Select>
             </FormField>
 
-            {hasPackages && (
-              <FormField label="Package">
-                <Select {...register('package')}>
-                  <Option value="">— None —</Option>
-                  <Option value="essentials">Essentials</Option>
-                  <Option value="growth">Growth</Option>
-                  <Option value="premium">Premium</Option>
-                </Select>
-              </FormField>
-            )}
+            <FormField label="Pricing Package" required error={errors.pricingPackageId?.message}>
+              <Select {...register('pricingPackageId', { required: true })} hasError={!!errors.pricingPackageId}>
+                <Option value="custom">Custom pricing</Option>
+                {availablePackages.map(item => (
+                  <Option key={item.id} value={item.id}>{item.name} - {formatPricingAmount(item)}</Option>
+                ))}
+              </Select>
+              {selectedPricingPackage && watchedPricingPackageId !== 'custom' && (
+                <p className="mt-2 text-xs font-medium text-gray-400">{selectedPricingPackage.summary}</p>
+              )}
+            </FormField>
 
             <FormField label="Status" required>
               <Select {...register('status', { required: true })}>
@@ -502,6 +539,7 @@ const ProjectDetail = () => {
                 type="number"
                 min="0"
                 step="0.01"
+                readOnly={watchedPricingPackageId !== 'custom'}
                 className={inputCls(!!errors.budget)}
               />
             </FormField>
@@ -598,7 +636,7 @@ const ProjectDetail = () => {
 
                 {(() => {
                   const phaseDoc = getPhaseAssignment(id!, editingPhase.id);
-                  const tpl = phaseDoc ? TEMPLATES.find(t => t.slug === phaseDoc.templateSlug) : null;
+                  const tpl = phaseDoc ? documentTemplates.find(t => t.slug === phaseDoc.templateSlug) : null;
                   return (
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Document</p>
