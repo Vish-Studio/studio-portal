@@ -41,6 +41,7 @@ export default function Button({
     <button
       type="button"
       disabled={isDisabled}
+      data-variant={variant}
       className={`button type-control inline-flex items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       {...props}
     >

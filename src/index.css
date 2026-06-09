@@ -334,6 +334,128 @@ body {
     @apply text-xs font-semibold leading-tight;
     letter-spacing: 0;
   }
+
+  .form-sidebar .form-field-label {
+    @apply text-gray-500;
+  }
+
+  .form-sidebar .form-field-hint {
+    @apply text-gray-500;
+  }
+
+  .form-sidebar .form-sidebar-body input:not([type="checkbox"]):not([type="radio"]),
+  .form-sidebar .form-sidebar-body textarea,
+  .form-sidebar .select-trigger {
+    background-color: rgb(255 255 255 / 0.06) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+    color: white !important;
+  }
+
+  .form-sidebar .form-sidebar-body input:not([type="checkbox"]):not([type="radio"])::placeholder,
+  .form-sidebar .form-sidebar-body textarea::placeholder {
+    color: rgb(156 163 175) !important;
+  }
+
+  .form-sidebar .form-sidebar-body input:not([type="checkbox"]):not([type="radio"]):focus,
+  .form-sidebar .form-sidebar-body textarea:focus,
+  .form-sidebar .select-trigger:focus {
+    background-color: rgb(255 255 255 / 0.09) !important;
+    border-color: rgb(255 255 255 / 0.2) !important;
+    box-shadow: 0 0 0 4px rgb(255 255 255 / 0.06) !important;
+  }
+
+  .form-sidebar .select-trigger:hover {
+    background-color: rgb(255 255 255 / 0.09) !important;
+  }
+
+  .form-sidebar .select-menu {
+    background-color: var(--color-sidebar-bg) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+    box-shadow: 0 18px 50px rgb(0 0 0 / 0.35) !important;
+  }
+
+  .form-sidebar .select-option {
+    color: rgb(209 213 219) !important;
+  }
+
+  .form-sidebar .select-option:hover {
+    background-color: rgb(255 255 255 / 0.08) !important;
+    color: white !important;
+  }
+
+  .form-sidebar .select-option[aria-selected="true"] {
+    background-color: var(--color-accent-lime) !important;
+    color: var(--color-ink) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-body {
+    background: var(--color-sidebar-bg) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-section {
+    background-color: rgb(255 255 255 / 0.06) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-section > div.rounded-2xl,
+  .form-sidebar .schedule-sidebar-form-section .space-y-3.rounded-2xl {
+    background-color: rgb(255 255 255 / 0.05) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-section .bg-\(--color-surface-alt\) {
+    background-color: rgb(255 255 255 / 0.08) !important;
+    color: white !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-section .text-\(--color-ink\),
+  .form-sidebar .schedule-sidebar-form-section .text-gray-900,
+  .form-sidebar .schedule-sidebar-form-section .text-gray-800,
+  .form-sidebar .schedule-sidebar-form-section .text-gray-700,
+  .form-sidebar .schedule-sidebar-form-section .text-gray-600 {
+    color: white !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-section .text-gray-500,
+  .form-sidebar .schedule-sidebar-form-section .text-gray-400,
+  .form-sidebar .schedule-sidebar-form-section .text-gray-300 {
+    color: rgb(156 163 175) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-section .bg-gray-100 {
+    background-color: rgb(255 255 255 / 0.08) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-member {
+    background-color: rgb(255 255 255 / 0.08) !important;
+    border-color: rgb(255 255 255 / 0.1) !important;
+    color: rgb(209 213 219) !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-member:hover {
+    border-color: rgb(255 255 255 / 0.18) !important;
+    color: white !important;
+  }
+
+  .form-sidebar .schedule-sidebar-form-member.border-\(--color-ink\) {
+    background-color: var(--color-accent-lime) !important;
+    border-color: var(--color-accent-lime) !important;
+    color: var(--color-ink) !important;
+  }
+
+  .form-sidebar-footer .button[data-variant="primary"] {
+    background-color: var(--color-accent-lime) !important;
+    color: var(--color-ink) !important;
+  }
+
+  .form-sidebar-footer .button[data-variant="primary"]:hover:not(:disabled) {
+    filter: brightness(0.96);
+  }
+
+  .form-sidebar-footer .button[data-variant="primary"] svg,
+  .form-sidebar-footer .button[data-variant="primary"] .material-symbols-rounded {
+    color: var(--color-ink) !important;
+  }
 }
 
 @media (max-width: 1024px) {

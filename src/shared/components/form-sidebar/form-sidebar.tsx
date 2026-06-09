@@ -67,14 +67,14 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
       {/* ── Backdrop ── */}
       <div
         onClick={onClose}
-        className={`form-sidebar-overlay fixed inset-0 z-40 bg-black/25 backdrop-blur-[2px] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`form-sidebar-overlay fixed inset-0 z-40 bg-black/45 backdrop-blur-[2px] transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         aria-hidden="true"
       />
 
       {/* ── Panel ── */}
       <aside
-        className={`form-sidebar fixed inset-y-0 right-0 z-50 flex flex-col bg-white shadow-2xl
+        className={`form-sidebar fixed inset-y-0 right-0 z-50 flex flex-col border-l border-(--color-sidebar-border-dark) bg-(--color-sidebar-bg) text-white shadow-2xl shadow-black/35
           ${WIDTH[width]}
           transform transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]
           ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}
@@ -83,18 +83,18 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
         aria-label={title}
       >
         {/* Header */}
-        <div className="form-sidebar-header flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-gray-100 shrink-0">
+        <div className="form-sidebar-header flex items-start justify-between gap-4 px-6 pt-6 pb-5 border-b border-white/10 shrink-0">
           <div className="min-w-0">
-            <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+            <h2 className="text-xl font-bold text-white">{title}</h2>
             {description && (
-              <p className="mt-1 text-sm leading-5 text-gray-400">{description}</p>
+              <p className="mt-1 text-sm leading-5 text-gray-500">{description}</p>
             )}
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-colors shrink-0 mt-0.5"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/8 text-gray-400 hover:bg-white/12 hover:text-white transition-colors shrink-0 mt-0.5"
             aria-label="Close"
           >
             <X size={15} />
@@ -116,7 +116,7 @@ const FormSidebar: FunctionComponent<FormSidebarProps> = ({
 */
 export function FormSidebarFooter({ children }: { children: React.ReactNode }) {
   return (
-    <div className="form-sidebar-footer flex shrink-0 gap-3 border-t border-gray-100 bg-white px-6 py-4 [&_a]:flex-1 [&_a>button]:w-full [&_button]:min-w-0 [&_button]:flex-1">
+    <div className="form-sidebar-footer flex shrink-0 gap-3 border-t border-white/10 bg-(--color-sidebar-bg) px-6 py-4 [&_a]:flex-1 [&_a>button]:w-full [&_button]:min-w-0 [&_button]:flex-1">
       {children}
     </div>
   );

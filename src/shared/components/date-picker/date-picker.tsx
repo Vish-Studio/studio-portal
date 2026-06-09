@@ -20,6 +20,7 @@ interface DatePickerProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 't
   onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
   hasError?: boolean;
   wrapperClassName?: string;
+  variant?: 'light' | 'dark';
 }
 
 const MONTH_NAMES = [
@@ -65,6 +66,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     hasError,
     className,
     wrapperClassName,
+    variant = 'light',
     placeholder = 'Select date',
     ...props
   }, ref) => {
@@ -75,6 +77,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
     const [visibleMonth, setVisibleMonth] = useState(selectedDate ?? startOfDay(new Date()));
     const rootRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
+    const isDark = variant === 'dark';
 
     const days = useMemo(() => getMonthDays(visibleMonth), [visibleMonth]);
     const years = useMemo(() => getYearOptions(visibleMonth.getFullYear()), [visibleMonth]);
@@ -160,24 +163,35 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             'focus:outline-none focus:bg-white focus:ring-4 focus:ring-gray-100',
             disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer hover:bg-white',
             hasError ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-gray-400',
+            isDark && [
+              'border-(--color-sidebar-border-dark) bg-white/6 text-white hover:bg-white/9',
+              'focus:border-white/20 focus:bg-white/9 focus:ring-white/6',
+            ],
             className,
           )}
         >
-          <span className={cn('truncate font-semibold', !selectedDate && 'text-gray-400')}>
+          <span className={cn('truncate font-semibold', !selectedDate && (isDark ? 'text-gray-500' : 'text-gray-400'))}>
             {selectedDate ? format(selectedDate, 'dd/MM/yyyy') : placeholder}
           </span>
-          <MaterialIcon name="calendar_today" size={18} className="shrink-0 text-gray-500" />
+          <MaterialIcon name="calendar_today" size={18} className={cn('shrink-0', isDark ? 'text-gray-400' : 'text-gray-500')} />
         </button>
 
         {isOpen && !disabled && (
-          <div className="date-picker-popover absolute left-0 top-[calc(100%+8px)] z-[400] w-full min-w-[18rem] max-w-[calc(100vw-2rem)] rounded-[18px] border border-gray-200 bg-white p-3 shadow-[0_18px_50px_rgba(15,23,42,0.16)] sm:min-w-[20rem]">
+          <div
+            className={cn(
+              'date-picker-popover absolute left-0 top-[calc(100%+8px)] z-[400] w-full min-w-[18rem] max-w-[calc(100vw-2rem)] rounded-[18px] border p-3 sm:min-w-[20rem]',
+              isDark
+                ? 'border-(--color-sidebar-border-dark) bg-(--color-sidebar-bg) shadow-[0_18px_50px_rgba(0,0,0,0.35)]'
+                : 'border-gray-200 bg-white shadow-[0_18px_50px_rgba(15,23,42,0.16)]',
+            )}
+          >
             <div className="date-picker-controls mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_5.75rem] gap-2">
                 <Select
                   value={visibleMonth.getMonth()}
                   onChange={event => changeMonth(Number(event.target.value))}
                   aria-label="Choose month"
-                  className="h-9 rounded-xl bg-gray-50 px-3 py-0 text-xs font-bold"
+                  className={cn('h-9 rounded-xl px-3 py-0 text-xs font-bold', isDark ? 'bg-white/6 text-white' : 'bg-gray-50')}
                 >
                   {MONTH_NAMES.map((month, index) => (
                     <Option key={month} value={index}>{month}</Option>
@@ -187,7 +201,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                   value={visibleMonth.getFullYear()}
                   onChange={event => changeYear(Number(event.target.value))}
                   aria-label="Choose year"
-                  className="h-9 rounded-xl bg-gray-50 px-3 py-0 text-xs font-bold"
+                  className={cn('h-9 rounded-xl px-3 py-0 text-xs font-bold', isDark ? 'bg-white/6 text-white' : 'bg-gray-50')}
                 >
                   {years.map(year => (
                     <Option key={year} value={year}>{year}</Option>
@@ -198,11 +212,13 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                 <ButtonIcon
                   iconName="chevron_left"
                   aria-label="Previous month"
+                  className={isDark ? 'bg-white/8 text-gray-400 hover:bg-white/12 hover:text-white' : ''}
                   clickHandler={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() - 1, 1))}
                 />
                 <ButtonIcon
                   iconName="chevron_right"
                   aria-label="Next month"
+                  className={isDark ? 'bg-white/8 text-gray-400 hover:bg-white/12 hover:text-white' : ''}
                   clickHandler={() => setVisibleMonth(new Date(visibleMonth.getFullYear(), visibleMonth.getMonth() + 1, 1))}
                 />
               </div>
@@ -210,7 +226,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
 
             <div className="date-picker-grid grid grid-cols-7 gap-1 text-center">
               {DAY_NAMES.map(day => (
-                <span key={day} className="py-1 text-[10px] font-bold uppercase text-gray-400">
+                <span key={day} className={cn('py-1 text-[10px] font-bold uppercase', isDark ? 'text-gray-500' : 'text-gray-400')}>
                   {day}
                 </span>
               ))}
@@ -228,8 +244,12 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
                     className={cn(
                       'date-picker-day flex h-9 items-center justify-center rounded-xl text-xs font-bold transition-colors',
                       selected
-                        ? 'bg-(--color-ink) text-white'
-                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                        ? isDark
+                          ? 'bg-(--color-accent-lime) text-(--color-ink)'
+                          : 'bg-(--color-ink) text-white'
+                        : isDark
+                          ? 'text-gray-300 hover:bg-white/8 hover:text-white'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                       today && !selected && 'bg-(--color-accent-lime) text-(--color-ink)',
                     )}
                   >

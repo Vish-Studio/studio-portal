@@ -223,20 +223,20 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
     >
       <form onSubmit={handleSubmit} className="schedule-sidebar-form flex min-h-0 flex-1 flex-col">
         <div className="schedule-sidebar-form-body flex-1 overflow-y-auto bg-gradient-to-b from-gray-50/90 to-white px-6 py-5">
-          <div className="schedule-sidebar-form-summary mb-5 overflow-hidden rounded-[22px] bg-(--color-ink) text-white">
+          <div className="schedule-sidebar-form-summary mb-5 overflow-hidden rounded-[22px] bg-(--color-accent-lime) text-(--color-ink)">
             <div className="schedule-sidebar-form-summary-main flex items-start gap-3 p-5">
-              <div className="schedule-sidebar-form-summary-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+              <div className="schedule-sidebar-form-summary-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-(--color-ink) text-white">
                 <MaterialIcon name={categoryConfig.icon} size={20} fill />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-bold uppercase tracking-widest text-white/45">{categoryConfig.label} schedule</p>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-black/45">{categoryConfig.label} schedule</p>
                 <p className="mt-1 text-lg font-bold leading-tight">{config.label}</p>
-                <p className="mt-1 text-xs font-semibold text-white/50">
+                <p className="mt-1 text-xs font-semibold text-black/55">
                   {format(selectedDate, 'EEEE, d MMM yyyy')} · {allDay ? 'All day' : startTime ? toDisplayTime(startTime) : 'No time set'}
                 </p>
               </div>
             </div>
-            <div className="schedule-sidebar-form-categories grid grid-cols-3 border-t border-white/10">
+            <div className="schedule-sidebar-form-categories grid grid-cols-3 border-t border-black/10">
               {allowedCategories.map(category => {
                 const categoryItem = SCHEDULE_CATEGORY_CONFIG[category];
                 const active = selectedCategory === category;
@@ -248,7 +248,7 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                     onClick={() => handleCategoryChange(category)}
                     className={cn(
                       'schedule-sidebar-form-category flex items-center justify-center gap-2 px-3 py-3 text-xs font-bold transition-colors',
-                      active ? 'bg-(--color-accent-lime) text-(--color-ink)' : 'text-white/55 hover:bg-white/5 hover:text-white',
+                      active ? 'bg-(--color-ink) text-white' : 'text-black/55 hover:bg-black/5 hover:text-(--color-ink)',
                     )}
                   >
                     <MaterialIcon name={categoryItem.icon} size={15} fill={active} />
@@ -309,7 +309,8 @@ export default function ScheduleSidebarForm({ date, onAdd, onClose, initialEvent
                 <DatePicker
                   value={toDateInputValue(selectedDate)}
                   onChange={event => setSelectedDate(fromDateInputValue(event.target.value))}
-                  className="rounded-xl border-transparent bg-white"
+                  variant="dark"
+                  className="rounded-xl"
                 />
 
                 <div className="mt-3 flex items-center justify-between">

@@ -350,9 +350,9 @@ export default function ProjectTimeline({
   const progress = getPhaseProgress(phases);
 
   const statusConfig = {
-    pending: { label: 'Pending', icon: 'radio_button_unchecked', dot: 'bg-gray-300', badge: 'bg-gray-100 text-gray-600', node: 'bg-gray-100 text-gray-500' },
-    active: { label: 'Active', icon: 'play_arrow', dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', node: 'bg-amber-500 text-white' },
-    done: { label: 'Done', icon: 'check', dot: 'bg-green-500', badge: 'bg-green-100 text-green-700', node: 'bg-gray-900 text-white' },
+    pending: { label: 'Pending', dot: 'bg-gray-300', badge: 'bg-gray-100 text-gray-600', bar: 'bg-gray-200' },
+    active: { label: 'Active', dot: 'bg-(--color-accent-lime)', badge: 'bg-(--color-accent-lime) text-(--color-ink)', bar: 'bg-(--color-accent-lime)' },
+    done: { label: 'Done', dot: 'bg-gray-900', badge: 'bg-gray-900 text-white', bar: 'bg-gray-900' },
   } as const;
 
   // ── Empty state ───────────────────────────────────────────────────────────
@@ -410,39 +410,77 @@ export default function ProjectTimeline({
   // ── Timeline layout ───────────────────────────────────────────────────────
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-      <div className="flex flex-col gap-4 border-b border-gray-100 px-4 py-4 md:px-5 lg:flex-row lg:items-center lg:justify-between">
+    <div className="overflow-hidden rounded-[18px] border border-gray-200/80 bg-white shadow-[0_18px_50px_var(--color-shadow-subtle)]">
+      <div className="flex flex-col gap-4 px-4 py-4 md:px-5 md:py-5 lg:flex-row lg:items-center lg:justify-between">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <MaterialIcon name="route" size={17} className="text-gray-400" />
-            <h2 className="text-sm font-bold text-gray-900">Project Timeline</h2>
+            <span className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-(--color-surface-alt) text-(--color-ink)">
+              <MaterialIcon name="route" size={15} />
+            </span>
+            <h2 className="type-panel-title text-(--color-ink)">Project Timeline</h2>
           </div>
-          <p className="mt-1 text-xs font-medium text-gray-500">
-            {doneCount}/{phases.length} steps complete
+          <p className="mt-1 text-xs font-semibold text-gray-500">
+            {doneCount}/{phases.length} steps complete · {progress}% delivery progress
           </p>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="min-w-[180px]">
-            <div className="mb-1.5 flex items-center justify-between gap-3">
-              <span className="text-[11px] font-bold text-gray-500">{progress}% complete</span>
-              <span className="text-[11px] font-semibold text-gray-400">{phases.length} steps</span>
+        <button
+          type="button"
+          onClick={() => onAddPhase(phases.length - 1)}
+          className="inline-flex h-10 items-center justify-center gap-1.5 rounded-xl bg-gray-900 px-4 text-xs font-bold text-white transition-colors hover:bg-gray-700"
+        >
+          <Plus size={13} />
+          Add step
+        </button>
+      </div>
+
+      <div className="mx-4 border-b border-gray-100 md:mx-5" />
+
+      <div className="p-4 md:p-5">
+        <div className="rounded-[18px] bg-(--color-surface-alt) p-4">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="type-label text-gray-400">Delivery path</p>
+              <p className="mt-1 text-lg font-bold text-(--color-ink)">{project.timeline || 'Timeline not set'}</p>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
-              <div className="h-full rounded-full bg-gray-900 transition-all duration-500" style={{ width: `${progress}%` }} />
+            <div className="min-w-[180px]">
+              <div className="mb-1.5 flex items-center justify-between gap-3">
+                <span className="text-[11px] font-bold text-gray-500">{progress}% complete</span>
+                <span className="text-[11px] font-semibold text-gray-400">{phases.length} steps</span>
+              </div>
+              <div className="h-2 overflow-hidden rounded-full bg-white">
+                <div className="h-full rounded-full bg-gray-900 transition-all duration-500" style={{ width: `${progress}%` }} />
+              </div>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => onAddPhase(phases.length - 1)}
-            className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-gray-900 px-3 text-xs font-bold text-white transition-colors hover:bg-gray-700"
-          >
-            <Plus size={13} />
-            Add step
-          </button>
+
+          <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+            {phases.slice(0, 6).map((phase, index) => {
+              const isActive = phase.status === 'active';
+              const cfg = statusConfig[phase.status];
+
+              return (
+                <button
+                  key={phase.id}
+                  type="button"
+                  onClick={() => onEditPhase(phase)}
+                  className="min-w-0 rounded-[14px] bg-white p-3 text-left transition-colors hover:bg-gray-50"
+                >
+                  <div className={`h-2 rounded-full ${cfg.bar}`} />
+                  <div className="mt-2 flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold tabular-nums text-gray-400">{String(index + 1).padStart(2, '0')}</span>
+                    <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
+                    <span className={`truncate text-[11px] font-bold ${isActive ? 'text-(--color-ink)' : 'text-gray-500'}`}>
+                      {phase.title}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="divide-y divide-gray-100">
+      <div className="divide-y divide-gray-100 border-t border-gray-100">
         {phases.map((phase, i) => {
           const isActive = phase.status === 'active';
           const isDone = phase.status === 'done';
@@ -452,31 +490,29 @@ export default function ProjectTimeline({
           const cfg = statusConfig[phase.status];
 
           return (
-            <div key={phase.id} className={`grid gap-3 px-4 py-3.5 md:px-5 xl:grid-cols-[44px_minmax(220px,1fr)_minmax(180px,260px)_minmax(180px,260px)_auto] xl:items-center ${
-              isActive ? 'bg-amber-50/35' : 'bg-white'
+            <div key={phase.id} className={`grid gap-3 px-4 py-3.5 md:px-5 xl:grid-cols-[minmax(260px,1fr)_minmax(150px,190px)_minmax(170px,260px)_auto] xl:items-center ${
+              isActive ? 'bg-(--color-accent-lime)/10' : 'bg-white'
             }`}>
-              <div className="flex items-center gap-3 xl:block">
-                <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${cfg.node}`}>
+              <div className="grid min-w-0 grid-cols-[36px_minmax(0,1fr)] gap-3">
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${isDone ? 'bg-gray-900 text-white' : isActive ? 'bg-(--color-accent-lime) text-(--color-ink)' : 'bg-gray-100 text-gray-500'}`}>
                   {isDone ? <MaterialIcon name="check" size={16} /> : <MaterialIcon name={phase.icon} size={16} />}
                 </div>
-                <span className="text-[10px] font-bold tabular-nums text-gray-400 xl:hidden">{String(i + 1).padStart(2, '0')}</span>
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <span className="hidden text-[10px] font-bold tabular-nums text-gray-400 xl:inline">{String(i + 1).padStart(2, '0')}</span>
+                <div className="min-w-0">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-bold tabular-nums text-gray-400">{String(i + 1).padStart(2, '0')}</span>
                   <h3 className="truncate text-sm font-bold text-gray-900">{phase.title}</h3>
                   <span className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold ${cfg.badge}`}>
                     <span className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`} />
                     {cfg.label}
                   </span>
+                  </div>
+                  <p className="mt-1 truncate text-xs font-medium text-gray-500">
+                    {phase.description || (isActive ? 'Current step' : isDone ? 'Completed step' : 'Upcoming step')}
+                  </p>
                 </div>
-                <p className="mt-1 truncate text-xs font-medium text-gray-500">
-                  {phase.description || (isActive ? 'Current step' : isDone ? 'Completed step' : 'Upcoming step')}
-                </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 rounded-xl bg-(--color-surface) p-2 xl:bg-transparent xl:p-0">
+              <div className="grid grid-cols-2 gap-2 rounded-xl bg-(--color-surface-alt) p-2 xl:bg-transparent xl:p-0">
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Date</p>
                   <p className="mt-1 truncate text-xs font-bold text-gray-700">{phase.targetDate || 'No date'}</p>
@@ -511,7 +547,7 @@ export default function ProjectTimeline({
 
               <div className="flex items-center justify-end gap-1.5">
                 {isActive && (
-                  <button type="button" onClick={() => onCompletePhase(phase.id)} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-gray-900 px-3 text-xs font-bold text-white transition-colors hover:bg-gray-700">
+                  <button type="button" onClick={() => onCompletePhase(phase.id)} className="inline-flex h-9 items-center gap-1.5 rounded-xl bg-(--color-accent-lime) px-3 text-xs font-bold text-(--color-ink) transition-colors hover:bg-(--color-accent-lime)">
                     <MaterialIcon name="skip_next" size={14} />
                     Advance
                   </button>

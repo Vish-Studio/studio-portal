@@ -8,28 +8,33 @@ export type CardContentVariant = 'white' | 'lime' | 'surface' | 'dark';
 interface VariantTokens {
   container: string;
   headerText: string;
+  iconFrame: string;
   divider: string;
 }
 
 const VARIANTS: Record<CardContentVariant, VariantTokens> = {
   white: {
-    container: 'bg-white border border-gray-200',
+    container: 'bg-white border border-gray-200/80 shadow-[0_18px_50px_var(--color-shadow-subtle)]',
     headerText: 'text-(--color-ink)',
-    divider: 'border-gray-100',
+    iconFrame: 'bg-(--color-surface-alt) text-(--color-ink)',
+    divider: 'border-gray-100/80',
   },
   lime: {
-    container: 'bg-(--color-accent-lime)',
+    container: 'bg-(--color-accent-lime) shadow-[0_18px_50px_var(--color-shadow-subtle)]',
     headerText: 'text-gray-800',
+    iconFrame: 'bg-white/60 text-(--color-ink)',
     divider: 'border-black/10',
   },
   surface: {
-    container: 'bg-(--color-surface-alt)',
+    container: 'bg-(--color-surface-alt) border border-gray-200/70 shadow-[0_18px_50px_var(--color-shadow-subtle)]',
     headerText: 'text-gray-600',
-    divider: 'border-gray-300/40',
+    iconFrame: 'bg-white text-(--color-ink)',
+    divider: 'border-gray-200/70',
   },
   dark: {
-    container: 'bg-(--color-ink)',
+    container: 'bg-(--color-ink) shadow-[0_18px_50px_var(--color-shadow-subtle)]',
     headerText: 'text-gray-300',
+    iconFrame: 'bg-white/10 text-white',
     divider: 'border-white/10',
   },
 };
@@ -89,19 +94,18 @@ const CardContent: FunctionComponent<CardContentProps> = ({
     <div
       className={`card-content ${variantStyles.container} rounded-[18px] overflow-hidden flex flex-col ${className}`}
     >
-      {/* ── Header ── */}
-      <div className="card-header bg-gray-100 px-4 md:px-6 py-4 md:py-5 flex items-center justify-between gap-4 shrink-0">
+      <div className="card-header px-4 py-4 md:px-5 md:py-5 flex items-center justify-between gap-4 shrink-0">
         <div className={`type-panel-title flex items-center gap-2 ${variantStyles.headerText}`}>
-          <MaterialIcon name={iconName} size={16} />
+          <span className={`flex h-7 w-7 items-center justify-center rounded-[10px] ${variantStyles.iconFrame}`}>
+            <MaterialIcon name={iconName} size={15} />
+          </span>
           <span>{title}</span>
         </div>
         {action && <div className="shrink-0">{action}</div>}
       </div>
 
-      {/* ── Divider ── */}
-      <div className={`border-b ${variantStyles.divider} mx-4 md:mx-6 shrink-0`} />
+      <div className={`border-b ${variantStyles.divider} mx-4 md:mx-5 shrink-0`} />
 
-      {/* ── Body ── */}
       <div className={`flex-1 min-h-0 ${bodyClassName}`}>
         {children}
       </div>

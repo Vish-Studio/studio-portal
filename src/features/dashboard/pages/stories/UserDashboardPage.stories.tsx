@@ -1,31 +1,30 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { AdminDashboardPage } from '@/src/features/dashboard';
+import { UserDashboardPage } from '@/src/features/dashboard';
 import { DEMO_CLIENTS, DEMO_DOCUMENTS, DEMO_PROJECTS, DEMO_TASKS } from '@/src/data/seed';
 import { useClientsStore } from '@/src/features/clients';
 import { useDocumentsStore } from '@/src/features/documents';
 import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 
-const SeededAdminDashboard = () => {
+const SeededUserDashboard = () => {
   useClientsStore.setState({ clients: DEMO_CLIENTS, ready: true });
   useDocumentsStore.setState({ documents: DEMO_DOCUMENTS });
   useProjectsStore.setState({ projects: DEMO_PROJECTS, ready: true });
   useTasksStore.setState({ tasks: DEMO_TASKS, ready: true });
 
-  return <AdminDashboardPage />;
+  return <UserDashboardPage />;
 };
 
 const meta = {
-  title: 'Pages/Admin/Dashboard',
-  component: SeededAdminDashboard,
+  title: 'Pages/User/Dashboard',
+  component: SeededUserDashboard,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
     backgrounds: { default: 'white' },
-    // Storybook docs: disable args table for full-page stories
-    docs: { story: { inline: false, iframeHeight: 900 } },
+    docs: { story: { inline: false, iframeHeight: 980 } },
   },
-} satisfies Meta<typeof SeededAdminDashboard>;
+} satisfies Meta<typeof SeededUserDashboard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
