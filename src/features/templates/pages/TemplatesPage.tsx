@@ -1,12 +1,18 @@
-import { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useEffect, useMemo, useState } from 'react';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
-import { Button, CardContent, ConfirmDialog, FormField, MaterialIcon, Option, Select, StatusBadge, TextArea, TextInput } from '@/src/shared/components';
+import { Button, CardContent, ConfirmDialog, FormField, MaterialIcon, Option, Select, StatusBadge, TextInput } from '@/src/shared/components';
 import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import { SERVICE_META, type ServiceType } from '@/src/features/projects';
 import TemplateCard from '../components/template-card/template-card';
 import { formatPricingAmount, TEMPLATE_COLLECTION_PATHS, useDocumentTemplatesStore, usePricingPackagesStore, useQuestionnaireTemplatesStore, type DocumentTemplate, type PricingBilling, type PricingPackage, type PricingTemplateKind } from '@/src/features/templates';
+import { isFirebaseConfigured } from '@/src/firebase/config';
+import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
+
+interface PricingListItemFormValue {
+  value: string;
+}
 
 interface PricingTemplateFormValues {
   service: ServiceType;
@@ -21,12 +27,11 @@ interface PricingTemplateFormValues {
   originalPrice: number | '';
   billing: PricingBilling;
   unit: string;
-  paymentNote: string;
   timeline: string;
   bestFor: string;
   revisions: string;
   summary: string;
-  features: string;
+  features: PricingListItemFormValue[];
   sortOrder: number | '';
   status: 'active' | 'inactive';
   featured: 'yes' | 'no';
@@ -141,12 +146,11 @@ const pricingToFormValues = (item: PricingPackage): PricingTemplateFormValues =>
   originalPrice: item.originalPrice ?? '',
   billing: item.billing,
   unit: item.unit ?? '',
-  paymentNote: item.paymentNote ?? '',
   timeline: item.timeline ?? '',
   bestFor: item.bestFor ?? '',
   revisions: item.revisions ?? '',
   summary: item.summary,
-  features: item.features.join('\n'),
+  features: item.features.length > 0 ? item.features.map(value => ({ value })) : [{ value: '' }],
   sortOrder: item.sortOrder ?? '',
   status: item.isActive ? 'active' : 'inactive',
   featured: item.isFeatured ? 'yes' : 'no',
@@ -174,12 +178,11 @@ const defaultPricingValues: PricingTemplateFormValues = {
   originalPrice: '',
   billing: 'one-time',
   unit: '',
-  paymentNote: '',
   timeline: '',
   bestFor: '',
   revisions: '',
   summary: '',
-  features: '',
+  features: [{ value: '' }],
   sortOrder: '',
   status: 'active',
   featured: 'no',
@@ -196,7 +199,7 @@ const defaultDocumentValues: DocumentTemplateFormValues = {
 
 export default function TemplatesPage() {
   const navigate = useNavigate();
-  const { packages, addPackage, updatePackage, removePackage } = usePricingPackagesStore();
+  const { packages, addPackage, updatePackage, removePackage, subscribeToPackages } = usePricingPackagesStore();
   const { templates, addTemplate, updateTemplate, removeTemplate } = useDocumentTemplatesStore();
   const questionnaires = useQuestionnaireTemplatesStore(state => state.templates);
   const [activeSection, setActiveSection] = useState<TemplateSection>('documents');
@@ -211,6 +214,19 @@ export default function TemplatesPage() {
 
   const pricingForm = useForm<PricingTemplateFormValues>({ defaultValues: defaultPricingValues });
   const documentForm = useForm<DocumentTemplateFormValues>({ defaultValues: defaultDocumentValues });
+  const {
+    fields: featureFields,
+    append: appendFeature,
+    remove: removeFeature,
+  } = useFieldArray({
+    control: pricingForm.control,
+    name: 'features',
+  });
+
+  useEffect(() => {
+    if (!isFirebaseConfigured) return undefined;
+    return subscribeToPackages();
+  }, [subscribeToPackages]);
 
   const selectedServiceMeta = SERVICE_META[selectedService];
   const selectedServicePricing = useMemo(() => (
@@ -265,8 +281,8 @@ export default function TemplatesPage() {
     setEditingDocument(null);
   };
 
-  const onSubmitPricing = (data: PricingTemplateFormValues) => {
-    const features = data.features.split('\n').map(item => item.trim()).filter(Boolean);
+  const onSubmitPricing = async (data: PricingTemplateFormValues) => {
+    const features = data.features.map(item => item.value.trim()).filter(Boolean);
     if (features.length === 0) {
       setSubmitError('Add at least one inclusion or service detail.');
       return;
@@ -287,7 +303,6 @@ export default function TemplatesPage() {
       priceLabel: data.priceLabel.trim() || undefined,
       billing: data.billing,
       unit: data.unit.trim() || undefined,
-      paymentNote: data.paymentNote.trim() || undefined,
       timeline: data.timeline.trim() || undefined,
       bestFor: data.bestFor.trim() || undefined,
       revisions: data.revisions.trim() || undefined,
@@ -298,9 +313,13 @@ export default function TemplatesPage() {
       isFeatured: data.featured === 'yes',
     };
 
-    if (editingPricing) updatePackage(editingPricing.id, payload);
-    else addPackage(payload);
-    closeSidebar();
+    try {
+      if (editingPricing) await updatePackage(editingPricing.id, payload);
+      else await addPackage(payload);
+      closeSidebar();
+    } catch (error) {
+      setSubmitError(firebaseErrorMessage(error));
+    }
   };
 
   const onSubmitDocument = (data: DocumentTemplateFormValues) => {
@@ -330,7 +349,7 @@ export default function TemplatesPage() {
             <p className="type-label text-gray-400">Template library</p>
             <h1 className="mt-1 text-3xl font-bold text-(--color-ink)">Templates</h1>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-gray-500">
-              Manage app-wide templates now, with stores shaped for Firebase collections at {TEMPLATE_COLLECTION_PATHS.documents}, {TEMPLATE_COLLECTION_PATHS.prices}, and {TEMPLATE_COLLECTION_PATHS.questionnaires}.
+              Manage app-wide templates now, with stores shaped for Firebase collections at {TEMPLATE_COLLECTION_PATHS.documents}, {TEMPLATE_COLLECTION_PATHS.priceItems}, and {TEMPLATE_COLLECTION_PATHS.questionnaires}.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -451,7 +470,7 @@ export default function TemplatesPage() {
                         <p className="text-4xl font-bold leading-none">{formatPricingAmount(item)}</p>
                         {item.originalPrice && <p className="text-sm font-bold text-gray-600 line-through">{item.currency === 'MUR' ? `Rs ${item.originalPrice.toLocaleString()}` : item.originalPrice}</p>}
                       </div>
-                      <p className="mt-2 type-label text-gray-500">{item.priceLabel || item.paymentNote || item.billing.replace('-', ' ')}</p>
+                      <p className="mt-2 type-label text-gray-500">{item.priceLabel || item.billing.replace('-', ' ')}</p>
                       {item.timeline && <p className="mt-4 text-xs font-bold text-gray-400"><span className="text-(--color-accent-lime)">•</span> Delivery: {item.timeline}</p>}
                       {item.bestFor && <p className="mt-3 text-xs font-semibold leading-relaxed text-gray-500">Best for: {item.bestFor}</p>}
                       {item.revisions && <p className="mt-2 text-xs font-semibold leading-relaxed text-gray-500">Revisions: {item.revisions}</p>}
@@ -694,7 +713,7 @@ export default function TemplatesPage() {
               </FormField>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <FormField label="Billing">
                 <Select {...pricingForm.register('billing')}>
                   <Option value="one-time">One-time</Option>
@@ -705,9 +724,6 @@ export default function TemplatesPage() {
               </FormField>
               <FormField label="Unit">
                 <TextInput {...pricingForm.register('unit')} placeholder="page / section" />
-              </FormField>
-              <FormField label="Payment Note">
-                <TextInput {...pricingForm.register('paymentNote')} placeholder="On start 50% - end 50%" />
               </FormField>
             </div>
 
@@ -727,14 +743,38 @@ export default function TemplatesPage() {
               </FormField>
             </div>
 
-            <FormField label="Features / Inclusions" required error={pricingForm.formState.errors.features?.message}>
-              <TextArea
-                {...pricingForm.register('features', { required: 'Add at least one inclusion' })}
-                rows={6}
-                placeholder={'One item per line\ne.g. Up to 5 pages\nCustom design system\nAdvanced SEO structure'}
-                hasError={!!pricingForm.formState.errors.features}
-              />
-            </FormField>
+            <div>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="type-label text-gray-400">Features / Inclusions <span className="text-red-500">*</span></p>
+                <Button type="button" variant="secondary" size="sm" iconLeft={<MaterialIcon name="add" size={14} />} onClick={() => appendFeature({ value: '' })}>
+                  Add item
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {featureFields.map((field, index) => (
+                  <div key={field.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+                    <TextInput
+                      {...pricingForm.register(`features.${index}.value`, { required: 'Feature is required' })}
+                      placeholder={index === 0 ? 'e.g. Up to 5 pages' : 'Add another inclusion'}
+                      hasError={!!pricingForm.formState.errors.features?.[index]?.value}
+                    />
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      className="h-12"
+                      disabled={featureFields.length === 1}
+                      onClick={() => removeFeature(index)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              {pricingForm.formState.errors.features && (
+                <p className="mt-2 text-xs font-semibold text-red-500">Add at least one inclusion.</p>
+              )}
+            </div>
 
             <FormField label="Status">
               <Select {...pricingForm.register('status')}>
@@ -791,9 +831,15 @@ export default function TemplatesPage() {
         message={confirmPricing ? `"${confirmPricing.name}" will be removed from future project selection.` : ''}
         confirmLabel="Delete"
         variant="danger"
-        onConfirm={() => {
-          if (confirmPricing) removePackage(confirmPricing.id);
-          setConfirmPricing(null);
+        onConfirm={async () => {
+          if (!confirmPricing) return;
+          try {
+            await removePackage(confirmPricing.id);
+            setConfirmPricing(null);
+          } catch (error) {
+            setSubmitError(firebaseErrorMessage(error));
+            setConfirmPricing(null);
+          }
         }}
         onCancel={() => setConfirmPricing(null)}
       />

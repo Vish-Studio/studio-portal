@@ -13,7 +13,7 @@ export { default as TemplateEditorPage } from './pages/TemplateEditorPage';
 export { default as TemplatesPage } from './pages/TemplatesPage';
 export { DEFAULT_DOCUMENT_TEMPLATES, useDocumentTemplatesStore } from './stores/documentTemplatesStore';
 export { useTemplateAssignmentsStore } from './stores/templateAssignmentsStore';
-export { DEFAULT_PRICING_PACKAGES, formatPricingAmount, usePricingPackagesStore } from './stores/pricingPackagesStore';
+export { DEFAULT_PRICING_PACKAGES, PRICING_PACKAGES_COLLECTION_PATH, formatPricingAmount, usePricingPackagesStore } from './stores/pricingPackagesStore';
 export { TEMPLATE_COLLECTION_PATHS, useQuestionnaireTemplatesStore } from './stores/questionnaireTemplatesStore';
 export { TEMPLATES } from './templates';
 export * from './templateBlocks';

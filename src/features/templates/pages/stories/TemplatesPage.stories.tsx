@@ -24,3 +24,11 @@ export const PricingPackages: Story = {
     await userEvent.click(canvas.getByRole('button', { name: /Pricing packages/i }));
   },
 };
+
+export const PricingEditSidebar: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: /Pricing packages/i }));
+    await userEvent.click(canvas.getAllByRole('button', { name: /Edit/i })[0]);
+  },
+};

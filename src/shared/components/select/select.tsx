@@ -77,7 +77,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
 
     useLayoutEffect(() => {
       syncFromNativeSelect();
-    }, []);
+    });
 
     useEffect(() => {
       if (value !== undefined) setSelectedValue(optionToString(value));

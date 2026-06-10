@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -88,8 +89,23 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       else if (ref) ref.current = node;
     };
 
+    const syncFromNativeInput = () => {
+      const nativeValue = inputRef.current?.value ?? '';
+      setSelectedValue(current => {
+        if (current === nativeValue) return current;
+        const nextDate = fromInputValue(nativeValue);
+        if (nextDate) setVisibleMonth(new Date(nextDate.getFullYear(), nextDate.getMonth(), 1));
+        return nativeValue;
+      });
+    };
+
+    useLayoutEffect(() => {
+      if (value === undefined) syncFromNativeInput();
+    });
+
     useEffect(() => {
       if (typeof value === 'string') {
+        if (inputRef.current) inputRef.current.value = value;
         setSelectedValue(value);
         const nextDate = fromInputValue(value);
         if (nextDate) setVisibleMonth(new Date(nextDate.getFullYear(), nextDate.getMonth(), 1));
@@ -137,7 +153,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
           ref={setRefs}
           id={id}
           name={name}
-          value={selectedValue}
+          defaultValue={selectedValue}
           readOnly
           tabIndex={-1}
           className="sr-only"

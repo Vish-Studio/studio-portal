@@ -24,6 +24,7 @@ interface QuestionnaireTemplatesState {
 
 export const TEMPLATE_COLLECTION_PATHS = {
   prices: 'templates/prices',
+  priceItems: 'templates/prices/items',
   documents: 'templates/documents',
   questionnaires: 'templates/questionnaires',
 } as const;

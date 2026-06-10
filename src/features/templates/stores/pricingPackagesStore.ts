@@ -1,5 +1,20 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  type QueryDocumentSnapshot,
+  type Timestamp,
+  type Unsubscribe,
+} from 'firebase/firestore';
+import { requireFirebase } from '@/src/firebase/requireFirebase';
 import type { ServiceType } from '@/src/features/projects';
 
 export type PricingTemplateKind = 'package' | 'maintenance' | 'addon';
@@ -19,7 +34,6 @@ export interface PricingPackage {
   originalPrice?: number;
   billing: PricingBilling;
   unit?: string;
-  paymentNote?: string;
   summary: string;
   features: string[];
   timeline?: string;
@@ -36,12 +50,90 @@ type PricingPackageInput = Omit<PricingPackage, 'id' | 'createdAt' | 'updatedAt'
 
 interface PricingPackagesState {
   packages: PricingPackage[];
-  addPackage: (input: PricingPackageInput) => PricingPackage;
-  updatePackage: (id: string, updates: Partial<PricingPackageInput>) => void;
-  removePackage: (id: string) => void;
+  loading: boolean;
+  error: string | null;
+  ready: boolean;
+  setPackages: (packages: PricingPackage[]) => void;
+  subscribeToPackages: () => Unsubscribe;
+  addPackage: (input: PricingPackageInput) => Promise<PricingPackage>;
+  updatePackage: (id: string, updates: Partial<PricingPackageInput>) => Promise<void>;
+  removePackage: (id: string) => Promise<void>;
   getPackagesByService: (service: ServiceType, kind?: PricingTemplateKind) => PricingPackage[];
   getPackageById: (id: string) => PricingPackage | undefined;
 }
+
+export const PRICING_PACKAGES_COLLECTION_PATH = 'templates/prices/items';
+
+const pricingPackagesCollection = () => collection(requireFirebase().db, 'templates', 'prices', 'items');
+
+const toMillis = (value: unknown) => {
+  if (typeof value === 'number') return value;
+  if (value instanceof Date) return value.getTime();
+  if (value && typeof (value as Timestamp).toMillis === 'function') return (value as Timestamp).toMillis();
+  return Date.now();
+};
+
+const optionalString = (value: unknown) => {
+  const next = typeof value === 'string' ? value.trim() : '';
+  return next || undefined;
+};
+
+const pricingPackageFromDoc = (snapshot: QueryDocumentSnapshot): PricingPackage => {
+  const data = snapshot.data();
+
+  return {
+    id: snapshot.id,
+    service: String(data.service ?? 'website') as ServiceType,
+    kind: ['package', 'maintenance', 'addon'].includes(String(data.kind)) ? data.kind as PricingTemplateKind : 'package',
+    tier: optionalString(data.tier),
+    badge: optionalString(data.badge),
+    name: String(data.name ?? 'Untitled pricing item'),
+    price: Number(data.price ?? 0),
+    currency: String(data.currency ?? 'MUR'),
+    priceSuffix: optionalString(data.priceSuffix),
+    priceLabel: optionalString(data.priceLabel),
+    originalPrice: data.originalPrice === undefined || data.originalPrice === null ? undefined : Number(data.originalPrice),
+    billing: ['one-time', 'monthly', 'unit', 'split'].includes(String(data.billing)) ? data.billing as PricingBilling : 'one-time',
+    unit: optionalString(data.unit),
+    summary: String(data.summary ?? ''),
+    features: Array.isArray(data.features) ? data.features.map(String).filter(Boolean) : [],
+    timeline: optionalString(data.timeline),
+    bestFor: optionalString(data.bestFor),
+    revisions: optionalString(data.revisions),
+    sortOrder: data.sortOrder === undefined || data.sortOrder === null ? undefined : Number(data.sortOrder),
+    isActive: data.isActive !== false,
+    isFeatured: Boolean(data.isFeatured),
+    createdAt: toMillis(data.createdAt),
+    updatedAt: toMillis(data.updatedAt ?? data.createdAt),
+  };
+};
+
+const compactFirestoreDoc = (input: Record<string, unknown>) => Object.fromEntries(
+  Object.entries(input).filter(([, value]) => value !== undefined),
+);
+
+const pricingPackageToFirestore = (input: PricingPackageInput | Partial<PricingPackageInput>) => compactFirestoreDoc({
+  service: input.service,
+  kind: input.kind,
+  tier: optionalString(input.tier),
+  badge: optionalString(input.badge),
+  name: input.name,
+  price: input.price,
+  currency: input.currency,
+  priceSuffix: optionalString(input.priceSuffix),
+  priceLabel: optionalString(input.priceLabel),
+  originalPrice: input.originalPrice,
+  billing: input.billing,
+  unit: optionalString(input.unit),
+  summary: input.summary,
+  features: input.features,
+  timeline: optionalString(input.timeline),
+  bestFor: optionalString(input.bestFor),
+  revisions: optionalString(input.revisions),
+  sortOrder: input.sortOrder,
+  isActive: input.isActive,
+  isFeatured: input.isFeatured,
+});
 
 const now = Date.now();
 const website = 'website' as const;
@@ -122,7 +214,6 @@ export const DEFAULT_PRICING_PACKAGES: PricingPackage[] = [
     originalPrice: 38000,
     billing: 'split',
     priceLabel: 'On start 50% - end 50%',
-    paymentNote: 'On start 50% - end 50%',
     summary: 'A premium web system engineered for credibility, SEO, and scale.',
     timeline: '2-4 weeks',
     bestFor: 'Tourism, real estate, retail, established brands',
@@ -285,7 +376,6 @@ export const DEFAULT_PRICING_PACKAGES: PricingPackage[] = [
     priceSuffix: '+',
     billing: 'split',
     priceLabel: 'Custom scope',
-    paymentNote: 'Custom scope',
     summary: 'A production-grade software build for serious operational scale.',
     timeline: '8-12+ weeks',
     bestFor: 'SaaS products, CRM systems, marketplaces, enterprise workflows',
@@ -444,7 +534,6 @@ export const DEFAULT_PRICING_PACKAGES: PricingPackage[] = [
     priceSuffix: '+',
     billing: 'split',
     priceLabel: 'Custom scope',
-    paymentNote: 'Custom scope',
     summary: 'A scalable mobile product build with advanced workflows and growth-ready architecture.',
     timeline: '10-16+ weeks',
     bestFor: 'Marketplaces, SaaS apps, internal platforms, funded products',
@@ -732,28 +821,64 @@ export const usePricingPackagesStore = create<PricingPackagesState>()(
   persist(
     (set, get) => ({
       packages: DEFAULT_PRICING_PACKAGES,
+      loading: false,
+      error: null,
+      ready: false,
 
-      addPackage: (input) => {
+      setPackages: (packages) => set({ packages, ready: true }),
+
+      subscribeToPackages: () => {
+        set({ loading: true, error: null });
+
+        return onSnapshot(
+          query(pricingPackagesCollection(), orderBy('sortOrder', 'asc')),
+          snapshot => {
+            const remotePackages = snapshot.docs.map(pricingPackageFromDoc).sort(byDisplayOrder);
+            set({
+              packages: remotePackages.length > 0 ? remotePackages : get().packages,
+              loading: false,
+              error: null,
+              ready: true,
+            });
+          },
+          error => set({ loading: false, error: error.message, ready: true }),
+        );
+      },
+
+      addPackage: async (input) => {
         const timestamp = Date.now();
+        const ref = doc(pricingPackagesCollection());
         const next: PricingPackage = {
           ...input,
-          id: `pkg_${timestamp}`,
+          id: ref.id,
           createdAt: timestamp,
           updatedAt: timestamp,
         };
         set(state => ({ packages: [...state.packages, next] }));
+        await setDoc(ref, {
+          ...pricingPackageToFirestore(input),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
         return next;
       },
 
-      updatePackage: (id, updates) =>
+      updatePackage: async (id, updates) => {
         set(state => ({
           packages: state.packages.map(item => (
             item.id === id ? { ...item, ...updates, updatedAt: Date.now() } : item
           )),
-        })),
+        }));
+        await updateDoc(doc(pricingPackagesCollection(), id), {
+          ...pricingPackageToFirestore(updates),
+          updatedAt: serverTimestamp(),
+        });
+      },
 
-      removePackage: (id) =>
-        set(state => ({ packages: state.packages.filter(item => item.id !== id) })),
+      removePackage: async (id) => {
+        set(state => ({ packages: state.packages.filter(item => item.id !== id) }));
+        await deleteDoc(doc(pricingPackagesCollection(), id));
+      },
 
       getPackagesByService: (service, kind) =>
         get().packages
