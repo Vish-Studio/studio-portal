@@ -3,6 +3,7 @@ export type { Client, ClientStatus } from '../types';
 import type { Client, ClientStatus } from '../types';
 import type { ClientCreateResult } from '../services/clientService';
 import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
+import { useUsersStore } from '@/src/features/users';
 
 export interface ClientInput {
   fullName: string;
@@ -58,28 +59,51 @@ export const useClientsStore = create<ClientsState>((set) => ({
       createdAt: timestamp(),
     };
     set(state => ({ clients: [client, ...state.clients], ready: true }));
+    useUsersStore.getState().upsertUser({
+      sourceId: id,
+      kind: 'client',
+      name: client.fullName,
+      email: client.email,
+      authRole: 'user',
+      roleLabel: 'Client',
+      accountStatus: client.status,
+      temporaryPassword,
+    });
     return { id, email, temporaryPassword };
   },
 
   updateClient: async (id, updates) => {
+    let syncedClient: Client | undefined;
     set(state => ({
-      clients: state.clients.map(client => (
-        client.id === id
-          ? {
-              ...client,
-              ...updates,
-              fullName: updates.fullName?.trim() ?? client.fullName,
-              companyName: updates.companyName?.trim() ?? client.companyName,
-              email: updates.email?.trim().toLowerCase() ?? client.email,
-              phone: updates.phone?.trim() ?? client.phone,
-              status: updates.status ?? client.status,
-            }
-          : client
-      )),
+      clients: state.clients.map(client => {
+        if (client.id !== id) return client;
+        syncedClient = {
+          ...client,
+          ...updates,
+          fullName: updates.fullName?.trim() ?? client.fullName,
+          companyName: updates.companyName?.trim() ?? client.companyName,
+          email: updates.email?.trim().toLowerCase() ?? client.email,
+          phone: updates.phone?.trim() ?? client.phone,
+          status: updates.status ?? client.status,
+        };
+        return syncedClient;
+      }),
     }));
+    if (syncedClient) {
+      useUsersStore.getState().upsertUser({
+        sourceId: syncedClient.id,
+        kind: 'client',
+        name: syncedClient.fullName,
+        email: syncedClient.email,
+        authRole: 'user',
+        roleLabel: 'Client',
+        accountStatus: syncedClient.status,
+      });
+    }
   },
 
   removeClient: async (id) => {
     set(state => ({ clients: state.clients.filter(client => client.id !== id) }));
+    useUsersStore.getState().removeUserBySource('client', id);
   },
 }));

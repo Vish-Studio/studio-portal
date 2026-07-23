@@ -2,6 +2,7 @@ import { create } from 'zustand';
 export type { AuthProfile, AuthRole } from '@/src/types/auth';
 import type { AuthProfile, AuthProfileUpdateInput } from '@/src/types/auth';
 import { DEV_SUPERADMIN_PROFILE, getDevProfileForRole } from '../authMode';
+import { useUsersStore, type ManagedUserAccountStatus } from '@/src/features/users';
 
 interface LocalAuthUser {
   uid: string;
@@ -33,7 +34,13 @@ const localUserFromProfile = (profile: AuthProfile): LocalAuthUser => ({
   displayName: profile.fullName,
 });
 
-export const useAuthStore = create<AuthState>((set) => ({
+const authStatusFromManagedStatus = (status: ManagedUserAccountStatus): AuthProfile['status'] => {
+  if (status === 'inactive' || status === 'on-leave') return 'inactive';
+  if (status === 'lost' || status === 'fired') return 'lost';
+  return 'active';
+};
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: localUserFromProfile(DEV_SUPERADMIN_PROFILE),
   profile: DEV_SUPERADMIN_PROFILE,
   loading: false,
@@ -46,13 +53,28 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: localUserFromProfile(profile), profile, role: profile.role, loading: false, ready: true, error: null });
   },
 
-  signIn: async (email) => {
+  signIn: async (email, password) => {
     const normalizedEmail = email.trim().toLowerCase();
-    const profile = normalizedEmail.includes('admin') && !normalizedEmail.includes('super')
-      ? getDevProfileForRole('admin')
-      : normalizedEmail.includes('client') || normalizedEmail.includes('user')
-        ? getDevProfileForRole('user')
-        : DEV_SUPERADMIN_PROFILE;
+    const managedUser = useUsersStore.getState().users.find(user => user.email === normalizedEmail);
+    const profile = managedUser
+      ? {
+          ...getDevProfileForRole(managedUser.authRole),
+          id: managedUser.id,
+          uid: managedUser.id,
+          email: managedUser.email,
+          fullName: managedUser.name,
+          role: managedUser.authRole,
+          staffRole: managedUser.authRole === 'user' ? undefined : managedUser.authRole,
+          needsPasswordChange: managedUser.passwordStatus === 'temporary' && password === managedUser.temporaryPassword,
+          status: authStatusFromManagedStatus(managedUser.accountStatus),
+          isActive: managedUser.accountStatus === 'active' || managedUser.accountStatus === 'working',
+          jobTitle: managedUser.roleLabel,
+        }
+      : normalizedEmail.includes('admin') && !normalizedEmail.includes('super')
+          ? getDevProfileForRole('admin')
+          : normalizedEmail.includes('client') || normalizedEmail.includes('user')
+            ? getDevProfileForRole('user')
+            : DEV_SUPERADMIN_PROFILE;
     set({ user: localUserFromProfile(profile), profile, role: profile.role, loading: false, ready: true, error: null });
     return profile;
   },
@@ -64,7 +86,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   confirmPasswordReset: async () => undefined,
 
   completeRequiredPasswordChange: async () => {
-    const profile = DEV_SUPERADMIN_PROFILE;
+    const currentProfile = get().profile ?? DEV_SUPERADMIN_PROFILE;
+    const profile = { ...currentProfile, needsPasswordChange: false, updatedAt: { toMillis: () => Date.now(), toDate: () => new Date() } };
+    useUsersStore.getState().markPasswordChangedByEmail(profile.email);
     set({ user: localUserFromProfile(profile), profile, role: profile.role, loading: false, ready: true, error: null });
     return profile;
   },

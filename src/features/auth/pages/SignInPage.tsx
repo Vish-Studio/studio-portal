@@ -14,6 +14,7 @@ import { Button, Checkbox, FormField, TextInput } from '@/src/shared/components'
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 import type { AuthRole } from '@/src/types/auth';
+import { hasCompletedWalkthrough } from '@/src/features/walkthrough/walkthroughStorage';
 
 interface SignInFormValues {
   email: string;
@@ -58,7 +59,13 @@ const SignInPage = () => {
       const requestedPath = typeof location.state === 'object' && location.state && 'from' in location.state
         ? String(location.state.from)
         : fallbackPath;
-      navigate(requestedPath.startsWith(`/${isUserRole(nextProfile.role) ? 'user' : 'admin'}`) ? requestedPath : fallbackPath, {
+      const nextPath = requestedPath.startsWith(`/${isUserRole(nextProfile.role) ? 'user' : 'admin'}`) ? requestedPath : fallbackPath;
+      if (!hasCompletedWalkthrough(nextProfile)) {
+        navigate('/walkthrough', { replace: true, state: { from: nextPath } });
+        return;
+      }
+
+      navigate(nextPath, {
         replace: true,
       });
     } catch (error) {

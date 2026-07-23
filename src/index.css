@@ -343,6 +343,33 @@ body {
     @apply text-gray-500;
   }
 
+  .form-sidebar .form-sidebar-body .text-\(--color-ink\),
+  .form-sidebar .form-sidebar-body .text-gray-900,
+  .form-sidebar .form-sidebar-body .text-gray-800,
+  .form-sidebar .form-sidebar-body .text-gray-700,
+  .form-sidebar .form-sidebar-body .text-gray-600 {
+    color: white !important;
+  }
+
+  .form-sidebar .form-sidebar-body .text-gray-500,
+  .form-sidebar .form-sidebar-body .text-gray-400,
+  .form-sidebar .form-sidebar-body .text-gray-300 {
+    color: rgb(156 163 175) !important;
+  }
+
+  .form-sidebar .form-sidebar-body .bg-white,
+  .form-sidebar .form-sidebar-body .bg-gray-50,
+  .form-sidebar .form-sidebar-body .bg-gray-100,
+  .form-sidebar .form-sidebar-body .bg-\(--color-surface-alt\) {
+    background-color: rgb(255 255 255 / 0.06) !important;
+  }
+
+  .form-sidebar .form-sidebar-body .border-gray-100,
+  .form-sidebar .form-sidebar-body .border-gray-200,
+  .form-sidebar .form-sidebar-body .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: var(--color-sidebar-border-dark) !important;
+  }
+
   .form-sidebar .form-sidebar-body input:not([type="checkbox"]):not([type="radio"]),
   .form-sidebar .form-sidebar-body textarea,
   .form-sidebar .select-trigger {
@@ -386,6 +413,76 @@ body {
   .form-sidebar .select-option[aria-selected="true"] {
     background-color: var(--color-accent-lime) !important;
     color: var(--color-ink) !important;
+  }
+
+  .form-sidebar .checkbox-box {
+    background-color: rgb(255 255 255 / 0.06) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+  }
+
+  .form-sidebar .checkbox input:checked + .checkbox-box,
+  .form-sidebar .checkbox .peer:checked + .checkbox-box {
+    background-color: var(--color-accent-lime) !important;
+    border-color: var(--color-accent-lime) !important;
+  }
+
+  .form-sidebar .checkbox input:checked + .checkbox-box svg,
+  .form-sidebar .checkbox .peer:checked + .checkbox-box svg {
+    color: var(--color-ink) !important;
+  }
+
+  .form-sidebar .tabs-list {
+    background-color: rgb(255 255 255 / 0.08) !important;
+    border: 1px solid var(--color-sidebar-border-dark);
+  }
+
+  .form-sidebar .tabs-trigger {
+    color: rgb(156 163 175) !important;
+  }
+
+  .form-sidebar .tabs-trigger:hover {
+    background-color: rgb(255 255 255 / 0.08) !important;
+    color: white !important;
+  }
+
+  .form-sidebar .tabs-trigger[aria-selected="true"] {
+    background-color: var(--color-accent-lime) !important;
+    color: var(--color-ink) !important;
+  }
+
+  .form-sidebar .tabs-trigger[aria-selected="true"] .tabs-count {
+    background-color: rgb(0 0 0 / 0.08) !important;
+    color: var(--color-ink) !important;
+  }
+
+  .form-sidebar .new-chat-sidebar-item,
+  .form-sidebar .clients-password-section,
+  .form-sidebar .team-password-section,
+  .form-sidebar .clients-temporary-access-details,
+  .form-sidebar .team-temporary-access-details {
+    background-color: rgb(255 255 255 / 0.06) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+  }
+
+  .form-sidebar .new-chat-sidebar-item:hover {
+    background-color: rgb(255 255 255 / 0.1) !important;
+  }
+
+  .form-sidebar .new-chat-sidebar-empty {
+    background-color: rgb(255 255 255 / 0.04) !important;
+    border-color: var(--color-sidebar-border-dark) !important;
+  }
+
+  .form-sidebar .button[data-variant="secondary"],
+  .form-sidebar .button[data-variant="ghost"] {
+    background-color: rgb(255 255 255 / 0.08) !important;
+    color: rgb(229 231 235) !important;
+  }
+
+  .form-sidebar .button[data-variant="secondary"]:hover:not(:disabled),
+  .form-sidebar .button[data-variant="ghost"]:hover:not(:disabled) {
+    background-color: rgb(255 255 255 / 0.12) !important;
+    color: white !important;
   }
 
   .form-sidebar .schedule-sidebar-form-body {

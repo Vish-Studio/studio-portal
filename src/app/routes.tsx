@@ -20,8 +20,10 @@ import {
   TemplatesPage,
 } from '@/src/features/templates';
 import { TeamDetailPage, TeamPage } from '@/src/features/team';
+import { UsersPage } from '@/src/features/users';
 import { DiscoveryPage } from '@/src/features/discovery';
 import { AuthGate, AuthLanding, SignInPage, ChangePasswordPage, ForgotPasswordPage, ResetPasswordPage } from '@/src/features/auth';
+import { WalkthroughPage } from '@/src/features/walkthrough';
 
 const adminRoute = (page: React.ReactNode) => (
   <AuthGate>{page}</AuthGate>
@@ -50,6 +52,7 @@ export function AppRoutes() {
       <Route path="/admin/clients/:id" element={adminRoute(<ClientDetailPage />)} />
       <Route path="/admin/team" element={adminRoute(<TeamPage />)} />
       <Route path="/admin/team/:id" element={adminRoute(<TeamDetailPage />)} />
+      <Route path="/admin/users" element={adminRoute(<UsersPage />)} />
       <Route path="/admin/expenses" element={adminRoute(<ExpensesPage />)} />
       <Route path="/admin/payments" element={adminRoute(<PaymentsPage />)} />
       <Route path="/admin/chat" element={adminRoute(<ChatPage />)} />
@@ -76,6 +79,7 @@ export function AppRoutes() {
       <Route path="/clients/:id" element={adminRoute(<ClientDetailPage />)} />
       <Route path="/team" element={adminRoute(<TeamPage />)} />
       <Route path="/team/:id" element={adminRoute(<TeamDetailPage />)} />
+      <Route path="/users" element={adminRoute(<UsersPage />)} />
       <Route path="/expenses" element={adminRoute(<ExpensesPage />)} />
       <Route path="/payments" element={adminRoute(<PaymentsPage />)} />
       <Route path="/chat" element={adminRoute(<ChatPage />)} />
@@ -102,6 +106,7 @@ export function AppRoutes() {
       <Route path="/change-password" element={<ChangePasswordPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/walkthrough" element={<WalkthroughPage />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

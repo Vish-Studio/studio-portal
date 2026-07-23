@@ -7,6 +7,7 @@ import {
   Calendar,
   FileText,
   UserCircle2,
+  KeyRound,
   CreditCard,
   MessageCircle,
   FileCheck2,
@@ -28,20 +29,21 @@ const AdminSidebar: FunctionComponent<SidebarProps> = (props) => {
   }, 0);
 
   const navItems: SidebarNavItem[] = [
-    { icon: <Home size={18} />, label: 'Dashboard', path: '/admin' },
-    { icon: <Calendar size={18} />, label: 'Calendar', path: '/admin/calendar' },
-    { icon: <Users size={18} />, label: 'Clients', path: '/admin/clients' },
-    { icon: <Briefcase size={18} />, label: 'Projects', path: '/admin/projects' },
-    { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/admin/tasks' },
-    { icon: <UserCircle2 size={18} />, label: 'Team', path: '/admin/team' },
-    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount },
-    { icon: <CreditCard size={18} />, label: 'Payments', path: '/admin/payments' },
-    { icon: <FileText size={18} />, label: 'Documents', path: '/admin/documents' },
+    { icon: <Home size={18} />, label: 'Dashboard', path: '/admin', section: 'Overview' },
+    { icon: <Calendar size={18} />, label: 'Calendar', path: '/admin/calendar', section: 'Overview' },
+    { icon: <Users size={18} />, label: 'Clients', path: '/admin/clients', section: 'Work' },
+    { icon: <Briefcase size={18} />, label: 'Projects', path: '/admin/projects', section: 'Work' },
+    { icon: <CheckSquare size={18} />, label: 'Tasks', path: '/admin/tasks', section: 'Work' },
+    { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount, section: 'Work' },
+    { icon: <CreditCard size={18} />, label: 'Payments', path: '/admin/payments', section: 'Work' },
+    { icon: <FileText size={18} />, label: 'Documents', path: '/admin/documents', section: 'Work' },
+    { icon: <UserCircle2 size={18} />, label: 'Team', path: '/admin/team', section: 'Internal' },
+    { icon: <KeyRound size={18} />, label: 'Users', path: '/admin/users', section: 'Internal' },
     ...(isStaffRole(profile?.role)
-      ? [{ icon: <Receipt size={18} />, label: 'Expenses', path: '/admin/expenses' }]
+      ? [{ icon: <Receipt size={18} />, label: 'Expenses', path: '/admin/expenses', section: 'Internal' }]
       : []),
     { icon: <Receipt size={18} />, label: 'Pricing', path: '/admin/templates/pricing', section: 'Templates' },
-    { icon: <FileText size={18} />, label: 'Documents', path: '/admin/templates/documents', section: 'Templates' },
+    { icon: <FileText size={18} />, label: 'Doc Templates', path: '/admin/templates/documents', section: 'Templates' },
     { icon: <FileCheck2 size={18} />, label: 'Questionnaires', path: '/admin/templates/questionnaires', section: 'Templates' },
   ];
 

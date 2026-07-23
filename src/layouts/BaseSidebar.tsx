@@ -55,8 +55,8 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
     const showIconBadge = hasBadge && (!isExpanded || isMobile);
     const showRowBadge = hasBadge && isExpanded && !isMobile;
     const btnClass = isActive
-      ? `bg-(--color-accent-lime) text-(--color-ink) shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3' : 'w-10 h-10 rounded-[14px] justify-center lg:w-12 lg:h-12 lg:rounded-[16px]'}`
-      : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[16px] px-4 py-3 hover:bg-white/5' : 'w-10 h-10 rounded-[14px] justify-center hover:bg-white/5 lg:w-12 lg:h-12 lg:rounded-[16px]'}`;
+      ? `bg-(--color-accent-lime) text-(--color-ink) shadow-md flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[14px] px-3.5 py-2.5' : 'w-10 h-10 rounded-[14px] justify-center lg:w-12 lg:h-12 lg:rounded-[16px]'}`
+      : `text-(--color-sidebar-text) hover:text-white transition-colors flex items-center shrink-0 ${isExpanded ? 'w-full rounded-[14px] px-3.5 py-2.5 hover:bg-white/7' : 'w-10 h-10 rounded-[14px] justify-center hover:bg-white/5 lg:w-12 lg:h-12 lg:rounded-[16px]'}`;
 
     const content = (
       <>
@@ -68,7 +68,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
             </span>
           )}
         </div>
-        {isExpanded && <span className="sidebar-item-label type-sidebar-label ml-4 whitespace-nowrap">{item.label}</span>}
+        {isExpanded && <span className="sidebar-item-label type-sidebar-label ml-3.5 whitespace-nowrap">{item.label}</span>}
         {showRowBadge && (
           <span className="sidebar-item-badge type-sidebar-badge ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-accent-lime) px-1.5 text-(--color-ink)">
             {formatBadge(item.badge ?? 0, false)}
@@ -79,14 +79,14 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
 
     if (isExpanded) {
       return (
-        <Link to={item.path} key={item.label} className={`sidebar-item ${btnClass}`}>
+        <Link to={item.path} key={`${item.section ?? 'main'}-${item.path}`} className={`sidebar-item ${btnClass}`}>
           {content}
         </Link>
       );
     }
 
     return (
-      <div key={item.label} className="sidebar-item-wrap flex justify-center">
+      <div key={`${item.section ?? 'main'}-${item.path}`} className="sidebar-item-wrap flex justify-center">
         <Tooltip className='bg-(--color-ink)' content={item.label} side="right" variant="sidebar">
           <Link to={item.path} className={`sidebar-item ${btnClass}`}>
             {content}
@@ -97,23 +97,47 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
   };
 
   const renderNavItems = () => {
-    let activeSection: string | undefined;
-
-    return navItems.map((item) => {
-      const sectionChanged = item.section !== activeSection;
-      activeSection = item.section;
-
-      return (
-        <div key={item.label} className="sidebar-item-slot flex flex-col">
-          {isExpanded && sectionChanged && item.section && (
-            <p className="sidebar-section-label type-sidebar-badge px-4 pb-1 pt-3 text-[10px] uppercase tracking-[0.18em] text-gray-500">
-              {item.section}
-            </p>
-          )}
+    const hasSections = navItems.some(item => item.section);
+    if (!hasSections) {
+      return navItems.map(item => (
+        <div key={`${item.section ?? 'main'}-${item.path}`} className="sidebar-item-slot flex flex-col">
           {renderNavLink(item)}
         </div>
-      );
-    });
+      ));
+    }
+
+    const groups = navItems.reduce<Array<{ section: string; items: SidebarNavItem[] }>>((result, item) => {
+      const section = item.section ?? 'Main';
+      const current = result.at(-1);
+      if (current?.section === section) {
+        current.items.push(item);
+        return result;
+      }
+      result.push({ section, items: [item] });
+      return result;
+    }, []);
+
+    if (!isExpanded) {
+      return groups.map(group => (
+        <div key={group.section} className="sidebar-section-collapsed flex flex-col items-center gap-1.5 border-b border-white/7 pb-2 last:border-b-0 last:pb-0">
+          {group.items.map(renderNavLink)}
+        </div>
+      ));
+    }
+
+    return groups.map(group => (
+      <section
+        key={group.section}
+        className="sidebar-section rounded-[20px] border border-white/6 bg-white/[0.025] p-2"
+      >
+        <p className="sidebar-section-label type-sidebar-badge px-2.5 pb-2 pt-1 text-[10px] uppercase tracking-[0.18em] text-gray-500">
+          {group.section}
+        </p>
+        <div className="sidebar-section-items flex flex-col gap-1">
+          {group.items.map(renderNavLink)}
+        </div>
+      </section>
+    ));
   };
 
   return (
@@ -170,7 +194,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
             )}
           </div>
 
-          <div className={`sidebar-nav min-h-0 flex-1 overflow-y-auto text-(--color-sidebar-text) no-scrollbar ${isExpanded ? 'flex flex-col gap-2' : 'flex flex-col items-center gap-1 lg:gap-2'}`}>
+          <div className={`sidebar-nav min-h-0 flex-1 overflow-y-auto text-(--color-sidebar-text) no-scrollbar ${isExpanded ? 'flex flex-col gap-3 pr-1' : 'flex flex-col items-center gap-2 lg:gap-3'}`}>
             {renderNavItems()}
           </div>
         </div>

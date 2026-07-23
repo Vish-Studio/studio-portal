@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, type AuthRole } from '@/src/features/auth';
 import { defaultRouteForRole } from '@/src/auth/roleAccess';
 import { AppLoader } from '@/src/app/components/loading';
+import { hasCompletedWalkthrough } from '@/src/features/walkthrough/walkthroughStorage';
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -21,6 +22,7 @@ export function AuthGate({ children, role }: AuthGateProps) {
   const setAccessRole = useAuthStore(state => state.setAccessRole);
   const ready = useAuthStore(state => state.ready);
   const profile = useAuthStore(state => state.profile);
+  const location = useLocation();
 
   useEffect(() => {
     if (role) {
@@ -43,6 +45,14 @@ export function AuthGate({ children, role }: AuthGateProps) {
     );
   }
 
+  if (profile?.needsPasswordChange) {
+    return <Navigate to="/change-password" replace state={{ from: location.pathname }} />;
+  }
+
+  if (profile && !hasCompletedWalkthrough(profile)) {
+    return <Navigate to="/walkthrough" replace state={{ from: location.pathname }} />;
+  }
+
   return <>{children}</>;
 }
 
@@ -57,6 +67,10 @@ export function AuthLanding() {
 
   if (profile?.needsPasswordChange) {
     return <Navigate to="/change-password" replace />;
+  }
+
+  if (profile && !hasCompletedWalkthrough(profile)) {
+    return <Navigate to="/walkthrough" replace state={{ from: defaultRouteForRole(profile.role) }} />;
   }
 
   return <Navigate to={defaultRouteForRole(profile?.role)} replace />;

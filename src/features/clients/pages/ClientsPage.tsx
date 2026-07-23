@@ -446,7 +446,6 @@ export default function Clients() {
                         type="text"
                         readOnly={generatePassword}
                         hasError={!!errors.temporaryPassword}
-                        className={generatePassword ? 'bg-white text-gray-500' : ''}
                       />
                       <Button
                         type="button"

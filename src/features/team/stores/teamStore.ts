@@ -2,6 +2,7 @@ import { create } from 'zustand';
 export type { TeamMember, TeamProject } from '../types';
 import type { TeamAccessRole, TeamMember, TeamProject, TeamSalaryType, TeamWorkStatus } from '../types';
 import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
+import { useUsersStore } from '@/src/features/users';
 
 export interface TeamMemberInput {
   name: string;
@@ -77,33 +78,56 @@ export const useTeamStore = create<TeamState>((set) => ({
       updatedAt: timestamp(),
     };
     set(state => ({ members: [member, ...state.members], ready: true }));
+    useUsersStore.getState().upsertUser({
+      sourceId: id,
+      kind: 'team',
+      name: member.name,
+      email: member.email,
+      authRole: member.accessRole ?? 'user',
+      roleLabel: member.role || member.accessRole || 'Team member',
+      accountStatus: member.status ?? 'working',
+      temporaryPassword,
+    });
     return { id, email, temporaryPassword };
   },
 
   updateMember: async (id, updates) => {
+    let syncedMember: TeamMember | undefined;
     set(state => ({
-      members: state.members.map(member => (
-        member.id === id
-          ? {
-              ...member,
-              name: updates.name?.trim() ?? member.name,
-              role: updates.role?.trim() ?? member.role,
-              accessRole: updates.accessRole ?? member.accessRole,
-              email: updates.email?.trim().toLowerCase() ?? member.email,
-              phone: updates.phone?.trim() ?? member.phone,
-              salaryAmount: updates.salaryAmount !== undefined ? Number(updates.salaryAmount) : member.salaryAmount,
-              salaryType: updates.salaryType ?? member.salaryType,
-              assignedProjectId: updates.assignedProjectId !== undefined ? updates.assignedProjectId : member.assignedProjectId,
-              status: updates.status ?? member.status,
-              updatedAt: timestamp(),
-            }
-          : member
-      )),
+      members: state.members.map(member => {
+        if (member.id !== id) return member;
+        syncedMember = {
+          ...member,
+          name: updates.name?.trim() ?? member.name,
+          role: updates.role?.trim() ?? member.role,
+          accessRole: updates.accessRole ?? member.accessRole,
+          email: updates.email?.trim().toLowerCase() ?? member.email,
+          phone: updates.phone?.trim() ?? member.phone,
+          salaryAmount: updates.salaryAmount !== undefined ? Number(updates.salaryAmount) : member.salaryAmount,
+          salaryType: updates.salaryType ?? member.salaryType,
+          assignedProjectId: updates.assignedProjectId !== undefined ? updates.assignedProjectId : member.assignedProjectId,
+          status: updates.status ?? member.status,
+          updatedAt: timestamp(),
+        };
+        return syncedMember;
+      }),
     }));
+    if (syncedMember) {
+      useUsersStore.getState().upsertUser({
+        sourceId: syncedMember.id,
+        kind: 'team',
+        name: syncedMember.name,
+        email: syncedMember.email,
+        authRole: syncedMember.accessRole ?? 'user',
+        roleLabel: syncedMember.role || syncedMember.accessRole || 'Team member',
+        accountStatus: syncedMember.status ?? 'working',
+      });
+    }
   },
 
   removeMember: async (id) => {
     set(state => ({ members: state.members.filter(member => member.id !== id) }));
+    useUsersStore.getState().removeUserBySource('team', id);
   },
 
   assignMember: async (memberId, projectId) => {
