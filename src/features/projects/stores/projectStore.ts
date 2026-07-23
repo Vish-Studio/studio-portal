@@ -1,26 +1,6 @@
 import { create } from "zustand";
 import { buildDefaultPhases, getActivePhaseIndex } from "../types";
-import type {
-  ClientProject,
-  ServiceType,
-  PackageType,
-  Phase,
-  PhaseStatus,
-} from "../types";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  updateDoc,
-  where,
-  type Unsubscribe,
-} from "firebase/firestore";
-import { requireFirebase } from "@/src/firebase/requireFirebase";
-import { projectDocToClientProject } from "@/src/firebase/firestoreTransformers";
+import type { ClientProject, PackageType, Phase, PhaseStatus, ServiceType } from "../types";
 import { useAuthStore } from "@/src/features/auth";
 import type { AuthRole } from "@/src/types/auth";
 import { FEEDBACK_MESSAGES } from "@/src/app/messages";
@@ -29,108 +9,49 @@ export type { ClientProject };
 
 export const PROJECT_CREATE_ROLES: AuthRole[] = [
   "superadmin",
+  "admin",
   "user",
 ];
 
 export const canCreateProject = (role?: AuthRole | null): role is AuthRole =>
   Boolean(role && PROJECT_CREATE_ROLES.includes(role));
 
-const projectStatusToFirestore = (status: ClientProject["status"]) =>
-  status === "paused"
-    ? "planning"
-    : status === "completed"
-      ? "completed"
-      : "in-progress";
+export const getPhaseIndex = getActivePhaseIndex;
 
-const activePhaseName = (project: Pick<ClientProject, "phases">) =>
-  project.phases.find((phase) => phase.status === "active")?.title ??
-  project.phases[0]?.title ??
-  "Discovery/Brief";
+export interface ProjectInput {
+  name: string;
+  service: ServiceType;
+  package?: PackageType;
+  pricingPackageId?: string;
+  status: ClientProject['status'];
+  timeline: string;
+  startDate?: string;
+  endDate?: string;
+  agreedPayment: number;
+  paidPayment?: number;
+  clientId: string;
+  assignedMemberIds?: string[];
+}
 
-const phaseToFirestore = (phase: Phase) => ({
-  id: phase.id,
-  title: phase.title,
-  icon: phase.icon,
-  status: phase.status,
-  requiresClientAction: phase.requiresClientAction,
-  clientCompleted: phase.clientCompleted,
-  ...(phase.targetDate ? { targetDate: phase.targetDate } : {}),
-  ...(phase.description ? { description: phase.description } : {}),
-  ...(phase.phaseAmount != null ? { phaseAmount: phase.phaseAmount } : {}),
-});
-
-const projectToCreateDoc = (project: ClientProject, role: AuthRole) => ({
-  clientId: project.clientId,
-  name: project.name,
-  title: project.name,
-  phase: activePhaseName(project),
-  status: projectStatusToFirestore(project.status),
-  service: project.service,
-  ...(project.package ? { package: project.package } : {}),
-  ...(project.pricingPackageId ? { pricingPackageId: project.pricingPackageId } : {}),
-  timeline: project.timeline,
-  startDate: project.startDate || new Date(project.startedAt).toISOString().slice(0, 10),
-  startedAt: project.startDate || new Date(project.startedAt).toISOString().slice(0, 10),
-  ...(project.endDate ? { endDate: project.endDate } : {}),
-  agreedPayment: project.agreedPayment,
-  budget: project.agreedPayment,
-  paidPayment: project.paidPayment,
-  remainingPayment: Math.max(project.agreedPayment - project.paidPayment, 0),
-  assignedTeamIds: project.assignedMemberIds ?? [],
-  phases: project.phases.map(phaseToFirestore),
-  createdById: useAuthStore.getState().profile?.uid ?? "",
-  createdByRole: role,
-  createdAt: serverTimestamp(),
-  updatedAt: serverTimestamp(),
-});
-
-const projectUpdatesToDoc = (updates: Partial<Omit<ClientProject, "id">>) => ({
-  ...(updates.name !== undefined
-    ? { name: updates.name, title: updates.name }
-    : {}),
-  ...(updates.status !== undefined
-    ? { status: projectStatusToFirestore(updates.status) }
-    : {}),
-  ...(updates.service !== undefined ? { service: updates.service } : {}),
-  ...(updates.package !== undefined ? { package: updates.package } : {}),
-  ...(updates.pricingPackageId !== undefined ? { pricingPackageId: updates.pricingPackageId } : {}),
-  ...(updates.timeline !== undefined ? { timeline: updates.timeline } : {}),
-  ...(updates.startDate !== undefined
-    ? { startDate: updates.startDate, startedAt: updates.startDate }
-    : {}),
-  ...(updates.endDate !== undefined ? { endDate: updates.endDate } : {}),
-  ...(updates.agreedPayment !== undefined
-    ? { agreedPayment: updates.agreedPayment, budget: updates.agreedPayment }
-    : {}),
-  ...(updates.paidPayment !== undefined
-    ? { paidPayment: updates.paidPayment }
-    : {}),
-  ...(updates.agreedPayment !== undefined || updates.paidPayment !== undefined
-    ? {
-        remainingPayment: Math.max(
-          (updates.agreedPayment ?? 0) - (updates.paidPayment ?? 0),
-          0,
-        ),
-      }
-    : {}),
-  ...(updates.clientId !== undefined ? { clientId: updates.clientId } : {}),
-  ...(updates.assignedMemberIds !== undefined
-    ? { assignedTeamIds: updates.assignedMemberIds }
-    : {}),
-  ...(updates.phases !== undefined
-    ? {
-        phases: updates.phases.map(phaseToFirestore),
-        phase: activePhaseName({ phases: updates.phases }),
-      }
-    : {}),
-  updatedAt: serverTimestamp(),
-});
-
-const persistProjectPhases = async (projectId: string, phases: Phase[]) => {
-  await updateDoc(
-    doc(requireFirebase().db, "projects", projectId),
-    projectUpdatesToDoc({ phases }),
-  );
+export const makeNewProject = (input: ProjectInput): ClientProject => {
+  const startDate = input.startDate || new Date().toISOString().slice(0, 10);
+  return {
+    id: `project_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    clientId: input.clientId,
+    name: input.name,
+    status: input.status,
+    phases: buildDefaultPhases(0),
+    agreedPayment: input.agreedPayment,
+    paidPayment: input.paidPayment ?? 0,
+    timeline: input.timeline,
+    startedAt: new Date(startDate).getTime(),
+    startDate,
+    endDate: input.endDate,
+    service: input.service,
+    package: input.package,
+    pricingPackageId: input.pricingPackageId,
+    assignedMemberIds: input.assignedMemberIds ?? [],
+  };
 };
 
 interface ProjectsState {
@@ -142,7 +63,7 @@ interface ProjectsState {
   subscribeToProjects: (filter?: {
     clientId?: string;
     teamId?: string;
-  }) => Unsubscribe;
+  }) => () => void;
   addProject: (project: ClientProject) => Promise<void>;
   updateProject: (
     id: string,
@@ -157,9 +78,7 @@ interface ProjectsState {
   insertPhase: (projectId: string, afterIndex: number, phase: Phase) => void;
   removePhase: (projectId: string, phaseId: string) => void;
   completePhase: (projectId: string, phaseId: string) => void;
-  /** Move a phase one step up or down in the ordered list */
   movePhase: (projectId: string, phaseId: string, dir: "up" | "down") => void;
-  /** Make the given phase active; all phases before it become done, all after become pending */
   setActivePhase: (projectId: string, phaseId: string) => void;
 }
 
@@ -171,40 +90,9 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
 
   setProjects: (projects) => set({ projects, ready: true }),
 
-  subscribeToProjects: (filter) => {
-    set({ loading: { projects: true }, error: { projects: null } });
-    const db = requireFirebase().db;
-    const projectsRef = filter?.clientId
-      ? query(
-          collection(db, "projects"),
-          where("clientId", "==", filter.clientId),
-        )
-      : filter?.teamId
-        ? query(
-            collection(db, "projects"),
-            where("assignedTeamIds", "array-contains", filter.teamId),
-          )
-        : collection(db, "projects");
-
-    return onSnapshot(
-      projectsRef,
-      (snapshot) => {
-        set({
-          projects: snapshot.docs.map((item) =>
-            projectDocToClientProject(item),
-          ),
-          loading: { projects: false },
-          ready: true,
-          error: { projects: null },
-        });
-      },
-      (error) =>
-        set({
-          loading: { projects: false },
-          ready: true,
-          error: { projects: error.message },
-        }),
-    );
+  subscribeToProjects: () => {
+    set({ loading: { projects: false }, ready: true, error: { projects: null } });
+    return () => undefined;
   },
 
   addProject: async (project) => {
@@ -212,66 +100,55 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
     if (!canCreateProject(role)) {
       throw new Error(FEEDBACK_MESSAGES.sidebar.projectCreateNotAllowed);
     }
-    await addDoc(
-      collection(requireFirebase().db, "projects"),
-      projectToCreateDoc(project, role),
-    );
+    set(state => ({ projects: [project, ...state.projects], ready: true }));
   },
 
   updateProject: async (id, updates) => {
-    await updateDoc(
-      doc(requireFirebase().db, "projects", id),
-      projectUpdatesToDoc(updates),
-    );
+    set(state => ({
+      projects: state.projects.map(project => (
+        project.id === id ? { ...project, ...updates } : project
+      )),
+    }));
   },
 
   removeProject: async (id) => {
-    await deleteDoc(doc(requireFirebase().db, "projects", id));
+    set(state => ({ projects: state.projects.filter(project => project.id !== id) }));
   },
 
   updatePhase: (projectId, phaseId, updates) => {
-    const project = get().projects.find((item) => item.id === projectId);
-    if (!project) return;
-    const phases = project.phases.map((phase) =>
-      phase.id === phaseId ? { ...phase, ...updates } : phase,
-    );
     set((state) => ({
       projects: state.projects.map((item) =>
-        item.id === projectId ? { ...item, phases } : item,
+        item.id === projectId
+          ? {
+              ...item,
+              phases: item.phases.map((phase) =>
+                phase.id === phaseId ? { ...phase, ...updates } : phase,
+              ),
+            }
+          : item,
       ),
     }));
-    void persistProjectPhases(projectId, phases).catch((error) =>
-      set({ error: { projects: error.message } }),
-    );
   },
 
   insertPhase: (projectId, afterIndex, phase) => {
-    const project = get().projects.find((item) => item.id === projectId);
-    if (!project) return;
-    const phases = [...project.phases];
-    phases.splice(afterIndex + 1, 0, phase);
     set((state) => ({
-      projects: state.projects.map((item) =>
-        item.id === projectId ? { ...item, phases } : item,
-      ),
+      projects: state.projects.map((item) => {
+        if (item.id !== projectId) return item;
+        const phases = [...item.phases];
+        phases.splice(afterIndex + 1, 0, phase);
+        return { ...item, phases };
+      }),
     }));
-    void persistProjectPhases(projectId, phases).catch((error) =>
-      set({ error: { projects: error.message } }),
-    );
   },
 
   removePhase: (projectId, phaseId) => {
-    const project = get().projects.find((item) => item.id === projectId);
-    if (!project) return;
-    const phases = project.phases.filter((phase) => phase.id !== phaseId);
     set((state) => ({
       projects: state.projects.map((item) =>
-        item.id === projectId ? { ...item, phases } : item,
+        item.id === projectId
+          ? { ...item, phases: item.phases.filter((phase) => phase.id !== phaseId) }
+          : item,
       ),
     }));
-    void persistProjectPhases(projectId, phases).catch((error) =>
-      set({ error: { projects: error.message } }),
-    );
   },
 
   completePhase: (projectId, phaseId) => {
@@ -283,16 +160,12 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         : phase,
     );
     const nextIdx = phases.findIndex((phase) => phase.status === "pending");
-    if (nextIdx !== -1)
-      phases[nextIdx] = { ...phases[nextIdx], status: "active" };
+    if (nextIdx !== -1) phases[nextIdx] = { ...phases[nextIdx], status: "active" };
     set((state) => ({
       projects: state.projects.map((item) =>
         item.id === projectId ? { ...item, phases } : item,
       ),
     }));
-    void persistProjectPhases(projectId, phases).catch((error) =>
-      set({ error: { projects: error.message } }),
-    );
   },
 
   movePhase: (projectId, phaseId, dir) => {
@@ -308,9 +181,6 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         item.id === projectId ? { ...item, phases } : item,
       ),
     }));
-    void persistProjectPhases(projectId, phases).catch((error) =>
-      set({ error: { projects: error.message } }),
-    );
   },
 
   setActivePhase: (projectId, phaseId) => {
@@ -332,38 +202,5 @@ export const useProjectsStore = create<ProjectsState>((set, get) => ({
         item.id === projectId ? { ...item, phases } : item,
       ),
     }));
-    void persistProjectPhases(projectId, phases).catch((error) =>
-      set({ error: { projects: error.message } }),
-    );
   },
 }));
-
-export const makeNewProject = (overrides: {
-  name: string;
-  service: ServiceType;
-  package?: PackageType;
-  pricingPackageId?: string;
-  status: "active" | "paused" | "completed";
-  timeline: string;
-  startDate?: string;
-  endDate?: string;
-  agreedPayment?: number;
-  clientId: string;
-  assignedMemberIds?: string[];
-  activePhaseIndex?: number;
-}): ClientProject => {
-  const { activePhaseIndex = 0, agreedPayment = 0, startDate, endDate, ...rest } = overrides;
-  return {
-    id: `p_${Date.now()}`,
-    phases: buildDefaultPhases(activePhaseIndex),
-    agreedPayment,
-    paidPayment: 0,
-    startedAt: startDate ? new Date(startDate).getTime() : Date.now(),
-    startDate: startDate ?? new Date().toISOString().slice(0, 10),
-    endDate,
-    ...rest,
-  };
-};
-
-export const getPhaseIndex = (project: ClientProject): number =>
-  getActivePhaseIndex(project.phases);

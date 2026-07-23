@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import {
   ArrowRight,
@@ -11,7 +11,6 @@ import {
   EyeOff,
 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, Checkbox, FormField, TextInput } from '@/src/shared/components';
-import { isFirebaseConfigured } from '@/src/firebase/config';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 import type { AuthRole } from '@/src/types/auth';
@@ -35,8 +34,6 @@ const SignInPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const signIn = useAuthStore(state => state.signIn);
-  const user = useAuthStore(state => state.user);
-  const profile = useAuthStore(state => state.profile);
   const authError = useAuthStore(state => state.error);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -68,14 +65,6 @@ const SignInPage = () => {
       setSubmitError(error instanceof Error ? error.message : FEEDBACK_MESSAGES.auth.signInFailed);
     }
   };
-
-  if (user && profile) {
-    if (profile.needsPasswordChange) {
-      return <Navigate to="/change-password" replace />;
-    }
-
-    return <Navigate to={isUserRole(profile.role) ? '/user' : '/admin'} replace />;
-  }
 
   return (
     <main className="sign-in min-h-screen bg-white p-3 font-sans text-(--color-ink) sm:p-4">
@@ -135,13 +124,6 @@ const SignInPage = () => {
               <p className="mt-2 text-sm font-medium text-gray-400">
                 Enter your details to continue managing the studio.
               </p>
-              {!isFirebaseConfigured && (
-                <div className="mt-4 rounded-[14px] border border-amber-200 bg-amber-50 px-4 py-3">
-                  <p className="text-xs font-semibold leading-5 text-amber-800">
-                    Firebase is not configured yet. Add the VITE_FIREBASE_* values to `.env.local`.
-                  </p>
-                </div>
-              )}
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -201,7 +183,6 @@ const SignInPage = () => {
               <Button
                 type="submit"
                 loading={isSubmitting}
-                disabled={!isFirebaseConfigured}
                 iconRight={!isSubmitting ? <ArrowRight size={15} /> : undefined}
                 className="mt-1 h-12 w-full font-bold tracking-tight active:scale-[0.98]"
               >

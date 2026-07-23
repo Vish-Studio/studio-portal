@@ -5,7 +5,6 @@ import { Check, Eye, EyeOff, KeyRound, LogOut } from '@/src/shared/components/ma
 import { AppLoader } from '@/src/app/components/loading';
 import { defaultRouteForRole } from '@/src/auth/roleAccess';
 import { Button, FormField, TextInput } from '@/src/shared/components';
-import { isFirebaseConfigured } from '@/src/firebase/config';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 
@@ -35,10 +34,6 @@ export default function ChangePasswordPage() {
   } = useForm<ChangePasswordFormValues>({
     defaultValues: { password: '', confirmPassword: '' },
   });
-
-  if (!isFirebaseConfigured) {
-    return <Navigate to="/sign-in" replace />;
-  }
 
   if (!ready) {
     return (

@@ -1,7 +1,10 @@
-import type { Timestamp } from "firebase/firestore";
+export interface LocalTimestamp {
+  toMillis: () => number;
+  toDate?: () => Date;
+}
 
-export type AuthRole = "user" | "superadmin";
-export type StaffRole = "superadmin";
+export type AuthRole = "user" | "admin" | "superadmin";
+export type StaffRole = "admin" | "superadmin";
 export type FeatureAccess = Record<string, boolean>;
 
 export interface AuthProfile {
@@ -12,7 +15,7 @@ export interface AuthProfile {
   role: AuthRole;
   staffRole?: StaffRole;
   needsPasswordChange?: boolean;
-  createdAt?: Timestamp;
+  createdAt?: LocalTimestamp;
   status?: "active" | "inactive" | "lost";
   newsletterPreferences?: boolean;
   featureAccess?: FeatureAccess;
@@ -23,7 +26,7 @@ export interface AuthProfile {
   gender?: string;
   phoneNumber?: string;
   companyName?: string;
-  updatedAt?: Timestamp;
+  updatedAt?: LocalTimestamp;
   jobTitle?: string;
   avatarColor?: string;
 }

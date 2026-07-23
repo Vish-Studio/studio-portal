@@ -3,7 +3,6 @@ import { Link, Navigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, MailCheck } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, FormField, TextInput } from '@/src/shared/components';
-import { isFirebaseConfigured } from '@/src/firebase/config';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 
@@ -111,15 +110,8 @@ export default function ForgotPasswordPage() {
                     Recover your account
                   </h2>
                   <p className="mt-2 text-sm font-medium leading-6 text-gray-400">
-                    Enter your email and Firebase will send a secure password reset link.
+                    Enter your email to start a local password reset flow.
                   </p>
-                  {!isFirebaseConfigured && (
-                    <div className="mt-4 rounded-[14px] border border-amber-200 bg-amber-50 px-4 py-3">
-                      <p className="text-xs font-semibold leading-5 text-amber-800">
-                        Firebase is not configured yet. Add the VITE_FIREBASE_* values to `.env.local`.
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="forgot-password-form flex flex-col gap-4">
@@ -143,7 +135,6 @@ export default function ForgotPasswordPage() {
                   <Button
                     type="submit"
                     loading={isSubmitting}
-                    disabled={!isFirebaseConfigured}
                     className="h-12 w-full font-bold tracking-tight active:scale-[0.98]"
                   >
                     Send reset link

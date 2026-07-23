@@ -12,6 +12,7 @@ import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/features/auth';
+import { isStaffRole } from '@/src/auth/roleAccess';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { TeamAccessRole, TeamSalaryType, TeamWorkStatus } from '../types';
@@ -39,7 +40,7 @@ export default function TeamDetail() {
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isSuperAdmin = profile?.role === 'superadmin';
-  const canManageTeam = profile?.role === 'superadmin';
+  const canManageTeam = isStaffRole(profile?.role);
 
   useEffect(() => subscribeMembers(), [subscribeMembers]);
 
@@ -67,8 +68,8 @@ export default function TeamDetail() {
   const completedTasks = assignedTasks.length - openTasks;
   const totalProjectValue = memberProjects.reduce((sum, project) => sum + project.agreedPayment, 0);
   const roleOptions = isSuperAdmin
-    ? (['user', 'superadmin'] as TeamAccessRole[])
-    : (['user'] as TeamAccessRole[]);
+    ? (['user', 'admin', 'superadmin'] as TeamAccessRole[])
+    : (['user', 'admin'] as TeamAccessRole[]);
 
   const {
     register,
@@ -375,7 +376,7 @@ export default function TeamDetail() {
               >
                 {roleOptions.map(role => (
                   <Option key={role} value={role}>
-                    {role === 'superadmin' ? 'Superadmin' : 'User'}
+                    {role === 'superadmin' ? 'Superadmin' : role === 'admin' ? 'Admin' : 'User'}
                   </Option>
                 ))}
               </Select>

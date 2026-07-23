@@ -1,10 +1,7 @@
 import { create } from "zustand";
 import type { ScheduleEvent } from "../components/schedule/event-types";
 import type { AuthProfile } from "@/src/types/auth";
-import { calendarService, groupCalendarEventsByDate } from "../services/calendarService";
-import { firebaseErrorMessage, logFirebaseError } from "@/src/lib/firebase-errors";
-import { useUIStore } from "@/src/app/stores/uiStore";
-import { FEEDBACK_MESSAGES } from "@/src/app/messages";
+import { groupCalendarEventsByDate, toLocalCalendarEvent } from "../services/calendarService";
 
 interface CalendarState {
   customEvents: Record<string, ScheduleEvent[]>;
@@ -17,46 +14,37 @@ interface CalendarState {
   clearEvents: () => void;
 }
 
-export const useCalendarStore = create<CalendarState>((set) => ({
+const localId = () => `event_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+const flattenEvents = (groups: Record<string, ScheduleEvent[]>) => Object.values(groups).flat();
+
+export const useCalendarStore = create<CalendarState>((set, get) => ({
   customEvents: {},
   loading: false,
   error: null,
 
-  subscribeToEvents: (profile) => {
-    set({ loading: true, error: null });
-    return calendarService.subscribeToEvents(
-      profile,
-      events => set({
-        customEvents: groupCalendarEventsByDate(events),
-        loading: false,
-        error: null,
-      }),
-      error => {
-        const message = firebaseErrorMessage(error);
-        logFirebaseError('calendar.subscribeToEvents', error);
-        useUIStore.getState().showToast({
-          status: 'error',
-          title: FEEDBACK_MESSAGES.sidebar.scheduleLoadToast,
-          message,
-        });
-        set({ customEvents: {}, loading: false, error: message });
-      },
-    );
+  subscribeToEvents: () => {
+    set({ loading: false, error: null });
+    return () => undefined;
   },
 
   addEvent: async (event, eventDate, profile) => {
     set({ error: null });
-    await calendarService.createEvent({ event, date: eventDate, profile });
+    const nextEvent = toLocalCalendarEvent({ event: { ...event, id: event.id || localId() }, date: eventDate, profile });
+    const events = [...flattenEvents(get().customEvents), nextEvent];
+    set({ customEvents: groupCalendarEventsByDate(events) });
   },
 
   editEvent: async (event, newDate, profile) => {
     set({ error: null });
-    await calendarService.updateEvent(event.id, { event, date: newDate, profile });
+    const nextEvent = toLocalCalendarEvent({ event, date: newDate, profile });
+    const events = flattenEvents(get().customEvents).map(item => item.id === event.id ? nextEvent : item);
+    set({ customEvents: groupCalendarEventsByDate(events) });
   },
 
   removeEvent: async (eventId) => {
     set({ error: null });
-    await calendarService.deleteEvent(eventId);
+    const events = flattenEvents(get().customEvents).filter(event => event.id !== eventId);
+    set({ customEvents: groupCalendarEventsByDate(events) });
   },
 
   clearEvents: () => set({ customEvents: {}, loading: false, error: null }),

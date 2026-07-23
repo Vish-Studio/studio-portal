@@ -20,7 +20,7 @@ import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, t
 import { useAuthStore } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
-import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
+import { operationErrorMessage } from '@/src/lib/operation-errors';
 import { formatPricingAmount, usePricingPackagesStore } from '@/src/features/templates';
 
 interface ProjectFormValues {
@@ -216,7 +216,7 @@ export default function UserProjectsPage() {
       }
       setSidebarOpen(false);
     } catch (error) {
-      setSubmitError(firebaseErrorMessage(error));
+      setSubmitError(operationErrorMessage(error));
     }
   };
 

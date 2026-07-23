@@ -171,7 +171,7 @@ export default function AccountSettings() {
     ),
     email: (
       <div className="account-settings-email grid grid-cols-1 gap-4 md:grid-cols-2">
-        <FormField label="Primary email" hint="Changing email may ask Firebase for a recent sign-in.">
+        <FormField label="Primary email" hint="Changing email may require a fresh local sign-in.">
           <TextInput type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} />
         </FormField>
         <FormField label="Recovery email">
@@ -186,7 +186,7 @@ export default function AccountSettings() {
             <div className="account-settings-security-copy min-w-0">
               <p className="type-card-title text-(--color-ink)">Password reset</p>
               <p className="type-muted mt-1 max-w-xl text-gray-400">
-                We will send Firebase password reset instructions to your primary email.
+                We will send password reset instructions to your primary email.
               </p>
             </div>
             <Button variant="secondary" loading={resettingPassword} onClick={handlePasswordReset}>

@@ -7,8 +7,7 @@ import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage 
 import { SERVICE_META, type ServiceType } from '@/src/features/projects';
 import TemplateCard from '../components/template-card/template-card';
 import { formatPricingAmount, TEMPLATE_COLLECTION_PATHS, useDocumentTemplatesStore, usePricingPackagesStore, useQuestionnaireTemplatesStore, type DocumentTemplate, type PricingBilling, type PricingPackage, type PricingTemplateKind } from '@/src/features/templates';
-import { isFirebaseConfigured } from '@/src/firebase/config';
-import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
+import { operationErrorMessage } from '@/src/lib/operation-errors';
 
 interface PricingListItemFormValue {
   value: string;
@@ -228,7 +227,6 @@ export default function TemplatesPage({ initialSection }: TemplatesPageProps) {
   });
 
   useEffect(() => {
-    if (!isFirebaseConfigured) return undefined;
     return subscribeToPackages();
   }, [subscribeToPackages]);
 
@@ -326,7 +324,7 @@ export default function TemplatesPage({ initialSection }: TemplatesPageProps) {
       else await addPackage(payload);
       closeSidebar();
     } catch (error) {
-      setSubmitError(firebaseErrorMessage(error));
+      setSubmitError(operationErrorMessage(error));
     }
   };
 
@@ -361,7 +359,7 @@ export default function TemplatesPage({ initialSection }: TemplatesPageProps) {
             <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-gray-500">
               {initialSection
                 ? sectionMeta[initialSection].description
-                : `Manage app-wide templates now, with stores shaped for Firebase collections at ${TEMPLATE_COLLECTION_PATHS.documents}, ${TEMPLATE_COLLECTION_PATHS.priceItems}, and ${TEMPLATE_COLLECTION_PATHS.questionnaires}.`}
+                : `Manage app-wide templates now with local Zustand-backed stores for ${TEMPLATE_COLLECTION_PATHS.documents}, ${TEMPLATE_COLLECTION_PATHS.priceItems}, and ${TEMPLATE_COLLECTION_PATHS.questionnaires}.`}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -645,7 +643,7 @@ export default function TemplatesPage({ initialSection }: TemplatesPageProps) {
                 <p className="type-label text-gray-400">Collection</p>
                 <p className="mt-1 text-lg font-bold text-(--color-ink)">{TEMPLATE_COLLECTION_PATHS.questionnaires}</p>
                 <p className="mt-3 max-w-xl text-sm font-medium leading-relaxed text-gray-500">
-                  This section is reserved for service discovery questionnaires. The Zustand store and Firebase collection path are already in place, so we can add the editor without changing the page structure later.
+                  This section is reserved for service discovery questionnaires. The Zustand store path is already in place, so we can add the editor without changing the page structure later.
                 </p>
               </div>
               <div className="rounded-[18px] bg-(--color-ink) p-6 text-white">
@@ -851,7 +849,7 @@ export default function TemplatesPage({ initialSection }: TemplatesPageProps) {
             await removePackage(confirmPricing.id);
             setConfirmPricing(null);
           } catch (error) {
-            setSubmitError(firebaseErrorMessage(error));
+            setSubmitError(operationErrorMessage(error));
             setConfirmPricing(null);
           }
         }}

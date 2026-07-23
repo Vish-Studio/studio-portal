@@ -14,6 +14,7 @@ import {
 import { FunctionComponent } from 'react';
 import { useChatStore } from '@/src/features/chat';
 import { useAuthStore } from '@/src/features/auth';
+import { isStaffRole } from '@/src/auth/roleAccess';
 import BaseSidebar, { type BaseSidebarProps, type SidebarNavItem } from './BaseSidebar';
 
 type SidebarProps = Omit<BaseSidebarProps, 'navItems' | 'settingsPath' | 'rootPath'>;
@@ -36,7 +37,7 @@ const AdminSidebar: FunctionComponent<SidebarProps> = (props) => {
     { icon: <MessageCircle size={18} />, label: 'Chat', path: '/admin/chat', badge: unreadChatCount },
     { icon: <CreditCard size={18} />, label: 'Payments', path: '/admin/payments' },
     { icon: <FileText size={18} />, label: 'Documents', path: '/admin/documents' },
-    ...(profile?.role === 'superadmin'
+    ...(isStaffRole(profile?.role)
       ? [{ icon: <Receipt size={18} />, label: 'Expenses', path: '/admin/expenses' }]
       : []),
     { icon: <Receipt size={18} />, label: 'Pricing', path: '/admin/templates/pricing', section: 'Templates' },

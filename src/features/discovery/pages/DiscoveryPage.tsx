@@ -12,7 +12,7 @@ import type { AnswerValue, DiscoveryQuestion, DiscoverySection } from '../types'
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function canEdit(role?: string, status?: string): boolean {
-  if (role === 'superadmin') return true;
+  if (role === 'superadmin' || role === 'admin') return true;
   if (status === 'submitted') return false;
   return role === 'user';
 }
@@ -538,7 +538,7 @@ export default function DiscoveryPage() {
                   <p className="text-xs text-amber-700 mt-0.5">
                     {userRole === 'user'
                       ? 'Contact your project manager to request changes.'
-                      : 'Only a superadmin can edit a submitted brief.'}
+                      : 'Only an admin or superadmin can edit a submitted brief.'}
                   </p>
                 </div>
               </div>

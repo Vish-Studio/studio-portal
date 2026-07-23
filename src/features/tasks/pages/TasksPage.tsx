@@ -20,7 +20,7 @@ import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '@/src/features/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
-import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
+import { operationErrorMessage } from '@/src/lib/operation-errors';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 
 // ─── Tab config ───────────────────────────────────────────────────────────────
@@ -227,7 +227,7 @@ const Tasks = () => {
       }
       setSidebarOpen(false);
     } catch (error) {
-      setSubmitError(firebaseErrorMessage(error));
+      setSubmitError(operationErrorMessage(error));
     }
   };
 

@@ -1,43 +1,44 @@
 import type { AuthRole } from '@/src/types/auth';
-import { SUPERADMIN_ROLE } from './roleAccess';
+import { ADMIN_ROLE, SUPERADMIN_ROLE, USER_ROLE } from './roleAccess';
 
 type ResourceAction = 'view' | 'create' | 'update' | 'delete' | 'manage';
 type PermissionMatrix = Record<string, Partial<Record<ResourceAction, AuthRole[]>>>;
+const LOCAL_CRUD_ROLES: AuthRole[] = [SUPERADMIN_ROLE, ADMIN_ROLE, USER_ROLE];
 
 export const permissions = {
   clients: {
-    view: [SUPERADMIN_ROLE],
-    create: [SUPERADMIN_ROLE],
-    update: [SUPERADMIN_ROLE],
-    delete: [SUPERADMIN_ROLE],
+    view: LOCAL_CRUD_ROLES,
+    create: LOCAL_CRUD_ROLES,
+    update: LOCAL_CRUD_ROLES,
+    delete: LOCAL_CRUD_ROLES,
   },
   projects: {
-    view: [SUPERADMIN_ROLE],
-    create: [SUPERADMIN_ROLE],
-    update: [SUPERADMIN_ROLE],
-    delete: [SUPERADMIN_ROLE],
+    view: LOCAL_CRUD_ROLES,
+    create: LOCAL_CRUD_ROLES,
+    update: LOCAL_CRUD_ROLES,
+    delete: LOCAL_CRUD_ROLES,
   },
   tasks: {
-    view: [SUPERADMIN_ROLE],
-    create: [SUPERADMIN_ROLE],
-    update: [SUPERADMIN_ROLE],
-    delete: [SUPERADMIN_ROLE],
+    view: LOCAL_CRUD_ROLES,
+    create: LOCAL_CRUD_ROLES,
+    update: LOCAL_CRUD_ROLES,
+    delete: LOCAL_CRUD_ROLES,
   },
   documents: {
-    view: [SUPERADMIN_ROLE],
-    create: [SUPERADMIN_ROLE],
-    update: [SUPERADMIN_ROLE],
-    delete: [SUPERADMIN_ROLE],
+    view: LOCAL_CRUD_ROLES,
+    create: LOCAL_CRUD_ROLES,
+    update: LOCAL_CRUD_ROLES,
+    delete: LOCAL_CRUD_ROLES,
   },
   expenses: {
-    view: [SUPERADMIN_ROLE],
-    create: [SUPERADMIN_ROLE],
-    update: [SUPERADMIN_ROLE],
-    delete: [SUPERADMIN_ROLE],
+    view: LOCAL_CRUD_ROLES,
+    create: LOCAL_CRUD_ROLES,
+    update: LOCAL_CRUD_ROLES,
+    delete: LOCAL_CRUD_ROLES,
   },
   settings: {
-    view: [SUPERADMIN_ROLE],
-    update: [SUPERADMIN_ROLE],
+    view: LOCAL_CRUD_ROLES,
+    update: LOCAL_CRUD_ROLES,
   },
 } satisfies PermissionMatrix;
 

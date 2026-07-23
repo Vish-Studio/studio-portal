@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, Check, Eye, EyeOff, KeyRound, ShieldAlert } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { Button, FormField, TextInput } from '@/src/shared/components';
-import { isFirebaseConfigured } from '@/src/firebase/config';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
 
@@ -97,7 +96,7 @@ export default function ResetPasswordPage() {
                 Create a new password and get back to work.
               </h1>
               <p className="mt-4 max-w-md text-sm font-medium leading-6 text-white/45">
-                Use the secure Firebase reset link from your email to update your account access.
+                Use the reset link from your email to update your account access.
               </p>
             </div>
           </div>
@@ -183,13 +182,6 @@ export default function ResetPasswordPage() {
                   <p className="mt-2 text-sm font-medium leading-6 text-gray-400">
                     {resetEmail ? `Create a new password for ${resetEmail}.` : 'Create a new password for your account.'}
                   </p>
-                  {!isFirebaseConfigured && (
-                    <div className="mt-4 rounded-[14px] border border-amber-200 bg-amber-50 px-4 py-3">
-                      <p className="text-xs font-semibold leading-5 text-amber-800">
-                        Firebase is not configured yet. Add the VITE_FIREBASE_* values to `.env.local`.
-                      </p>
-                    </div>
-                  )}
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="reset-password-form flex flex-col gap-4">
@@ -246,7 +238,6 @@ export default function ResetPasswordPage() {
                   <Button
                     type="submit"
                     loading={isSubmitting}
-                    disabled={!isFirebaseConfigured}
                     className="h-12 w-full font-bold tracking-tight active:scale-[0.98]"
                   >
                     Update password

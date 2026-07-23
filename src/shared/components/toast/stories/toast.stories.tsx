@@ -73,7 +73,7 @@ export const AllStates: Story = {
       <Toast
         status="info"
         title="Sync in progress"
-        message="The app is refreshing Firestore data."
+        message="The app is refreshing local data."
         onDismiss={() => undefined}
       />
     </div>

@@ -17,8 +17,9 @@ import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, t
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '@/src/features/auth';
+import { isStaffRole } from '@/src/auth/roleAccess';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
-import { firebaseErrorMessage } from '@/src/lib/firebase-errors';
+import { operationErrorMessage } from '@/src/lib/operation-errors';
 import { formatPricingAmount, usePricingPackagesStore } from '@/src/features/templates';
 
 interface ProjectFormValues {
@@ -79,7 +80,7 @@ const Projects = () => {
   );
   const selectedPricingPackage = pricingPackages.find(item => item.id === watchedPricingPackageId);
   const canCreate = canCreateProject(profile?.role);
-  const canManage = profile?.role === 'superadmin';
+  const canManage = isStaffRole(profile?.role);
   const hasProjectFormChanges = isDirty || (
     editingProject
       ? selectedClientId !== editingProject.clientId || !sameStringSet(selectedMemberIds, editingProject.assignedMemberIds ?? [])
@@ -221,7 +222,7 @@ const Projects = () => {
       }
       setSidebarOpen(false);
     } catch (error) {
-      setSubmitError(firebaseErrorMessage(error));
+      setSubmitError(operationErrorMessage(error));
     }
   };
 

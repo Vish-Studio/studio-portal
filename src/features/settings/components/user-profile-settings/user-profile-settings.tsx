@@ -236,7 +236,7 @@ export default function UserProfileSettings() {
                 <FormField label="Last name">
                   <TextInput value={form.lastName ?? ''} onChange={event => updateForm('lastName', event.target.value)} />
                 </FormField>
-                <FormField label="Primary email" hint="Email sign-in is managed by Firebase Authentication.">
+                <FormField label="Primary email" hint="Email sign-in is managed locally.">
                   <TextInput type="email" value={form.email ?? ''} onChange={event => updateForm('email', event.target.value)} />
                 </FormField>
                 <FormField label="Phone number">
@@ -281,7 +281,7 @@ export default function UserProfileSettings() {
                     <div className="user-profile-settings-security-copy min-w-0">
                       <p className="type-card-title text-(--color-ink)">Password reset</p>
                       <p className="type-muted mt-1 max-w-xl text-gray-400">
-                        We will send Firebase password reset instructions to your primary email.
+                        We will send password reset instructions to your primary email.
                       </p>
                     </div>
                     <Button variant="secondary" loading={resettingPassword} onClick={handlePasswordReset}>

@@ -1,4 +1,0 @@
-    // Legacy teamMembers collection has been replaced by /team.
-    match /teamMembers/{memberId} {
-      allow read, write: if false;
-    }

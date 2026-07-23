@@ -1,4 +1,4 @@
-export type TeamAccessRole = "superadmin" | "user";
+export type TeamAccessRole = "superadmin" | "admin" | "user";
 export type TeamWorkStatus = "working" | "fired" | "on-leave";
 export type TeamSalaryType = "monthly" | "per-project";
 

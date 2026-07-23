@@ -9,6 +9,7 @@ import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Button, Checkbox, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
+import { isStaffRole } from '@/src/auth/roleAccess';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
@@ -61,10 +62,10 @@ export default function Team() {
   const { searchQuery, showToast } = useUIStore();
   const profile = useAuthStore(state => state.profile);
   const isSuperAdmin = profile?.role === 'superadmin';
-  const canManageTeam = profile?.role === 'superadmin';
+  const canManageTeam = isStaffRole(profile?.role);
   const roleOptions = isSuperAdmin
-    ? (['user', 'superadmin'] as TeamAccessRole[])
-    : (['user'] as TeamAccessRole[]);
+    ? (['user', 'admin', 'superadmin'] as TeamAccessRole[])
+    : (['user', 'admin'] as TeamAccessRole[]);
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
@@ -325,7 +326,7 @@ export default function Team() {
                 member={member}
                 canEdit={canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin')}
                 canAssign={isSuperAdmin || member.accessRole !== 'superadmin'}
-                canDelete={isSuperAdmin}
+                canDelete={canManageTeam && (isSuperAdmin || member.accessRole !== 'superadmin')}
                 onOpen={item => navigate(`/admin/team/${item.id}`)}
                 onEdit={openEdit}
                 onAssign={setAssigningMember}
@@ -400,7 +401,7 @@ export default function Team() {
               >
                 {roleOptions.map(role => (
                   <Option key={role} value={role}>
-                    {role === 'superadmin' ? 'Superadmin' : 'User'}
+                    {role === 'superadmin' ? 'Superadmin' : role === 'admin' ? 'Admin' : 'User'}
                   </Option>
                 ))}
               </Select>

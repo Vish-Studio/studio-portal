@@ -1,24 +1,6 @@
-import {
-  Timestamp,
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  serverTimestamp,
-  updateDoc,
-  where,
-  query,
-  type FirestoreError,
-  type QueryDocumentSnapshot,
-  type Unsubscribe,
-} from 'firebase/firestore';
-import { requireFirebase } from '@/src/firebase/requireFirebase';
 import type { AuthProfile, AuthRole } from '@/src/types/auth';
-import type { EventType, ScheduleCategory, ScheduleEvent } from '../components/schedule/event-types';
+import type { ScheduleCategory, ScheduleEvent } from '../components/schedule/event-types';
 import { getEventCategory } from '../components/schedule/event-types';
-
-const collectionName = 'calendar';
 
 export interface CalendarEventInput {
   event: ScheduleEvent;
@@ -29,12 +11,13 @@ export interface CalendarEventInput {
 const dateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
 export const canCreateCalendarCategory = (role: AuthRole | null | undefined, category: ScheduleCategory) => {
-  if (role === 'superadmin') return true;
-  return false;
+  if (role === 'superadmin' || role === 'admin') return true;
+  return category === 'client';
 };
 
 export const getAllowedCalendarCategories = (role: AuthRole | null | undefined): ScheduleCategory[] => {
-  if (role === 'superadmin') return ['team', 'project', 'client'];
+  if (role === 'superadmin' || role === 'admin') return ['team', 'project', 'client'];
+  if (role === 'user') return ['client'];
   return [];
 };
 
@@ -67,46 +50,10 @@ const toDisplayTime = (allDay: boolean, startTime?: string, endTime?: string, fa
     return `${hour}:${minute.padStart(2, '0')} ${period}`;
   };
 
-  return endTime ? `${formatTime(startTime)} – ${formatTime(endTime)}` : formatTime(startTime);
+  return endTime ? `${formatTime(startTime)} - ${formatTime(endTime)}` : formatTime(startTime);
 };
 
-const toDate = (value: unknown): Date | undefined => {
-  if (value instanceof Timestamp) return value.toDate();
-  if (value instanceof Date) return value;
-  return undefined;
-};
-
-const calendarEventFromDoc = (snapshot: QueryDocumentSnapshot): ScheduleEvent => {
-  const data = snapshot.data();
-  const category = data.category as ScheduleCategory | undefined;
-  const allDay = data.allDay !== false;
-  const startTime = typeof data.startTime === 'string' ? data.startTime : undefined;
-  const endTime = typeof data.endTime === 'string' ? data.endTime : undefined;
-
-  return {
-    id: snapshot.id,
-    category,
-    type: data.type as EventType,
-    title: String(data.title ?? 'Untitled event'),
-    time: typeof data.time === 'string' ? data.time : toDisplayTime(allDay, startTime, endTime),
-    date: toDate(data.date),
-    allDay,
-    startTime,
-    endTime,
-    callLink: typeof data.callLink === 'string' && data.callLink ? data.callLink : undefined,
-    description: typeof data.description === 'string' && data.description ? data.description : undefined,
-    createdById: String(data.createdById ?? ''),
-    createdByName: typeof data.createdByName === 'string' ? data.createdByName : undefined,
-    createdByRole: typeof data.createdByRole === 'string' ? data.createdByRole : undefined,
-    invitees: Array.isArray(data.invitees) ? data.invitees.filter((value): value is string => typeof value === 'string') : [],
-    projectId: typeof data.projectId === 'string' && data.projectId ? data.projectId : undefined,
-    phaseId: typeof data.phaseId === 'string' && data.phaseId ? data.phaseId : undefined,
-    clientId: typeof data.clientId === 'string' && data.clientId ? data.clientId : undefined,
-    memberIds: Array.isArray(data.memberIds) ? data.memberIds.filter((value): value is string => typeof value === 'string') : undefined,
-  };
-};
-
-const toFirestoreEvent = ({ event, date, profile }: CalendarEventInput) => {
+export const toLocalCalendarEvent = ({ event, date, profile }: CalendarEventInput): ScheduleEvent => {
   const category = event.category ?? getEventCategory(event.type);
 
   if (!canCreateCalendarCategory(profile.role, category)) {
@@ -133,24 +80,23 @@ const toFirestoreEvent = ({ event, date, profile }: CalendarEventInput) => {
   const allDay = event.allDay ?? event.time === 'All Day';
 
   return {
+    ...event,
+    id: event.id,
     category,
-    type: event.type,
     title: event.title.trim(),
     time: toDisplayTime(allDay, event.startTime, event.endTime, event.time),
-    date: Timestamp.fromDate(new Date(date.getFullYear(), date.getMonth(), date.getDate())),
+    date: new Date(date.getFullYear(), date.getMonth(), date.getDate()),
     allDay,
-    startTime: event.startTime ?? '',
-    endTime: event.endTime ?? '',
-    callLink: event.callLink?.trim() ?? '',
-    description: event.description?.trim() ?? '',
+    callLink: event.callLink?.trim() || undefined,
+    description: event.description?.trim() || undefined,
     createdById: profile.uid,
     createdByName: profile.fullName,
     createdByRole: profile.role,
     invitees,
-    projectId: category === 'project' ? event.projectId ?? '' : '',
-    phaseId: category === 'project' ? event.phaseId ?? '' : '',
-    clientId: category === 'client' || category === 'project' ? event.clientId ?? '' : '',
-    memberIds: category === 'team' || category === 'project' ? event.memberIds ?? [] : [],
+    projectId: category === 'project' ? event.projectId : undefined,
+    phaseId: category === 'project' ? event.phaseId : undefined,
+    clientId: category === 'client' || category === 'project' ? event.clientId : undefined,
+    memberIds: category === 'team' || category === 'project' ? event.memberIds ?? [] : undefined,
   };
 };
 
@@ -162,40 +108,3 @@ export const groupCalendarEventsByDate = (events: ScheduleEvent[]) => (
     return groups;
   }, {})
 );
-
-export const calendarService = {
-  subscribeToEvents(
-    profile: AuthProfile,
-    onEvents: (events: ScheduleEvent[]) => void,
-    onError: (error: FirestoreError) => void,
-  ): Unsubscribe {
-    const eventsQuery = profile.role === 'superadmin'
-      ? collection(requireFirebase().db, collectionName)
-      : query(collection(requireFirebase().db, collectionName), where('invitees', 'array-contains', profile.uid));
-
-    return onSnapshot(
-      eventsQuery,
-      snapshot => onEvents(snapshot.docs.map(calendarEventFromDoc)),
-      onError,
-    );
-  },
-
-  async createEvent(input: CalendarEventInput): Promise<void> {
-    await addDoc(collection(requireFirebase().db, collectionName), {
-      ...toFirestoreEvent(input),
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
-  },
-
-  async updateEvent(eventId: string, input: CalendarEventInput): Promise<void> {
-    await updateDoc(doc(requireFirebase().db, collectionName, eventId), {
-      ...toFirestoreEvent(input),
-      updatedAt: serverTimestamp(),
-    });
-  },
-
-  async deleteEvent(eventId: string): Promise<void> {
-    await deleteDoc(doc(requireFirebase().db, collectionName, eventId));
-  },
-};

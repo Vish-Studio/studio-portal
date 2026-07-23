@@ -18,7 +18,7 @@ export function GlobalOperationLoader() {
           </div>
           <div className="global-operation-loader-copy min-w-0 flex-1">
             <p className="type-card-title truncate text-white">{latestOperation?.label || "Saving changes"}</p>
-            <p className="type-muted text-white/45">Syncing with Firebase...</p>
+            <p className="type-muted text-white/45">Syncing local data...</p>
           </div>
         </div>
         <div className="global-operation-loader-track h-1 overflow-hidden bg-white/10">

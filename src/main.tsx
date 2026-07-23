@@ -5,7 +5,7 @@ import { registerServiceWorker } from './lib/registerServiceWorker';
 import App from './App.tsx';
 import './index.css';
 
-// Hydrate non-Firebase stores before the React tree mounts.
+// Hydrate local Zustand stores before the React tree mounts.
 initStores();
 registerServiceWorker();
 

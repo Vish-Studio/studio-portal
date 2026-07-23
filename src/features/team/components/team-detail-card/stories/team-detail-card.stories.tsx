@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import TeamDetailCard from '../team-detail-card';
 import type { TeamMember } from '../../../types';
 
-const firestoreDate = (date: string) => {
+const localDate = (date: string) => {
   const value = new Date(date);
   return {
     toMillis: () => value.getTime(),
@@ -19,7 +19,7 @@ const fakeMembers: TeamMember[] = [
     email: 'divesh@studio.test',
     assignedProjectId: null,
     status: 'active',
-    createdAt: firestoreDate('2026-03-18T09:00:00'),
+    createdAt: localDate('2026-03-18T09:00:00'),
   },
   {
     id: 'member-seen',
@@ -29,7 +29,7 @@ const fakeMembers: TeamMember[] = [
     email: 'seenarain@studio.test',
     assignedProjectId: null,
     status: 'active',
-    createdAt: firestoreDate('2026-04-08T09:00:00'),
+    createdAt: localDate('2026-04-08T09:00:00'),
   },
   {
     id: 'member-new',
@@ -39,7 +39,7 @@ const fakeMembers: TeamMember[] = [
     email: 'ashvin@studio.test',
     assignedProjectId: null,
     status: 'inactive',
-    createdAt: firestoreDate('2026-05-12T09:00:00'),
+    createdAt: localDate('2026-05-12T09:00:00'),
   },
 ];
 

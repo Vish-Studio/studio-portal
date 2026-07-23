@@ -19,6 +19,21 @@ export const DEV_SUPERADMIN_PROFILE: AuthProfile = {
   createdAt: { toMillis: () => now } as AuthProfile['createdAt'],
 };
 
+export const DEV_ADMIN_PROFILE: AuthProfile = {
+  id: 'dev-admin',
+  uid: 'dev-admin',
+  email: 'admin@vish.studio',
+  fullName: 'VISH Studio Admin',
+  role: 'admin',
+  staffRole: 'admin',
+  needsPasswordChange: false,
+  status: 'active',
+  isActive: true,
+  jobTitle: 'Studio admin',
+  avatarColor: 'zinc',
+  createdAt: { toMillis: () => now } as AuthProfile['createdAt'],
+};
+
 export const DEV_USER_PROFILE: AuthProfile = {
   id: 'dev-user',
   uid: 'dev-user',
@@ -35,4 +50,8 @@ export const DEV_USER_PROFILE: AuthProfile = {
 };
 
 export const getDevProfileForRole = (role: AuthRole = 'superadmin') =>
-  role === 'user' ? DEV_USER_PROFILE : DEV_SUPERADMIN_PROFILE;
+  role === 'user'
+    ? DEV_USER_PROFILE
+    : role === 'admin'
+      ? DEV_ADMIN_PROFILE
+      : DEV_SUPERADMIN_PROFILE;

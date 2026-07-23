@@ -1,4 +1,3 @@
-import { AUTH_FLOW_ENABLED } from '@/src/features/auth/authMode';
 import {
   DEMO_CLIENTS,
   DEMO_DOCUMENTS,
@@ -17,13 +16,8 @@ import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '@/src/features/team';
 
-/**
- * Bootstraps local demo data when Firebase auth is intentionally disconnected.
- * With auth enabled, Firestore streams own store hydration.
- */
+/** Bootstraps local demo data into Zustand stores before React mounts. */
 export function initStores(): void {
-  if (AUTH_FLOW_ENABLED) return;
-
   useClientsStore.getState().setClients(DEMO_CLIENTS);
   useProjectsStore.getState().setProjects(DEMO_PROJECTS);
   useTasksStore.getState().setTasks(DEMO_TASKS);
