@@ -71,7 +71,7 @@ const UserDashboardPage = ({ audience = 'client' }: UserDashboardPageProps) => {
   const { clients } = useClientsStore();
   const { documents } = useDocumentsStore();
 
-  const roleCanSeeAll = profile?.role === 'admin' || profile?.role === 'superadmin';
+  const roleCanSeeAll = profile?.role === 'superadmin';
   const canSeeAll = roleCanSeeAll || (audience === 'staff' && !profile);
   const profileClientId = profile?.uid ?? profile?.id;
   const currentClient = canSeeAll

@@ -72,8 +72,8 @@ export default function TeamMemberListItem({
           <span className="team-member-list-item-role-chip type-count max-w-[180px] truncate rounded-lg bg-gray-100 px-2 py-1 text-gray-500">
             {member.role || 'No role'}
           </span>
-          <span className={`team-member-list-item-access type-count rounded-lg px-2 py-1 ${member.accessRole === 'admin' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
-            {member.accessRole ?? 'freelancer'}
+          <span className={`team-member-list-item-access type-count rounded-lg px-2 py-1 ${member.accessRole === 'superadmin' ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
+            {member.accessRole ?? 'user'}
           </span>
           <span className={`team-member-list-item-status type-count rounded-lg px-2 py-1 ${
             member.status === 'fired' ? 'bg-red-50 text-red-600' : member.status === 'on-leave' ? 'bg-amber-50 text-amber-700' : 'bg-green-50 text-green-700'

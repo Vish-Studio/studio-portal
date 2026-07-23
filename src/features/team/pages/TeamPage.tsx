@@ -61,10 +61,10 @@ export default function Team() {
   const { searchQuery, showToast } = useUIStore();
   const profile = useAuthStore(state => state.profile);
   const isSuperAdmin = profile?.role === 'superadmin';
-  const canManageTeam = profile?.role === 'superadmin' || profile?.role === 'admin';
+  const canManageTeam = profile?.role === 'superadmin';
   const roleOptions = isSuperAdmin
-    ? (['freelancer', 'admin', 'superadmin'] as TeamAccessRole[])
-    : (['freelancer', 'admin'] as TeamAccessRole[]);
+    ? (['user', 'superadmin'] as TeamAccessRole[])
+    : (['user'] as TeamAccessRole[]);
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
   const [sortKey, setSortKey] = useState<SortKey>('name');
@@ -91,7 +91,7 @@ export default function Team() {
     defaultValues: {
       name: '',
       role: '',
-      accessRole: 'freelancer',
+      accessRole: 'user',
       email: '',
       phone: '',
       salaryAmount: 0,
@@ -112,8 +112,8 @@ export default function Team() {
   }), [visibleMembers]);
 
   const accessCounts = useMemo(() => ({
-    admins: visibleMembers.filter(m => m.accessRole === 'admin' || m.accessRole === 'superadmin').length,
-    freelancers: visibleMembers.filter(m => m.accessRole === 'freelancer' || m.accessRole === 'team').length,
+    superadmins: visibleMembers.filter(m => m.accessRole === 'superadmin').length,
+    users: visibleMembers.filter(m => m.accessRole === 'user').length,
   }), [visibleMembers]);
 
   const tabs: TabItem[] = [
@@ -153,7 +153,7 @@ export default function Team() {
     reset({
       name: '',
       role: '',
-      accessRole: 'freelancer',
+      accessRole: 'user',
       email: '',
       phone: '',
       salaryAmount: 0,
@@ -173,7 +173,7 @@ export default function Team() {
     reset({
       name: member.name,
       role: member.role,
-      accessRole: member.accessRole ?? 'freelancer',
+      accessRole: member.accessRole ?? 'user',
       email: member.email,
       phone: member.phone ?? '',
       salaryAmount: member.salaryAmount ?? 0,
@@ -209,7 +209,7 @@ export default function Team() {
           reset({
             name: '',
             role: '',
-            accessRole: 'freelancer',
+            accessRole: 'user',
             email: '',
             phone: '',
             salaryAmount: 0,
@@ -251,8 +251,8 @@ export default function Team() {
             icon={<Users size={16} />}
             label="Team Members"
             value={tabCounts.all}
-            badge={`${accessCounts.freelancers} freelancer${accessCounts.freelancers !== 1 ? 's' : ''}`}
-            badgeLabel="delivery team"
+            badge={`${accessCounts.users} user${accessCounts.users !== 1 ? 's' : ''}`}
+            badgeLabel="standard access"
           />
           <StatCard
             size="sm"
@@ -276,8 +276,8 @@ export default function Team() {
             size="sm"
             variant="dark"
             icon={<ShieldCheck size={16} />}
-            label="Admin Access"
-            value={accessCounts.admins}
+            label="Superadmin Access"
+            value={accessCounts.superadmins}
             badge={isSuperAdmin ? 'Full control' : 'Limited'}
             badgeLabel="role access"
           />
@@ -400,7 +400,7 @@ export default function Team() {
               >
                 {roleOptions.map(role => (
                   <Option key={role} value={role}>
-                    {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Freelancer'}
+                    {role === 'superadmin' ? 'Superadmin' : 'User'}
                   </Option>
                 ))}
               </Select>

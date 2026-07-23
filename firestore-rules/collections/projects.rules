@@ -1,7 +1,7 @@
     // projects: client work and process state.
     match /projects/{projectId} {
       function isProjectClient(data) {
-        return currentRole() == 'client' && data.clientId == request.auth.uid;
+        return currentRole() == 'user' && data.clientId == request.auth.uid;
       }
 
       function isAssignedToProject(data) {

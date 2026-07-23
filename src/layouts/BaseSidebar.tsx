@@ -8,6 +8,7 @@ export interface SidebarNavItem {
   label: string;
   path: string;
   badge?: number;
+  section?: string;
 }
 
 export interface BaseSidebarProps {
@@ -95,6 +96,26 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
     );
   };
 
+  const renderNavItems = () => {
+    let activeSection: string | undefined;
+
+    return navItems.map((item) => {
+      const sectionChanged = item.section !== activeSection;
+      activeSection = item.section;
+
+      return (
+        <div key={item.label} className="sidebar-item-slot flex flex-col">
+          {isExpanded && sectionChanged && item.section && (
+            <p className="sidebar-section-label type-sidebar-badge px-4 pb-1 pt-3 text-[10px] uppercase tracking-[0.18em] text-gray-500">
+              {item.section}
+            </p>
+          )}
+          {renderNavLink(item)}
+        </div>
+      );
+    });
+  };
+
   return (
     <>
       {isMobileMenuOpen && (
@@ -150,7 +171,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
           </div>
 
           <div className={`sidebar-nav min-h-0 flex-1 overflow-y-auto text-(--color-sidebar-text) no-scrollbar ${isExpanded ? 'flex flex-col gap-2' : 'flex flex-col items-center gap-1 lg:gap-2'}`}>
-            {navItems.map(renderNavLink)}
+            {renderNavItems()}
           </div>
         </div>
 

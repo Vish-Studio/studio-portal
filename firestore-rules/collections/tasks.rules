@@ -1,7 +1,7 @@
     // tasks: admin-assigned and client-visible tasks.
     match /tasks/{taskId} {
       function isTaskClient(data) {
-        return currentRole() == 'client' && data.clientId == request.auth.uid;
+        return currentRole() == 'user' && data.clientId == request.auth.uid;
       }
 
       function isAssignedToTask(data) {
@@ -9,11 +9,11 @@
       }
 
       function canCreateTask() {
-        return currentRole() in ['admin', 'superadmin', 'freelancer'];
+        return currentRole() == 'superadmin';
       }
 
       function canUpdateTask(data) {
-        return isManager() || (currentRole() == 'freelancer' && isAssignedToTask(data));
+        return isManager();
       }
 
       function isValidTask(data) {

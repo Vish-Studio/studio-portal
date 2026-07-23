@@ -1,32 +1,32 @@
 import type { AuthRole } from '@/src/types/auth';
-import { ADMIN_ROLE, FREELANCER_ROLE, SUPERADMIN_ROLE, TEAM_ROLE } from './roleAccess';
+import { SUPERADMIN_ROLE } from './roleAccess';
 
 type ResourceAction = 'view' | 'create' | 'update' | 'delete' | 'manage';
 type PermissionMatrix = Record<string, Partial<Record<ResourceAction, AuthRole[]>>>;
 
 export const permissions = {
   clients: {
-    view: [ADMIN_ROLE, SUPERADMIN_ROLE],
-    create: [ADMIN_ROLE, SUPERADMIN_ROLE],
-    update: [ADMIN_ROLE, SUPERADMIN_ROLE],
+    view: [SUPERADMIN_ROLE],
+    create: [SUPERADMIN_ROLE],
+    update: [SUPERADMIN_ROLE],
     delete: [SUPERADMIN_ROLE],
   },
   projects: {
-    view: [FREELANCER_ROLE, TEAM_ROLE, ADMIN_ROLE, SUPERADMIN_ROLE],
-    create: [ADMIN_ROLE, SUPERADMIN_ROLE],
-    update: [ADMIN_ROLE, SUPERADMIN_ROLE],
+    view: [SUPERADMIN_ROLE],
+    create: [SUPERADMIN_ROLE],
+    update: [SUPERADMIN_ROLE],
     delete: [SUPERADMIN_ROLE],
   },
   tasks: {
-    view: [FREELANCER_ROLE, TEAM_ROLE, ADMIN_ROLE, SUPERADMIN_ROLE],
-    create: [ADMIN_ROLE, SUPERADMIN_ROLE],
-    update: [FREELANCER_ROLE, TEAM_ROLE, ADMIN_ROLE, SUPERADMIN_ROLE],
-    delete: [ADMIN_ROLE, SUPERADMIN_ROLE],
+    view: [SUPERADMIN_ROLE],
+    create: [SUPERADMIN_ROLE],
+    update: [SUPERADMIN_ROLE],
+    delete: [SUPERADMIN_ROLE],
   },
   documents: {
-    view: [ADMIN_ROLE, SUPERADMIN_ROLE],
-    create: [ADMIN_ROLE, SUPERADMIN_ROLE],
-    update: [ADMIN_ROLE, SUPERADMIN_ROLE],
+    view: [SUPERADMIN_ROLE],
+    create: [SUPERADMIN_ROLE],
+    update: [SUPERADMIN_ROLE],
     delete: [SUPERADMIN_ROLE],
   },
   expenses: {
@@ -36,7 +36,7 @@ export const permissions = {
     delete: [SUPERADMIN_ROLE],
   },
   settings: {
-    view: [ADMIN_ROLE, SUPERADMIN_ROLE],
+    view: [SUPERADMIN_ROLE],
     update: [SUPERADMIN_ROLE],
   },
 } satisfies PermissionMatrix;

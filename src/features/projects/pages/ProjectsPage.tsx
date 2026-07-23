@@ -79,7 +79,7 @@ const Projects = () => {
   );
   const selectedPricingPackage = pricingPackages.find(item => item.id === watchedPricingPackageId);
   const canCreate = canCreateProject(profile?.role);
-  const canManage = profile?.role === 'superadmin' || profile?.role === 'admin';
+  const canManage = profile?.role === 'superadmin';
   const hasProjectFormChanges = isDirty || (
     editingProject
       ? selectedClientId !== editingProject.clientId || !sameStringSet(selectedMemberIds, editingProject.assignedMemberIds ?? [])

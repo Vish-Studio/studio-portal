@@ -39,7 +39,7 @@ export default function TeamDetail() {
   const [editSidebarOpen, setEditSidebarOpen] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isSuperAdmin = profile?.role === 'superadmin';
-  const canManageTeam = profile?.role === 'superadmin' || profile?.role === 'admin';
+  const canManageTeam = profile?.role === 'superadmin';
 
   useEffect(() => subscribeMembers(), [subscribeMembers]);
 
@@ -67,8 +67,8 @@ export default function TeamDetail() {
   const completedTasks = assignedTasks.length - openTasks;
   const totalProjectValue = memberProjects.reduce((sum, project) => sum + project.agreedPayment, 0);
   const roleOptions = isSuperAdmin
-    ? (['freelancer', 'admin', 'superadmin'] as TeamAccessRole[])
-    : (['freelancer', 'admin'] as TeamAccessRole[]);
+    ? (['user', 'superadmin'] as TeamAccessRole[])
+    : (['user'] as TeamAccessRole[]);
 
   const {
     register,
@@ -80,7 +80,7 @@ export default function TeamDetail() {
     defaultValues: {
       name: '',
       role: '',
-      accessRole: 'freelancer',
+      accessRole: 'user',
       email: '',
       phone: '',
       salaryAmount: 0,
@@ -93,7 +93,7 @@ export default function TeamDetail() {
   const hasMemberChanges = !!member && isEditing && (
     watchedMemberForm.name !== member.name ||
     watchedMemberForm.role !== member.role ||
-    watchedMemberForm.accessRole !== (member.accessRole ?? 'freelancer') ||
+    watchedMemberForm.accessRole !== (member.accessRole ?? 'user') ||
     watchedMemberForm.email !== member.email ||
     watchedMemberForm.phone !== (member.phone ?? '') ||
     watchedMemberForm.salaryAmount !== (member.salaryAmount ?? 0) ||
@@ -106,7 +106,7 @@ export default function TeamDetail() {
     reset({
       name: member.name,
       role: member.role,
-      accessRole: member.accessRole ?? 'freelancer',
+      accessRole: member.accessRole ?? 'user',
       email: member.email,
       phone: member.phone ?? '',
       salaryAmount: member.salaryAmount ?? 0,
@@ -144,7 +144,7 @@ export default function TeamDetail() {
     reset({
       name: member?.name ?? '',
       role: member?.role ?? '',
-      accessRole: member?.accessRole ?? 'freelancer',
+      accessRole: member?.accessRole ?? 'user',
       email: member?.email ?? '',
       phone: member?.phone ?? '',
       salaryAmount: member?.salaryAmount ?? 0,
@@ -161,7 +161,7 @@ export default function TeamDetail() {
     reset({
       name: member.name,
       role: member.role,
-      accessRole: member.accessRole ?? 'freelancer',
+      accessRole: member.accessRole ?? 'user',
       email: member.email,
       phone: member.phone ?? '',
       salaryAmount: member.salaryAmount ?? 0,
@@ -178,7 +178,7 @@ export default function TeamDetail() {
     reset({
       name: member.name,
       role: member.role,
-      accessRole: member.accessRole ?? 'freelancer',
+      accessRole: member.accessRole ?? 'user',
       email: member.email,
       phone: member.phone ?? '',
       salaryAmount: member.salaryAmount ?? 0,
@@ -255,7 +255,7 @@ export default function TeamDetail() {
             label="Value"
             icon={<TrendingUp size={11} />}
             value={`$${(totalProjectValue / 1000).toFixed(0)}k`}
-            sub={member.accessRole ?? 'freelancer'}
+            sub={member.accessRole ?? 'user'}
             trendData={[0, totalProjectValue * 0.35, totalProjectValue * 0.68, totalProjectValue]}
             trendVariant="positive"
           />
@@ -375,7 +375,7 @@ export default function TeamDetail() {
               >
                 {roleOptions.map(role => (
                   <Option key={role} value={role}>
-                    {role === 'superadmin' ? 'Super Admin' : role === 'admin' ? 'Admin' : 'Freelancer'}
+                    {role === 'superadmin' ? 'Superadmin' : 'User'}
                   </Option>
                 ))}
               </Select>

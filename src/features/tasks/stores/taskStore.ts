@@ -20,8 +20,8 @@ import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 export type { Task, TaskStatus, TaskPriority };
 
-export const TASK_CREATE_ROLES: AuthRole[] = ['superadmin', 'admin', 'freelancer'];
-export const TASK_DELETE_ROLES: AuthRole[] = ['superadmin', 'admin'];
+export const TASK_CREATE_ROLES: AuthRole[] = ['superadmin'];
+export const TASK_DELETE_ROLES: AuthRole[] = ['superadmin'];
 
 export const canCreateTask = (role?: AuthRole | null): role is AuthRole =>
   Boolean(role && TASK_CREATE_ROLES.includes(role));

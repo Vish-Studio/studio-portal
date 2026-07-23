@@ -86,8 +86,8 @@ export const userDocToClient = (doc: QueryDocumentSnapshot): Client => {
 export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
   const data = doc.data();
   const name = String(data.fullName ?? data.name ?? data.full_name ?? 'Unnamed member');
-  const role = String(data.role ?? 'freelancer');
-  const accessRole = role === 'team' ? 'freelancer' : role;
+  const role = String(data.role ?? 'user');
+  const accessRole = role === 'superadmin' ? 'superadmin' : 'user';
   const jobTitle = String(data.jobTitle ?? data.job_title ?? 'Team member');
   const rawStatus = data.workStatus ?? data.status;
   const status = rawStatus === 'fired' ? 'fired' : rawStatus === 'on-leave' ? 'on-leave' : 'working';
@@ -98,9 +98,7 @@ export const userDocToTeamMember = (doc: QueryDocumentSnapshot): TeamMember => {
     userId: doc.id,
     name,
     role: jobTitle,
-    accessRole: (accessRole === 'superadmin' || accessRole === 'admin' || accessRole === 'freelancer')
-      ? accessRole
-      : 'freelancer',
+    accessRole,
     email: String(data.email ?? ''),
     phone: String(data.phoneNumber ?? data.phone_number ?? data.phone ?? ''),
     isOnline: data.isOnline === true || data.is_online === true,
@@ -214,4 +212,4 @@ export const messageDocToChatMessage = (
 };
 
 export const isFirestoreRole = (role: unknown): role is AuthRole =>
-  role === 'superadmin' || role === 'admin' || role === 'freelancer' || role === 'team' || role === 'client';
+  role === 'superadmin' || role === 'user';

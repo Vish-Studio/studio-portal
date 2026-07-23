@@ -11,13 +11,15 @@ service cloud.firestore {
 // Primitive helpers shared by collection rules.
     function isSignedIn() { return request.auth != null; }
 
-    // Admin = hardcoded owner emails OR users/{uid}.role is admin/superadmin
+    // Superadmin = hardcoded owner emails OR users/{uid}.role is superadmin
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
         request.auth.token.email == 'vishseenarain@gmail.com' ||
+        request.auth.token.email == 'vishroy@vish.studio' ||
+        request.auth.token.email == 'divesh@vish.studio' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'freelancer'])
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')
       );
     }
 
@@ -31,7 +33,9 @@ service cloud.firestore {
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
         request.auth.token.email == 'vishseenarain@gmail.com' ||
-        currentRole() in ['admin', 'superadmin']
+        request.auth.token.email == 'vishroy@vish.studio' ||
+        request.auth.token.email == 'divesh@vish.studio' ||
+        currentRole() == 'superadmin'
       );
     }
 
@@ -50,7 +54,7 @@ service cloud.firestore {
         return data.uid   is string &&
                data.fullName is string && data.fullName.size() > 0 && data.fullName.size() <= 120 &&
                data.email is string && data.email.size() > 0 && data.email.size() <= 255 &&
-               data.role  in ['admin', 'superadmin', 'team', 'client', 'freelancer'] &&
+               data.role  in ['superadmin', 'user'] &&
                data.needsPasswordChange is bool;
       }
 
@@ -89,7 +93,7 @@ service cloud.firestore {
     // projects: client work and process state.
     match /projects/{projectId} {
       function isProjectClient(data) {
-        return currentRole() == 'client' && data.clientId == request.auth.uid;
+        return currentRole() == 'user' && data.clientId == request.auth.uid;
       }
 
       function isAssignedToProject(data) {
@@ -184,7 +188,7 @@ service cloud.firestore {
     // tasks: admin-assigned and client-visible tasks.
     match /tasks/{taskId} {
       function isTaskClient(data) {
-        return currentRole() == 'client' && data.clientId == request.auth.uid;
+        return currentRole() == 'user' && data.clientId == request.auth.uid;
       }
 
       function isAssignedToTask(data) {
@@ -192,11 +196,11 @@ service cloud.firestore {
       }
 
       function canCreateTask() {
-        return currentRole() in ['admin', 'superadmin', 'freelancer'];
+        return currentRole() == 'superadmin';
       }
 
       function canUpdateTask(data) {
-        return isManager() || (currentRole() == 'freelancer' && isAssignedToTask(data));
+        return isManager();
       }
 
       function isValidTask(data) {
@@ -271,7 +275,7 @@ service cloud.firestore {
                (data.get('callLink', '') is string) && data.get('callLink', '').size() <= 2048 &&
                (data.get('description', '') is string) && data.get('description', '').size() <= 2000 &&
                data.createdById == request.auth.uid &&
-               data.createdByRole in ['admin', 'superadmin', 'freelancer', 'team', 'client'] &&
+               data.createdByRole in ['superadmin', 'user'] &&
                data.invitees is list &&
                data.invitees.size() >= 2 &&
                data.invitees.size() <= 50 &&
@@ -286,9 +290,7 @@ service cloud.firestore {
 
       function canWriteCalendarCategory(data) {
         return isManager() || (
-          data.category == 'team' &&
-          currentRole() in ['freelancer', 'team'] &&
-          data.get('clientId', '') == ''
+          false
         );
       }
 

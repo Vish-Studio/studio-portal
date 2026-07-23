@@ -5,7 +5,7 @@ export const isCurrentTeamMember = (
   member: TeamMember,
   profile?: AuthProfile | null,
 ) => {
-  if (!profile || profile.role === 'client') return false;
+  if (!profile || profile.role === 'user') return false;
 
   const profileEmail = profile.email?.trim().toLowerCase();
   const memberEmail = member.email?.trim().toLowerCase();

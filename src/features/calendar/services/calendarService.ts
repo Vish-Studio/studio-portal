@@ -29,14 +29,12 @@ export interface CalendarEventInput {
 const dateKey = (date: Date) => `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 
 export const canCreateCalendarCategory = (role: AuthRole | null | undefined, category: ScheduleCategory) => {
-  if (role === 'superadmin' || role === 'admin') return true;
-  if (role === 'freelancer' || role === 'team') return category === 'team';
+  if (role === 'superadmin') return true;
   return false;
 };
 
 export const getAllowedCalendarCategories = (role: AuthRole | null | undefined): ScheduleCategory[] => {
-  if (role === 'superadmin' || role === 'admin') return ['team', 'project', 'client'];
-  if (role === 'freelancer' || role === 'team') return ['team'];
+  if (role === 'superadmin') return ['team', 'project', 'client'];
   return [];
 };
 
@@ -171,7 +169,7 @@ export const calendarService = {
     onEvents: (events: ScheduleEvent[]) => void,
     onError: (error: FirestoreError) => void,
   ): Unsubscribe {
-    const eventsQuery = profile.role === 'superadmin' || profile.role === 'admin'
+    const eventsQuery = profile.role === 'superadmin'
       ? collection(requireFirebase().db, collectionName)
       : query(collection(requireFirebase().db, collectionName), where('invitees', 'array-contains', profile.uid));
 

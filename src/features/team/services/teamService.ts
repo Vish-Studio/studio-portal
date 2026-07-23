@@ -75,7 +75,7 @@ export const teamService = {
     onError: (error: FirestoreError) => void,
   ): Unsubscribe {
     return onSnapshot(
-      query(usersCollection(), where('role', 'in', ['superadmin', 'admin', 'freelancer', 'team'])),
+      query(usersCollection(), where('role', 'in', ['superadmin', 'user'])),
       snapshot => onMembers(snapshot.docs.map(userDocToTeamMember)),
       onError,
     );
@@ -86,7 +86,7 @@ export const teamService = {
     const email = input.email.trim().toLowerCase();
     const name = input.name.trim();
     const position = input.role.trim();
-    const role = input.accessRole === 'team' ? 'freelancer' : input.accessRole;
+    const role = input.accessRole;
     const phone = input.phone?.trim() ?? '';
     const status = input.status ?? 'working';
     const salaryAmount = Number(input.salaryAmount ?? 0);
@@ -108,6 +108,7 @@ export const teamService = {
       fullName: name,
       email,
       role,
+      isTeamMember: true,
       needsPasswordChange: true,
       jobTitle: position,
       phoneNumber: phone,
@@ -158,9 +159,7 @@ export const teamService = {
       : existing.workStatus === 'on-leave' || existing.status === 'on-leave'
         ? 'on-leave'
         : 'working');
-    const role = input.accessRole
-      ? input.accessRole === 'team' ? 'freelancer' : input.accessRole
-      : String(existing.role ?? 'freelancer');
+    const role = input.accessRole ?? (existing.role === 'superadmin' ? 'superadmin' : 'user');
     const nextName = name || String(existing.fullName ?? existing.name ?? existing.full_name ?? 'Unnamed member');
     const nextEmail = email || String(existing.email ?? '');
     const nextPosition = position !== undefined

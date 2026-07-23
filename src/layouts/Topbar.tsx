@@ -37,7 +37,7 @@ const Topbar = ({ setIsMobileMenuOpen, title = 'Dashboard', hideSearch = false, 
 
   const location = useLocation();
   const { searchQuery, setSearchQuery, clearSearch } = useUIStore();
-  const settingsPath = profile?.role === 'client' ? '/user/settings' : '/admin/settings';
+  const settingsPath = profile?.role === 'user' ? '/user/settings' : '/admin/settings';
 
   const userMenuSections: DropdownMenuSectionType[] = [
     {

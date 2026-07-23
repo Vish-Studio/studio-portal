@@ -28,7 +28,7 @@ const highlights = [
   { icon: CreditCard, label: 'Payments', value: '$56k', meta: 'collected' },
 ];
 
-const isClientRole = (role: AuthRole) => role === 'client';
+const isUserRole = (role: AuthRole) => role === 'user';
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -57,11 +57,11 @@ const SignInPage = () => {
         return;
       }
 
-      const fallbackPath = isClientRole(nextProfile.role) ? '/user' : '/admin';
+      const fallbackPath = isUserRole(nextProfile.role) ? '/user' : '/admin';
       const requestedPath = typeof location.state === 'object' && location.state && 'from' in location.state
         ? String(location.state.from)
         : fallbackPath;
-      navigate(requestedPath.startsWith(`/${isClientRole(nextProfile.role) ? 'user' : 'admin'}`) ? requestedPath : fallbackPath, {
+      navigate(requestedPath.startsWith(`/${isUserRole(nextProfile.role) ? 'user' : 'admin'}`) ? requestedPath : fallbackPath, {
         replace: true,
       });
     } catch (error) {
@@ -74,7 +74,7 @@ const SignInPage = () => {
       return <Navigate to="/change-password" replace />;
     }
 
-    return <Navigate to={isClientRole(profile.role) ? '/user' : '/admin'} replace />;
+    return <Navigate to={isUserRole(profile.role) ? '/user' : '/admin'} replace />;
   }
 
   return (

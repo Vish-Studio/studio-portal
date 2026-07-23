@@ -25,7 +25,7 @@
                (data.get('callLink', '') is string) && data.get('callLink', '').size() <= 2048 &&
                (data.get('description', '') is string) && data.get('description', '').size() <= 2000 &&
                data.createdById == request.auth.uid &&
-               data.createdByRole in ['admin', 'superadmin', 'freelancer', 'team', 'client'] &&
+               data.createdByRole in ['superadmin', 'user'] &&
                data.invitees is list &&
                data.invitees.size() >= 2 &&
                data.invitees.size() <= 50 &&
@@ -40,9 +40,7 @@
 
       function canWriteCalendarCategory(data) {
         return isManager() || (
-          data.category == 'team' &&
-          currentRole() in ['freelancer', 'team'] &&
-          data.get('clientId', '') == ''
+          false
         );
       }
 

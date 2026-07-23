@@ -7,6 +7,7 @@ import type { AuthProfile, AuthProfileUpdateInput } from '@/src/types/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { firebaseErrorMessage, logFirebaseError } from '@/src/lib/firebase-errors';
+import { AUTH_FLOW_ENABLED, DEV_SUPERADMIN_PROFILE, getDevProfileForRole } from '../authMode';
 
 interface AuthState {
   user: User | null;
@@ -15,6 +16,7 @@ interface AuthState {
   ready: boolean;
   error: string | null;
   role: AuthProfile['role'] | null;
+  setAccessRole: (role: AuthProfile['role']) => void;
   signIn: (email: string, password: string) => Promise<AuthProfile>;
   sendPasswordReset: (email: string) => Promise<void>;
   verifyPasswordReset: (code: string) => Promise<string>;
@@ -27,13 +29,25 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  profile: null,
+  profile: AUTH_FLOW_ENABLED ? null : DEV_SUPERADMIN_PROFILE,
   loading: false,
-  ready: false,
+  ready: !AUTH_FLOW_ENABLED,
   error: null,
-  role: null,
+  role: AUTH_FLOW_ENABLED ? null : DEV_SUPERADMIN_PROFILE.role,
+
+  setAccessRole: (role) => {
+    if (AUTH_FLOW_ENABLED) return;
+    const profile = getDevProfileForRole(role);
+    set({ user: null, profile, role: profile.role, loading: false, ready: true, error: null });
+  },
 
   signIn: async (email, password) => {
+    if (!AUTH_FLOW_ENABLED) {
+      const profile = DEV_SUPERADMIN_PROFILE;
+      set({ user: null, profile, role: profile.role, loading: false, ready: true, error: null });
+      return profile;
+    }
+
     set({ loading: true, error: null });
     try {
       const credential = await authService.signIn(email, password);
@@ -49,6 +63,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   sendPasswordReset: async (email) => {
+    if (!AUTH_FLOW_ENABLED) return;
+
     set({ loading: true, error: null });
     try {
       await authService.sendPasswordReset(email);
@@ -62,6 +78,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   verifyPasswordReset: async (code) => {
+    if (!AUTH_FLOW_ENABLED) return '';
+
     try {
       return await authService.verifyPasswordReset(code);
     } catch (error) {
@@ -73,6 +91,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   confirmPasswordReset: async (code, password) => {
+    if (!AUTH_FLOW_ENABLED) return;
+
     set({ loading: true, error: null });
     try {
       await authService.confirmPasswordReset(code, password);
@@ -86,6 +106,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   completeRequiredPasswordChange: async (password) => {
+    if (!AUTH_FLOW_ENABLED) {
+      const profile = DEV_SUPERADMIN_PROFILE;
+      set({ profile, role: profile.role, loading: false, ready: true, error: null });
+      return profile;
+    }
+
     set({ loading: true, error: null });
     try {
       const profile = await runOperationWithFeedback({
@@ -105,6 +131,16 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   updateProfile: async (updates) => {
+    if (!AUTH_FLOW_ENABLED) {
+      let nextProfile: AuthProfile;
+      set((state) => {
+        const currentProfile = state.profile ?? DEV_SUPERADMIN_PROFILE;
+        nextProfile = { ...currentProfile, ...updates };
+        return { profile: nextProfile, role: nextProfile.role, loading: false, ready: true, error: null };
+      });
+      return nextProfile!;
+    }
+
     set({ loading: true, error: null });
     try {
       const profile = await runOperationWithFeedback({
@@ -124,11 +160,23 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOutUser: async () => {
+    if (!AUTH_FLOW_ENABLED) {
+      const profile = DEV_SUPERADMIN_PROFILE;
+      set({ user: null, profile, role: profile.role, error: null, ready: true, loading: false });
+      return;
+    }
+
     await authService.signOut();
     set({ user: null, profile: null, role: null, error: null, ready: true });
   },
 
   initAuthListener: () => {
+    if (!AUTH_FLOW_ENABLED) {
+      const profile = DEV_SUPERADMIN_PROFILE;
+      set({ user: null, profile, role: profile.role, ready: true, loading: false, error: null });
+      return () => undefined;
+    }
+
     if (!isFirebaseConfigured) {
       set({ ready: true, loading: false });
       return () => undefined;

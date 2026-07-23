@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthStore, type AuthRole } from '@/src/features/auth';
+import { AUTH_FLOW_ENABLED } from '@/src/features/auth/authMode';
 import { isFirebaseConfigured } from '@/src/firebase/config';
-import { defaultRouteForRole, isStaffRole } from '@/src/auth/roleAccess';
+import { defaultRouteForRole } from '@/src/auth/roleAccess';
 import { AppLoader } from '@/src/app/components/loading';
+import { Button } from '@/src/shared/components';
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -20,11 +22,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function AuthGate({ children, role }: AuthGateProps) {
   const location = useLocation();
+  const setAccessRole = useAuthStore(state => state.setAccessRole);
   const ready = useAuthStore(state => state.ready);
   const user = useAuthStore(state => state.user);
   const profile = useAuthStore(state => state.profile);
   const error = useAuthStore(state => state.error);
   const signOutUser = useAuthStore(state => state.signOutUser);
+
+  useEffect(() => {
+    if (!AUTH_FLOW_ENABLED) {
+      setAccessRole(role ?? 'superadmin');
+    }
+  }, [role, setAccessRole]);
+
+  if (!AUTH_FLOW_ENABLED) {
+    return <>{children}</>;
+  }
 
   if (!isFirebaseConfigured) {
     return <Navigate to="/sign-in" replace state={{ from: location.pathname }} />;
@@ -52,13 +65,9 @@ export function AuthGate({ children, role }: AuthGateProps) {
           <p className="type-muted mt-1 text-gray-400">
             {error || 'Your Firebase user is signed in, but the app profile could not be loaded.'}
           </p>
-          <button
-            type="button"
-            onClick={() => signOutUser()}
-            className="button mt-4 inline-flex rounded-xl bg-(--color-ink) px-4 py-2 text-sm font-semibold text-white"
-          >
+          <Button onClick={() => signOutUser()} className="mt-4">
             Back to sign in
-          </button>
+          </Button>
         </div>
       </main>
     );
@@ -68,11 +77,11 @@ export function AuthGate({ children, role }: AuthGateProps) {
     return <Navigate to="/change-password" replace state={{ from: location.pathname }} />;
   }
 
-  if (role === 'client' && profile.role !== 'client') {
+  if (role === 'user' && profile.role !== 'user') {
     return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
 
-  if (role === 'admin' && !isStaffRole(profile.role)) {
+  if (role === 'superadmin' && profile.role !== 'superadmin') {
     return <Navigate to={defaultRouteForRole(profile.role)} replace />;
   }
 
@@ -83,6 +92,10 @@ export function AuthLanding() {
   const ready = useAuthStore(state => state.ready);
   const user = useAuthStore(state => state.user);
   const profile = useAuthStore(state => state.profile);
+
+  if (!AUTH_FLOW_ENABLED) {
+    return <Navigate to="/admin" replace />;
+  }
 
   if (!isFirebaseConfigured || !ready || !user) {
     return <Navigate to="/sign-in" replace />;

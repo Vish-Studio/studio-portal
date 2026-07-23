@@ -29,8 +29,7 @@ export type { ClientProject };
 
 export const PROJECT_CREATE_ROLES: AuthRole[] = [
   "superadmin",
-  "admin",
-  "client",
+  "user",
 ];
 
 export const canCreateProject = (role?: AuthRole | null): role is AuthRole =>

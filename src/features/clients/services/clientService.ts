@@ -46,7 +46,7 @@ export const clientsService = {
     onError: (error: FirestoreError) => void,
   ): Unsubscribe {
     return onSnapshot(
-      query(usersCollection(), where('role', '==', 'client')),
+      query(usersCollection(), where('role', '==', 'user')),
       snapshot => onClients(snapshot.docs.map(userDocToClient)),
       onError,
     );
@@ -78,7 +78,7 @@ export const clientsService = {
       uid: user.uid,
       fullName: name,
       email,
-      role: 'client',
+      role: 'user',
       needsPasswordChange: true,
       companyName,
       phoneNumber: phone,
@@ -134,7 +134,7 @@ export const clientsService = {
         uid: typeof existing.uid === 'string' ? existing.uid : id,
         fullName: nextName,
         email: nextEmail,
-        role: 'client',
+        role: 'user',
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
         companyName: companyName !== undefined ? companyName : String(existing.companyName ?? existing.company_name ?? ''),
         phoneNumber: phone !== undefined ? phone : String(existing.phoneNumber ?? existing.phone_number ?? ''),

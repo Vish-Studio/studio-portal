@@ -47,7 +47,11 @@ interface DocumentTemplateFormValues {
 }
 
 type SidebarMode = 'pricing' | 'document' | null;
-type TemplateSection = 'documents' | 'pricing' | 'questionnaires';
+export type TemplateSection = 'documents' | 'pricing' | 'questionnaires';
+
+interface TemplatesPageProps {
+  initialSection?: TemplateSection;
+}
 
 const serviceEntries = Object.entries(SERVICE_META) as [ServiceType, typeof SERVICE_META[ServiceType]][];
 const pricingServices = serviceEntries.filter(([service]) => (
@@ -197,12 +201,12 @@ const defaultDocumentValues: DocumentTemplateFormValues = {
   status: 'active',
 };
 
-export default function TemplatesPage() {
+export default function TemplatesPage({ initialSection }: TemplatesPageProps) {
   const navigate = useNavigate();
   const { packages, addPackage, updatePackage, removePackage, subscribeToPackages } = usePricingPackagesStore();
   const { templates, addTemplate, updateTemplate, removeTemplate } = useDocumentTemplatesStore();
   const questionnaires = useQuestionnaireTemplatesStore(state => state.templates);
-  const [activeSection, setActiveSection] = useState<TemplateSection>('documents');
+  const [activeSection, setActiveSection] = useState<TemplateSection>(initialSection ?? 'documents');
   const [selectedService, setSelectedService] = useState<ServiceType>('website');
   const [activeKind, setActiveKind] = useState<PricingTemplateKind>('package');
   const [sidebarMode, setSidebarMode] = useState<SidebarMode>(null);
@@ -227,6 +231,10 @@ export default function TemplatesPage() {
     if (!isFirebaseConfigured) return undefined;
     return subscribeToPackages();
   }, [subscribeToPackages]);
+
+  useEffect(() => {
+    if (initialSection) setActiveSection(initialSection);
+  }, [initialSection]);
 
   const selectedServiceMeta = SERVICE_META[selectedService];
   const selectedServicePricing = useMemo(() => (
@@ -342,14 +350,18 @@ export default function TemplatesPage() {
   };
 
   return (
-    <DashboardLayout title="Templates">
+    <DashboardLayout title={initialSection ? sectionMeta[initialSection].label : 'Templates'}>
       <div className="flex flex-col gap-6 pb-10">
         <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
           <div>
             <p className="type-label text-gray-400">Template library</p>
-            <h1 className="mt-1 text-3xl font-bold text-(--color-ink)">Templates</h1>
+            <h1 className="mt-1 text-3xl font-bold text-(--color-ink)">
+              {initialSection ? sectionMeta[initialSection].label : 'Templates'}
+            </h1>
             <p className="mt-2 max-w-2xl text-sm font-medium leading-relaxed text-gray-500">
-              Manage app-wide templates now, with stores shaped for Firebase collections at {TEMPLATE_COLLECTION_PATHS.documents}, {TEMPLATE_COLLECTION_PATHS.priceItems}, and {TEMPLATE_COLLECTION_PATHS.questionnaires}.
+              {initialSection
+                ? sectionMeta[initialSection].description
+                : `Manage app-wide templates now, with stores shaped for Firebase collections at ${TEMPLATE_COLLECTION_PATHS.documents}, ${TEMPLATE_COLLECTION_PATHS.priceItems}, and ${TEMPLATE_COLLECTION_PATHS.questionnaires}.`}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -366,33 +378,35 @@ export default function TemplatesPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-          {(Object.keys(sectionMeta) as TemplateSection[]).map(section => (
-            <button
-              key={section}
-              type="button"
-              onClick={() => setActiveSection(section)}
-              className={`rounded-[18px] p-4 text-left transition-colors ${
-                activeSection === section
-                  ? 'bg-(--color-ink) text-white'
-                  : 'border border-gray-200 bg-white text-(--color-ink) hover:bg-(--color-surface-alt)'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-4">
-                <span className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${activeSection === section ? 'bg-white/10' : 'bg-(--color-surface-alt)'}`}>
-                  <MaterialIcon name={sectionMeta[section].icon} size={18} />
-                </span>
-                <span className={`rounded-lg px-2 py-1 text-xs font-bold ${activeSection === section ? 'bg-white/10 text-white' : 'bg-(--color-surface-alt) text-gray-500'}`}>
-                  {sectionCounts[section]}
-                </span>
-              </div>
-              <p className="mt-4 text-base font-bold">{sectionMeta[section].label}</p>
-              <p className={`mt-1 text-xs font-medium leading-relaxed ${activeSection === section ? 'text-gray-300' : 'text-gray-500'}`}>
-                {sectionMeta[section].description}
-              </p>
-            </button>
-          ))}
-        </section>
+        {!initialSection && (
+          <section className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+            {(Object.keys(sectionMeta) as TemplateSection[]).map(section => (
+              <button
+                key={section}
+                type="button"
+                onClick={() => setActiveSection(section)}
+                className={`rounded-[18px] p-4 text-left transition-colors ${
+                  activeSection === section
+                    ? 'bg-(--color-ink) text-white'
+                    : 'border border-gray-200 bg-white text-(--color-ink) hover:bg-(--color-surface-alt)'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <span className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${activeSection === section ? 'bg-white/10' : 'bg-(--color-surface-alt)'}`}>
+                    <MaterialIcon name={sectionMeta[section].icon} size={18} />
+                  </span>
+                  <span className={`rounded-lg px-2 py-1 text-xs font-bold ${activeSection === section ? 'bg-white/10 text-white' : 'bg-(--color-surface-alt) text-gray-500'}`}>
+                    {sectionCounts[section]}
+                  </span>
+                </div>
+                <p className="mt-4 text-base font-bold">{sectionMeta[section].label}</p>
+                <p className={`mt-1 text-xs font-medium leading-relaxed ${activeSection === section ? 'text-gray-300' : 'text-gray-500'}`}>
+                  {sectionMeta[section].description}
+                </p>
+              </button>
+            ))}
+          </section>
+        )}
 
         {activeSection === 'pricing' && (
           <CardContent

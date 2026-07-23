@@ -8,6 +8,7 @@ import { useTeamStore } from '@/src/features/team';
 import { useExpenseStore } from '@/src/features/expenses';
 import { useCalendarStore } from '@/src/features/calendar';
 import { isStaffRole } from '@/src/auth/roleAccess';
+import { AUTH_FLOW_ENABLED } from '@/src/features/auth/authMode';
 
 export function FirestoreStreams() {
   const profile = useAuthStore(state => state.profile);
@@ -22,22 +23,19 @@ export function FirestoreStreams() {
   const clearCalendarEvents = useCalendarStore(state => state.clearEvents);
 
   useEffect(() => {
+    if (!AUTH_FLOW_ENABLED) return undefined;
     if (!profile) return undefined;
 
     const unsubscribers = [
       subscribeToProjects(
-        profile.role === 'client'
+        profile.role === 'user'
           ? { clientId: profile.uid }
-          : profile.role === 'team' || profile.role === 'freelancer'
-            ? { teamId: profile.uid }
-            : undefined,
+          : undefined,
       ),
       subscribeToTasks(
-        profile.role === 'client'
+        profile.role === 'user'
           ? { clientId: profile.uid }
-          : profile.role === 'team' || profile.role === 'freelancer'
-            ? { assigneeId: profile.uid }
-            : undefined,
+          : undefined,
       ),
       subscribeToDocuments(),
       subscribeToCalendarEvents(profile),

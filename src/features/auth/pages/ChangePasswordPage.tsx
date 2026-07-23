@@ -69,7 +69,7 @@ export default function ChangePasswordPage() {
     try {
       const updatedProfile = await completeRequiredPasswordChange(values.password);
       const defaultPath = defaultRouteForRole(updatedProfile.role);
-      const allowedPrefix = updatedProfile.role === 'client' ? '/user' : '/admin';
+      const allowedPrefix = updatedProfile.role === 'user' ? '/user' : '/admin';
       navigate(fromPath.startsWith(allowedPrefix) ? fromPath : defaultPath, { replace: true });
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : FEEDBACK_MESSAGES.auth.updatePasswordFailed);

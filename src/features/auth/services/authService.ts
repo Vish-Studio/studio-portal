@@ -10,11 +10,15 @@ import {
   type User,
 } from 'firebase/auth';
 import {
+  collection,
   deleteField,
   doc,
   getDoc,
+  getDocs,
+  query,
   serverTimestamp,
   setDoc,
+  where,
 } from 'firebase/firestore';
 import { requireFirebase } from '@/src/firebase/requireFirebase';
 import type { AuthProfile, AuthProfileUpdateInput, AuthRole } from '@/src/types/auth';
@@ -23,16 +27,17 @@ import { isFirebasePermissionError, logFirebaseError } from '@/src/lib/firebase-
 import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
 
 const normalizeEmail = (email?: string | null) => (email ?? '').trim().toLowerCase();
+const SUPERADMIN_EMAILS = new Set([
+  'vishseenarain@gmail.com',
+  'vishstudio.ltd@gmail.com',
+  'vishroy@vish.studio',
+  'divesh@vish.studio',
+]);
 
-const roleFromValue = (value: unknown): AuthRole => {
-  if (
-    value === 'superadmin' ||
-    value === 'admin' ||
-    value === 'freelancer' ||
-    value === 'team' ||
-    value === 'client'
-  ) return value;
-  return 'client';
+const roleFromValue = (value: unknown, email?: string): AuthRole => {
+  if (SUPERADMIN_EMAILS.has(normalizeEmail(email))) return 'superadmin';
+  if (value === 'superadmin') return value;
+  return 'user';
 };
 
 const nameFromEmail = (email: string) =>
@@ -59,7 +64,7 @@ const legacyUserFieldDeletes = {
 const profileFromSnapshot = (user: User, data: Record<string, unknown>): AuthProfile => {
   const email = normalizeEmail(user.email || String(data.email ?? ''));
   const fullName = String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email));
-  const role = roleFromValue(data.role);
+  const role = roleFromValue(data.role, email);
 
   return {
     id: user.uid,
@@ -67,7 +72,7 @@ const profileFromSnapshot = (user: User, data: Record<string, unknown>): AuthPro
     email: String(data.email ?? email),
     fullName,
     role,
-    staffRole: role === 'client' ? undefined : role,
+    staffRole: role === 'user' ? undefined : role,
     needsPasswordChange: typeof data.needsPasswordChange === 'boolean' ? data.needsPasswordChange : false,
     createdAt: data.createdAt as AuthProfile['createdAt'],
     updatedAt: data.updatedAt as AuthProfile['updatedAt'],
@@ -128,13 +133,99 @@ export const authService = {
   async loadProfile(user: User): Promise<AuthProfile> {
     const { db } = requireFirebase();
     const profileRef = doc(db, 'users', user.uid);
-    const snapshot = await getDoc(profileRef);
+    let snapshot = await getDoc(profileRef);
 
     if (!snapshot.exists()) {
-      throw new Error(FEEDBACK_MESSAGES.auth.noProfile);
+      const email = normalizeEmail(user.email);
+      const matchingProfiles = await getDocs(query(collection(db, 'users'), where('email', '==', email)));
+      const matchingProfile = matchingProfiles.docs[0];
+
+      if (matchingProfile) {
+        const data = matchingProfile.data();
+        await setDoc(profileRef, {
+          uid: user.uid,
+          fullName: String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email)),
+          email,
+          role: roleFromValue(data.role, email),
+          needsPasswordChange: typeof data.needsPasswordChange === 'boolean' ? data.needsPasswordChange : false,
+          firstName: data.firstName ?? data.first_name ?? '',
+          lastName: data.lastName ?? data.last_name ?? '',
+          recoveryEmail: data.recoveryEmail ?? data.recovery_email ?? '',
+          gender: data.gender ?? '',
+          phoneNumber: data.phoneNumber ?? data.phone_number ?? '',
+          companyName: data.companyName ?? data.company_name ?? '',
+          jobTitle: data.jobTitle ?? data.job_title ?? '',
+          avatarColor: typeof data.avatarColor === 'string' ? data.avatarColor : randomAvatarTone(),
+          newsletterPreferences: data.newsletterPreferences ?? false,
+          featureAccess: data.featureAccess ?? data.feature_access ?? {},
+          isActive: typeof data.isActive === 'boolean' ? data.isActive : true,
+          status: data.status ?? 'active',
+          createdAt: data.createdAt ?? serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        snapshot = await getDoc(profileRef);
+      }
+    }
+
+    if (!snapshot.exists()) {
+      const email = normalizeEmail(user.email);
+      if (!SUPERADMIN_EMAILS.has(email)) {
+        const fullName = user.displayName || nameFromEmail(email);
+        await setDoc(profileRef, {
+          uid: user.uid,
+          fullName,
+          email,
+          role: 'user',
+          needsPasswordChange: false,
+          avatarColor: randomAvatarTone(),
+          newsletterPreferences: false,
+          featureAccess: {},
+          isActive: true,
+          status: 'active',
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+        return this.loadProfile(user);
+      }
+
+      const fullName = user.displayName || nameFromEmail(email);
+      await setDoc(profileRef, {
+        uid: user.uid,
+        fullName,
+        email,
+        role: 'superadmin',
+        needsPasswordChange: false,
+        avatarColor: randomAvatarTone(),
+        newsletterPreferences: false,
+        featureAccess: {},
+        isActive: true,
+        status: 'active',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      return this.loadProfile(user);
     }
 
     const data = snapshot.data();
+    const email = normalizeEmail(user.email || String(data.email ?? ''));
+
+    if (SUPERADMIN_EMAILS.has(email) && data.role !== 'superadmin') {
+      await setDoc(
+        profileRef,
+        {
+          uid: typeof data.uid === 'string' ? data.uid : user.uid,
+          fullName: String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email)),
+          email,
+          role: 'superadmin',
+          needsPasswordChange: typeof data.needsPasswordChange === 'boolean' ? data.needsPasswordChange : false,
+          updatedAt: serverTimestamp(),
+          ...legacyUserFieldDeletes,
+        },
+        { merge: true },
+      );
+      return this.loadProfile(user);
+    }
+
     if (typeof data.needsPasswordChange !== 'boolean') {
       const email = normalizeEmail(user.email || String(data.email ?? ''));
       const fullName = String(data.fullName ?? data.full_name ?? data.name ?? user.displayName ?? nameFromEmail(email));
@@ -145,7 +236,7 @@ export const authService = {
             uid: typeof data.uid === 'string' ? data.uid : user.uid,
             fullName,
             email: normalizeEmail(String(data.email ?? email)),
-            role: roleFromValue(data.role),
+            role: roleFromValue(data.role, email),
             needsPasswordChange: false,
             updatedAt: serverTimestamp(),
             ...legacyUserFieldDeletes,
@@ -185,7 +276,7 @@ export const authService = {
             uid: typeof data.uid === 'string' ? data.uid : user.uid,
             fullName,
             email: normalizeEmail(String(data.email ?? email)),
-            role: roleFromValue(data.role),
+            role: roleFromValue(data.role, email),
             needsPasswordChange: false,
             firstName: data.firstName ?? data.first_name ?? '',
             lastName: data.lastName ?? data.last_name ?? '',
@@ -259,7 +350,7 @@ export const authService = {
         uid: typeof existing.uid === 'string' ? existing.uid : user.uid,
         fullName,
         email,
-        role: roleFromValue(existing.role),
+        role: roleFromValue(existing.role, email),
         needsPasswordChange: false,
         updatedAt: serverTimestamp(),
         ...legacyUserFieldDeletes,
@@ -295,7 +386,7 @@ export const authService = {
         uid: typeof existing.uid === 'string' ? existing.uid : user.uid,
         fullName: nextFullName,
         email: currentEmail,
-        role: roleFromValue(existing.role),
+        role: roleFromValue(existing.role, currentEmail),
         needsPasswordChange: typeof existing.needsPasswordChange === 'boolean' ? existing.needsPasswordChange : false,
         firstName: input.firstName?.trim() ?? existing.firstName ?? existing.first_name ?? '',
         lastName: input.lastName?.trim() ?? existing.lastName ?? existing.last_name ?? '',

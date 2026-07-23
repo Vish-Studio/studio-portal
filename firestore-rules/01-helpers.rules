@@ -1,13 +1,15 @@
 // Primitive helpers shared by collection rules.
     function isSignedIn() { return request.auth != null; }
 
-    // Admin = hardcoded owner emails OR users/{uid}.role is admin/superadmin
+    // Superadmin = hardcoded owner emails OR users/{uid}.role is superadmin
     function isAdmin() {
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
         request.auth.token.email == 'vishseenarain@gmail.com' ||
+        request.auth.token.email == 'vishroy@vish.studio' ||
+        request.auth.token.email == 'divesh@vish.studio' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin', 'freelancer'])
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superadmin')
       );
     }
 
@@ -21,7 +23,9 @@
       return isSignedIn() && (
         request.auth.token.email == 'vishstudio.ltd@gmail.com' ||
         request.auth.token.email == 'vishseenarain@gmail.com' ||
-        currentRole() in ['admin', 'superadmin']
+        request.auth.token.email == 'vishroy@vish.studio' ||
+        request.auth.token.email == 'divesh@vish.studio' ||
+        currentRole() == 'superadmin'
       );
     }
 

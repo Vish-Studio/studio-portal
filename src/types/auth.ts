@@ -1,7 +1,7 @@
 import type { Timestamp } from "firebase/firestore";
 
-export type AuthRole = "client" | "superadmin" | "admin" | "freelancer" | "team";
-export type StaffRole = Exclude<AuthRole, "client">;
+export type AuthRole = "user" | "superadmin";
+export type StaffRole = "superadmin";
 export type FeatureAccess = Record<string, boolean>;
 
 export interface AuthProfile {

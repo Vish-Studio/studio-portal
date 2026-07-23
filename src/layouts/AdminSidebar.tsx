@@ -6,10 +6,10 @@ import {
   CheckSquare,
   Calendar,
   FileText,
-  LayoutTemplate,
   UserCircle2,
   CreditCard,
   MessageCircle,
+  FileCheck2,
 } from 'lucide-react';
 import { FunctionComponent } from 'react';
 import { useChatStore } from '@/src/features/chat';
@@ -39,7 +39,9 @@ const AdminSidebar: FunctionComponent<SidebarProps> = (props) => {
     ...(profile?.role === 'superadmin'
       ? [{ icon: <Receipt size={18} />, label: 'Expenses', path: '/admin/expenses' }]
       : []),
-    { icon: <LayoutTemplate size={18} />, label: 'Templates', path: '/admin/templates' },
+    { icon: <Receipt size={18} />, label: 'Pricing', path: '/admin/templates/pricing', section: 'Templates' },
+    { icon: <FileText size={18} />, label: 'Documents', path: '/admin/templates/documents', section: 'Templates' },
+    { icon: <FileCheck2 size={18} />, label: 'Questionnaires', path: '/admin/templates/questionnaires', section: 'Templates' },
   ];
 
   return (

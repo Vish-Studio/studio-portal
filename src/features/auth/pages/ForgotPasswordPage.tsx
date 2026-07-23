@@ -38,7 +38,7 @@ export default function ForgotPasswordPage() {
   };
 
   if (user && profile) {
-    return <Navigate to={profile.role === 'client' ? '/user' : '/admin'} replace />;
+    return <Navigate to={profile.role === 'user' ? '/user' : '/admin'} replace />;
   }
 
   return (
