@@ -17,7 +17,7 @@ import { SERVICE_META, getPhaseProgress, type ClientProject, type ServiceType, t
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '@/src/features/auth';
-import { isStaffRole } from '@/src/auth/roleAccess';
+import { isStaffRole } from '@/src/features/auth';
 import { runOperationWithFeedback } from '@/src/lib/operation-feedback';
 import { operationErrorMessage } from '@/src/lib/operation-errors';
 import { formatPricingAmount, usePricingPackagesStore } from '@/src/features/templates';

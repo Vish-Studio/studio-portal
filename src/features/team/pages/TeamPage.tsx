@@ -9,7 +9,7 @@ import Fab from '@/src/shared/components/button-fab/button-fab';
 import { Button, Checkbox, ConfirmDialog, FormField, Option, Select, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import { useAuthStore } from '@/src/features/auth';
-import { isStaffRole } from '@/src/auth/roleAccess';
+import { isStaffRole } from '@/src/features/auth';
 import { useTeamStore } from '../stores/teamStore';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';

@@ -1,18 +1,8 @@
 import { create } from 'zustand';
 export type { Client, ClientStatus } from '../types';
-import type { Client, ClientStatus } from '../types';
-import type { ClientCreateResult } from '../services/clientService';
+import type { Client, ClientCreateResult, ClientInput } from '../types';
 import { randomAvatarTone } from '@/src/shared/components/avatar/avatar';
 import { useUsersStore } from '@/src/features/users';
-
-export interface ClientInput {
-  fullName: string;
-  companyName?: string;
-  email: string;
-  phone?: string;
-  status?: ClientStatus;
-  temporaryPassword?: string;
-}
 
 interface ClientsState {
   clients: Client[];

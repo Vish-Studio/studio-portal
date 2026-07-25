@@ -1,5 +1,5 @@
 import type { TeamMember } from '@/src/features/team';
-import type { AuthProfile } from '@/src/types/auth';
+import type { AuthProfile } from '@/src/features/auth';
 
 export const isCurrentTeamMember = (
   member: TeamMember,

@@ -1,9 +1,11 @@
 ---
 name: studio-portal-ui
-description: Use when modifying the Studio Portal frontend dashboards, layouts, or reusable UI patterns.
+description: Maintain the Studio Portal visual system and interaction patterns. Use when modifying dashboards, onboarding, sidebars, layouts, forms, CRUD drawers, lists, responsive behavior, or reusable UI components.
 ---
 
 # Studio Portal UI
+
+Read `../../docs/architecture.md` before relocating UI and use the `studio-portal-development` skill for route, state, auth, or feature-architecture changes.
 
 When changing dashboard pages:
 

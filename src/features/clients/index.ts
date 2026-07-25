@@ -2,7 +2,5 @@ export { default as ClientDetailCard } from './components/client-detail-card/cli
 export { default as ClientPicker } from './pickers/client-picker/client-picker';
 export { default as ClientDetailPage } from './pages/ClientDetailPage';
 export { default as ClientsPage } from './pages/ClientsPage';
-export { clientsService } from './services/clientService';
 export { useClientsStore } from './stores/clientStore';
-export type { Client, ClientStatus } from './types';
-
+export type { Client, ClientCreateResult, ClientInput, ClientStatus } from './types';

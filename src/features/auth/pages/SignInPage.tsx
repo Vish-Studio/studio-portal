@@ -13,7 +13,7 @@ import {
 import { Button, Checkbox, FormField, TextInput } from '@/src/shared/components';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';
-import type { AuthRole } from '@/src/types/auth';
+import type { AuthRole } from '../types';
 import { hasCompletedWalkthrough } from '@/src/features/walkthrough/walkthroughStorage';
 
 interface SignInFormValues {

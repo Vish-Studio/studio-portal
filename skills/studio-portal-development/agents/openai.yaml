@@ -1,0 +1,4 @@
+interface:
+  display_name: "Studio Portal Development"
+  short_description: "Architecture and feature development rules"
+  default_prompt: "Use $studio-portal-development to implement this Studio Portal change within the established architecture."

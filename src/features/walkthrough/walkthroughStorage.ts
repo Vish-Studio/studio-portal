@@ -1,4 +1,4 @@
-import type { AuthProfile } from '@/src/types/auth';
+import type { AuthProfile } from '@/src/features/auth';
 
 const WALKTHROUGH_PREFIX = 'studio-portal-walkthrough-complete';
 

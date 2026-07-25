@@ -1,4 +1,4 @@
-import type { AuthRole } from '@/src/types/auth';
+import type { AuthRole } from '@/src/features/auth/types';
 
 export type ManagedUserKind = 'client' | 'team';
 export type ManagedUserPasswordStatus = 'temporary' | 'changed';

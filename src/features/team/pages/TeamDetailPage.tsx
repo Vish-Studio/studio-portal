@@ -12,7 +12,7 @@ import { useProjectsStore } from '@/src/features/projects';
 import { useTasksStore } from '@/src/features/tasks';
 import { useTeamStore } from '../stores/teamStore';
 import { useAuthStore } from '@/src/features/auth';
-import { isStaffRole } from '@/src/auth/roleAccess';
+import { isStaffRole } from '@/src/features/auth';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import type { TeamAccessRole, TeamSalaryType, TeamWorkStatus } from '../types';

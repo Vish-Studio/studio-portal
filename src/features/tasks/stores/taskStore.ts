@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Task, TaskStatus, TaskPriority } from '../types';
 import { useAuthStore } from '@/src/features/auth';
-import type { AuthRole } from '@/src/types/auth';
+import type { AuthRole } from '@/src/features/auth';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
 export type { Task, TaskStatus, TaskPriority };

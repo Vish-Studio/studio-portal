@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { ScheduleEvent } from "../components/schedule/event-types";
-import type { AuthProfile } from "@/src/types/auth";
+import type { AuthProfile } from '@/src/features/auth';
 import { groupCalendarEventsByDate, toLocalCalendarEvent } from "../services/calendarService";
 
 interface CalendarState {

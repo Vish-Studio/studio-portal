@@ -1,18 +1,11 @@
-import type { AuthRole } from '@/src/types/auth';
+import type { AuthRole } from '../types';
 
 export const USER_ROLE: AuthRole = 'user';
 export const ADMIN_ROLE: AuthRole = 'admin';
 export const SUPERADMIN_ROLE: AuthRole = 'superadmin';
 
-export const STAFF_ROLES: AuthRole[] = [
-  ADMIN_ROLE,
-  SUPERADMIN_ROLE,
-];
-
-export const ADMIN_AREA_ROLES: AuthRole[] = [
-  ADMIN_ROLE,
-  SUPERADMIN_ROLE,
-];
+export const STAFF_ROLES: AuthRole[] = [ADMIN_ROLE, SUPERADMIN_ROLE];
+export const ADMIN_AREA_ROLES: AuthRole[] = [ADMIN_ROLE, SUPERADMIN_ROLE];
 
 export const ROLE_LABELS: Record<AuthRole, string> = {
   admin: 'Admin',
@@ -20,8 +13,7 @@ export const ROLE_LABELS: Record<AuthRole, string> = {
   superadmin: 'Superadmin',
 };
 
-export const isStaffRole = (role?: AuthRole | null) =>
-  Boolean(role && STAFF_ROLES.includes(role));
+export const isStaffRole = (role?: AuthRole | null) => Boolean(role && STAFF_ROLES.includes(role));
 
 export const canAccessRole = (
   userRole: AuthRole | null | undefined,

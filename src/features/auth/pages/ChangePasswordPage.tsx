@@ -3,7 +3,7 @@ import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Check, Eye, EyeOff, KeyRound, LogOut } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { AppLoader } from '@/src/app/components/loading';
-import { defaultRouteForRole } from '@/src/auth/roleAccess';
+import { defaultRouteForRole } from '../access/roleAccess';
 import { Button, FormField, TextInput } from '@/src/shared/components';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 import { useAuthStore } from '../stores/authStore';

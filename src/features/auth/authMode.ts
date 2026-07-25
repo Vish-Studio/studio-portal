@@ -1,4 +1,4 @@
-import type { AuthProfile, AuthRole } from '@/src/types/auth';
+import type { AuthProfile, AuthRole } from './types';
 
 export const AUTH_FLOW_ENABLED = false;
 

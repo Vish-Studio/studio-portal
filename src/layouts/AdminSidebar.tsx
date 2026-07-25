@@ -15,7 +15,7 @@ import {
 import { FunctionComponent } from 'react';
 import { useChatStore } from '@/src/features/chat';
 import { useAuthStore } from '@/src/features/auth';
-import { isStaffRole } from '@/src/auth/roleAccess';
+import { isStaffRole } from '@/src/features/auth';
 import BaseSidebar, { type BaseSidebarProps, type SidebarNavItem } from './BaseSidebar';
 
 type SidebarProps = Omit<BaseSidebarProps, 'navItems' | 'settingsPath' | 'rootPath'>;

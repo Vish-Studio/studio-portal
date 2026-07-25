@@ -1,7 +1,6 @@
 export { default as TeamDetailCard } from './components/team-detail-card/team-detail-card';
 export { default as TeamDetailPage } from './pages/TeamDetailPage';
 export { default as TeamPage } from './pages/TeamPage';
-export { teamService } from './services/teamService';
 export { useTeamStore } from './stores/teamStore';
 export {
   AVATAR_COLORS,
@@ -10,4 +9,3 @@ export {
   type TeamMember,
   type TeamProject,
 } from './types';
-

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-export type { AuthProfile, AuthRole } from '@/src/types/auth';
-import type { AuthProfile, AuthProfileUpdateInput } from '@/src/types/auth';
+export type { AuthProfile, AuthRole } from '../types';
+import type { AuthProfile, AuthProfileUpdateInput } from '../types';
 import { DEV_SUPERADMIN_PROFILE, getDevProfileForRole } from '../authMode';
 import { useUsersStore, type ManagedUserAccountStatus } from '@/src/features/users';
 

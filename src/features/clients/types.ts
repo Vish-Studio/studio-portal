@@ -19,3 +19,18 @@ export interface Client {
 
 /** Kept for backward compat with existing UI filter tabs and dropdowns. */
 export type ClientStatus = "active" | "inactive" | "lost";
+
+export interface ClientInput {
+  fullName: string;
+  companyName?: string;
+  email: string;
+  phone?: string;
+  status?: ClientStatus;
+  temporaryPassword?: string;
+}
+
+export interface ClientCreateResult {
+  id: string;
+  email: string;
+  temporaryPassword: string;
+}

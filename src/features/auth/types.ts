@@ -3,8 +3,8 @@ export interface LocalTimestamp {
   toDate?: () => Date;
 }
 
-export type AuthRole = "user" | "admin" | "superadmin";
-export type StaffRole = "admin" | "superadmin";
+export type AuthRole = 'user' | 'admin' | 'superadmin';
+export type StaffRole = 'admin' | 'superadmin';
 export type FeatureAccess = Record<string, boolean>;
 
 export interface AuthProfile {
@@ -16,7 +16,7 @@ export interface AuthProfile {
   staffRole?: StaffRole;
   needsPasswordChange?: boolean;
   createdAt?: LocalTimestamp;
-  status?: "active" | "inactive" | "lost";
+  status?: 'active' | 'inactive' | 'lost';
   newsletterPreferences?: boolean;
   featureAccess?: FeatureAccess;
   isActive?: boolean;
@@ -42,7 +42,7 @@ export interface AuthProfileUpdateInput {
   companyName?: string;
   featureAccess?: FeatureAccess;
   isActive?: boolean;
-  status?: "active" | "inactive" | "lost";
+  status?: 'active' | 'inactive' | 'lost';
   jobTitle?: string;
   newsletterPreferences?: boolean;
 }

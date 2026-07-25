@@ -1,100 +1,97 @@
-# Local App Flow
+# Application Flow
 
-The app starts with local Zustand state only. There is no remote auth gate and no remote database requirement.
+## Startup To Screen
 
 ```mermaid
 flowchart TD
-  A[main.tsx] --> B[initStores]
-  B --> C[Seed demo data from src/data/seed.ts]
-  C --> D[Hydrate feature Zustand stores]
-  D --> E[Render App]
-  E --> F[AppProviders]
-  F --> G[AuthProvider sets local superadmin default]
-  G --> H[AppRoutes]
-
-  H --> I{Route family}
-  I -->|/admin/* or unprefixed staff routes| J[AuthGate staff mode]
-  I -->|/user/* or /user-dashboard| K[AuthGate user mode]
-  I -->|/sign-in| L[Local sign-in page]
-
-  J --> M[Set local superadmin profile when needed]
-  K --> N[Set local user profile]
-  L --> O{Email contains role hint}
-  O -->|admin| P[Local admin profile]
-  O -->|user or client| N
-  O -->|anything else| M
-
-  M --> Q[Staff dashboard shell]
+  A[index.html] --> B[src/main.tsx]
+  B --> C[Initialize application stores]
+  C --> D[Render App]
+  D --> E[AppProviders]
+  E --> F[BrowserRouter]
+  F --> G[AuthProvider]
+  G --> H[Loading and feedback providers]
+  H --> I[AppRoutes]
+  I --> J{Route group}
+  J -->|Public| K[Auth or walkthrough page]
+  J -->|/admin/*| L[AuthGate: staff context]
+  J -->|/user/*| M[AuthGate: user context]
+  J -->|Old URL| N[Redirect to canonical route]
+  L --> O[Admin layout]
+  M --> P[User layout]
+  O --> Q[Feature page]
   P --> Q
-  N --> R[User dashboard shell]
-
-  Q --> S[Clients]
-  Q --> T[Team]
-  Q --> U[Projects]
-  Q --> V[Tasks]
-  Q --> W[Calendar]
-  Q --> X[Documents]
-  Q --> Y[Expenses]
-  Q --> Z[Payments]
-  Q --> AA[Templates]
-  Q --> AB[Chat]
-  Q --> AC[Settings]
-
-  R --> AD[User projects]
-  R --> AE[User tasks]
-  R --> AF[User calendar]
-  R --> AG[User payments]
-  R --> AH[User documents]
-  R --> AI[User chat]
-  R --> AJ[User settings]
-
-  S --> AK[Zustand CRUD]
-  T --> AK
-  U --> AK
-  V --> AK
-  W --> AK
-  X --> AK
-  Y --> AK
-  Z --> AK
-  AA --> AK
-  AB --> AK
-  AD --> AK
-  AE --> AK
-  AF --> AK
-  AG --> AK
-  AH --> AK
-  AI --> AK
 ```
 
-## Route Map
+## Session And Onboarding
 
-Staff dashboard routes are available with and without the `/admin` prefix:
+```mermaid
+flowchart TD
+  A[AuthProvider starts session] --> B[authStore is ready]
+  B --> C{Password change required?}
+  C -->|Yes| D[/change-password]
+  C -->|No| E{Walkthrough complete?}
+  E -->|No| F[/walkthrough]
+  E -->|Yes| G{Profile role}
+  D --> E
+  F --> G
+  G -->|superadmin or admin| H[/admin]
+  G -->|user| I[/user]
+```
 
-- `/admin` and `/dashboard`
-- `/admin/clients` and `/clients`
-- `/admin/projects` and `/projects`
-- `/admin/tasks` and `/tasks`
-- `/admin/calendar` and `/calendar`
-- `/admin/documents` and `/documents`
-- `/admin/team` and `/team`
-- `/admin/expenses` and `/expenses`
-- `/admin/templates/pricing` and `/templates/pricing`
+`AuthGate` prepares the role context for a route family. `AuthLanding` chooses the correct dashboard entry. The auth store owns the active local profile and session actions.
 
-User dashboard routes:
+## Page And CRUD Flow
 
-- `/user`
-- `/user-dashboard`
-- `/user/projects`
-- `/user/tasks`
-- `/user/calendar`
-- `/user/payments`
-- `/user/documents`
-- `/user/chat`
-- `/user/settings`
+```mermaid
+flowchart LR
+  A[Route] --> B[Feature page]
+  B --> C[Feature component]
+  B --> D[Zustand selector]
+  C --> E[User action]
+  E --> F[Feature store action]
+  F --> G[Normalize and update state]
+  G --> D
+  D --> C
+```
 
-## Feature Ownership
+Keep data mutations in the owning store. Pages should coordinate forms, navigation, and feedback; reusable components should receive values and callbacks through props.
 
-- `src/features/auth` owns local role selection.
-- `src/lib/initStores.ts` owns startup hydration.
-- Each feature store owns its local CRUD mutations.
-- `src/app/routes.tsx` owns route aliases and dashboard entry points.
+## Route Families
+
+```text
+Public
+  /
+  /sign-in
+  /change-password
+  /forgot-password
+  /reset-password
+  /walkthrough
+
+Staff
+  /admin
+  /admin/clients
+  /admin/team
+  /admin/users
+  /admin/projects
+  /admin/tasks
+  /admin/calendar
+  /admin/payments
+  /admin/documents
+  /admin/templates/*
+  /admin/chat
+  /admin/expenses
+  /admin/settings
+
+Client
+  /user
+  /user/projects
+  /user/tasks
+  /user/calendar
+  /user/payments
+  /user/documents
+  /user/chat
+  /user/settings
+```
+
+Canonical routes are defined in `src/app/router`. Unprefixed historical URLs are redirects and should not become a second route registry.

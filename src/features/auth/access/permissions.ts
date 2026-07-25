@@ -1,4 +1,4 @@
-import type { AuthRole } from '@/src/types/auth';
+import type { AuthRole } from '../types';
 import { ADMIN_ROLE, SUPERADMIN_ROLE, USER_ROLE } from './roleAccess';
 
 type ResourceAction = 'view' | 'create' | 'update' | 'delete' | 'manage';

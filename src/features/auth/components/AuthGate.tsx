@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuthStore, type AuthRole } from '@/src/features/auth';
-import { defaultRouteForRole } from '@/src/auth/roleAccess';
+import { defaultRouteForRole } from '../access/roleAccess';
+import { useAuthStore } from '../stores/authStore';
+import type { AuthRole } from '../types';
 import { AppLoader } from '@/src/app/components/loading';
 import { hasCompletedWalkthrough } from '@/src/features/walkthrough/walkthroughStorage';
 

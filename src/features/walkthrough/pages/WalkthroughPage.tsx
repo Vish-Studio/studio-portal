@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, MessageSquare, PanelTop } from 'lucide-react';
-import { defaultRouteForRole, isStaffRole } from '@/src/auth/roleAccess';
+import { defaultRouteForRole, isStaffRole } from '@/src/features/auth';
 import { Button } from '@/src/shared/components';
 import { useAuthStore } from '@/src/features/auth/stores/authStore';
 import { markWalkthroughComplete } from '../walkthroughStorage';

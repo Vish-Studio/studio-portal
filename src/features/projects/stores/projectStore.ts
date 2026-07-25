@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { buildDefaultPhases, getActivePhaseIndex } from "../types";
 import type { ClientProject, PackageType, Phase, PhaseStatus, ServiceType } from "../types";
 import { useAuthStore } from "@/src/features/auth";
-import type { AuthRole } from "@/src/types/auth";
+import type { AuthRole } from '@/src/features/auth';
 import { FEEDBACK_MESSAGES } from "@/src/app/messages";
 
 export type { ClientProject };

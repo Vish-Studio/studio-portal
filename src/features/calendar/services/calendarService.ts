@@ -1,4 +1,4 @@
-import type { AuthProfile, AuthRole } from '@/src/types/auth';
+import type { AuthProfile, AuthRole } from '@/src/features/auth';
 import type { ScheduleCategory, ScheduleEvent } from '../components/schedule/event-types';
 import { getEventCategory } from '../components/schedule/event-types';
 
