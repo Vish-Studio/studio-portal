@@ -82,8 +82,8 @@ export default function ResetPasswordPage() {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] border border-(--color-sidebar-border-dark)">
               <img src="/assets/logo-white-trans.png" alt="Studio Portal logo" width={34} height={34} />
             </div>
-            <span className="text-lg font-bold tracking-tight">
-              studio <span className="font-normal text-white/70">portal</span>
+            <span className="brand-wordmark text-lg">
+              studio <span className="brand-wordmark-light text-white/70">portal</span>
             </span>
           </div>
 

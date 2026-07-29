@@ -81,8 +81,8 @@ const SignInPage = () => {
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] bg-(--color-sidebar-bg) lg:border lg:border-(--color-sidebar-border-dark) lg:bg-transparent">
               <img src="/assets/logo-white-trans.png" alt="Studio Portal logo" width={34} height={34} />
             </div>
-            <span className="text-lg font-bold tracking-tight text-gray-950 lg:text-white">
-              studio <span className="font-normal text-gray-500 lg:text-white/70">portal</span>
+            <span className="brand-wordmark text-lg text-gray-950 lg:text-white">
+              studio <span className="brand-wordmark-light text-gray-500 lg:text-white/70">portal</span>
             </span>
           </div>
 

@@ -6,7 +6,7 @@ import DashboardLayout from '@/src/layouts/DashboardLayout';
 import FormSidebar, { FormSidebarActions, FormSidebarError, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
-import { Button, Checkbox, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
+import { Button, CardContent, Checkbox, ConfirmDialog, DatePicker, FormField, Option, Select, TextArea, TextInput } from '@/src/shared/components';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
 import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
@@ -76,7 +76,7 @@ const Tasks = () => {
   const { clients } = useClientsStore();
 
   const [activeTab, setActiveTab] = useState<FilterKey>('all');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [sortKey, setSortKey] = useState<SortKey>('updated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -334,18 +334,25 @@ const Tasks = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <CardContent
+            iconName="task_alt"
+            title={activeTab === 'all' ? 'Work queue' : TABS.find(tab => tab.key === activeTab)?.label ?? 'Tasks'}
+            action={<span className="text-xs font-semibold text-gray-400">{filtered.length} task{filtered.length !== 1 ? 's' : ''}</span>}
+          >
+          <div className="flex flex-col">
             {filtered.map(task => (
               <TaskRow
                 key={task.id}
                 task={task}
                 showStatus={activeTab === 'all'}
+                embedded
                 onClick={() => setDetailTask(task)}
                 onEdit={canEdit ? () => openEdit(task) : undefined}
                 onDelete={canDelete ? () => setConfirmTask(task) : undefined}
               />
             ))}
           </div>
+          </CardContent>
         )}
 
       </div>

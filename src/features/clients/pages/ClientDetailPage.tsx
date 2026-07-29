@@ -11,7 +11,7 @@ import type { ClientStatus } from '../types';
 import { useTeamStore } from '@/src/features/team';
 import { useProjectsStore } from '@/src/features/projects';
 import Fab from '@/src/shared/components/button-fab/button-fab';
-import { Breadcrumb, Button, DetailHeroCard, FormField, Option, Select, TextInput } from '@/src/shared/components';
+import { Breadcrumb, Button, FormField, Option, Select, StatCard, TextInput } from '@/src/shared/components';
 import { useUIStore } from '@/src/app/stores/uiStore';
 import { FEEDBACK_MESSAGES } from '@/src/app/messages';
 
@@ -185,6 +185,10 @@ const ClientDetail = () => {
   const totalAgreed = projects.reduce((s, p) => s + p.agreedPayment, 0);
   const totalPaid = projects.reduce((s, p) => s + p.paidPayment, 0);
   const totalRemaining = totalAgreed - totalPaid;
+  const featuredProjects = [
+    ...projects.filter(project => project.status === 'active'),
+    ...projects.filter(project => project.status !== 'active'),
+  ].slice(0, 4);
   return (
     <DashboardLayout title="Client Detail">
       <div className="flex-1 flex flex-col gap-4 md:gap-7">
@@ -208,34 +212,11 @@ const ClientDetail = () => {
 
         <ClientDetailCard client={client} />
 
-        <DetailHeroCard.Stats>
-          <DetailHeroCard.Stat
-            label="Projects"
-            icon={<Briefcase size={11} />}
-            value={projects.length}
-            sub={`${activeCount} active`}
-            trendData={[1, Math.max(1, projects.length - 1), projects.length, activeCount + 1, projects.length + activeCount]}
-            trendVariant={activeCount > 0 ? 'positive' : 'neutral'}
-          />
-          <DetailHeroCard.Stat
-            label="Value"
-            icon={<TrendingUp size={11} />}
-            value={`$${(totalAgreed / 1000).toFixed(0)}k`}
-            sub={`$${totalPaid.toLocaleString()} paid`}
-            valueStyle={{ color: 'var(--color-accent-lime)' }}
-            trendData={[0, totalPaid * 0.35, totalPaid * 0.58, totalPaid * 0.78, totalAgreed]}
-            trendVariant="accent"
-          />
-          <DetailHeroCard.Stat
-            label="Balance"
-            icon={<TrendingUp size={11} />}
-            value={totalRemaining > 0 ? `$${(totalRemaining / 1000).toFixed(0)}k` : 'Settled'}
-            sub={totalRemaining > 0 ? 'outstanding' : 'fully paid'}
-            valueClassName={totalRemaining > 0 ? 'text-amber-400' : 'text-green-400'}
-            trendData={totalRemaining > 0 ? [totalAgreed, totalAgreed * 0.72, totalAgreed * 0.58, totalRemaining] : [8, 6, 3, 0]}
-            trendVariant={totalRemaining > 0 ? 'warning' : 'positive'}
-          />
-        </DetailHeroCard.Stats>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <StatCard size="sm" variant="lime" icon={<Briefcase size={16} />} label="Current work" value={activeCount} badge={`${projects.length} total`} badgeLabel="projects" />
+          <StatCard size="sm" variant="surface" icon={<TrendingUp size={16} />} label="Collected" value={`$${totalPaid.toLocaleString()}`} badge={`${totalAgreed > 0 ? Math.round((totalPaid / totalAgreed) * 100) : 0}%`} badgeLabel="of agreed value" />
+          <StatCard size="sm" variant="white" icon={<TrendingUp size={16} />} label="Outstanding" value={totalRemaining > 0 ? `$${totalRemaining.toLocaleString()}` : 'Settled'} badge={totalRemaining > 0 ? 'Needs follow-up' : 'Fully paid'} badgeLabel="account status" />
+        </div>
 
 
         {/* Projects detail*/}
@@ -243,9 +224,9 @@ const ClientDetail = () => {
           <div className="lg-col-span-2">
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-(--color-ink)">Projects</h2>
+                <h2 className="text-2xl font-bold text-(--color-ink)">Current projects</h2>
                 <p className="text-xs font-medium text-gray-400">
-                  {projects.length} project{projects.length !== 1 ? 's' : ''} · {activeCount} active
+                  Up to four active or recent engagements for this client.
                 </p>
               </div>
               {projects.length > 0 && (
@@ -274,7 +255,7 @@ const ClientDetail = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                {projects.map(project => (
+                {featuredProjects.map(project => (
                   <ProjectCard key={project.id} project={project} allMembers={members} variant="surface" />
                 ))}
               </div>

@@ -23,8 +23,8 @@ export function AppLoader({
           <img src="/assets/logo-white-trans.png" alt="Studio Portal logo" width={32} height={32} />
         </div>
         <div className="app-loader-brand min-w-0">
-          <p className="type-card-title text-white">
-            studio <span className="font-normal text-white/60">portal</span>
+          <p className="brand-wordmark type-card-title text-white">
+            studio <span className="brand-wordmark-light text-white/60">portal</span>
           </p>
           <p className="type-muted mt-0.5 text-white/35">{eyebrow}</p>
         </div>

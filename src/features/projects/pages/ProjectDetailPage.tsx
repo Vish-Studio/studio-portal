@@ -1,14 +1,14 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Briefcase, Check, CheckSquare, Pencil, Trash2, Users, WalletCards } from '@/src/shared/components/material-icon/material-lucide-icons';
+import { Briefcase, Check, Pencil, Trash2 } from '@/src/shared/components/material-icon/material-lucide-icons';
 import DashboardLayout from '@/src/layouts/DashboardLayout';
 import CardContent from '@/src/shared/components/card-content/card-content';
 import FormSidebar, { FormSidebarActions, FormSidebarError, FormSidebarFooter, getFormErrorMessage } from '@/src/shared/components/form-sidebar/form-sidebar';
 import IconPicker from '@/src/features/projects/components/icon-picker/icon-picker';
 import Fab from '@/src/shared/components/button-fab/button-fab';
 import ProjectTimeline from '../components/project-timeline/project-timeline';
-import { Avatar, Breadcrumb, Button, ConfirmDialog, DETAIL_COVER_IMAGES, DetailHeroCard, FormField, inputCls, MaterialIcon, Option, Select } from '@/src/shared/components';
+import { Avatar, Breadcrumb, Button, ConfirmDialog, FormField, inputCls, MaterialIcon, Option, Select, StatCard } from '@/src/shared/components';
 import { ClientPicker } from '@/src/features/clients';
 import { MemberPicker } from '@/src/shared/components';
 import { TaskDetailModal, TaskRow, useTasksStore, type Task, type TaskStatus } from '@/src/features/tasks';
@@ -296,89 +296,71 @@ const ProjectDetail = () => {
           }
         />
 
-        <DetailHeroCard className="project-detail-card">
-          <DetailHeroCard.Hero title={project.name} coverImage={DETAIL_COVER_IMAGES.project}>
-            <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
+        <CardContent
+          className="project-detail-card"
+          iconName="workspaces"
+          title="Delivery overview"
+          action={
+            <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+              project.status === 'active' ? 'bg-green-100 text-green-700' :
+              project.status === 'paused' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'
+            }`}>
+              {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
+            </span>
+          }
+          bodyClassName="p-4 md:p-5"
+        >
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:items-center">
+            <div className="flex min-w-0 items-center gap-4">
+              <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-[16px] ${accent.bg}`}>
+                <MaterialIcon name={accent.icon} size={24} className={accent.iconText} />
+              </div>
               <div className="min-w-0">
-                <div className={`mb-4 flex h-24 w-24 items-center justify-center rounded-full border-4 border-gray-100 ${accent.bg}`}>
-                  <MaterialIcon name={accent.icon} size={34} className={accent.iconText} />
-                </div>
+                <h1 className="truncate text-xl font-bold text-(--color-ink)">{project.name}</h1>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${accent.badgeBg} ${accent.badgeText}`}>{accent.label}</span>
-                  <span className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                    project.status === 'active' ? 'bg-green-100 text-green-700' :
-                    project.status === 'paused' ? 'bg-amber-100 text-amber-700' :
-                                                  'bg-gray-100 text-gray-700'
-                  }`}>
-                    {project.status.charAt(0).toUpperCase() + project.status.slice(1)}
-                  </span>
+                  <span className="text-xs font-medium text-gray-400">{project.timeline || 'No timeline set'}</span>
                 </div>
-                <p className="mt-3 text-[11px] font-semibold text-gray-400">
-                  Started {new Date(project.startedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  {project.endDate ? ` · Ends ${new Date(project.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}
-                </p>
-              </div>
-
-              <div className="grid gap-3 pt-6 sm:grid-cols-2 lg:pt-5">
-                <DetailHeroCard.IconRow icon={<MaterialIcon name="flag" size={13} className="text-gray-400" />}>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Current step</p>
-                    <p className="truncate text-sm font-bold text-(--color-ink)">{activePhase ? activePhase.title : 'No active step'}</p>
-                  </div>
-                </DetailHeroCard.IconRow>
-                <DetailHeroCard.IconRow icon={<MaterialIcon name="schedule" size={13} className="text-gray-400" />}>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Timeline</p>
-                    <p className="truncate text-sm font-bold text-(--color-ink)">{project.timeline || 'No timeline set'}</p>
-                  </div>
-                </DetailHeroCard.IconRow>
-                {client && (
-                  <DetailHeroCard.IconRow icon={<Avatar name={client.fullName} id={client.id} color={client.avatarColor} size="xs" />}>
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
-                      <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
-                    </div>
-                  </DetailHeroCard.IconRow>
-                )}
-                <DetailHeroCard.IconRow icon={<MaterialIcon name="payments" size={13} className="text-gray-400" />}>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Budget</p>
-                    <p className="truncate text-sm font-bold text-(--color-ink)">${project.agreedPayment.toLocaleString()}</p>
-                  </div>
-                </DetailHeroCard.IconRow>
               </div>
             </div>
-          </DetailHeroCard.Hero>
 
-        </DetailHeroCard>
+            <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Current phase</p>
+                <p className="mt-1 truncate text-sm font-bold text-(--color-ink)">{activePhase ? activePhase.title : 'No active phase'}</p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
+                  <div className="h-full rounded-full bg-(--color-accent-lime)" style={{ width: `${projectProgress}%` }} />
+                </div>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Client</p>
+                {client ? (
+                  <div className="mt-1 flex min-w-0 items-center gap-2">
+                    <Avatar name={client.fullName} id={client.id} color={client.avatarColor} size="xs" />
+                    <p className="truncate text-sm font-bold text-(--color-ink)">{client.fullName}</p>
+                  </div>
+                ) : <p className="mt-1 text-sm font-semibold text-gray-400">Unassigned</p>}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Schedule</p>
+                <p className="mt-1 truncate text-sm font-semibold text-(--color-ink)">
+                  {project.endDate ? `Due ${new Date(project.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}` : 'No due date'}
+                </p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Budget</p>
+                <p className="mt-1 truncate text-sm font-bold text-(--color-ink)">${project.agreedPayment.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
 
-        <DetailHeroCard.Stats>
-          <DetailHeroCard.Stat
-            label="Tasks"
-            icon={<CheckSquare size={11} />}
-            value={allProjectTaskCount}
-            sub={`${openProjectTaskCount} open`}
-            trendData={[0, openProjectTaskCount, allProjectTaskCount, Math.max(allProjectTaskCount, openProjectTaskCount + 1)]}
-            trendVariant={openProjectTaskCount > 0 ? 'warning' : 'neutral'}
-          />
-          <DetailHeroCard.Stat
-            label="Team"
-            icon={<Users size={11} />}
-            value={projectMembers.length}
-            sub={`${project.assignedMemberIds?.length ?? 0} assigned`}
-            trendData={[0, Math.max(1, projectMembers.length - 1), projectMembers.length, projectMembers.length + 1]}
-            trendVariant={projectMembers.length > 0 ? 'positive' : 'neutral'}
-          />
-          <DetailHeroCard.Stat
-            label="Price"
-            icon={<WalletCards size={11} />}
-            value={`$${project.agreedPayment.toLocaleString()}`}
-            sub={`${projectProgress}% complete · ${donePhaseCount}/${project.phases.length} steps`}
-            valueStyle={{ color: 'var(--color-accent-lime)' }}
-            trendData={[0, project.paidPayment * 0.35, project.paidPayment, project.agreedPayment]}
-            trendVariant="accent"
-          />
-        </DetailHeroCard.Stats>
+        <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+          <StatCard size="sm" variant="lime" icon={<MaterialIcon name="percent" size={16} />} label="Delivery progress" value={`${projectProgress}%`} badge={`${donePhaseCount}/${project.phases.length}`} badgeLabel="phases complete" />
+          <StatCard size="sm" variant="surface" icon={<MaterialIcon name="task_alt" size={16} />} label="Open tasks" value={openProjectTaskCount} badge={`${allProjectTaskCount} total`} badgeLabel="project tasks" />
+          <StatCard size="sm" variant="white" icon={<MaterialIcon name="group" size={16} />} label="Delivery team" value={projectMembers.length} badge={projectMembers.length ? 'Assigned' : 'Unassigned'} badgeLabel="team members" />
+          <StatCard size="sm" variant="white" icon={<MaterialIcon name="payments" size={16} />} label="Outstanding" value={remaining > 0 ? `$${remaining.toLocaleString()}` : 'Settled'} badge={`$${project.paidPayment.toLocaleString()} paid`} badgeLabel="of agreed budget" />
+        </div>
 
         <ProjectTimeline
           project={project}

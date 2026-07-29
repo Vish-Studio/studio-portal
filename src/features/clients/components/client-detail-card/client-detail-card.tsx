@@ -1,7 +1,7 @@
 import { FunctionComponent } from 'react';
 import { Mail, Phone } from '@/src/shared/components/material-icon/material-lucide-icons';
 import { format } from 'date-fns';
-import { Avatar, DETAIL_COVER_IMAGES, DetailHeroCard, MaterialIcon } from '@/src/shared/components';
+import { Avatar, CardContent, MaterialIcon } from '@/src/shared/components';
 import { ClientStatusBadge } from '@/src/shared/components';
 import type { Client } from '../../types';
 
@@ -21,26 +21,28 @@ const formatOnlineStatus = (client: Client) => {
 
 const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) => {
   return (
-    <DetailHeroCard className={`client-detail-card ${className}`}>
-      {/* ── Hero ── */}
-      <DetailHeroCard.Hero title={client.fullName} coverImage={DETAIL_COVER_IMAGES.client}>
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.35fr)] lg:items-start">
+    <CardContent
+      className={`client-detail-card ${className}`}
+      iconName="business_center"
+      title="Client profile"
+      action={<ClientStatusBadge status={client.status} />}
+      bodyClassName="p-4 md:p-5"
+    >
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] lg:items-center">
+        <div className="flex min-w-0 items-center gap-4">
+          <Avatar
+            name={client.fullName}
+            id={client.id}
+            color={client.avatarColor}
+            size="lg"
+            className="shrink-0"
+          />
           <div className="min-w-0">
-            <Avatar
-              name={client.fullName}
-              id={client.id}
-              color={client.avatarColor}
-              size="xl"
-              className="client-detail-card-avatar mb-4 border-4 border-gray-100"
-            />
-
-            {client.companyName && (
-              <p className="mt-1 max-w-full truncate text-sm font-semibold text-gray-500">{client.companyName}</p>
-            )}
-            <div className="mt-2.5">
-              <ClientStatusBadge status={client.status} />
-            </div>
-            <p className="mt-3 text-[11px] font-semibold text-gray-400">
+            <h1 className="truncate text-xl font-bold text-(--color-ink)">{client.fullName}</h1>
+            <p className="mt-0.5 truncate text-sm font-medium text-gray-500">
+              {client.companyName || 'Independent client'}
+            </p>
+            <p className="mt-2 text-[11px] font-semibold text-gray-400">
               Client since{' '}
               {client.createdAt
                 ? format(
@@ -52,44 +54,44 @@ const ClientDetailCard: FunctionComponent<Props> = ({ className = '', client }) 
                 : '—'}
             </p>
           </div>
+        </div>
 
-          <div className="grid gap-3 pt-6 sm:grid-cols-2 lg:pt-5">
-            <DetailHeroCard.IconRow icon={<Mail size={12} className="text-gray-400" />}>
-              <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.email}</span>
-            </DetailHeroCard.IconRow>
-            {client.phone && (
-              <DetailHeroCard.IconRow icon={<Phone size={12} className="text-gray-400" />}>
-                <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.phone}</span>
-              </DetailHeroCard.IconRow>
-            )}
-            {client.website && (
-              <DetailHeroCard.IconRow icon={<MaterialIcon name="language" size={12} className="text-gray-400" />}>
-                <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.website}</span>
-              </DetailHeroCard.IconRow>
-            )}
-            {client.industry && (
-              <DetailHeroCard.IconRow icon={<MaterialIcon name="category" size={12} className="text-gray-400" />}>
-                <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.industry}</span>
-              </DetailHeroCard.IconRow>
-            )}
-            {client.location && (
-              <DetailHeroCard.IconRow icon={<MaterialIcon name="location_on" size={12} className="text-gray-400" />}>
-                <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.location}</span>
-              </DetailHeroCard.IconRow>
-            )}
-            {client.companySize && (
-              <DetailHeroCard.IconRow icon={<MaterialIcon name="groups" size={12} className="text-gray-400" />}>
-                <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.companySize}</span>
-              </DetailHeroCard.IconRow>
-            )}
-            <DetailHeroCard.IconRow icon={<MaterialIcon name={client.isOnline ? 'radio_button_checked' : 'schedule'} size={12} className={client.isOnline ? 'text-green-500' : 'text-gray-400'} />}>
-              <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{formatOnlineStatus(client)}</span>
-            </DetailHeroCard.IconRow>
+        <div className="grid gap-x-5 gap-y-3 sm:grid-cols-2">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Mail size={13} className="shrink-0 text-gray-400" />
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.email}</span>
+          </div>
+          {client.phone && (
+            <div className="flex min-w-0 items-center gap-2.5">
+              <Phone size={13} className="shrink-0 text-gray-400" />
+              <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.phone}</span>
+            </div>
+          )}
+          {client.website && (
+            <div className="flex min-w-0 items-center gap-2.5">
+              <MaterialIcon name="language" size={14} className="shrink-0 text-gray-400" />
+              <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.website}</span>
+            </div>
+          )}
+          {client.industry && (
+            <div className="flex min-w-0 items-center gap-2.5">
+              <MaterialIcon name="category" size={14} className="shrink-0 text-gray-400" />
+              <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.industry}</span>
+            </div>
+          )}
+          {client.location && (
+            <div className="flex min-w-0 items-center gap-2.5">
+              <MaterialIcon name="location_on" size={14} className="shrink-0 text-gray-400" />
+              <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{client.location}</span>
+            </div>
+          )}
+          <div className="flex min-w-0 items-center gap-2.5">
+            <MaterialIcon name={client.isOnline ? 'radio_button_checked' : 'schedule'} size={14} className={client.isOnline ? 'shrink-0 text-green-500' : 'shrink-0 text-gray-400'} />
+            <span className="min-w-0 truncate text-sm font-semibold text-(--color-ink)">{formatOnlineStatus(client)}</span>
           </div>
         </div>
-      </DetailHeroCard.Hero>
-
-    </DetailHeroCard>
+      </div>
+    </CardContent>
   );
 };
 

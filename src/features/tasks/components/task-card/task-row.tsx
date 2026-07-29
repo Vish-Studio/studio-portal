@@ -14,6 +14,8 @@ export interface TaskRowProps {
   task: Task;
   showProject?: boolean;
   showStatus?: boolean;
+  /** Removes the standalone card treatment when this row is used in a shared task queue. */
+  embedded?: boolean;
   onClick?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
@@ -23,6 +25,7 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
   task,
   showProject = true,
   showStatus = true,
+  embedded = false,
   onClick,
   onEdit,
   onDelete,
@@ -48,7 +51,11 @@ const TaskRow: FunctionComponent<TaskRowProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`task-row flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-[14px] hover:bg-gray-50/80 hover:border-gray-200 transition-all duration-150 ${onClick ? 'cursor-pointer' : ''}`}
+      className={`task-row flex items-center gap-3 px-4 py-3 transition-colors duration-150 ${
+        embedded
+          ? 'border-b border-gray-100 last:border-b-0 hover:bg-(--color-surface-alt)/70'
+          : 'rounded-[14px] border border-gray-200 bg-white hover:border-gray-200 hover:bg-gray-50/80'
+      } ${onClick ? 'cursor-pointer' : ''}`}
     >
       {/* Priority indicator */}
       <span className={`task-row-priority w-1.5 h-1.5 rounded-xs shrink-0 ${PRIORITY_DOT[task.priority]}`} />

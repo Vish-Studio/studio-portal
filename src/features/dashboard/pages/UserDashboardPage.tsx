@@ -8,7 +8,6 @@ import {
   ButtonIcon,
   CardContent,
   MaterialIcon,
-  ProjectStatusBadge,
   StatCard,
   StatusBadge,
   TaskStatusBadge,
@@ -19,7 +18,7 @@ import { useTasksStore } from '@/src/features/tasks';
 import { useClientsStore } from '@/src/features/clients';
 import { useDocumentsStore } from '@/src/features/documents';
 import { useAuthStore } from '@/src/features/auth';
-import { getActivePhaseIndex, getPhaseProgress, getProjectAccent, type ClientProject } from '@/src/features/projects';
+import { getActivePhaseIndex, getPhaseProgress, getProjectAccent, SERVICE_META, type ClientProject } from '@/src/features/projects';
 
 type DashboardAudience = 'client' | 'staff';
 type DashboardLayoutProps = {
@@ -51,17 +50,6 @@ const formatShortDate = (value?: string) => {
 };
 
 const formatDueDate = (value?: string) => (value ? `Due ${formatShortDate(value)}` : 'No due date');
-
-const getProjectHealth = (project?: ClientProject) => {
-  if (!project) return { label: 'No project', variant: 'gray' as const };
-  if (project.status === 'completed') return { label: 'Delivered', variant: 'green' as const };
-  if (project.status === 'paused') return { label: 'Paused', variant: 'amber' as const };
-
-  const progress = getPhaseProgress(project.phases);
-  if (progress >= 65) return { label: 'On track', variant: 'green' as const };
-  if (progress >= 35) return { label: 'In motion', variant: 'blue' as const };
-  return { label: 'Starting', variant: 'amber' as const };
-};
 
 const UserDashboardPage = ({ audience = 'client' }: UserDashboardPageProps) => {
   const navigate = useNavigate();
@@ -241,30 +229,28 @@ const UserDashboardPage = ({ audience = 'client' }: UserDashboardPageProps) => {
                     const progress = getPhaseProgress(project.phases);
                     const phase = project.phases[getActivePhaseIndex(project.phases)] ?? project.phases.at(-1);
                     const accent = getProjectAccent(project.service, project.package);
-                    const projectHealth = getProjectHealth(project);
+                    const service = SERVICE_META[project.service];
 
                     return (
                       <button
                         key={project.id}
                         type="button"
                         onClick={() => navigate(`${routeBase}/projects${audience === 'staff' ? `/${project.id}` : ''}`)}
-                        className="grid w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-(--color-surface-alt) md:grid-cols-[minmax(0,1fr)_140px] md:items-center md:px-5"
+                        className="grid w-full gap-4 px-4 py-4 text-left transition-colors hover:bg-(--color-surface-alt) md:grid-cols-[minmax(0,1fr)_220px] md:items-center md:px-5"
                       >
                         <div className="min-w-0">
-                          <div className="mb-1 flex flex-wrap items-center gap-2">
-                            <span className={`type-label rounded-[8px] px-2 py-0.5 ${accent.badgeBg} ${accent.badgeText}`}>
-                              {accent.label}
-                            </span>
-                            <StatusBadge label={projectHealth.label} variant={projectHealth.variant} />
+                          <div className={`mb-2 flex items-center gap-1.5 ${accent.badgeText}`}>
+                            <MaterialIcon name={service.icon} size={14} />
+                            <span className="type-label">{service.label}</span>
                           </div>
                           <p className="truncate text-sm font-bold text-(--color-ink)">{project.name}</p>
                           <p className="mt-1 truncate text-xs font-semibold text-gray-400">
-                            {canSeeAll ? `${clientNameForProject(project)} - ` : ''}{phase?.title ?? 'Planning'} - {project.timeline}
+                            {clientNameForProject(project)}
                           </p>
                         </div>
                         <div className="min-w-0">
                           <div className="mb-1 flex items-center justify-between gap-2">
-                            <ProjectStatusBadge status={project.status} />
+                            <span className="truncate text-xs font-semibold text-gray-500">{phase?.title ?? 'Planning'}</span>
                             <span className="text-xs font-bold text-(--color-ink)">{progress}%</span>
                           </div>
                           <div className="h-2 overflow-hidden rounded-full bg-gray-100">

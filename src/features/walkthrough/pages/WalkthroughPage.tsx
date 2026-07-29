@@ -109,7 +109,7 @@ export default function WalkthroughPage() {
           <div className="flex h-10 w-10 items-center justify-center rounded-[13px] bg-(--color-sidebar-bg)">
             <img src="/assets/logo-white-trans.png" alt="Studio Portal logo" width={27} height={27} />
           </div>
-          <span className="text-base font-bold">studio portal</span>
+          <span className="brand-wordmark text-base">studio <span className="brand-wordmark-light">portal</span></span>
         </div>
         <Button variant="ghost" size="sm" onClick={finish}>Skip</Button>
       </header>

@@ -173,7 +173,7 @@ const BaseSidebar: FunctionComponent<BaseSidebarProps> = ({
               ) : (
                 <img src="/assets/logo-white-trans.png" alt="Logo" width={28} height={28} />
               )}
-              {isExpanded && <span className="sidebar-brand-text type-sidebar-brand whitespace-nowrap text-white">studio <span className="font-normal">portal</span></span>}
+              {isExpanded && <span className="sidebar-brand-text brand-wordmark type-sidebar-brand whitespace-nowrap text-white">studio <span className="brand-wordmark-light">portal</span></span>}
             </div>
 
             {isExpanded && (

@@ -4,6 +4,7 @@ import { isPast, parseISO } from 'date-fns';
 import UserLayout from '@/src/layouts/UserLayout';
 import TableTab, { type TabItem } from '@/src/shared/components/table-tab/table-tab';
 import StatCard from '@/src/shared/components/stat-card/stat-card';
+import CardContent from '@/src/shared/components/card-content/card-content';
 import TaskCard from '../components/task-card/task-card';
 import TaskRow from '../components/task-card/task-row';
 import TaskDetailModal from '../components/task-detail-modal/task-detail-modal';
@@ -50,7 +51,7 @@ const UserTasks = () => {
   const myTasks      = tasks.filter(t => (t.clientId === currentClientId || t.clientAssigneeId === currentClientId) && myProjectIds.has(t.projectId));
 
   const [activeTab,     setActiveTab]     = useState<FilterKey>('all');
-  const [viewMode,      setViewMode]      = useState<'grid' | 'list'>('grid');
+  const [viewMode,      setViewMode]      = useState<'grid' | 'list'>('list');
   const [sortKey,       setSortKey]       = useState<SortKey>('updated');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
   const [detailTask,    setDetailTask]    = useState<Task | null>(null);
@@ -182,16 +183,23 @@ const UserTasks = () => {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
+          <CardContent
+            iconName="task_alt"
+            title={activeTab === 'all' ? 'My work queue' : TABS.find(tab => tab.key === activeTab)?.label ?? 'Tasks'}
+            action={<span className="text-xs font-semibold text-gray-400">{filtered.length} task{filtered.length !== 1 ? 's' : ''}</span>}
+          >
+          <div className="flex flex-col">
             {filtered.map(task => (
               <TaskRow
                 key={task.id}
                 task={task}
                 showStatus={activeTab === 'all'}
+                embedded
                 onClick={() => setDetailTask(task)}
               />
             ))}
           </div>
+          </CardContent>
         )}
 
       </div>
